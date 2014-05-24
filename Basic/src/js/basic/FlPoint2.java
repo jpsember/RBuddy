@@ -1,7 +1,7 @@
-package js.base;
+package js.basic;
 
 
-import static js.base.Tools.*;
+import static js.basic.Tools.*;
 
 /**
  * Methods equals() and hashCode() are not overridden as you might expect;

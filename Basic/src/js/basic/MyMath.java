@@ -1,6 +1,6 @@
-package js.base;
+package js.basic;
 
-import static js.base.Tools.*;
+import static js.basic.Tools.*;
 import java.util.*;
 
 public final class MyMath {

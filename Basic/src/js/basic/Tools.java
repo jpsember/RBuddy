@@ -1,7 +1,7 @@
-package js.base;
+package js.basic;
 
 import java.util.*;
-import static js.base.MyMath.*;
+import static js.basic.MyMath.*;
 
 public final class Tools {
 
@@ -134,14 +134,14 @@ public final class Tools {
   }
 
   public static void unimp() {
-    warn("TODO", null, 1);
+    warning("TODO", null, 1);
   }
 
   public static void unimp(String msg) {
-    warn("TODO", msg, 1);
+	  warning("TODO", msg, 1);
   }
 
-  private static void warn(String type, String s, int skipCount) {
+  private static void warning(String type, String s, int skipCount) {
     String st = stackTrace(1 + skipCount, 1);
     StringBuilder sb = new StringBuilder();
     sb.append("*** ");
@@ -167,8 +167,8 @@ public final class Tools {
     }
   }
 
-  public static void warn(String s) {
-    warn(null, s, 1);
+  public static void warning(String s) {
+	  warning(null, s, 1);
   }
 
   public static String f(boolean b) {
