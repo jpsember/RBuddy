@@ -4,7 +4,6 @@ import java.util.*;
 import static js.base.MyMath.*;
 
 public final class Tools {
-  // placed here for convenience
 
   public static String stackTrace() {
     return stackTraceFmt(1);
@@ -134,12 +133,6 @@ public final class Tools {
     }
   }
 
-  //  public static boolean rndBool(Random r) {
-  //    if (r == null)
-  //      r = random();
-  //    return r.nextInt() > 0;
-  //  }
-
   public static void unimp() {
     warn("TODO", null, 1);
   }
@@ -172,7 +165,6 @@ public final class Tools {
         pr(keyString);
       }
     }
-    //    return true;
   }
 
   public static void warn(String s) {
@@ -183,18 +175,67 @@ public final class Tools {
     return b ? " T" : " F";
   }
 
-  public static String fBits(int word, int nBits) {
-    StringBuilder sb = new StringBuilder();
+  /**
+   * Convert (unsigned) integer to string representing its binary equivalent.
+   * Uses default format: 8 bits, omit leading zeros, display zeros as dots
+   * @param word integer to display
+   * @return
+   */
+  public static String fBits(int word) {
+	  return fBits(word,"8zd");
+  }
 
+  private static Object[] parseNumberOfDigitsPrefix(String s) {
+	  Object []output = {null,null};
+	  
+	    int cursor = 0;
+	    while (cursor < s.length()) {
+	    	char c = s.charAt(cursor);
+	    		if (c < '0' || c > '9') break;
+	    		cursor++;
+	    }
+	    ASSERT(cursor > 0 && cursor <= 2);
+	    String digitsString = s.substring(0,cursor);
+	    int nDigits = Integer.parseInt(digitsString);
+	    ASSERT(nDigits > 0 && nDigits <= 32);
+	    
+	    output[0] = nDigits;
+	    output[1] = s.substring(cursor);
+	    return output;
+  }
+  
+  /**
+   * Convert (unsigned) integer to string representing its binary equivalent
+   * @param word
+   * @param format "D*[zd]*" where D is decimal digit (number of significant bits)
+   *          z : skip leading zero bits
+   *          d : display dots (.) for zeros instead of 0
+   * @return String
+   */
+  public static String fBits(int word, String format) { //int nBits, boolean ignoreLeadingZeros) {
+    StringBuilder sb = new StringBuilder();
+    
+    Object[] parts = parseNumberOfDigitsPrefix(format);
+    int nBits = (Integer)parts[0];
+    format = (String)parts[1];
+    boolean filteringLeadingZeros = format.contains("z");
+    boolean useDots = format.contains("d");
+    char zeroChar = useDots ? '.' : '0';
+    
     for (int j = nBits - 1; j >= 0; j--) {
-      if ((word & (1 << j)) != 0)
+    	boolean nonzero = ((word & (1 << j)) != 0);
+    	if (j == 0 || nonzero)
+    		filteringLeadingZeros = false;
+    	
+    	if (nonzero) {
         sb.append('1');
-      else
-        sb.append('0');
+      } else {
+        sb.append(filteringLeadingZeros ? ' ' : zeroChar);
+      }
     }
-    sb.append(' ');
     return sb.toString();
   }
+
 
   /**
    * Format a string to be at least a certain size
@@ -363,7 +404,6 @@ public final class Tools {
     }
   }
 
-  //private static StringBuilder sbw = new StringBuilder();
   private static final String SPACES = "                             ";
   public static String sp(int len) {
     len = Math.max(len, 0);
@@ -374,33 +414,24 @@ public final class Tools {
       sb.append(' ');
     return sb.toString();
   }
-  //  /**
-  //   * Add spaces to a StringBuilder until its length is at some value. Sort of a
-  //   * 'tab' feature, useful for aligning output.
-  //   *
-  //   * @param sb :
-  //   *          StringBuilder to pad out
-  //   * @param len :
-  //   *          desired length of StringBuilder; if it is already past this point,
-  //   *          nothing is added to it
-  //   */
-  //  public static StringBuilder tab(StringBuilder sb, int len) {
-  //    sb.append(sp(len - sb.length()));
-  //    return sb;
-  //  }
 
   /**
-   * Add a space to buffer if it doesn't already end with whitespace
-   * @param sb
-   * @return sb
+   * Add a space to a StringBuilder if it doesn't already end with whitespace
+   * @param sb StringBuilder
+   * @return sb the StringBuilder
    */
-  public static StringBuilder addSp(StringBuilder sb) {
+  public static StringBuilder addSpace(StringBuilder sb) {
     if (sb.length() > 0 && sb.charAt(sb.length() - 1) > ' ')
       sb.append(' ');
     return sb;
   }
 
-  public static void addCr(StringBuilder sb) {
+  /**
+   * Add a newline to a StringBuilder if it doesn't already end with one
+   * @param sb StringBuilder
+   * @return sb the StringBuilder
+   */
+  public static void addNewline(StringBuilder sb) {
     if (sb.length() == 0 || sb.charAt(sb.length() - 1) != '\n')
       sb.append('\n');
   }
@@ -578,13 +609,27 @@ public final class Tools {
 
   private static HashMap warningStrings = new HashMap();
 
-  public static String fh(int n) {
-    return "$" + toHex(n, 8);
+  public static CharSequence fh(int n) {
+	  return fh(n,"8zg");
   }
-
-  public static String fh4(int n) {
-    return "$" + toHex(n, 4);
-  }
+  
+	/**
+	 * Convert an unsigned integer to its hex string representation
+	 * 
+	 * @param n
+	 * @param format
+	 *            "D+[F]*" where D is decimal digit, representing number of hex
+	 *            digits to display; F is z : skip lead zeros g : insert spaces
+	 *            to display digits in (g)roups of four
+	 * @return string
+	 */
+	public static CharSequence fh(int n, String format) {
+		Object[] fmt = parseNumberOfDigitsPrefix(format);
+		int nDig = (Integer) fmt[0];
+		String flags = (String) fmt[1];
+		return toHex(new StringBuilder("$"), n, nDig, flags.contains("z"),
+				flags.contains("g"));
+	}
 
   public static Random rseed(int seed) {
     rnd = null;
@@ -627,44 +672,50 @@ public final class Tools {
     return s;
   }
 
-  /**
-   * Convert an integer to a hex string
-   * @param val : value
-   * @param digits : number of digits to produce (number of nybbles,
-   *   starting from the lowest 4 bits, of the value to examine)
-   * @return String
-   */
-  public static String toHex(int val, int digits) {
-    return toHex(null, val, digits).toString();
-  }
+	/**
+	 * Convert value to hex, store in StringBuilder
+	 * 
+	 * @param sb
+	 *            where to store result, or null
+	 * @param value0
+	 *            value to convert
+	 * @param digits
+	 *            number of hex digits to output
+	 * @return result
+	 */
+	public static StringBuilder toHex(StringBuilder sb, int value0, int digits,
+			boolean stripLeadingZeros, boolean groupsOfFour) {
+		if (sb == null)
+			sb = new StringBuilder();
 
-  /**
-   * Convert value to hex, store in StringBuilder
-   * @param sb where to store result, or null
-   * @param value0 value to convert
-   * @param digits number of hex digits to output
-   * @return result
-   */
-  private static StringBuilder toHex(StringBuilder sb, int value0, int digits) {
-    if (sb == null)
-      sb = new StringBuilder();
+		boolean nonZeroSeen = !stripLeadingZeros;
 
-    long value = value0;
+		long value = value0;
 
-    int shift = (digits - 1) << 2;
-    while (digits-- > 0) {
-      shift = digits << 2;
-      int v = (int) ((value >> shift)) & 0xf;
-      char c;
-      if (v < 10) {
-        c = (char) ('0' + v);
-      } else {
-        c = (char) ('a' + (v - 10));
-      }
-      sb.append(c);
-    }
-    return sb;
-  }
+		int shift = (digits - 1) << 2;
+		while (digits-- > 0) {
+			shift = digits << 2;
+			int v = (int) ((value >> shift)) & 0xf;
+			if (v != 0 || digits == 0)
+				nonZeroSeen = true;
+
+			char c;
+			if (!nonZeroSeen) {
+				c = ' ';
+
+			} else {
+				if (v < 10) {
+					c = (char) ('0' + v);
+				} else {
+					c = (char) ('a' + (v - 10));
+				}
+			}
+			sb.append(c);
+			if (groupsOfFour && (digits & 3) == 0 && digits != 0)
+				sb.append(' ');
+		}
+		return sb;
+	}
   
   public static void report(Throwable t, String msg) {
     if (t != null) {
