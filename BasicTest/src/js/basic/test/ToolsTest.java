@@ -1,7 +1,9 @@
 package js.basic.test;
 
 import static org.junit.Assert.*;
+
 import org.junit.*;
+
 import static js.basic.Tools.*;
 
 public class ToolsTest extends MyTest {
@@ -36,4 +38,8 @@ public class ToolsTest extends MyTest {
 		assertStringsMatch("0000 0000",toHex(null,0,8,false,true));
 	}
 	
+	@Test
+	public void testSnapshots() {
+		unimp("add snapshot capability");
+	}
 }
