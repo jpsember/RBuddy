@@ -1,0 +1,4 @@
+# Jeff's gitignore file
+#
+**/bin/*
+
