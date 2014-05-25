@@ -4,6 +4,7 @@ import static js.basic.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.regex.*;
 
 public class IOSnapshot {
@@ -46,10 +47,14 @@ public class IOSnapshot {
 	}
 
 	private void doClose() {
-		interceptor.detachOut();
+		System.setOut(originalStdOut);
+		System.setErr(originalStdErr);
 		Tools.sanitizeLineNumbers = false;
-		String content = interceptor.content();
-
+		String content = capturedStdOut.content();
+		String content2 = capturedStdErr.content();
+		if (content2.length() > 0)
+			content = content + "\n*** System.err:\n"+content2;
+		
 		try {
 			if (snapshotPath.exists()) {
 				String previousContent = Files.readTextFile(snapshotPath
@@ -74,8 +79,17 @@ public class IOSnapshot {
 	}
 
 	private void interceptOutput() {
-		interceptor = new OutputInterceptor(System.out);
-		interceptor.attachOut();
+		capturedStdOut = StringPrintStream.build();
+		originalStdOut = System.out;
+		System.setOut(capturedStdOut);
+		
+		capturedStdErr = StringPrintStream.build();
+		originalStdErr = System.err;
+		System.setErr(capturedStdErr);
+
+		
+//		interceptor = new OutputInterceptor(System.out);
+//		interceptor.attachOut();
 		Tools.sanitizeLineNumbers = true;
 	}
 
@@ -110,5 +124,6 @@ public class IOSnapshot {
 
 	private static File snapshotDirectory;
 	private File snapshotPath;
-	private OutputInterceptor interceptor;
+	private StringPrintStream capturedStdOut, capturedStdErr;
+	private PrintStream originalStdOut,originalStdErr;
 }
