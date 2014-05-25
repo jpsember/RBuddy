@@ -3,53 +3,52 @@ package js.basic;
 import java.io.*;
 
 public class Files {
-	
-	  /**
-	   * Get a buffered InputStream for reading from a file.
-	   * @param path  path of file
-	   * @return OutputStream
-	   * @throws IOException
-	   */
-	  public static InputStream inputStream(String path) throws IOException {
-	    InputStream ret;
-	    ret = new BufferedInputStream(new FileInputStream(path));
-	    return ret;
-	  }
+	final static String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	  /**
-	   * Get a buffered Reader for a file.
-	   * @param path path of file
-	   * @return Reader
-	   */
-	  public static Reader reader(String path) throws IOException {
-	    return new InputStreamReader(inputStream(path));
-	  }
+	/**
+	 * Read a file into a string
+	 * 
+	 * @param path
+	 *            file to read
+	 * @return String
+	 */
+	public static String readTextFile(File file) throws IOException {
+		StringBuilder sb = new StringBuilder();
 
-	  /**
-	   * Read a file into a string
-	   * @param file File to read 
-	   * @return String
-	   */
-	  public static String readTextFile(String path) throws IOException {
-	    StringBuilder sb = new StringBuilder();
-	    Reader r = reader(path);
-	    while (true) {
-	      int c = r.read();
-	      if (c < 0) {
-	        break;
-	      }
-	      sb.append((char) c);
-	    }
-	    r.close();
-	    return sb.toString();
-	  }
-	  
-	public static void writeTextFile(File file, String content)
+		BufferedReader input = new BufferedReader(new FileReader(file));
+		try {
+			String line = null;
+			/*
+			 * Readline strips newlines, and returns null only for the end of
+			 * the stream.
+			 */
+			while ((line = input.readLine()) != null) {
+				sb.append(line);
+				sb.append(LINE_SEPARATOR);
+			}
+		} finally {
+			input.close();
+		}
+		return sb.toString();
+	}
+
+	public static void writeTextFile(File file, String content, boolean onlyIfChanged)
 			throws IOException {
-
+		if (onlyIfChanged) {
+			if (file.isFile()) {
+				String currentContents = readTextFile(file);
+				if (currentContents.equals(content))
+					return;
+			}
+		}
 		BufferedWriter w = new BufferedWriter(new FileWriter(file));
 		w.write(content);
 		w.close();
+	}
+
+	public static void writeTextFile(File file, String content)
+			throws IOException {
+		writeTextFile(file,content,false);
 	}
 
 }

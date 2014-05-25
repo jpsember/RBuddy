@@ -57,8 +57,7 @@ public class IOSnapshot {
 		
 		try {
 			if (snapshotPath.exists()) {
-				String previousContent = Files.readTextFile(snapshotPath
-						.getPath());
+				String previousContent = Files.readTextFile(snapshotPath);
 				String diff = constructDiff(previousContent, content);
 				if (diff != null) {
 					fail("Output disagrees with snapshot (" + snapshotPath
@@ -86,10 +85,7 @@ public class IOSnapshot {
 		capturedStdErr = StringPrintStream.build();
 		originalStdErr = System.err;
 		System.setErr(capturedStdErr);
-
 		
-//		interceptor = new OutputInterceptor(System.out);
-//		interceptor.attachOut();
 		Tools.sanitizeLineNumbers = true;
 	}
 
