@@ -1,10 +1,18 @@
 package js.basic;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static js.basic.MyMath.*;
 
 public final class Tools {
 
+	public static boolean sanitizeLineNumbers;
+		
   public static String stackTrace() {
     return stackTraceFmt(1);
   }
@@ -117,9 +125,21 @@ public final class Tools {
 
     }
   }
+  
+  public static void fail() {
+	  fail("(no reason given)");
+  }
+  
+  public static void fail(String message) {
+	  throw new RuntimeException("Failing; "+message);
+  }
+	public static void fail(Throwable t) {
+		fail("(Throwable:"+t.getMessage()+")");
+	}
+
   private static void toss(String msg) {
     RuntimeException e = new RuntimeException(msg + " " + stackTrace());
-    pr("Throwing: " + e+"\n"+stackTrace(8));
+//    pr("Throwing: " + e+"\n"+stackTrace(8));
     throw e;
   }
 
@@ -141,8 +161,28 @@ public final class Tools {
 	  warning("TODO", msg, 1);
   }
 
+  private static Pattern lineNumbersPattern;
+  
+  /**
+   * Replace all line numbers within a stack trace with 'XXX' so they are ignored
+   * within snapshots; has no effect if sanitize is not active
+   * 
+   * @param s string containing stack trace
+   * @return possibly modified stack trace
+   */
+  private static String sanitizeStackTrace(String s) {
+	  if (sanitizeLineNumbers) {
+		  if (lineNumbersPattern==null)
+			  lineNumbersPattern = Pattern.compile(":(\\d+)($|\\n)");
+			Matcher m = lineNumbersPattern.matcher(s);
+			s = m.replaceAll("_XXX");
+	  }
+	  return s;
+  }
+  
   private static void warning(String type, String s, int skipCount) {
     String st = stackTrace(1 + skipCount, 1);
+    st = sanitizeStackTrace(st);
     StringBuilder sb = new StringBuilder();
     sb.append("*** ");
     if (type == null) {
@@ -246,16 +286,6 @@ public final class Tools {
    */
   public static String f(String s, int length) {
     return f(s, length, null).toString();
-    //
-    //    StringBuilder sb = new StringBuilder();
-    //    if (length >= 0) {
-    //      sb.append(s);
-    //      return tab(sb, length).toString();
-    //    } else {
-    //      tab(sb, (-length) - s.length());
-    //      sb.append(s);
-    //      return sb.toString();
-    //    }
   }
 
   public static StringBuilder f(String s, int length, StringBuilder sb) {
@@ -619,7 +649,7 @@ public final class Tools {
 	 * @param n
 	 * @param format
 	 *            "D+[F]*" where D is decimal digit, representing number of hex
-	 *            digits to display; F is z : skip lead zeros g : insert spaces
+	 *            digits to display; F is z : skip lead zeros g : insert underscores
 	 *            to display digits in (g)roups of four
 	 * @return string
 	 */
@@ -711,8 +741,12 @@ public final class Tools {
 				}
 			}
 			sb.append(c);
-			if (groupsOfFour && (digits & 3) == 0 && digits != 0)
-				sb.append(' ');
+			if (groupsOfFour && (digits & 3) == 0 && digits != 0) {
+				if (!nonZeroSeen)
+					sb.append(' ');
+				else
+				sb.append('_');
+			}
 		}
 		return sb;
 	}
@@ -723,5 +757,45 @@ public final class Tools {
       t.printStackTrace();
     }
   }
+
+	public static String[] systemCommand(String command) {
+		String[] ret = null;
+		try {
+			ret = systemCommand(command,true);
+		} catch (IOException e) {
+			fail(e);
+		}
+		return ret;
+	}
+
+	public static String[] systemCommand(String command, boolean failIfError) throws IOException {
+		String[] out = { null, null };
+		Process p = Runtime.getRuntime().exec(command);
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
+		BufferedReader stdError = new BufferedReader(new InputStreamReader(
+				p.getErrorStream()));
+		StringBuilder sb = new StringBuilder();
+		String s;
+		while ((s = stdInput.readLine()) != null) {
+			sb.append(s);
+			sb.append("\n");
+		}
+		out[0] = sb.toString();
+		sb = new StringBuilder();
+		while ((s = stdError.readLine()) != null) {
+			sb.append(s);
+			sb.append("\n");
+		}
+		out[1] = sb.toString();
+		for (int i = 0; i < out.length; i++) {
+			if (out[i].length() == 0)
+				out[i] = null;
+		}
+		if (failIfError && out[1]!=null)
+			fail("Failed executing system command '"+command+"';\nstdout:\n"+out[0]+"\nstderr:\n"+out[1]);
+		
+		return out;
+	}
 
 }

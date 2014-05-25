@@ -1,6 +1,7 @@
 package js.basic.test;
 
 import static org.junit.Assert.*;
+import js.basic.IOSnapshot;
 
 import org.junit.*;
 
@@ -8,13 +9,13 @@ import static js.basic.Tools.*;
 
 public class ToolsTest extends MyTest {
 
+	@Test
 	public void testASSERT() {
 		String msg = "";
 		ASSERT(true);
 
 		try {
 			ASSERT(false);
-
 		} catch (RuntimeException e) {
 			msg = e.getMessage();
 		}
@@ -35,11 +36,27 @@ public class ToolsTest extends MyTest {
 		assertStringsMatch("$       40",fh(64));
 		assertStringsMatch("$        0",fh(0));
 		assertStringsMatch("00000000",toHex(null,0,8,false,false) );
-		assertStringsMatch("0000 0000",toHex(null,0,8,false,true));
+		assertStringsMatch("0000_0000",toHex(null,0,8,false,true));
 	}
 	
 	@Test
-	public void testSnapshots() {
-		unimp("add snapshot capability");
+	public void testFormatHexWithSnapshots() {
+		IOSnapshot.open();
+		for (int i = 0; i < 32; i++) {
+			int v = 1 << i;
+			System.out.println(fh(v));
+			pr(fh(v,"8zg"));
+			pr(fh(v,"8g"));
+			pr(fh(v,"8z"));
+			pr(fh(v,"8"));
+		v = ~v;
+		pr(fh(v,"8zg"));
+		pr(fh(v,"8g"));
+		pr(fh(v,"8z"));
+		pr(fh(v,"8"));
+		pr("");
+		}
+		IOSnapshot.close();
 	}
+	
 }
