@@ -60,7 +60,7 @@ public class IOSnapshot {
 				String previousContent = Files.readTextFile(snapshotPath);
 				String diff = constructDiff(previousContent, content);
 				if (diff != null) {
-					fail("Output disagrees with snapshot (" + snapshotPath
+					die("Output disagrees with snapshot (" + snapshotPath
 							+ "):\n" + diff);
 				}
 			} else {
@@ -68,7 +68,7 @@ public class IOSnapshot {
 				Files.writeTextFile(snapshotPath, content);
 			}
 		} catch (IOException e) {
-			fail(e);
+			die(e);
 		}
 	}
 
@@ -94,7 +94,7 @@ public class IOSnapshot {
 			String userDir = System.getProperty("user.dir");
 			File d = new File(new File(userDir), "snapshots");
 			if (!d.isDirectory())
-				fail("cannot find directory: " + d);
+				die("cannot find directory: " + d);
 			snapshotDirectory = d;
 		}
 		return snapshotDirectory;
@@ -107,7 +107,7 @@ public class IOSnapshot {
 		Pattern p = Pattern.compile("\\.test(\\w+):");
 		Matcher m = p.matcher(st);
 		if (!m.find())
-			fail("no 'test' method name found in stack trace:\n" + st);
+			die("no 'test' method name found in stack trace:\n" + st);
 		String matchName = m.group(1);
 		return matchName;
 	}

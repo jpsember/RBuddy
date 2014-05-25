@@ -29,7 +29,7 @@ public class StringPrintStream extends PrintStream {
 		try {
 			content = byteArrayOutputStream.toString("UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			fail(e);
+			die(e);
 		}
 		return content;
 	}

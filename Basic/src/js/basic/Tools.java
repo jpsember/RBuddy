@@ -136,16 +136,16 @@ public final class Tools {
 		}
 	}
 
-	public static void fail() {
-		fail("(no reason given)");
+	public static void die() {
+		die("(no reason given)");
 	}
 
-	public static void fail(String message) {
+	public static void die(String message) {
 		throw new RuntimeException("Failing; " + message);
 	}
 
-	public static void fail(Throwable t) {
-		fail("(Throwable:" + t.getMessage() + ")");
+	public static void die(Throwable t) {
+		die("(Throwable:" + t.getMessage() + ")");
 	}
 
 	private static void toss(String msg) {
@@ -798,7 +798,7 @@ public final class Tools {
 		try {
 			ret = systemCommand(command, true);
 		} catch (IOException e) {
-			fail(e);
+			die(e);
 		}
 		return ret;
 	}
@@ -829,7 +829,7 @@ public final class Tools {
 				out[i] = null;
 		}
 		if (failIfError && out[1] != null)
-			fail("Failed executing system command '" + command
+			die("Failed executing system command '" + command
 					+ "';\nstdout:\n" + out[0] + "\nstderr:\n" + out[1]);
 
 		return out;
