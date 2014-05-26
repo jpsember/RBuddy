@@ -7,16 +7,34 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.regex.*;
 
+/**
+ * Designed to be called from within a unit test.  Captures System.out and System.err, and verifies
+ * that they match a previously saved 'snapshot' of these streams.  If no snapshot exists, creates one.
+ * 
+ * The methods are static methods, since only a single IOSnapshot object should be in existence at a time.
+ */
 public class IOSnapshot {
 
+	/**
+	 * Open the snapshot; start capturing output
+	 */
 	public static void open() {
 		open(false);
 	}
+
+	/**
+	 * Open the snapshot; start capturing output
+	 * @param alwaysReplaceExisting if true, and the new snapshot differs from the previous one,
+	 * a warning is printed but no exception is thrown.  This is useful when writing or debugging code.
+	 */
 	public static void open(boolean alwaysReplaceExisting) {
 		singleton = new IOSnapshot();
 		singleton.doOpen(alwaysReplaceExisting);
 	}
 
+	/**
+	 * Close the snapshot; stop capturing output, and verify with previously saved output
+	 */
 	public static void close() {
 		if (singleton != null) {
 			singleton.doClose();
@@ -56,8 +74,8 @@ public class IOSnapshot {
 		String content = capturedStdOut.content();
 		String content2 = capturedStdErr.content();
 		if (content2.length() > 0)
-			content = content + "\n*** System.err:\n"+content2;
-		
+			content = content + "\n*** System.err:\n" + content2;
+
 		try {
 			boolean write = true;
 			if (snapshotPath.exists()) {
@@ -67,12 +85,13 @@ public class IOSnapshot {
 					write = false;
 				} else {
 					if (alwaysReplaceExisting)
-						pr("...replacing old snapshot content ("+snapshotPath+")");
+						pr("...replacing old snapshot content (" + snapshotPath
+								+ ")");
 					else
-					die("Output disagrees with snapshot (" + snapshotPath
-							+ "):\n" + diff);
+						die("Output disagrees with snapshot (" + snapshotPath
+								+ "):\n" + diff);
 				}
-			}  
+			}
 			if (write) {
 				System.out.println("...writing new snapshot: " + snapshotPath);
 				Files.writeTextFile(snapshotPath, content);
@@ -84,8 +103,9 @@ public class IOSnapshot {
 
 	private void doOpen(boolean alwaysReplaceExisting) {
 		this.alwaysReplaceExisting = alwaysReplaceExisting;
-		if (alwaysReplaceExisting) warning("always replacing existing snapshot",2);
-		
+		if (alwaysReplaceExisting)
+			warning("always replacing existing snapshot", 2);
+
 		calculatePath();
 		interceptOutput();
 	}
@@ -94,11 +114,11 @@ public class IOSnapshot {
 		capturedStdOut = StringPrintStream.build();
 		originalStdOut = System.out;
 		System.setOut(capturedStdOut);
-		
+
 		capturedStdErr = StringPrintStream.build();
 		originalStdErr = System.err;
 		System.setErr(capturedStdErr);
-		
+
 		Tools.sanitizeLineNumbers = true;
 	}
 
@@ -113,11 +133,16 @@ public class IOSnapshot {
 		return snapshotDirectory;
 	}
 
+	/**
+	 * Examine stack trace to find the name of the calling unit test, and
+	 * extract the test name from it
+	 * @return name of method, without the 'test' prefix
+	 */
 	private String determineTestName() {
 		String st = stackTrace(2, 5);
 
 		// Look for first occurrence of '.testXXX:'
-		Pattern p = Pattern.compile("\\.test(\\w+):");
+		final Pattern p = Pattern.compile("\\.test(\\w+):");
 		Matcher m = p.matcher(st);
 		if (!m.find())
 			die("no 'test' method name found in stack trace:\n" + st);
@@ -134,6 +159,6 @@ public class IOSnapshot {
 	private static File snapshotDirectory;
 	private File snapshotPath;
 	private StringPrintStream capturedStdOut, capturedStdErr;
-	private PrintStream originalStdOut,originalStdErr;
+	private PrintStream originalStdOut, originalStdErr;
 	private boolean alwaysReplaceExisting;
 }

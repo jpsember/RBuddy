@@ -35,8 +35,8 @@ public class ToolsTest extends MyTest {
 	public void testFormatHex() {
 		assertStringsMatch("$       40", fh(64));
 		assertStringsMatch("$        0", fh(0));
-		assertStringsMatch("00000000", toHex(null, 0, 8, false, false));
-		assertStringsMatch("0000_0000", toHex(null, 0, 8, false, true));
+		assertStringsMatch("00000000", toHex(null, 0, 8, false, false,false));
+		assertStringsMatch("0000_0000", toHex(null, 0, 8, false, true,false));
 	}
 
 	@Test
@@ -45,15 +45,15 @@ public class ToolsTest extends MyTest {
 		for (int i = 0; i < 32; i++) {
 			int v = 1 << i;
 			System.out.println(fh(v));
-			pr(fh(v, "8zg"));
-			pr(fh(v, "8g"));
-			pr(fh(v, "8z"));
-			pr(fh(v, "8"));
+			pr(fh(v, "8$zg"));
+			pr(fh(v, "8$g"));
+			pr(fh(v, "8$z"));
+			pr(fh(v, "8$"));
 			v = ~v;
 			pr(fh(v, "8zg"));
-			pr(fh(v, "8g"));
+			pr(fh(v, "8$g"));
 			pr(fh(v, "8z"));
-			pr(fh(v, "8"));
+			pr(fh(v, "8$"));
 			pr("");
 		}
 		IOSnapshot.close();
@@ -64,26 +64,6 @@ public class ToolsTest extends MyTest {
 		assertStringsMatch("hello", chomp("hello"));
 		assertStringsMatch("hello", chomp("hello\n"));
 		assertStringsMatch("hello", chomp("hello\n\n\n\n"));
-	}
-
-	@Test
-	public void testAddSpace() {
-		String[] s = { "", "", " ", " ", "z", "z ", "z\n", "z\n" };
-		for (int i = 0; i < s.length; i += 2) {
-
-			StringBuilder sb = new StringBuilder(s[i]);
-			assertStringsMatch(s[i + 1], addSpace(sb));
-		}
-
-	}
-
-	@Test
-	public void testAddNewline() {
-		String[] s = { "", "\n", " ", " \n", "z", "z\n", "z\n", "z\n" };
-		for (int i = 0; i < s.length; i += 2) {
-			StringBuilder sb = new StringBuilder(s[i]);
-			assertStringsMatch(s[i + 1], addNewline(sb));
-		}
 	}
 
 	@Test

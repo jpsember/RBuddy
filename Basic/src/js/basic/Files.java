@@ -3,7 +3,6 @@ package js.basic;
 import java.io.*;
 
 public class Files {
-	final static String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	/**
 	 * Read a file into a string
@@ -23,6 +22,8 @@ public class Files {
 			 * the stream.
 			 */
 			while ((line = input.readLine()) != null) {
+				final String LINE_SEPARATOR = System
+						.getProperty("line.separator");
 				sb.append(line);
 				sb.append(LINE_SEPARATOR);
 			}
@@ -32,8 +33,8 @@ public class Files {
 		return sb.toString();
 	}
 
-	public static void writeTextFile(File file, String content, boolean onlyIfChanged)
-			throws IOException {
+	public static void writeTextFile(File file, String content,
+			boolean onlyIfChanged) throws IOException {
 		if (onlyIfChanged) {
 			if (file.isFile()) {
 				String currentContents = readTextFile(file);
@@ -48,7 +49,7 @@ public class Files {
 
 	public static void writeTextFile(File file, String content)
 			throws IOException {
-		writeTextFile(file,content,false);
+		writeTextFile(file, content, false);
 	}
 
 }
