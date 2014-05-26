@@ -10,8 +10,11 @@ import java.util.regex.*;
 public class IOSnapshot {
 
 	public static void open() {
+		open(false);
+	}
+	public static void open(boolean alwaysReplaceExisting) {
 		singleton = new IOSnapshot();
-		singleton.doOpen();
+		singleton.doOpen(alwaysReplaceExisting);
 	}
 
 	public static void close() {
@@ -56,14 +59,21 @@ public class IOSnapshot {
 			content = content + "\n*** System.err:\n"+content2;
 		
 		try {
+			boolean write = true;
 			if (snapshotPath.exists()) {
 				String previousContent = Files.readTextFile(snapshotPath);
 				String diff = constructDiff(previousContent, content);
-				if (diff != null) {
+				if (diff == null) {
+					write = false;
+				} else {
+					if (alwaysReplaceExisting)
+						pr("...replacing old snapshot content ("+snapshotPath+")");
+					else
 					die("Output disagrees with snapshot (" + snapshotPath
 							+ "):\n" + diff);
 				}
-			} else {
+			}  
+			if (write) {
 				System.out.println("...writing new snapshot: " + snapshotPath);
 				Files.writeTextFile(snapshotPath, content);
 			}
@@ -72,7 +82,10 @@ public class IOSnapshot {
 		}
 	}
 
-	private void doOpen() {
+	private void doOpen(boolean alwaysReplaceExisting) {
+		this.alwaysReplaceExisting = alwaysReplaceExisting;
+		if (alwaysReplaceExisting) warning("always replacing existing snapshot",2);
+		
 		calculatePath();
 		interceptOutput();
 	}
@@ -122,4 +135,5 @@ public class IOSnapshot {
 	private File snapshotPath;
 	private StringPrintStream capturedStdOut, capturedStdErr;
 	private PrintStream originalStdOut,originalStdErr;
+	private boolean alwaysReplaceExisting;
 }

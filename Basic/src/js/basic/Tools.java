@@ -11,31 +11,36 @@ import static js.basic.MyMath.*;
 
 public final class Tools {
 
-	public static boolean sanitizeLineNumbers;
+	// This global flag determines whether the line numbers that appear in
+	// warnings (and 'unimp' messages)
+	// are to be replaced with constant placeholders ('XXX') so that old
+	// snapshots remain valid even if
+	// a line number associated with a warning has changed.
+	static boolean sanitizeLineNumbers;
 
-	public static String stackTrace() {
-		return stackTraceFmt(1);
-	}
+//	private static String stackTrace() {
+//		return stackTraceFmt(1);
+//	}
 
 	public static String stackTrace(Throwable t) {
 		return stackTrace(1, 10, t);
 	}
 
-	public static String stackTrace(int max) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(stackTrace(1, max));
-		sb.append(" : ");
-		tab(sb, 24);
-		return sb.toString();
-	}
+	// public static String stackTrace(int max) {
+	// StringBuilder sb = new StringBuilder();
+	// sb.append(stackTrace(1, max));
+	// sb.append(" : ");
+	// tab(sb, 24);
+	// return sb.toString();
+	// }
 
-	private static String stackTraceFmt(int skip) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(stackTrace(1 + skip, 1));
-		sb.append(" : ");
-		tab(sb, 24);
-		return sb.toString();
-	}
+//	private static String stackTraceFmt(int skip) {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append(stackTrace(1 + skip, 1));
+//		sb.append(" : ");
+//		tab(sb, 24);
+//		return sb.toString();
+//	}
 
 	public static void sleepFor(int ms) {
 		try {
@@ -49,10 +54,10 @@ public final class Tools {
 	 * Construct a string describing a stack trace
 	 * 
 	 * @param skipCount
-	 *            : # stack frames to skip (actually skips 1 + skipCount, to
-	 *            skip the call to this method)
+	 *            # stack frames to skip (actually skips 1 + skipCount, to skip
+	 *            the call to this method)
 	 * @param displayCount
-	 *            : maximum # stack frames to display
+	 *            maximum # stack frames to display
 	 * @return String; iff displayCount > 1, cr's inserted after every item
 	 */
 	public static String stackTrace(int skipCount, int displayCount) {
@@ -74,29 +79,9 @@ public final class Tools {
 	 */
 	private static String stackTrace(int skipCount, int displayCount,
 			Throwable t) {
-		final boolean db = false;
-
 		StringBuilder sb = new StringBuilder();
 
 		StackTraceElement[] elist = t.getStackTrace();
-
-		if (db) {
-			for (int j = 0; j < elist.length; j++) {
-				StackTraceElement e = elist[j];
-				sb.append(j >= skipCount && j < skipCount + displayCount ? "  "
-						: "x ");
-				String cn = e.getClassName();
-				cn = cn.substring(cn.lastIndexOf('.') + 1);
-				sb.append(cn);
-				sb.append(".");
-				sb.append(e.getMethodName());
-				sb.append(":");
-				sb.append(e.getLineNumber());
-				sb.append("\n");
-
-			}
-			return sb.toString();
-		}
 
 		int s0 = skipCount;
 		int s1 = s0 + displayCount;
@@ -131,7 +116,7 @@ public final class Tools {
 	 */
 	public static void ASSERT(boolean flag, String message) {
 		if (!flag) {
-			toss("ASSERTION FAILED (" + message + ")");
+			die("ASSERTION FAILED (" + message + ")");
 
 		}
 	}
@@ -148,11 +133,11 @@ public final class Tools {
 		die("(Throwable:" + t.getMessage() + ")");
 	}
 
-	private static void toss(String msg) {
-		RuntimeException e = new RuntimeException(msg + " " + stackTrace());
-		// pr("Throwing: " + e+"\n"+stackTrace(8));
-		throw e;
-	}
+//	private static void toss(String msg) {
+//		RuntimeException e = new RuntimeException(msg + " " + stackTrace());
+//		// pr("Throwing: " + e+"\n"+stackTrace(8));
+//		throw e;
+//	}
 
 	/**
 	 * Simple assertion mechanism, throws RuntimeException if flag is false
@@ -162,7 +147,7 @@ public final class Tools {
 	 */
 	public static void ASSERT(boolean flag) {
 		if (!flag) {
-			toss("ASSERTION FAILED");
+			die("ASSERTION FAILED");
 		}
 	}
 
@@ -222,9 +207,11 @@ public final class Tools {
 	}
 
 	public static void warning(String s) {
-		warning(null, s, 1);
+		warning(s,1);
 	}
-
+	public static void warning(String s, int skipCount) {
+		warning(null, s, 1 + skipCount);
+	}
 	public static String f(boolean b) {
 		return b ? " T" : " F";
 	}
@@ -458,13 +445,18 @@ public final class Tools {
 
 	private static final String SPACES = "                             ";
 
-	public static String sp(int len) {
-		len = Math.max(len, 0);
-		if (len < SPACES.length())
-			return SPACES.substring(0, len);
-		StringBuilder sb = new StringBuilder(len);
-		for (int i = 0; i < len; i++)
-			sb.append(' ');
+	/**
+	 * Get a string consisting of n spaces
+	 */
+	public static String sp(int n) {
+		n = Math.max(n, 0);
+		if (n < SPACES.length())
+			return SPACES.substring(0, n);
+		StringBuilder sb = new StringBuilder(n);
+		while (sb.length() < n) {
+			int chunk = Math.min(n - sb.length(),SPACES.length());
+			sb.append(SPACES.substring(0,chunk));
+		}
 		return sb.toString();
 	}
 
@@ -488,9 +480,10 @@ public final class Tools {
 	 *            StringBuilder
 	 * @return sb the StringBuilder
 	 */
-	public static void addNewline(StringBuilder sb) {
+	public static StringBuilder addNewline(StringBuilder sb) {
 		if (sb.length() == 0 || sb.charAt(sb.length() - 1) != '\n')
 			sb.append('\n');
+		return sb;
 	}
 
 	/**
@@ -829,18 +822,20 @@ public final class Tools {
 				out[i] = null;
 		}
 		if (failIfError && out[1] != null)
-			die("Failed executing system command '" + command
-					+ "';\nstdout:\n" + out[0] + "\nstderr:\n" + out[1]);
+			die("Failed executing system command '" + command + "';\nstdout:\n"
+					+ out[0] + "\nstderr:\n" + out[1]);
 
 		return out;
 	}
 
 	public static String hexDump(byte[] byteArray) {
-		return hexDump(byteArray,0,byteArray.length);
+		return hexDump(byteArray, 0, byteArray.length);
 	}
-	public static String hexDump(byte[] byteArray,int offset, int length) {
-		return hexDump(byteArray,offset,length,"16gza");
+
+	public static String hexDump(byte[] byteArray, int offset, int length) {
+		return hexDump(byteArray, offset, length, "16gza");
 	}
+
 	public static String hexDump(byte[] byteArray, int offset, int length,
 			String options) {
 		int groupSize = (1 << 2); // Must be power of 2
@@ -854,7 +849,7 @@ public final class Tools {
 		boolean groups = options.contains("g");
 		boolean absoluteIndex = options.contains("A");
 		boolean withASCII = options.contains("a");
-		
+
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		while (i < length) {
@@ -879,25 +874,25 @@ public final class Tools {
 				}
 				sb.append(' ');
 				if (groups) {
-				if ((j & (groupSize-1)) == groupSize-1)
-					sb.append("| ");
-//					sb.append("  ");
+					if ((j & (groupSize - 1)) == groupSize - 1)
+						sb.append("| ");
+					// sb.append("  ");
 				}
 			}
 			if (withASCII) {
-			sb.append(' ');
-			for (int j = 0; j < rSize; j++) {
-				byte v = byteArray[offset + i + j];
-//				if (false && hideZeroes && v == 0x00)
-//					v = ' ';
-//				else 
+				sb.append(' ');
+				for (int j = 0; j < rSize; j++) {
+					byte v = byteArray[offset + i + j];
+					// if (false && hideZeroes && v == 0x00)
+					// v = ' ';
+					// else
 					if (v < 0x20 || v >= 0x80)
-					v = '.';
-				sb.append((char) v);
-				if (groups && ((j & (groupSize-1)) == groupSize-1)) {
+						v = '.';
+					sb.append((char) v);
+					if (groups && ((j & (groupSize - 1)) == groupSize - 1)) {
 						sb.append(' ');
 					}
-			}
+				}
 			}
 			sb.append('\n');
 			i += rSize;

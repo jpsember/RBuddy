@@ -34,8 +34,6 @@ public class MyTest {
 			die("could not delete temp dir prior to creation");
 		if (!t.mkdir())
 			die("could not create temp dir");
-		pr("creating test directory "+t);
-		t.deleteOnExit();
 		return t;
 	}
 }
