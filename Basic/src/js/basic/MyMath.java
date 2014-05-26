@@ -2,18 +2,13 @@ package js.basic;
 
 import static js.basic.Tools.*;
 import java.util.*;
+import static java.lang.Math.*;
 
 public final class MyMath {
-  public static final float PI = (float) Math.PI;
-  public static final float DEGTORAD = (float) (Math.PI / 180);
-  public static final float RADTODEG = 1.0f / DEGTORAD;
+  public static final double PI = Math.PI;
+  public static final double DEGTORAD = PI / 180;
+  public static final double RADTODEG = 1.0 / DEGTORAD;
 
-  public static float sin(float a) {
-    return (float) Math.sin(a);
-  }
-  public static float cos(float a) {
-    return (float) Math.cos(a);
-  }
   public static void err(Object cause) {
     throw new MathError(cause);
   }
@@ -25,7 +20,7 @@ public final class MyMath {
    * @param dest destination point, or null
    * @return destination point
    */
-  public static FlPoint2 ptOnCircle(FlPoint2 origin, float angle, float radius) {
+  public static FlPoint2 ptOnCircle(FlPoint2 origin, double angle, double radius) {
     return new FlPoint2(origin.x + cos(angle) * radius, origin.y + sin(angle)
         * radius);
   }
@@ -34,9 +29,6 @@ public final class MyMath {
     public MathError(Object string) {
       super(string == null ? "unknown" : string.toString());
     }
-  }
-  public static float sqrt(float f) {
-    return (float) Math.sqrt(f);
   }
 
   /**
@@ -59,16 +51,10 @@ public final class MyMath {
    * @param size size of grid cells (assumed to be square)
    * @return point snapped to nearest cell corner
    */
-  public static float snapToGrid(float n, float size) {
+  public static double snapToGrid(double n, double size) {
     return size * Math.round(n / size);
   }
 
-  public static float floor(float n) {
-    return (float) Math.floor(n);
-  }
-  public static float ceil(float n) {
-    return (float) Math.ceil(n);
-  }
 
   /**
    * Clamp a value into range
@@ -77,7 +63,7 @@ public final class MyMath {
    * @param max
    * @return clamped value
    */
-  public static float clamp(float value, float min, float max) {
+  public static double clamp(double value, double min, double max) {
     if (value < min)
       value = min;
     else if (value > max)
@@ -90,7 +76,7 @@ public final class MyMath {
   //   * @param degrees angle in degrees
   //   * @return angle in radians
   //   */
-  //  public static float radians(float degrees) {
+  //  public static double radians(double degrees) {
   //    return degrees * DEGTORAD;
   //  }
   //
@@ -99,7 +85,7 @@ public final class MyMath {
   //   * @param radians angle in radians
   //   * @return angle in degrees
   //   */
-  //  public static float degrees(float radians) {
+  //  public static double degrees(double radians) {
   //    return radians * RADTODEG;
   //  }
 
@@ -108,8 +94,8 @@ public final class MyMath {
    * @param n range
    * @return random value in range [0,n)
    */
-  public static float rnd(float n) {
-    float d = random.nextFloat();
+  public static double rnd(double n) {
+    double d = random.nextFloat();
     return d * n;
   }
 
@@ -142,7 +128,7 @@ public final class MyMath {
    * @param a  angle to normalize
    * @return an equivalent angle in [-PI,PI)
    */
-  public static float angle(float a) {
+  public static double angle(double a) {
     return mod(a + PI, PI * 2) - PI;
   }
 
@@ -153,8 +139,8 @@ public final class MyMath {
    * @param a  angle to normalize
    * @return an equivalent angle in [0,2*PI)
    */
-  public static float angle2(float a) {
-    float r = angle(a);
+  public static double angle2(double a) {
+    double r = angle(a);
     if (r < 0)
       r += PI * 2;
     return r;
@@ -180,8 +166,8 @@ public final class MyMath {
    * @return value - v', where v' is the largest multiple of divisor not
    *  greater than value
    */
-  public static float mod(float value, float divisor) {
-    return (value - divisor * (float) Math.floor(value / divisor));
+  public static double mod(double value, double divisor) {
+    return (value - divisor * Math.floor(value / divisor));
   }
 
   /**
@@ -202,7 +188,7 @@ public final class MyMath {
    * @param i value
    * @return integer sign -1,0,1
    */
-  public static int sign(float i) {
+  public static int sign(double i) {
     if (i < 0)
       return -1;
     else if (i > 0)
@@ -216,7 +202,7 @@ public final class MyMath {
    * @param pt1 : end point
    * @return normalized angle [-PI...PI) for vector (pt1 - pt0)
    */
-  public static float polarAngle(FlPoint2 pt0, FlPoint2 pt1) {
+  public static double polarAngle(FlPoint2 pt0, FlPoint2 pt1) {
     return polarAngle(pt0.x, pt0.y, pt1.x, pt1.y);
     //    return Math.atan2(pt1.y - pt0.y, pt1.x - pt0.x);
   }
@@ -227,8 +213,8 @@ public final class MyMath {
    * @param x1,y1 end point
    * @return normalized angle [-PI...PI) for vector 
    */
-  public static float polarAngle(float x0, float y0, float x1, float y1) {
-    return (float) Math.atan2(y1 - y0, x1 - x0);
+  public static double polarAngle(double x0, double y0, double x1, double y1) {
+    return Math.atan2(y1 - y0, x1 - x0);
   }
 
   /**
@@ -236,12 +222,12 @@ public final class MyMath {
    * @param pt end point (start is origin)
    * @return normalized angle [-PI...PI)  
    */
-  public static float polarAngle(FlPoint2 pt) {
-    return (float) Math.atan2(pt.y, pt.x);
+  public static double polarAngle(FlPoint2 pt) {
+    return  Math.atan2(pt.y, pt.x);
   }
 
   /**
-   * Determine which side of a line a point is on; floating point version
+   * Determine which side of a line a point is on; doubleing point version
    * @param ax
    * @param ay first point on line
    * @param bx
@@ -251,20 +237,20 @@ public final class MyMath {
    * @return 0 if the point is on the line containing the ray from a to b,
    *  positive value if it's to the left of this ray, negative if it's to the right
    */
-  public static float sideOfLine(float ax, float ay, float bx, float by,
-      float px, float py) {
-    float area2 = ((bx - ax)) * (py - ay) - ((px - ax)) * (by - ay);
+  public static double sideOfLine(double ax, double ay, double bx, double by,
+      double px, double py) {
+    double area2 = ((bx - ax)) * (py - ay) - ((px - ax)) * (by - ay);
     return area2;
   }
   /**
-   * Determine which side of a line a point is on; floating point version
+   * Determine which side of a line a point is on; doubleing point version
    * @param a first point on line
    * @param b second point on line
    * @param p point to test
    * @return 0 if the point is on the line containing the ray from a to b,
    *  positive value if it's to the left of this ray, negative if it's to the right
    */
-  public static float sideOfLine(FlPoint2 a, FlPoint2 b, FlPoint2 p) {
+  public static double sideOfLine(FlPoint2 a, FlPoint2 b, FlPoint2 p) {
     return sideOfLine(a.x, a.y, b.x, b.y, p.x, p.y);
   }
   
@@ -279,13 +265,13 @@ public final class MyMath {
    * @param ptOnSeg  if not null, closest point on segment to point is stored here
    * @return double
    */
-  public static float ptDistanceToSegment(FlPoint2 pt, FlPoint2 l0,
+  public static double ptDistanceToSegment(FlPoint2 pt, FlPoint2 l0,
       FlPoint2 l1, FlPoint2 ptOnSeg) {
 
     final boolean db = false;
-    float dist = 0;
+    double dist = 0;
     // calculate parameter for position on segment
-    float t = positionOnSegment(pt, l0, l1);
+    double t = positionOnSegment(pt, l0, l1);
 if (db) 
   pr("ptDistanceToSegment "+pt+" --> "+l0+l1+" t="+f(t));
       
@@ -314,7 +300,7 @@ if (db)
    * @param closestPt if not null, closest point on line is stored here
    * @return distance 
    */
-  public static float ptDistanceToLine(FlPoint2 pt, FlPoint2 e0, FlPoint2 e1,
+  public static double ptDistanceToLine(FlPoint2 pt, FlPoint2 e0, FlPoint2 e1,
       FlPoint2 closestPt) {
 
     /*
@@ -332,25 +318,25 @@ if (db)
      *  
      *     l0 + (|A| cos t) / |B|
      */
-    float bLength = FlPoint2.distance(e0, e1);
-    float dist;
+    double bLength = FlPoint2.distance(e0, e1);
+    double dist;
     if (bLength == 0) {
       dist = FlPoint2.distance(pt, e0);
       if (closestPt != null)
         closestPt.setLocation(e0);
     } else {
-      float ax = pt.x - e0.x;
-      float ay = pt.y - e0.y;
-      float bx = e1.x - e0.x;
-      float by = e1.y - e0.y;
+      double ax = pt.x - e0.x;
+      double ay = pt.y - e0.y;
+      double bx = e1.x - e0.x;
+      double by = e1.y - e0.y;
 
-      float crossProd = bx * ay - by * ax;
+      double crossProd = bx * ay - by * ax;
 
       dist = Math.abs(crossProd / bLength);
 
       if (closestPt != null) {
-        float scalarProd = ax * bx + ay * by;
-        float t = scalarProd / (bLength * bLength);
+        double scalarProd = ax * bx + ay * by;
+        double t = scalarProd / (bLength * bLength);
         closestPt.set(e0.x + t * bx, e0.y + t * by);
       }
     }
@@ -363,14 +349,14 @@ if (db)
    * @param s1 end point of line segment (t = 1.0)
    * @return t value associated with pt
    */
-  public static float positionOnSegment(FlPoint2 pt, FlPoint2 s0, FlPoint2 s1) {
+  public static double positionOnSegment(FlPoint2 pt, FlPoint2 s0, FlPoint2 s1) {
 
-    float sx = s1.x - s0.x;
-    float sy = s1.y - s0.y;
+    double sx = s1.x - s0.x;
+    double sy = s1.y - s0.y;
 
-    float t = 0;
+    double t = 0;
 
-    float dotProd = (pt.x - s0.x) * sx + (pt.y - s0.y) * sy;
+    double dotProd = (pt.x - s0.x) * sx + (pt.y - s0.y) * sy;
     if (dotProd != 0)
       t = dotProd / (sx * sx + sy * sy);
 
@@ -388,7 +374,7 @@ if (db)
 *  or if they intersect outside of either segment range, returns null)
 */
 public static FlPoint2 lineSegmentIntersection(FlPoint2 p1, FlPoint2 p2,
-   FlPoint2 q1, FlPoint2 q2, float[] iParam) {
+   FlPoint2 q1, FlPoint2 q2, double[] iParam) {
  return lineSegmentIntersection(p1.x, p1.y, p2.x, p2.y, q1.x, q1.y, q2.x,
      q2.y, iParam);
 
@@ -409,26 +395,26 @@ public static FlPoint2 lineSegmentIntersection(FlPoint2 p1, FlPoint2 p2,
 * @return FPoint2 if they properly intersect (if parallel or coincident,
 *  or if they intersect outside of either segment range, returns null)
 */
-public static FlPoint2 lineSegmentIntersection(float p1x, float p1y,
-   float p2x, float p2y, float q1x, float q1y, float q2x, float q2y,
-   float[] param) {
+public static FlPoint2 lineSegmentIntersection(double p1x, double p1y,
+   double p2x, double p2y, double q1x, double q1y, double q2x, double q2y,
+   double[] param) {
 
- final float EPS = 1e-5f;
+ final double EPS = 1e-5f;
 
  FlPoint2 out = null;
  do {
-   float denom = (q2y - q1y) * (p2x - p1x) - (q2x - q1x) * (p2y - p1y);
-   float numer1 = (q2x - q1x) * (p1y - q1y) - (q2y - q1y) * (p1x - q1x);
+   double denom = (q2y - q1y) * (p2x - p1x) - (q2x - q1x) * (p2y - p1y);
+   double numer1 = (q2x - q1x) * (p1y - q1y) - (q2y - q1y) * (p1x - q1x);
    //double numer2 = (p2x - p1x)*(p1y - q1y) - (p2y -p1y)*(p1x-q1x);
    if (Math.abs(denom) < EPS) {
      break;
    }
 
-   float ua = numer1 / denom;
+   double ua = numer1 / denom;
 
-   float numer2 = (p2x - p1x) * (p1y - q1y) - (p2y - p1y) * (p1x - q1x);
+   double numer2 = (p2x - p1x) * (p1y - q1y) - (p2y - p1y) * (p1x - q1x);
 
-   float ub = numer2 / denom;
+   double ub = numer2 / denom;
 
    if (param != null) {
      param[0] = ua;

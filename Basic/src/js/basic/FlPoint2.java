@@ -9,7 +9,7 @@ import static js.basic.Tools.*;
  * and will not be considered equal.
  */
 public class FlPoint2 {
-  public float x, y;
+  public double x, y;
  
   public static FlPoint2 add(FlPoint2 a, FlPoint2 b, FlPoint2 d) {
     if (d == null)
@@ -22,7 +22,7 @@ public class FlPoint2 {
   public static FlPoint2 add(FlPoint2 a, FlPoint2 b) {
     return add(a, b, null);
   }
-  public FlPoint2(float x, float y) {
+  public FlPoint2(double x, double y) {
     this.x = x;
     this.y = y;
   }
@@ -39,13 +39,13 @@ public class FlPoint2 {
 //   * @param y
 //   * @return
 //   */
-//  public FlPoint2 add(float x, float y) {
+//  public FlPoint2 add(double x, double y) {
 //    this.x += x;
 //    this.y += y;
 //    return this;
 //  }
 
-  public FlPoint2 translate(float x, float y, boolean neg) {
+  public FlPoint2 translate(double x, double y, boolean neg) {
     if (neg) {
       x = -x;
       y = -y;
@@ -57,15 +57,15 @@ public class FlPoint2 {
   public FlPoint2 translate(FlPoint2 amt) {
     return translate(amt.x, amt.y, false);
   }
-  public FlPoint2 translate(float tx, float ty) {
+  public FlPoint2 translate(double tx, double ty) {
     x += tx;
     y += ty;
     return this;
   }
 
   public FlPoint2 translate(FlPoint2 amt, boolean neg) {
-    float tx = amt.x;
-    float ty = amt.y;
+    double tx = amt.x;
+    double ty = amt.y;
     if (neg) {
       tx = -tx;
       ty = -ty;
@@ -82,31 +82,31 @@ public class FlPoint2 {
   public static FlPoint2 difference(FlPoint2 b, FlPoint2 a) {
     return difference(b, a, null);
   }
-  public static void addMultiple(FlPoint2 a, float mult, FlPoint2 b,
+  public static void addMultiple(FlPoint2 a, double mult, FlPoint2 b,
       FlPoint2 dest) {
     dest.x = a.x + mult * b.x;
     dest.y = a.y + mult * b.y;
   }
 
-  public FlPoint2 subtract(float x, float y) {
+  public FlPoint2 subtract(double x, double y) {
     this.x -= x;
     this.y -= y;
     return this;
   }
 
-  public float lengthSq() {
+  public double lengthSq() {
     return x * x + y * y;
   }
 
-  public float length() {
-    return (float) Math.sqrt(lengthSq());
+  public double length() {
+    return Math.sqrt(lengthSq());
   }
 
-  public float normalize() {
-    float lenSq = lengthSq();
+  public double normalize() {
+    double lenSq = lengthSq();
     if (lenSq != 0 && lenSq != 1) {
-      lenSq = (float) Math.sqrt(lenSq);
-      float scale = 1 / lenSq;
+      lenSq = Math.sqrt(lenSq);
+      double scale = 1 / lenSq;
       x *= scale;
       y *= scale;
     }
@@ -121,7 +121,7 @@ public class FlPoint2 {
     this(src.x, src.y);
   }
 
-  public static FlPoint2 interpolate(FlPoint2 p1, FlPoint2 p2, float t) {
+  public static FlPoint2 interpolate(FlPoint2 p1, FlPoint2 p2, double t) {
     return new FlPoint2(p1.x + t * (p2.x - p1.x), p1.y + t * (p2.y - p1.y));
   }
 
@@ -140,10 +140,10 @@ public class FlPoint2 {
   //   * Align point to a grid
   //   * @param gridSize : size of grid
   //   */
-  //  public void alignToGrid(float gridSize) {
+  //  public void alignToGrid(double gridSize) {
   //    alignToGrid(gridSize, gridSize);
   //  }
-  public void set(float x, float y) {
+  public void set(double x, double y) {
     this.x = x;
     this.y = y;
   }
@@ -154,8 +154,8 @@ public class FlPoint2 {
   //   * @param pixelWidth width of pixels in grid
   //   * @param pixelHeight height of pixels in grid
   //   */
-  //  public void alignToGrid(float pixelWidth, float pixelHeight) {
-  //    float iGrid = 1 / pixelWidth;
+  //  public void alignToGrid(double pixelWidth, double pixelHeight) {
+  //    double iGrid = 1 / pixelWidth;
   //    x = Math.round(x * iGrid) * pixelWidth;
   //    iGrid = 1 / pixelHeight;
   //    y = Math.round(y * iGrid) * pixelHeight;
@@ -164,7 +164,7 @@ public class FlPoint2 {
   public FlPoint2() {
   }
 
-  //  public boolean clamp(float x0, float y0, float x1, float y1) {
+  //  public boolean clamp(double x0, double y0, double x1, double y1) {
   //    boolean valid = true;
   //    if (x < x0 || x > x1) {
   //      valid = false;
@@ -180,28 +180,28 @@ public class FlPoint2 {
   //  public boolean clamp(FRect r) {
   //    return clamp(r.x, r.y, r.x + r.width, r.y + r.height);
   //  }
-  public static float distance(FlPoint2 a, FlPoint2 b) {
+  public static double distance(FlPoint2 a, FlPoint2 b) {
     return distance(a.x, a.y, b.x, b.y);
   }
-  public static float distanceSq(float ax, float ay, float bx, float by) {
-    float dx = bx - ax;
-    float dy = by - ay;
+  public static double distanceSq(double ax, double ay, double bx, double by) {
+    double dx = bx - ax;
+    double dy = by - ay;
     return dx * dx + dy * dy;
   }
 
-  public static float distance(float ax, float ay, float bx, float by) {
-    return (float) Math.sqrt(distanceSq(ax, ay, bx, by));
+  public static double distance(double ax, double ay, double bx, double by) {
+    return Math.sqrt(distanceSq(ax, ay, bx, by));
   }
-  public static float distanceSq(FlPoint2 a, FlPoint2 b) {
+  public static double distanceSq(FlPoint2 a, FlPoint2 b) {
     return distanceSq(a.x, a.y, b.x, b.y);
   }
 
-  //   public static float distanceSq (float x1, float y1, float x2, float y2) {
+  //   public static double distanceSq (double x1, double y1, double x2, double y2) {
   //    x1 -= x2;
   //    y1 -= y2;
   //    return (x1*x1)+(y1*y1);
   //  }
-  //  public static float distance (float x1, float y1, float x2, float y2) {
+  //  public static double distance (double x1, double y1, double x2, double y2) {
   //    return Math.sqrt(distanceSq(x1,y1,x2,y2));
   //  }
 
@@ -257,11 +257,11 @@ public class FlPoint2 {
   //    y = 0;
   //  }
 
-  //  public float get(int y, int x) {
+  //  public double get(int y, int x) {
   //    return (y == 1 ? this.y : this.x);
   //  }
   //
-  //  public float get(int y) {
+  //  public double get(int y) {
   //    return (y == 1 ? this.y : this.x);
   //  }
   //
@@ -270,15 +270,15 @@ public class FlPoint2 {
   //  }
 
   // public void set(FlPoint2 pt) {this.x = pt.x; this.y = pt.y;}
-  // public void set(float x, float y) {
+  // public void set(double x, double y) {
   //   this.x = x; this.y = y;
   // }
 
-  //  public void set(int y, int x, float v) {
+  //  public void set(int y, int x, double v) {
   //    set(y, v);
   //  }
   //
-  //  public void set(int y, float v) {
+  //  public void set(int y, double v) {
   //    if (y == 0)
   //      this.x = v;
   //    else {
@@ -296,30 +296,30 @@ public class FlPoint2 {
   //    return 2;
   //  }
   //
-  //  //public float x, y;
+  //  //public double x, y;
   //
-  //  public void setX(float x) {
+  //  public void setX(double x) {
   //    this.x = x;
   //
   //  }
   //
-  //  public void setY(float y) {
+  //  public void setY(double y) {
   //    this.y = y;
   //  }
   //
-  //  public void setZ(float z) {
+  //  public void setZ(double z) {
   //    throw new UnsupportedOperationException();
   //  }
   //
-  //  public float x() {
+  //  public double x() {
   //    return x;
   //  }
   //
-  //  public float y() {
+  //  public double y() {
   //    return y;
   //  }
   //
-  //  public float z() {
+  //  public double z() {
   //    throw new UnsupportedOperationException();
   //  }
 
@@ -328,7 +328,7 @@ public class FlPoint2 {
     y = -y;
   }
 
-  public void scale(float s) {
+  public void scale(double s) {
     x *= s;
     y *= s;
   }
@@ -339,7 +339,7 @@ public class FlPoint2 {
   public void setLocation(FlPoint2 cpt) {
     set(cpt.x, cpt.y);
   }
-  public void snapToGrid(float g) {
+  public void snapToGrid(double g) {
     x = MyMath.snapToGrid(  x,g);
     y = MyMath.snapToGrid(  y,g);
   }
@@ -360,7 +360,7 @@ public class FlPoint2 {
   //  public static int compareLex(FlPoint2 pt1, FlPoint2 pt2) {
   //    return compareLex(pt1, pt2, true);
   //    //    
-  //    //    float res = pt1.y - pt2.y;
+  //    //    double res = pt1.y - pt2.y;
   //    //    if (res == 0)
   //    //      res = pt1.x - pt2.x;
   //    //    return MyMath.sign(res);
@@ -376,7 +376,7 @@ public class FlPoint2 {
   //   */
   //  public static int compareLex(FlPoint2 pt1, FlPoint2 pt2,
   //      boolean yHasPrecedence) {
-  //    float res;
+  //    double res;
   //    if (yHasPrecedence) {
   //      res = pt1.y - pt2.y;
   //      if (res == 0)

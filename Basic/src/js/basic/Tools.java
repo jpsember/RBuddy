@@ -529,7 +529,7 @@ public final class Tools {
 	}
 
 	/**
-	 * Format a float into a string, without scientific notation
+	 * Format a double into a string, without scientific notation
 	 * 
 	 * @param v
 	 *            : value
@@ -541,7 +541,7 @@ public final class Tools {
 	 *         present only if fDig > 0 if overflow, returns s********* of same
 	 *         size
 	 */
-	public static String f(float v, int iDig, int fDig) {
+	public static String f(double v, int iDig, int fDig) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -558,18 +558,18 @@ public final class Tools {
 		// Determine which digits will be displayed.
 		// Round last digit and propagate leftward.
 		{
-			float n = (float) Math.pow(10, iDig);
+			double n = Math.pow(10, iDig);
 			if (v >= n) {
 				overflow = true;
 			} else {
-				float v2 = v;
+				double v2 = v;
 				for (int i = 0; i < iDig + fDig; i++) {
 					n /= 10.0;
-					float d = (float) Math.floor(v2 / n);
+					double d =  Math.floor(v2 / n);
 					dig[i] = (int) d;
 					v2 -= d * n;
 				}
-				float d2 = (float) Math.floor(v2 * 10 / n);
+				double d2 = Math.floor(v2 * 10 / n);
 				if (d2 >= 5) {
 					for (int k = dig.length - 1;; k--) {
 						if (k < 0) {
@@ -620,11 +620,11 @@ public final class Tools {
 		return sb.toString();
 	}
 
-	public static String f(float f) {
+	public static String f(double f) {
 		return f(f, 5, 3);
 	}
 
-	public static String fa(float radians) {
+	public static String fa(double radians) {
 		return f(radians * RADTODEG, 3, 2);
 	}
 
@@ -708,7 +708,7 @@ public final class Tools {
 
 	private static Random rnd;
 
-	public static String fa2(float ang) {
+	public static String fa2(double ang) {
 		return fa(angle2(ang));
 	}
 

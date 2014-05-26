@@ -88,7 +88,6 @@ public class ToolsTest extends MyTest {
 
 	@Test
 	public void testFormattedNumbersDisplay() {
-		unimp("switch float -> double since little cost on newer hardware, and double is better precision");
 		double[] v = { 4.2, 4.2222222, 444.2222222, 444.2256, 444.9994,
 				444.9995, 999.9994, 999.9995, 0, 0.0000001,
 
@@ -96,8 +95,8 @@ public class ToolsTest extends MyTest {
 		IOSnapshot.open();
 		pr("Floating point:");
 		for (int i = 0; i < v.length; i++) {
-			pr(f((float) v[i], 3, 3));
-			pr(f(-(float) v[i], 3, 3));
+			pr(f(v[i], 3, 3));
+			pr(f(-v[i], 3, 3));
 		}
 		pr(f(4.2f, 1, 0));
 		pr(f(4.2f, 0, 0));
