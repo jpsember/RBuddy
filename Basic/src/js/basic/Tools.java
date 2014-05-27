@@ -38,7 +38,9 @@ public final class Tools {
 
 	/**
 	 * Construct stack trace for a throwable
-	 * @param t throwable
+	 * 
+	 * @param t
+	 *            throwable
 	 * @return String
 	 */
 	public static String stackTrace(Throwable t) {
@@ -126,6 +128,7 @@ public final class Tools {
 
 	/**
 	 * Throw a RuntimeException containing a particular throwable
+	 * 
 	 * @param t
 	 */
 	public static void die(Throwable t) {
@@ -261,9 +264,11 @@ public final class Tools {
 
 	/**
 	 * Parse an options expression which has the format "(\d+)(.*)"
-	 * @param s string
-	 * @return array [value(Integer), remainder(String)] where value is (\d+), and
-	 * remainder is (.*)
+	 * 
+	 * @param s
+	 *            string
+	 * @return array [value(Integer), remainder(String)] where value is (\d+),
+	 *         and remainder is (.*)
 	 */
 	private static Object[] parseOptionsString(String s) {
 		Object[] output = { null, null };
@@ -391,7 +396,8 @@ public final class Tools {
 	/**
 	 * Convert string to debug display, using default options
 	 * 
-	 * @param s String, or null
+	 * @param s
+	 *            String, or null
 	 * @return String
 	 */
 	public static String d(CharSequence s) {
@@ -449,7 +455,6 @@ public final class Tools {
 		}
 	}
 
-
 	/**
 	 * Get a string consisting of n spaces
 	 */
@@ -464,6 +469,13 @@ public final class Tools {
 			sb.append(SPACES.substring(0, chunk));
 		}
 		return sb;
+	}
+
+	public static boolean isAndroid() {
+		final boolean isAndroid = System.getProperties()
+				.getProperty("java.vendor", "other")
+				.equals("The Android Project");
+		return isAndroid;
 	}
 
 	/**
@@ -707,8 +719,8 @@ public final class Tools {
 	 */
 	public static String chomp(String s) {
 		int i = s.length();
-		
-		while (i > 0 && s.charAt(i-1) == '\n')
+
+		while (i > 0 && s.charAt(i - 1) == '\n')
 			i--;
 		return s.substring(0, i);
 	}
@@ -855,15 +867,16 @@ public final class Tools {
 	 * @param length
 	 * @param options
 	 *            "D+[F]*" where D is decimal digit, representing the number of
-	 *            bytes in each row, and F is zero or more of: hide (z)eros; display in (g)roups of four;
-	 *            display (A)bsolute offset; include (a)scii representation to right
+	 *            bytes in each row, and F is zero or more of: hide (z)eros;
+	 *            display in (g)roups of four; display (A)bsolute offset;
+	 *            include (a)scii representation to right
 	 * 
 	 * @return
 	 */
 	public static String hexDump(byte[] byteArray, int offset, int length,
 			String options) {
 		int groupSize = (1 << 2); // Must be power of 2
-		
+
 		Object[] fmt = parseOptionsString(options);
 		int rowSize = (Integer) fmt[0];
 		options = (String) fmt[1];
@@ -935,10 +948,39 @@ public final class Tools {
 	 */
 	private static String sanitizeStackTrace(String s) {
 		if (sanitizeLineNumbers) {
-			final Pattern lineNumbersPattern = Pattern.compile(":(\\d+)($|\\n)");
+			final Pattern lineNumbersPattern = Pattern
+					.compile(":(\\d+)($|\\n)");
 			Matcher m = lineNumbersPattern.matcher(s);
 			s = m.replaceAll("_XXX");
 		}
 		return s;
+	}
+
+	private static boolean appStarted;
+
+	/**
+	 * Perform any desired operations the first time an app starts; for
+	 * development only.
+	 */
+	public static void startApp() {
+		if (!appStarted) {
+			appStarted = true;
+
+			AndroidSystemOutFilter.install();
+			
+			// Print message about app starting.  Print a bunch of newlines to simulate
+			// clearing the console, and for convenience, print the time of day so we can figure out if the
+			// output is current or not.
+			
+			String strTime = "";
+			{
+				Calendar cal = Calendar.getInstance();
+				java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+						"h:mm:ss", Locale.CANADA);
+				strTime = sdf.format(cal.getTime());
+			}
+			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
+					+ strTime + " -------------\n\n\n");
+		}
 	}
 }
