@@ -449,12 +449,12 @@ public final class Tools {
 		}
 	}
 
-	private static final String SPACES = "                             ";
 
 	/**
 	 * Get a string consisting of n spaces
 	 */
 	public static CharSequence sp(int n) {
+		final String SPACES = "                             ";
 		n = Math.max(n, 0);
 		if (n < SPACES.length())
 			return SPACES.substring(0, n);
@@ -706,10 +706,11 @@ public final class Tools {
 	 * @return trimmed string
 	 */
 	public static String chomp(String s) {
-		while (s.endsWith("\n")) {
-			s = s.substring(0, s.length() - 1);
-		}
-		return s;
+		int i = s.length();
+		
+		while (i > 0 && s.charAt(i-1) == '\n')
+			i--;
+		return s.substring(0, i);
 	}
 
 	/**
