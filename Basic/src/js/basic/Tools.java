@@ -140,7 +140,7 @@ public final class Tools {
 	 * first time through
 	 */
 	public static void unimp() {
-		warning("TODO", null, 1);
+		reportOnce("TODO", null, 1);
 	}
 
 	/**
@@ -151,10 +151,10 @@ public final class Tools {
 	 *            additional message to display
 	 */
 	public static void unimp(String msg) {
-		warning("TODO", msg, 1);
+		reportOnce("TODO", msg, 1);
 	}
 
-	private static void warning(String type, String s, int skipCount) {
+	private static void reportOnce(String type, String s, int skipCount) {
 		String st = stackTrace(1 + skipCount, 1);
 		st = sanitizeStackTrace(st);
 		StringBuilder sb = new StringBuilder();
@@ -173,6 +173,7 @@ public final class Tools {
 		String keyString = sb.toString();
 
 		{
+			final HashMap warningStrings = new HashMap();
 			Object wr = warningStrings.get(keyString);
 			if (wr == null) {
 				warningStrings.put(keyString, Boolean.TRUE);
@@ -201,7 +202,7 @@ public final class Tools {
 	 *            number to display
 	 */
 	public static void warning(String s, int skipCount) {
-		warning(null, s, 1 + skipCount);
+		reportOnce(null, s, 1 + skipCount);
 	}
 
 	/**
@@ -650,8 +651,6 @@ public final class Tools {
 		sb.append(sp(len - sb.length()));
 		return sb;
 	}
-
-	private static HashMap warningStrings = new HashMap();
 
 	public static CharSequence fh(int n) {
 		return fh(n, "8$zg");
