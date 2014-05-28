@@ -1,69 +1,97 @@
 package js.base;
 
 import static js.basic.Tools.*;
-
+import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-	
+	private void constructView() {
+
+		LinearLayout layout = new LinearLayout(this);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		LayoutParams linLayoutParam = new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		// set this layout as the root element of the activity
+		setContentView(layout, linLayoutParam);
+
+		{
+			LayoutParams layoutParam = new LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+			{
+				TextView tv = new TextView(this);
+				this.textView = tv;
+				tv.setLayoutParams(layoutParam);
+				layout.addView(tv);
+				textView.setText(getDrinkOrderString());
+			}
+			
+			{
+				Button btn = new Button(this);
+
+				btn.setText("Press Me");
+				layout.addView(btn, layoutParam);
+				btn.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						MainActivity a = (MainActivity) v.getContext();
+						a.updateDrinkOrder();
+					}
+				});
+			}
+			{
+				Button btn = new Button(this);
+				btn.setText("Second Activity");
+				layout.addView(btn, layoutParam);
+				btn.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						// Start the receipt list activity, and pass a message
+						// to it
+						Intent intent = new Intent(getApplicationContext(),
+								ReceiptListActivity.class);
+						intent.putExtra("message", textView.getText()
+								.toString());
+						startActivity(intent);
+					}
+				});
+			}
+
+		}
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_main);
+		constructView();
 
 		if (savedInstanceState == null) {
 			startApp();
-				unimp("try adding our own fragment with programmatically generated view");
-//				Fragment f = new PlaceholderFragment();
-//				getSupportFragmentManager().beginTransaction()
-//						.add(R.id.container, f).commit();
 		}
 	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+	private String[] drinks() {
+		final String[] drinks = { "---no drink selected---",
+				"Double short Americano", "Frappucino", "Drip Coffee", "Mocha", };
+		return drinks;
+	}
+	
+	private String getDrinkOrderString() {
+		return drinks()[drinkNumber];
+	}
+	
+	private void updateDrinkOrder() {
+		drinkNumber = (drinkNumber + 1) % drinks().length;
+		textView.setText(getDrinkOrderString());
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-    	pr("onOptionsItemSelected "+item);
-    	
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-//    /**
-//     * A placeholder fragment containing a simple view.
-//     */
-//    public static class PlaceholderFragment extends Fragment {
-//
-//        public PlaceholderFragment() {
-//        }
-//
-//        
-//        @Override
-//        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-//                Bundle savedInstanceState) {
-//            View rootView = inflater.inflate(R.layout.renamedbyjeff_fragment_main, container, false);
-//            return rootView;
-//        }
-//    }
-
+	private int drinkNumber;
+	private TextView textView;
 }
