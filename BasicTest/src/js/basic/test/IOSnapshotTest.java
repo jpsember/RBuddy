@@ -3,7 +3,7 @@ package js.basic.test;
 import org.junit.*;
 import js.basic.IOSnapshot;
 
-public class IOSnapshotTest extends MyTest {
+public class IOSnapshotTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testStdOut() {

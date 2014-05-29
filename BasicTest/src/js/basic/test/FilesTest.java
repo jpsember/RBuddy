@@ -12,7 +12,7 @@ import org.junit.*;
 //import static js.basic.Tools.*;
 import static org.junit.Assert.*;
 
-public class FilesTest extends MyTest {
+public class FilesTest extends js.testUtils.MyTest {
 	
 	private static void ourWriteTextFile(File path, String content) throws IOException {
 		BufferedWriter w = new BufferedWriter(new FileWriter(path));

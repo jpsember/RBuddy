@@ -7,7 +7,7 @@ import org.junit.*;
 
 import static js.basic.Tools.*;
 
-public class ToolsTest extends MyTest {
+public class ToolsTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testASSERT() {

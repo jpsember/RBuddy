@@ -154,6 +154,8 @@ public final class Tools {
 		reportOnce("TODO", msg, 1);
 	}
 
+	private static final HashMap warningStrings = new HashMap();
+
 	private static void reportOnce(String type, String s, int skipCount) {
 		String st = stackTrace(1 + skipCount, 1);
 		st = sanitizeStackTrace(st);
@@ -173,7 +175,6 @@ public final class Tools {
 		String keyString = sb.toString();
 
 		{
-			final HashMap warningStrings = new HashMap();
 			Object wr = warningStrings.get(keyString);
 			if (wr == null) {
 				warningStrings.put(keyString, Boolean.TRUE);
@@ -456,11 +457,12 @@ public final class Tools {
 		}
 	}
 
+	private static final String SPACES = "                             ";
+
 	/**
 	 * Get a string consisting of n spaces
 	 */
 	public static CharSequence sp(int n) {
-		final String SPACES = "                             ";
 		n = Math.max(n, 0);
 		if (n < SPACES.length())
 			return SPACES.substring(0, n);
@@ -472,10 +474,10 @@ public final class Tools {
 		return sb;
 	}
 
+	private static final boolean isAndroid = System.getProperties()
+			.getProperty("java.vendor", "other").equals("The Android Project");
+
 	public static boolean isAndroid() {
-		final boolean isAndroid = System.getProperties()
-				.getProperty("java.vendor", "other")
-				.equals("The Android Project");
 		return isAndroid;
 	}
 
@@ -936,6 +938,7 @@ public final class Tools {
 	// snapshots remain valid even if
 	// a line number associated with a warning has changed.
 	static boolean sanitizeLineNumbers;
+	private static Pattern lineNumbersPattern;
 
 	/**
 	 * Replace all line numbers within a stack trace with 'XXX' so they are
@@ -947,8 +950,8 @@ public final class Tools {
 	 */
 	private static String sanitizeStackTrace(String s) {
 		if (sanitizeLineNumbers) {
-			final Pattern lineNumbersPattern = Pattern
-					.compile(":(\\d+)($|\\n)");
+			if (lineNumbersPattern == null)
+				lineNumbersPattern = Pattern.compile(":(\\d+)($|\\n)");
 			Matcher m = lineNumbersPattern.matcher(s);
 			s = m.replaceAll("_XXX");
 		}
@@ -966,11 +969,13 @@ public final class Tools {
 			appStarted = true;
 
 			AndroidSystemOutFilter.install();
-			
-			// Print message about app starting.  Print a bunch of newlines to simulate
-			// clearing the console, and for convenience, print the time of day so we can figure out if the
+
+			// Print message about app starting. Print a bunch of newlines to
+			// simulate
+			// clearing the console, and for convenience, print the time of day
+			// so we can figure out if the
 			// output is current or not.
-			
+
 			String strTime = "";
 			{
 				Calendar cal = Calendar.getInstance();
@@ -981,5 +986,11 @@ public final class Tools {
 			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
 					+ strTime + " -------------\n\n\n");
 		}
+	}
+
+	/**
+	 * This main() method is provided for running quick tests
+	 */
+	public static void main(String[] args) {
 	}
 }

@@ -1,6 +1,6 @@
 package js.rbuddy;
 
-//import static js.basic.Tools.*;
+import static js.basic.Tools.*;
 import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
 import android.content.Intent;
@@ -16,6 +16,8 @@ public class ReceiptListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		warning("Creating a receipt for test purposes");
+		new Receipt();
 		Intent i = getIntent();
 		String msg = i.getStringExtra("message");
 

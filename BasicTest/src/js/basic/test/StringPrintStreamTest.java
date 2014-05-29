@@ -6,7 +6,7 @@ import org.junit.*;
 import static js.basic.Tools.*;
 import js.basic.StringPrintStream;
 
-public class StringPrintStreamTest extends MyTest {
+public class StringPrintStreamTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testInterceptor() {

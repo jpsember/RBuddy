@@ -36,5 +36,10 @@
 			<type>2</type>
 			<locationURI>$%7BWORKSPACE_LOC%7D/Basic/src</locationURI>
 		</link>
+		<link>
+			<name>rbuddy_src</name>
+			<type>2</type>
+			<locationURI>$%7BWORKSPACE_LOC%7D/RBuddy/src</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

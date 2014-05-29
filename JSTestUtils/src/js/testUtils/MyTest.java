@@ -1,4 +1,4 @@
-package js.basic.test;
+package js.testUtils;
 
 import static org.junit.Assert.*;
 import org.junit.*;
