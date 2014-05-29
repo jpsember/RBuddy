@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
 			{
 				Button btn = new Button(this);
 
-				btn.setText("Press Me");
+				btn.setText("Press Me Hard");
 				layout.addView(btn, layoutParam);
 				btn.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {

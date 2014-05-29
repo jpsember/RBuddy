@@ -34,7 +34,7 @@
 		<link>
 			<name>basic src</name>
 			<type>2</type>
-			<location>/Users/jeff/android_development/workspace/Basic/src</location>
+			<locationURI>$%7BWORKSPACE_LOC%7D/Basic/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
