@@ -4,6 +4,9 @@ import java.io.*;
 
 public class Files {
 
+	private static final String LINE_SEPARATOR = System
+			.getProperty("line.separator");
+
 	/**
 	 * Read a file into a string
 	 * 
@@ -22,8 +25,6 @@ public class Files {
 			 * the stream.
 			 */
 			while ((line = input.readLine()) != null) {
-				final String LINE_SEPARATOR = System
-						.getProperty("line.separator");
 				sb.append(line);
 				sb.append(LINE_SEPARATOR);
 			}

@@ -142,7 +142,7 @@ public class IOSnapshot {
 		String st = stackTrace(2, 5);
 
 		// Look for first occurrence of '.testXXX:'
-		final Pattern p = Pattern.compile("\\.test(\\w+):");
+		Pattern p = Pattern.compile("\\.test(\\w+):");
 		Matcher m = p.matcher(st);
 		if (!m.find())
 			die("no 'test' method name found in stack trace:\n" + st);

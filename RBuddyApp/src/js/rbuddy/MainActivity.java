@@ -77,18 +77,15 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private String[] drinks() {
-		final String[] drinks = { "---no drink selected---",
-				"Double short Americano", "Frappucino", "Drip Coffee", "Mocha", };
-		return drinks;
-	}
+	private static final String[] drinks = { "---no drink selected---",
+			"Double short Americano", "Frappucino", "Drip Coffee", "Mocha", };
 	
 	private String getDrinkOrderString() {
-		return drinks()[drinkNumber];
+		return drinks[drinkNumber];
 	}
 	
 	private void updateDrinkOrder() {
-		drinkNumber = (drinkNumber + 1) % drinks().length;
+		drinkNumber = (drinkNumber + 1) % drinks.length;
 		textView.setText(getDrinkOrderString());
 	}
 
