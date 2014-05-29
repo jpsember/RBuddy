@@ -1,4 +1,4 @@
-package js.base;
+package js.rbuddy;
 
 //import static js.basic.Tools.*;
 import android.view.ViewGroup.LayoutParams;
