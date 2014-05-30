@@ -992,5 +992,6 @@ public final class Tools {
 	 * This main() method is provided for running quick tests
 	 */
 	public static void main(String[] args) {
+		warning("Tools.main executing.");
 	}
 }

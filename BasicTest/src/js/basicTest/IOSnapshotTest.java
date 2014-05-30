@@ -1,4 +1,4 @@
-package js.basic.test;
+package js.basicTest;
 
 import org.junit.*;
 import js.basic.IOSnapshot;

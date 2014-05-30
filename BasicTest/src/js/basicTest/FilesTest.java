@@ -1,4 +1,4 @@
-package js.basic.test;
+package js.basicTest;
 
 import java.io.BufferedWriter;
 import java.io.File;
