@@ -1,0 +1,31 @@
+# This script contains global gitignore entries.
+# It must be run once as follows:
+#
+# git config --global core.excludesfile ~/.gitignore_global
+#
+.DS_Store
+_SKIP_*
+._SKIP_*
+_OLD_*
+*.gz
+*.out
+*.log
+*.aux
+xcuserdata
+
+# Used by my java programs:
+._tmp_*
+
+__pycache__
+*.pyc
+
+.metadata
+#.classpath
+# Try re-enabling this to preserve Eclipse project information:
+#.settings
+#.project
+#.buildpath
+
+*.gem
+.yardoc
+
