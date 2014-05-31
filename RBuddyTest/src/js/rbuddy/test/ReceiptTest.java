@@ -27,7 +27,11 @@ public class ReceiptTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testSummaryReplaceLinefeedsWithSpaces() {
-		verifySummary("linefeeds\n\n\nembedded","linefeeds embedded");
+		verifySummary("linefeeds\n\n\nembedded", "linefeeds embedded");
+		verifySummary("linefeeds    \t\n\n  embedded    aaa \n\n \n bbb ",
+				"linefeeds embedded aaa bbb");
+		verifySummary(" \n\n \n ",
+				"");
 	}
 	
 	@Test
