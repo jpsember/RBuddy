@@ -18,16 +18,18 @@ public class StringUtil {
 	 */
 	public static String randomString(int maxLength) {
 		unimp("organize rnd, clamp into appropriate utility classes");
-		
+
 		StringBuilder sb = new StringBuilder();
-		int ln = rnd.nextInt(maxLength / 2 + maxLength / 2);
-		ln = clamp(ln, 1, maxLength);
-		for (int i = 0; i < ln; i++) {
-			if (rnd.nextInt(6) == 0 && i > 0 && i < ln - 1
-					&& sb.charAt(i - 1) != ' ')
-				sb.append(' ');
-			else
-				sb.append((char) (rnd.nextInt(26) + 'a'));
+		if (maxLength > 0) {
+			int ln = rnd.nextInt(maxLength);
+			ln = clamp(ln, 1, maxLength);
+			for (int i = 0; i < ln; i++) {
+				if (rnd.nextInt(6) == 0 && i > 0 && i < ln - 1
+						&& sb.charAt(i - 1) != ' ')
+					sb.append(' ');
+				else
+					sb.append((char) (rnd.nextInt(26) + 'a'));
+			}
 		}
 		return sb.toString();
 	}
