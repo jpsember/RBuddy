@@ -82,4 +82,11 @@ public class JSDate {
 		}
 	};
 	
+	public static JSDate buildRandom() {
+		int year = rnd.nextInt(4) + 2010;
+		int month = rnd.nextInt(12);
+		int day = rnd.nextInt(28);
+		String str = String.format("%04d-%02d-%02d",year,month,day);
+		return JSDate.parse(str);
+	}
 }

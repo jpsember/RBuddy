@@ -1,8 +1,8 @@
 package js.rbuddy;
 
-import java.util.Date;
+//import static js.basic.Tools.*;
 
-import static js.basic.Tools.*;
+import js.basic.StringUtil;
 
 public class Receipt {
 
@@ -14,12 +14,12 @@ public class Receipt {
 	public Receipt() {
 	}
 
-	public Date getDate() {
+	public JSDate getDate() {
 		return this.date;
 	}
 
-	public void setDate(Date date) {
-		warning("Java's Date class has lots of problems; look for alternate?");
+	public void setDate(JSDate date) {
+		this.date = date;
 	}
 
 	public String getSummary() {
@@ -77,7 +77,18 @@ public class Receipt {
 		return "Receipt summary='" + summary + "'";
 	}
 
-	private Date date;
+	/**
+	 * For test purposes, build a random receipt
+	 * @return
+	 */
+	public static Receipt buildRandom() {
+		Receipt r = new Receipt();
+		r.setDate(JSDate.buildRandom());
+		r.setSummary(StringUtil.randomString(30));
+		return r;
+	}
+	
+	private JSDate date;
 	private String summary;
 
 }

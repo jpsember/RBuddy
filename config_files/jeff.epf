@@ -1,4 +1,4 @@
-#Thu May 29 18:30:58 PDT 2014
+#Sat May 31 16:40:45 PDT 2014
 /instance/org.eclipse.jdt.ui/sp_cleanup.make_variable_declarations_final=true
 /instance/com.android.ide.eclipse.ddms/logcat.view.font=1|Monaco|14.0|0|COCOA|1|Monaco;
 /instance/org.eclipse.jdt.ui/org.eclipse.jdt.ui.PackageExplorer.ImportDeclarationFilter=true
@@ -35,11 +35,13 @@
 /instance/org.eclipse.debug.core//org.eclipse.debug.core.PREFERRED_DELEGATES/org.eclipse.cdt.launch.attachLaunchType=org.eclipse.cdt.dsf.gdb.launch.attachCLaunch,debug
 /instance/org.eclipse.ui.workbench/ColorsAndFontsPreferencePage.expandedCategories=Torg.eclipse.ui.workbenchMisc\tTorg.eclipse.jdt.ui.presentation
 @org.eclipse.team.ui=3.7.1.v20130729-1104
-/instance/org.eclipse.jdt.launching/org.eclipse.jdt.launching.PREF_VM_XML=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<vmSettings defaultVM\="52,org.eclipse.jdt.internal.launching.macosx.MacOSXType19,com.apple.javajdk16" defaultVMConnector\="">\n<vmType id\="org.eclipse.jdt.internal.launching.macosx.MacOSXType">\n<vm id\="com.oracle.java.7u21.jdk" name\="Java SE 7 [1.7.0_21]" path\="/Library/Java/JavaVirtualMachines/jdk1.7.0_21.jdk/Contents/Home"/>\n<vm id\="com.apple.javajdk16" name\="Java SE 6 [1.6.0_65-b14-462]" path\="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"/>\n</vmType>\n</vmSettings>\n
+/instance/org.eclipse.jdt.launching/org.eclipse.jdt.launching.PREF_VM_XML=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<vmSettings defaultVM\="52,org.eclipse.jdt.internal.launching.macosx.MacOSXType19,com.apple.javajdk16">\n<vmType id\="org.eclipse.jdt.internal.launching.macosx.MacOSXType">\n<vm id\="com.oracle.java.7u21.jdk" name\="Java SE 7 [1.7.0_21]" path\="/Library/Java/JavaVirtualMachines/jdk1.7.0_21.jdk/Contents/Home"/>\n<vm id\="com.apple.javajdk16" name\="Java SE 6 [1.6.0_65-b14-462]" path\="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"/>\n</vmType>\n</vmSettings>\n
+/instance/org.eclipse.ui.workbench/PLUGINS_NOT_ACTIVATED_ON_STARTUP=
 /instance/org.eclipse.ui.editors/lineNumberRuler=true
 /instance/org.eclipse.ui.ide/quickStart=false
 /instance/org.eclipse.jdt.ui/sp_cleanup.qualify_static_member_accesses_through_subtypes_with_declaring_class=true
 /instance/org.eclipse.jdt.ui/sp_cleanup.add_missing_annotations=true
+/instance/com.android.ide.eclipse.ddms/logcat.view.colsize.TID=4
 \!/=
 @org.eclipse.search=3.9.0.v20130312-1625
 /instance/org.eclipse.jdt.core/org.eclipse.jdt.core.compiler.source=1.6
@@ -49,6 +51,7 @@
 /instance/org.eclipse.jdt.ui/sp_cleanup.remove_unused_private_methods=true
 /instance/org.eclipse.jdt.ui/sp_cleanup.make_private_fields_final=true
 /instance/org.eclipse.jdt.ui/tabWidthPropagated=true
+/instance/com.android.ide.eclipse.ddms/logcat.view.colsize.PID=46
 @org.eclipse.debug.ui=3.9.0.v20130516-1713
 /instance/org.eclipse.ui.workbench/OPEN_ON_SINGLE_CLICK=true
 /instance/org.eclipse.ui.editors/overviewRuler_migration=migrated_3.1
@@ -65,7 +68,7 @@
 /instance/org.eclipse.jdt.ui/sp_cleanup.convert_to_enhanced_for_loop=false
 /instance/org.eclipse.jdt.ui/sp_cleanup.format_source_code_changes_only=false
 /instance/org.eclipse.jdt.ui/sp_cleanup.add_default_serial_version_id=true
-/instance/org.eclipse.jdt.ui/CustomFiltersActionGroup.org.eclipse.jdt.ui.PackageExplorer.userDefinedPatterns=bin, gen, link_*
+/instance/org.eclipse.jdt.ui/CustomFiltersActionGroup.org.eclipse.jdt.ui.PackageExplorer.userDefinedPatterns=bin, gen, link_*, *?src, src_*, project.properties
 /instance/org.eclipse.jdt.ui/sp_cleanup.add_missing_override_annotations=true
 /instance/org.eclipse.ui/showIntro=false
 /instance/org.eclipse.jdt.core/org.eclipse.jdt.core.timeoutForParameterNameFromAttachedJavadoc=50
@@ -104,7 +107,7 @@
 /instance/org.eclipse.ui.ide/PROBLEMS_FILTERS_MIGRATE=true
 /instance/org.eclipse.jdt.ui/content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"/>
 /instance/org.eclipse.jdt.core/org.eclipse.jdt.core.codeComplete.argumentPrefixes=
-/configuration/org.eclipse.ui.ide/RECENT_WORKSPACES=/Users/jeff/android_development/android_base\n/Users/jeff/android_development/workspace\n/Users/jeff/Downloads/OpenGL\n/Users/jeff/mygit/eclipse_coffee
+/configuration/org.eclipse.ui.ide/RECENT_WORKSPACES=/Users/jeff/android_development/android_base
 /instance/org.eclipse.jdt.ui/org.eclipse.jdt.ui.formatterprofiles.version=12
 /instance/org.eclipse.jdt.ui/sp_cleanup.use_blocks=false
 /instance/org.eclipse.wst.sse.ui/useQuickDiffPrefPage=true
@@ -208,7 +211,7 @@ file_export_version=3.0
 /instance/org.eclipse.jdt.ui/sp_cleanup.remove_unused_imports=false
 /instance/org.eclipse.jdt.core/org.eclipse.jdt.core.classpathVariable.JRE_SRC=
 /instance/org.eclipse.jdt.launching/org.eclipse.jdt.launching.PREF_DEFAULT_ENVIRONMENTS_XML=
-/instance/org.eclipse.jdt.ui/org.eclipse.jdt.ui.text.custom_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates><template autoinsert\="false" context\="java-members" deleted\="false" description\="test method (JUnit 4)" enabled\="true" id\="org.eclipse.jdt.ui.templates.test_junit4" name\="test">@${testType\:newType(org.junit.Test)}\npublic void ${testName}() {\n\t${staticImport\:importStatic('org.junit.Assert.*')}${cursor}\n}</template><template autoinsert\="true" context\="java" deleted\="false" description\="Print to System.out" enabled\="true" name\="out">System.out.println("</template></templates>
+/instance/org.eclipse.jdt.ui/org.eclipse.jdt.ui.text.custom_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates><template autoinsert\="false" context\="java-members" deleted\="false" description\="test method (JUnit 4)" enabled\="true" id\="org.eclipse.jdt.ui.templates.test_junit4" name\="test">@${testType\:newType(org.junit.Test)}\npublic void ${testName}() {\n\t${staticImport\:importStatic('org.junit.Assert.*')}${cursor}\n}</template><template autoinsert\="true" context\="java" deleted\="false" description\="Print to System.out" enabled\="true" name\="out">System.out.println("</template><template autoinsert\="true" context\="java" deleted\="false" description\="Do db-guarded pr statement" enabled\="true" name\="prr">\t\tif (db) pr(</template><template autoinsert\="true" context\="java" deleted\="false" description\="add static import of Tools" enabled\="true" name\="impt">import static js.basic.Tools.*;</template></templates>
 @org.eclipse.ui=3.105.0.v20130522-1122
 /instance/org.eclipse.jdt.ui/sp_cleanup.make_type_abstract_if_missing_method=false
 /instance/org.eclipse.jdt.ui/sp_cleanup.add_missing_deprecated_annotations=true

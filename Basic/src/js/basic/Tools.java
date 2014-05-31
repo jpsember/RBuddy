@@ -10,6 +10,11 @@ import java.util.regex.Pattern;
 public final class Tools {
 
 	/**
+	 * Default value for 'db' conditional compilation, in case not provided within a particular method
+	 */
+	public static final boolean db = false;
+	
+	/**
 	 * Have current thread sleep for some number of milliseconds
 	 * 
 	 * @param ms
@@ -999,4 +1004,7 @@ public final class Tools {
 	public static void main(String[] args) {
 		warning("Tools.main executing.");
 	}
+	
+	public static Random rnd = new Random(1965);
+
 }

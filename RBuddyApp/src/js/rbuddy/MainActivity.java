@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Button;
-import android.text.format.Time;
 
 public class MainActivity extends Activity {
 
@@ -37,7 +36,7 @@ public class MainActivity extends Activity {
 			{
 				Button btn = new Button(this);
 
-				btn.setText("Press Me Hard");
+				btn.setText("Change Drink Order");
 				layout.addView(btn, layoutParam);
 				btn.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
@@ -48,7 +47,7 @@ public class MainActivity extends Activity {
 			}
 			{
 				Button btn = new Button(this);
-				btn.setText("Second Activity");
+				btn.setText("Show List Activity");
 				layout.addView(btn, layoutParam);
 				btn.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
@@ -56,8 +55,8 @@ public class MainActivity extends Activity {
 						// to it
 						Intent intent = new Intent(getApplicationContext(),
 								ReceiptListActivity.class);
-						intent.putExtra("message", textView.getText()
-								.toString());
+						intent.putExtra("message",
+								"Drink Menu (" + textView.getText() + ")");
 						startActivity(intent);
 					}
 				});
@@ -76,32 +75,15 @@ public class MainActivity extends Activity {
 		if (savedInstanceState == null) {
 			startApp();
 			JSDate.setFactory(AndroidDate.androidDateFactory);
-			
-			if (oneTimeOnly("TimeTest")) {
-				warning("doing test code");
-				Time t = new Time();
-				pr("time = " + t);
-				pr("2445 = " + t.format2445());
-				pr("3339 = " + t.format3339(true));
-				pr("setting to now");
-				t.setToNow();
-				pr("time = " + t);
-				pr("2445 = " + t.format2445());
-				pr("3339 = " + t.format3339(true));
-				
-				JSDate d = JSDate.currentDate();
-				pr("JSDate: "+d);
-				
-				String ds = d.toString();
-				JSDate d2 = JSDate.parse(ds);
-				pr("parsed: "+d2);
-			}
-
 		}
 	}
 
-	private static final String[] drinks = { "---no drink selected---",
-			"Double short Americano", "Frappucino", "Drip Coffee", "Mocha", };
+	private static final String[] drinks = {//
+	"---no drink selected---", //
+			"Double short Americano", //
+			"Frappucino", //
+			"Drip Coffee", //
+	};
 
 	private String getDrinkOrderString() {
 		return drinks[drinkNumber];
