@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Button;
+import android.text.format.Time;
 
 public class MainActivity extends Activity {
 
@@ -32,7 +33,7 @@ public class MainActivity extends Activity {
 				layout.addView(tv);
 				textView.setText(getDrinkOrderString());
 			}
-			
+
 			{
 				Button btn = new Button(this);
 
@@ -74,16 +75,38 @@ public class MainActivity extends Activity {
 
 		if (savedInstanceState == null) {
 			startApp();
+			JSDate.setFactory(AndroidDate.androidDateFactory);
+			
+			if (oneTimeOnly("TimeTest")) {
+				warning("doing test code");
+				Time t = new Time();
+				pr("time = " + t);
+				pr("2445 = " + t.format2445());
+				pr("3339 = " + t.format3339(true));
+				pr("setting to now");
+				t.setToNow();
+				pr("time = " + t);
+				pr("2445 = " + t.format2445());
+				pr("3339 = " + t.format3339(true));
+				
+				JSDate d = JSDate.currentDate();
+				pr("JSDate: "+d);
+				
+				String ds = d.toString();
+				JSDate d2 = JSDate.parse(ds);
+				pr("parsed: "+d2);
+			}
+
 		}
 	}
 
 	private static final String[] drinks = { "---no drink selected---",
 			"Double short Americano", "Frappucino", "Drip Coffee", "Mocha", };
-	
+
 	private String getDrinkOrderString() {
 		return drinks[drinkNumber];
 	}
-	
+
 	private void updateDrinkOrder() {
 		drinkNumber = (drinkNumber + 1) % drinks.length;
 		textView.setText(getDrinkOrderString());

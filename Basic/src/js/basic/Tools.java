@@ -155,7 +155,12 @@ public final class Tools {
 	}
 
 	private static final HashMap warningStrings = new HashMap();
-
+	private static final Set oneTimeFlags = new HashSet();
+	
+	public static boolean oneTimeOnly(String flag) {
+		return oneTimeFlags.add(flag);
+	}
+	
 	private static void reportOnce(String type, String s, int skipCount) {
 		String st = stackTrace(1 + skipCount, 1);
 		st = sanitizeStackTrace(st);

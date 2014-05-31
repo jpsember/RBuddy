@@ -1,0 +1,8 @@
+These are some Terminal commands I ran from the ~/android_development
+directory to set up some links and whatnot.
+
+export ADEV=$PWD
+cd $ADEV
+ln -s adt-bundle-mac-x86_64-20140321/ adt
+ln -s adt/eclipse/plugins/org.junit_4.11.0.v201303080030/ junit4
+
