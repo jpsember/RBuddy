@@ -2,9 +2,10 @@ package js.rbuddy.test;
 
 import org.junit.*;
 
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+import js.rbuddy.JSDate;
+//import static js.basic.Tools.*;
 import js.rbuddy.Receipt;
-//import js.basic.Tools;
 
 
 public class ReceiptTest extends js.testUtils.MyTest {
@@ -36,9 +37,8 @@ public class ReceiptTest extends js.testUtils.MyTest {
 	
 	@Test
 	public void testConstructorStartsWithCurrentDate() {
-		
 		Receipt r = new Receipt();
-		assertTrue(r.getDate() != null);
+		assertStringsMatch(JSDate.currentDate(), r.getDate());
 	}
 	
 }

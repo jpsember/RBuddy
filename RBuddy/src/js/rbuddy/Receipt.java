@@ -12,6 +12,7 @@ public class Receipt {
 	 * Sets date to current date
 	 */
 	public Receipt() {
+		setDate(JSDate.currentDate());
 	}
 
 	public JSDate getDate() {
