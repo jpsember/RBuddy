@@ -10,10 +10,11 @@ import java.util.regex.Pattern;
 public final class Tools {
 
 	/**
-	 * Default value for 'db' conditional compilation, in case not provided within a particular method
+	 * Default value for 'db' conditional compilation, in case not provided
+	 * within a particular method
 	 */
 	public static final boolean db = false;
-	
+
 	/**
 	 * Have current thread sleep for some number of milliseconds
 	 * 
@@ -38,7 +39,7 @@ public final class Tools {
 	 * @return String; iff displayCount > 1, cr's inserted after every item
 	 */
 	public static String stackTrace(int skipCount, int displayCount) {
-		return stackTrace(1 + skipCount, displayCount, new Throwable());
+		return stackTrace(1 + skipCount, displayCount, null);
 	}
 
 	/**
@@ -66,6 +67,8 @@ public final class Tools {
 	 */
 	private static String stackTrace(int skipCount, int displayCount,
 			Throwable t) {
+		if (t == null)
+			t = new Throwable();
 		StringBuilder sb = new StringBuilder();
 
 		StackTraceElement[] elist = t.getStackTrace();
@@ -161,11 +164,11 @@ public final class Tools {
 
 	private static final HashMap warningStrings = new HashMap();
 	private static final Set oneTimeFlags = new HashSet();
-	
+
 	public static boolean oneTimeOnly(String flag) {
 		return oneTimeFlags.add(flag);
 	}
-	
+
 	private static void reportOnce(String type, String s, int skipCount) {
 		String st = stackTrace(1 + skipCount, 1);
 		st = sanitizeStackTrace(st);
@@ -1004,7 +1007,46 @@ public final class Tools {
 	public static void main(String[] args) {
 		warning("Tools.main executing.");
 	}
-	
+
 	public static Random rnd = new Random(1965);
+
+	/**
+	 * Construct a new timer
+	 */
+	public static void timeStamp() {
+		timeStamp(null, 1);
+	}
+
+	public static void timeStamp(Object message) {
+		timeStamp(message, 1);
+	}
+
+	private static long previousTime;
+	private static long baseTime;
+
+	private static void timeStamp(Object message, int skip) {
+		long newTime = System.currentTimeMillis();
+		String location = stackTrace(2+skip, 1);
+		if (previousTime == 0) {
+			baseTime = newTime;
+			previousTime = newTime;
+		}
+		long delta = newTime - previousTime;
+		previousTime = newTime;
+		StringBuilder sb = new StringBuilder();
+		if (delta >= 0.1) {
+			sb.append(String.format("%5.2f ", delta / 1000.0f));
+		} else
+			sb.append(sp(6));
+		sb.append(String.format("%6.2f  ", (newTime - baseTime) / 1000.0f));
+		int len = sb.length();
+		sb.append(location);
+		tab(sb, len+50);
+		if (message != null) {
+			sb.append(' ');
+			sb.append(message);
+		}
+		pr(sb);
+	}
 
 }

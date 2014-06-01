@@ -1,14 +1,9 @@
 package js.basic;
 import static js.basic.Tools.*;
+import static js.basic.JSMath.*;
 
 public class StringUtil {
 	
-	private static int clamp(int value, int min, int max) {
-		if (value < min) value = min;
-		else if (value > max) value = max;
-		return value;
-	}
-
 	/**
 	 * Generate a random string
 	 * 
@@ -17,12 +12,11 @@ public class StringUtil {
 	 * @return random string
 	 */
 	public static String randomString(int maxLength) {
-		unimp("organize rnd, clamp into appropriate utility classes");
 
 		StringBuilder sb = new StringBuilder();
 		if (maxLength > 0) {
 			int ln = rnd.nextInt(maxLength);
-			ln = clamp(ln, 1, maxLength);
+			ln = clampInt(ln, 1, maxLength);
 			for (int i = 0; i < ln; i++) {
 				if (rnd.nextInt(6) == 0 && i > 0 && i < ln - 1
 						&& sb.charAt(i - 1) != ' ')

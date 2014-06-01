@@ -48,9 +48,12 @@ public class ReceiptListActivity extends Activity {
 
 	private List constructReceiptList() {
 		List list = new ArrayList();
-		for (int i = 0; i < 50; i++) {
+		int NUM_RECEIPTS = 200;
+		timeStamp("building receipts");
+		for (int i = 0; i < NUM_RECEIPTS; i++) {
 			list.add(Receipt.buildRandom());
 		}
+		timeStamp("done building");
 		return list;
 	}
 
