@@ -41,7 +41,7 @@ cp gitignore_global.txt ~/.gitignore_global
 cp gitconfig.txt ~/.gitconfig
 cp git-completion.bash.txt ~/.git-completion.bash
 cp bash_login.txt ~/.bash_login
-cp bash_profile.txt ~/.bash_profile.txt
+cp bash_profile.txt ~/.bash_profile
 cp com.apple.Terminal.plist.txt ~/Library/Preferences/com.apple.Terminal.plist
 
 killall SystemUIServer

@@ -65,7 +65,8 @@ alias gt="git log --graph --oneline --all"
 
 # rbenv documentation says this may be necessary:
 #
-eval "$(rbenv init -)"
+export RBENV_ROOT=/usr/local/var/rbenv
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
 # Add android development tools to path
 #
