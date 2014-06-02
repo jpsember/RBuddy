@@ -5,9 +5,12 @@ import static js.basic.Tools.*;
 import java.util.*;
 
 import android.view.ViewGroup.LayoutParams;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -43,7 +46,33 @@ public class ReceiptListActivity extends Activity {
 		}
 		ListView lv = constructListView();
 		layout.addView(lv);
+		
+		// If we want the 'up' button to appear to go back to the main activity, we do this:
+	    ActionBar actionBar = getActionBar();
+	    actionBar.setDisplayHomeAsUpEnabled(true);
+	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		getMenuInflater().inflate(R.menu.receiptlist_activity_actions, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.action_search:
+	        warning("for now, just doing finish() for search action");    
+	        	finish();
+	            return true;
+	        case R.id.action_settings:
+	            unimp("settings");
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 
 	private List constructReceiptList() {

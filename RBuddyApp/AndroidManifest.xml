@@ -20,7 +20,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ReceiptListActivity"></activity>
+
+        <!--  support 'up' button by making receipt list a child of the main activity (this may not be what we want) -->
+        <activity 
+            android:name=".ReceiptListActivity"
+        		android:parentActivityName=".MainActivity" >
+        >
+            
+        </activity>
     </application>
 
 </manifest>

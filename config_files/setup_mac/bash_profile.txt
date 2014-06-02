@@ -1,0 +1,83 @@
+#   ~/.profile  : Set up bash command line nicely
+#
+export PATH=.:/usr/local/bin:$PATH
+
+# Allow preceding a command with a space to NOT save it in the bash history
+# (e.g. if entering a password from the command line)
+export HISTCONTROL=ignorespace
+export EDITOR=vi
+
+# Set prompt
+export PS1="\w> "
+
+# Enable all warnings by default within Ruby scripts
+export RUBYOPT="-w"
+
+alias edprof="vi ~/.bash_profile"
+alias hd="hexdump -Cv"
+alias hidehidden="defaults write com.apple.finder AppleShowAllFiles FALSE"
+alias showhidden="defaults write com.apple.finder AppleShowAllFiles TRUE"
+alias ls="ls -l"
+alias makeexe="chmod u+x"
+alias mv="mv -i"
+alias show="unzip -l"
+alias mygit="cd ~/mygit"
+export MYTOOLS="/usr/local/bin"
+alias lbin="cd /usr/local/bin"
+alias clear="osascript -e 'if application \"Terminal\" is frontmost then tell application \"System Events\" to keystroke \"k\" using command down'"
+
+source ~/.git-completion.bash
+
+# Enhance the 'cd' command; push old directories onto a stack.
+# These additional commands are now available:
+#   p    : return (pop) to last directory
+#   s    : toggle between current and last directory
+#   d    : show list of old directories, and prompt to switch to one
+#
+function stack_cd {
+    pushd "$1" > /dev/null
+}
+function swap {
+    pushd > /dev/null
+}
+function pop_stack {
+    popd > /dev/null
+}
+function display_stack
+{
+    dirs -v
+    echo -n "Select directory # (or none): "
+    read dir
+    if [[ $dir = 'p' ]]; then
+        pushd > /dev/null
+    elif [[ $dir != ''  ]]; then
+        d=$(dirs -l +$dir);
+        popd +$dir > /dev/null
+        pushd "$d" > /dev/null
+    fi
+}
+alias cd=stack_cd
+alias s=swap
+alias p=pop_stack
+alias d=display_stack
+alias gl="git log --pretty=oneline --abbrev-commit"
+alias gt="git log --graph --oneline --all"
+
+# rbenv documentation says this may be necessary:
+#
+eval "$(rbenv init -)"
+
+# Add android development tools to path
+#
+export PATH=$PATH:$HOME/android_development/adt/sdk/tools:$HOME/android_development/adt/sdk/platform-tools
+#
+# Dump Android 'System.out' calls to console
+# (note: the same effect can be achieved within Eclipse by adding a 'saved filter' to LogCat)
+#
+alias worksp="cd ~/android_development/android_base"
+
+# Remove duplicate entries from PATH
+#
+PATH=`awk -F: '{for(i=1;i<=NF;i++){if(!($i in a)){a[$i];printf s$i;s=":"}}}'<<<$PATH`
+
+

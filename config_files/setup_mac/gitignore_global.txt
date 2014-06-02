@@ -1,0 +1,23 @@
+# This script contains global gitignore entries.
+# It must be run once as follows:
+#
+# git config --global core.excludesfile ~/.gitignore_global
+#
+.DS_Store
+_SKIP_*
+._SKIP_*
+_OLD_*
+*.gz
+*.out
+*.log
+*.aux
+xcuserdata
+
+__pycache__
+*.pyc
+
+.metadata
+
+*.gem
+.yardoc
+

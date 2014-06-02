@@ -1,6 +1,8 @@
 package js.rbuddy;
 
 import static js.basic.Tools.*;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
 import android.content.Intent;
@@ -51,18 +53,44 @@ public class MainActivity extends Activity {
 				layout.addView(btn, layoutParam);
 				btn.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-						// Start the receipt list activity, and pass a message
-						// to it
-						Intent intent = new Intent(getApplicationContext(),
-								ReceiptListActivity.class);
-						intent.putExtra("message",
-								"Drink Menu (" + textView.getText() + ")");
-						startActivity(intent);
+						displayListActivity();
 					}
 				});
 			}
-
 		}
+	}
+
+	private void displayListActivity() {
+		// Start the receipt list activity, and pass a message
+		// to it
+		Intent intent = new Intent(getApplicationContext(),
+				ReceiptListActivity.class);
+		intent.putExtra("message",
+				"Drink Menu (" + textView.getText() + ")");
+		startActivity(intent);
+
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.action_search:
+	            displayListActivity();
+	            return true;
+	        case R.id.action_settings:
+	            unimp("settings");
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
