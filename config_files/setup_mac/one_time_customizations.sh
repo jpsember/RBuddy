@@ -38,6 +38,8 @@ defaults write com.apple.Preview PVPSDisplayMode 1
 defaults write com.apple.Preview PVPDFDisplayMode 1
 
 cp gitignore_global.txt ~/.gitignore_global
+git config --global core.excludesfile ~/.gitignore_global
+
 cp gitconfig.txt ~/.gitconfig
 cp git-completion.bash.txt ~/.git-completion.bash
 cp bash_login.txt ~/.bash_login
