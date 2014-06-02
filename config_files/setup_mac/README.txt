@@ -12,6 +12,14 @@ Steps to take when setting up a new Mac
 [] don't send diagnostics
 [] don't register
 
+Finder preferences
+[] Show these items on the desktop: Hard Disks, External Disks
+[] New finder windows shows: home directory
+[] sidebar: Favorites: Downloads, home directory
+[] hide tags
+
+[] Advanced: show all filename extensions
+
 [] remove all icons from dock except iTunes
 Preferences
 [] change desktop background to solid blue

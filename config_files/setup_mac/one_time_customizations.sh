@@ -42,7 +42,8 @@ cp gitconfig.txt ~/.gitconfig
 cp git-completion.bash.txt ~/.git-completion.bash
 cp bash_login.txt ~/.bash_login
 cp bash_profile.txt ~/.bash_profile
-cp com.apple.Terminal.plist.txt ~/Library/Preferences/com.apple.Terminal.plist
+# cp com.apple.Terminal.plist.txt ~/Library/Preferences/com.apple.Terminal.plist
+echo "You must copy the com.apple.Terminal.plist file to ~/Library/Preferences after closing Terminal and by using Finder / go to directory"
 
 killall SystemUIServer
 killall Dock
