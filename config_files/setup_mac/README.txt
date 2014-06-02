@@ -20,6 +20,15 @@ Finder preferences
 
 [] Advanced: show all filename extensions
 
+Terminal preferences
+[] Open Terminal, and set 'keep in dock'
+[] Preferences / Settings: create new profile;
+[] Startup: on startup, open New Window with settings 'Jeff';
+[] Text: font: Monaco 18 pt;
+[] Window: Background color: choose light gray
+[] Window Size: 140 columns, 35 rows
+[] Advanced: turn off audible bell
+
 [] remove all icons from dock except iTunes
 Preferences
 [] change desktop background to solid blue
@@ -60,6 +69,8 @@ Time machine
 [] choose an appropriate version e.g. 2.1.0, and type:
 [] rbenv install 2.1.0
 [] rbenv rehash
+[] rbenv global 2.1.0
+[] quit and rerun Terminal, type 'ruby -v' to verify 2.1.0 is active
 
 Set up Password-less login
 [] ssh-keygen
