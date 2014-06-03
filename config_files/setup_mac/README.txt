@@ -19,6 +19,10 @@ Finder preferences
 [] hide tags
 
 [] Advanced: show all filename extensions
+[] Set list view as default finder window view type
+
+Open TextEdit and set its preferences
+[] plain text; no spell check; Monaco 18pt font
 
 Terminal preferences
 [] Open Terminal, and set 'keep in dock'
@@ -41,6 +45,8 @@ Keyboard and mouse shortcuts
 [] Remove Application Windows
 [] Remove Show Dashboard
 [] Hot Corners: bottom right = Start Screen Saver
+Use Shift-F11 to create three desktops in spaces
+
 Keyboard
 [] Key repeat: Fast(est); delay until repeat: second from shortest
 [] Use all F1,F2 etc as standard function keys
@@ -65,12 +71,35 @@ Time machine
 [] brew update
 [] brew install rbenv
 [] brew install ruby-build
-[] ruby-build --definitions
-[] choose an appropriate version e.g. 2.1.0, and type:
+[] brew update
+[] brew tap homebrew/dupes  (not sure this is required)
+   choose an appropriate version e.g. 2.1.0, and type:
 [] rbenv install 2.1.0
 [] rbenv rehash
 [] rbenv global 2.1.0
 [] quit and rerun Terminal, type 'ruby -v' to verify 2.1.0 is active
+[] Create a 'my_gems' directory in Downloads and go to it.  Then clone some repos:
+[] git clone https://github.com/jpsember/js_base
+[] git clone https://github.com/jpsember/cmd_line_tools
+[] git clone https://github.com/jpsember/backup_set
+[] git clone https://github.com/jpsember/git_repo
+[] git clone https://github.com/jpsember/git_diff
+
+   from the js_base directory, type
+[] gem build js_base.gemspec
+[] gem install js_base-1.0.0.gem
+
+   do similar operation from the cmd_line_tools directory; then, from the my_gems directory,
+   you ought to be able to type
+[] makegem backup_set
+[] makegem git_repo
+[] makegem git_diff
+
+
+
+
+
+
 
 Set up Password-less login
 [] ssh-keygen
@@ -92,4 +121,29 @@ GitHub login
 
 [] cd to ~/android_development/android_base/config_files/setup_mac
 [] type:  bash one_time_customizations.sh
+
+Install the Android SDK
+[] go to developer.android.com/sdk
+[] Download the SDK (ADT Bundle for Mac)
+[] Unzip it, and move the unzipped folder (adt-bundle-macXXXX) to the ~/android_development dir
+ Make some symbolic links:
+[] cd ~/android_development
+[] ln -s adt-bundle-mac-XXXX/ adt
+[] ln -s adt/eclipse/plugins/org.junit_4.11.0.v201303080030/ junit4
+
+[] Use spotlight to run the Eclipse.app program; install the Java SE 6 runtime if it asks.
+[] set Eclipse 'keep in dock' flag
+[] choose ~/android_development/android_base as the workspace, and use as default
+We're not storing Eclipse workspaces in the repo (only the projects), so some of these
+steps are necessary:
+[] import general/preferences from android_base/config_files/jeff.epf; you may have to fix
+  some paths that refer to my home directory.
+[] import existing projects into workspace; choose all of them
+[] show the view Android/LogCat, and choose the System.out filter
+[] In Package Explorer, create a filter; check 'Name filter patterns' and
+   enter the patterns 'link_*,*?src,src_*,project.properties'; check 'Libraries from external'
+
+Install some other tools
+[] VLC (google 'videolan osx')
+
 
