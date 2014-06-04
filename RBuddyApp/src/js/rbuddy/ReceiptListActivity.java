@@ -5,7 +5,6 @@ import static js.basic.Tools.*;
 import java.util.*;
 
 import android.view.ViewGroup.LayoutParams;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Button;
 
 public class ReceiptListActivity extends Activity {
 
@@ -24,32 +22,19 @@ public class ReceiptListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Intent i = getIntent();
-		String msg = i.getStringExtra("message");
-
+		{
+			startApp(); // does nothing if already started
+			JSDate.setFactory(AndroidDate.androidDateFactory);
+		}
+		
+		
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 
-		{
-			Button btn = new Button(this);
-			btn.setText("Return to " + msg);
-			LayoutParams layoutParam = new LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			layout.addView(btn, layoutParam);
-			btn.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					finish();
-				}
-			});
-		}
 		ListView lv = constructListView();
 		layout.addView(lv);
-		
-		// If we want the 'up' button to appear to go back to the main activity, we do this:
-	    ActionBar actionBar = getActionBar();
-	    actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -63,10 +48,6 @@ public class ReceiptListActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle presses on the action bar items
 	    switch (item.getItemId()) {
-	        case R.id.action_search:
-	        warning("for now, just doing finish() for search action");    
-	        	finish();
-	            return true;
 	        case R.id.action_settings:
 	            unimp("settings");
 	            return true;
@@ -77,12 +58,12 @@ public class ReceiptListActivity extends Activity {
 
 	private List constructReceiptList() {
 		List list = new ArrayList();
-		int NUM_RECEIPTS = 200;
-		timeStamp("building receipts");
+		int NUM_RECEIPTS = 50;
+		if (db) timeStamp("building receipts");
 		for (int i = 0; i < NUM_RECEIPTS; i++) {
 			list.add(Receipt.buildRandom());
 		}
-		timeStamp("done building");
+		if (db) timeStamp("done building");
 		return list;
 	}
 
