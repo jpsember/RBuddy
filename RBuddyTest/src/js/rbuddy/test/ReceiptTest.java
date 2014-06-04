@@ -41,5 +41,15 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		assertStringsMatch(JSDate.currentDate(), r.getDate());
 	}
 	
+	@Test(expected=IllegalArgumentException.class)
+	public void testAttemptToAssignIllegalUniqueIdentifier() {
+		new Receipt().setUniqueIdentifier(0);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testAttemptToAssignIllegalUniqueIdentifier2() {
+		new Receipt().setUniqueIdentifier(-1);
+	}
+	
 }
 

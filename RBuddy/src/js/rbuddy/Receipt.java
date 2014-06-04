@@ -73,9 +73,24 @@ public class Receipt {
 
 	}
 
+	public int getUniqueIdentifier() {
+		return uniqueIdentifier;
+	}
+
+	/**
+	 * A valid unique identifier must be a positive integer
+	 * @param uniqueIdentifier
+	 */
+	public void setUniqueIdentifier(int uniqueIdentifier) {
+		if (uniqueIdentifier <= 0) 
+			throw new IllegalArgumentException();
+		
+		this.uniqueIdentifier = uniqueIdentifier;
+	}
+
 	@Override
 	public String toString() {
-		return "Receipt summary='" + summary + "'";
+		return "Receipt #"+getUniqueIdentifier()+" summary='" + summary + "'";
 	}
 
 	/**
@@ -91,5 +106,5 @@ public class Receipt {
 	
 	private JSDate date;
 	private String summary;
-
+	private int uniqueIdentifier;
 }
