@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Button;
@@ -26,9 +27,8 @@ public class EditReceiptActivity extends Activity {
 	// Identifiers for the intents that we may spawn
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 
-
 	private void layoutElements() {
-		
+
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -41,16 +41,49 @@ public class EditReceiptActivity extends Activity {
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			layout.addView(btn, layoutParam);
 		}
-		
+
 		{
-		       ImageView bitmapView = new ImageView(this);
-		       bitmapView.setImageDrawable(getResources().getDrawable(R.drawable.missingphoto));
-			// Give photo a fixed size that is small, but lots of weight to grow to take up what extra there is
-			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 10, 1.0f);
-		       layout.addView(bitmapView,p);
-		   	
+			// Nest the image view within a horizontal layout, to add a 'camera'
+			// button to the bottom right
+			LinearLayout l2 = new LinearLayout(this);
+			l2.setOrientation(LinearLayout.HORIZONTAL);
+			{
+				// Give this layout a fixed size that is small, but lots of
+				// weight to grow to take up what extra there is.
+				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+						LayoutParams.MATCH_PARENT, 10, 1.0f);
+				layout.addView(l2, p);
+			}
+			{
+				ImageView bitmapView = new ImageView(this);
+				bitmapView.setImageDrawable(getResources().getDrawable(
+						R.drawable.missingphoto));
+				// Give photo a fixed size that is small, but lots of weight to
+				// grow to take up what extra there is (horizontally)
+				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(10,
+						LayoutParams.MATCH_PARENT, 1.0f);
+				l2.addView(bitmapView, p);
+				{
+					Button btn = new Button(this);
+					LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(
+							LayoutParams.WRAP_CONTENT,
+							LayoutParams.WRAP_CONTENT, 0.0f);
+					l2.addView(btn, p2);
+					btn.setCompoundDrawablesWithIntrinsicBounds(getResources()
+							.getDrawable(android.R.drawable.ic_menu_camera),
+							null, null, null);
+
+					btn.setOnClickListener(new View.OnClickListener() {
+						public void onClick(View v) {
+							EditReceiptActivity a = (EditReceiptActivity) v
+									.getContext();
+							a.dispatchTakePictureIntent();
+						}
+					});
+				}
+
+			}
 		}
-		
 		{
 			Button btn = new Button(this);
 			btn.setText("Hatcher");
@@ -58,7 +91,7 @@ public class EditReceiptActivity extends Activity {
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			layout.addView(btn, layoutParam);
 		}
-		
+
 		{
 			Button btn = new Button(this);
 			btn.setText("Yum");
@@ -66,23 +99,8 @@ public class EditReceiptActivity extends Activity {
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			layout.addView(btn, layoutParam);
 		}
-		
+	}
 
-//		{
-//			Button btn = new Button(this);
-//			btn.setText("Return to " + msg);
-//			LayoutParams layoutParam = new LayoutParams(
-//					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//			layout.addView(btn, layoutParam);
-//			btn.setOnClickListener(new View.OnClickListener() {
-//				public void onClick(View v) {
-//					finish();
-//				}
-//			});
-//		}
-
-			}
-	
 	@Override
 	public void onSaveInstanceState(Bundle s) {
 		// The OS may be shutting down our activity to service some other
@@ -101,10 +119,10 @@ public class EditReceiptActivity extends Activity {
 			pathOfTakenPhoto = savedInstanceState.getString("pathOfTakenPhoto");
 		}
 		preparePhotoFile();
-		
+
 		unimp("get receipt from intent");
-//		Intent i = getIntent();
-//		String msg = i.getStringExtra("message");
+		// Intent i = getIntent();
+		// String msg = i.getStringExtra("message");
 		layoutElements();
 
 	}
@@ -118,17 +136,14 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle presses on the action bar items
-	    switch (item.getItemId()) {
-	    case R.id.action_takephoto:
-	    	dispatchTakePictureIntent();
-	    	return true;
-	        case R.id.action_settings:
-	            unimp("settings");
-	            return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
+		// Handle presses on the action bar items
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			unimp("settings");
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
@@ -161,7 +176,7 @@ public class EditReceiptActivity extends Activity {
 
 		File scaledFile = null;
 		try {
-			scaledFile = ImageUtilities.scalePhoto(workFile, 800,800,true);
+			scaledFile = ImageUtilities.scalePhoto(workFile, 800, 800, true);
 		} catch (IOException e1) {
 			die(e1);
 		}
@@ -199,7 +214,8 @@ public class EditReceiptActivity extends Activity {
 			return;
 		}
 
-		File workFile = ImageUtilities.constructExternalImageFile("RBuddy_work");
+		File workFile = ImageUtilities
+				.constructExternalImageFile("RBuddy_work");
 
 		// save work file in instance field, so we can refer to it later
 		pathOfTakenPhoto = workFile.getPath();
@@ -211,10 +227,11 @@ public class EditReceiptActivity extends Activity {
 
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
-	
+
 	private void preparePhotoFile() {
-		if (photoFile != null) return;
-		
+		if (photoFile != null)
+			return;
+
 		// final boolean db = true;
 		if (db)
 			pr("preparePhotoFile; " + stackTrace(1, 1));
