@@ -34,7 +34,8 @@
         <activity 
             android:name=".ReceiptListActivity"
         		android:parentActivityName=".MainActivity" >
-        >
+        </activity>
+          <activity android:name=".EditReceiptActivity">
         </activity>
     </application>
 	

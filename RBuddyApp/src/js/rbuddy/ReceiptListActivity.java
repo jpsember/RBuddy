@@ -99,7 +99,8 @@ public class ReceiptListActivity extends Activity {
 		// to make responding to selection actions more convenient.
 		this.receiptListAdapter = arrayAdapter;
 		this.receiptList = receiptList;
-
+		if (db) pr("adapter="+this.receiptListAdapter+", list="+this.receiptList);
+		
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView aView, View v, int position,
 					long id) {
@@ -117,11 +118,14 @@ public class ReceiptListActivity extends Activity {
 		Receipt r = (Receipt) receiptListAdapter.getItem(position);
 		pr("Just clicked on view, receipt " + r);
 
-		if (position >= 10 && position <= 20) {
-			// Try deleting this particular receipt
-			receiptList.remove(position);
-			receiptListAdapter.notifyDataSetChanged();
-		}
+		
+		// Start the edit receipt activity
+		Intent intent = new Intent(getApplicationContext(),
+				EditReceiptActivity.class);
+		unimp("we need a string that is a unique identifier for a particular receipt to pass in the intent");
+		
+		intent.putExtra("message", r.getSummary());
+		startActivity(intent);
 	}
 
 	private ArrayAdapter receiptListAdapter;
