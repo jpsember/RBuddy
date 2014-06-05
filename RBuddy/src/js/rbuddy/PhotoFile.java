@@ -11,47 +11,27 @@ public class PhotoFile {
 	public PhotoFile(File directory) {
 		mainDirectory = directory;
 		thumbDirectory = new File(mainDirectory, "thumbnails");
-		workDirectory = new File(mainDirectory,"work");
 	}
 
-	private String photoBaseName(Photo photo) {
-		return photo.identifier() +PHOTO_EXTENSION;
+	private String photoBaseName(int photoId) {
+		return photoId +PHOTO_EXTENSION;
 	}
 
-	public File getMainFileFor(Photo photo) {
-		String baseName = photoBaseName(photo);
+	public File getMainFileFor(int photoId) {
+		String baseName = photoBaseName(photoId);
 		return new File(mainDirectory, baseName);
 	}
 
-	public File getThumbFileFor(Photo photo) {
-		String baseName = photoBaseName(photo);
+	public File getThumbFileFor(int photoId) {
+		String baseName = photoBaseName(photoId);
 		return new File(thumbDirectory, baseName);
-	}
-
-	/**
-	 * Get the singleton 'work' file (not currently used; in Android, such a file
-	 * would be stored elsewhere to service an Intent, probably due to permissions)
-	 * 
-	 * @return
-	 */
-	public File getWorkFile() {
-		return new File(workDirectory,"_work_"+PHOTO_EXTENSION);
-	}
-	
-	/**
-	 * Delete the work file, if it exists
-	 */
-	public void deleteWorkFile() {
-		File f = getWorkFile();
-		if (f.exists())
-			f.delete();
 	}
 
 	/**
 	 * Get a list of all Photos in the file
 	 * @return
 	 */
-	public ArrayList<Photo> contents() {
+	public ArrayList<Integer> contents() {
 		String[] filenames = mainDirectory.list(new FilenameFilter(){
 			public boolean accept(File f, String s) {
 				boolean accept = false;
@@ -65,22 +45,22 @@ public class PhotoFile {
 				} while (false);
 				return accept;
 			}});
-		ArrayList<Photo> list = new ArrayList();
+		ArrayList<Integer> list = new ArrayList();
 		for (int i = 0; i < filenames.length; i++) {
 			String filename = filenames[i];
 			String identifierString = filename.substring(0,filename.length() - PHOTO_EXTENSION.length());
 			int identifier = Integer.parseInt(identifierString);
-			list.add(new Photo(identifier));
+			list.add(identifier);
 		}
 		return list;
 	}
 	
-	public void delete(Photo p) {
-		File mainFile = getMainFileFor(p);
+	public void delete(int photoId) {
+		File mainFile = getMainFileFor(photoId);
 		if (mainFile.exists()) {
 			mainFile.delete();
 		}
-		File thumbFile = getThumbFileFor(p);
+		File thumbFile = getThumbFileFor(photoId);
 		if (thumbFile.exists()) {
 			thumbFile.delete();
 		}
@@ -88,5 +68,4 @@ public class PhotoFile {
 	
 	private File mainDirectory;
 	private File thumbDirectory;
-	private File workDirectory;
 }

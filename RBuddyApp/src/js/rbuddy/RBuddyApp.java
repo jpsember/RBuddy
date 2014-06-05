@@ -33,10 +33,6 @@ public class RBuddyApp {
 	public static RBuddyApp sharedInstance() {
 		if (sharedInstance == null)
 			die("RBuddyApp must be prepared");
-		// if (sharedInstance == null) {
-		// assertUIThread();
-		// sharedInstance = new RBuddyApp();
-		// }
 
 		return sharedInstance;
 	}
