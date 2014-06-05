@@ -1,7 +1,7 @@
 package js.rbuddy;
 
 import java.io.File;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
@@ -65,22 +65,29 @@ public class RBuddyApp {
 		return photoFile;
 	}
 
-	public ArrayList receiptList() {
-		if (receiptList == null) {
-			ArrayList list = new ArrayList();
-			int NUM_RECEIPTS = 50;
-			if (db)
-				timeStamp("building receipts");
-			for (int i = 0; i < NUM_RECEIPTS; i++) {
-				list.add(Receipt.buildRandom());
-			}
-			if (db)
-				timeStamp("done building");
-			receiptList = list;
-
+	public IReceiptFile receiptFile() {
+		if (receiptFile == null) {
+			receiptFile = new SimpleReceiptFile();
 		}
-		return receiptList;
+		return receiptFile;
 	}
+	
+//	public ArrayList receiptList() {
+//		if (receiptList == null) {
+//			ArrayList list = new ArrayList();
+//			int NUM_RECEIPTS = 50;
+//			if (db)
+//				timeStamp("building receipts");
+//			for (int i = 0; i < NUM_RECEIPTS; i++) {
+//				list.add(Receipt.buildRandom());
+//			}
+//			if (db)
+//				timeStamp("done building");
+//			receiptList = list;
+//
+//		}
+//		return receiptList;
+//	}
 
 	public int getUniqueIdentifier() {
 		int value;
@@ -97,6 +104,10 @@ public class RBuddyApp {
 		return preferences;
 	}
 
+	public Activity activity() {
+		return this.context;
+	}
+	
 	private RBuddyApp(Activity activity) {
 		this.context = activity;
 		this.preferences = activity.getPreferences(Context.MODE_PRIVATE);
@@ -108,5 +119,6 @@ public class RBuddyApp {
 	private static RBuddyApp sharedInstance;
 	private Activity context;
 	private PhotoFile photoFile;
-	private ArrayList receiptList;
+//	private ArrayList receiptList;
+	private IReceiptFile receiptFile;
 }

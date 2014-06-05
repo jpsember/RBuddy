@@ -56,21 +56,27 @@ public class ReceiptListActivity extends Activity {
 	    }
 	}
 
+	private List buildListOfReceipts() {
+		ArrayList list = new ArrayList();
+		for (Iterator it = app.receiptFile().iterator(); it.hasNext(); )
+			list.add(it.next());
+		return list;
+	}
 
 	// Construct a view to be used for the list items
 	private ListView constructListView() {
 
 		ListView listView = new ListView(this);
 
-		List receiptList = app.receiptList();
+		List receiptList = buildListOfReceipts(); //app.receiptList();
 		ArrayAdapter arrayAdapter = new ReceiptListAdapter(this, receiptList);
 		listView.setAdapter(arrayAdapter);
 
 		// Store references to both the ArrayAdapter and the backing ArrayList,
 		// to make responding to selection actions more convenient.
 		this.receiptListAdapter = arrayAdapter;
-		this.receiptList = receiptList;
-		if (db) pr("adapter="+this.receiptListAdapter+", list="+this.receiptList);
+//		this.receiptList = receiptList;
+		if (db) pr("adapter="+this.receiptListAdapter);
 		
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView aView, View v, int position,
@@ -88,7 +94,6 @@ public class ReceiptListActivity extends Activity {
 	private void processReceiptSelection(int position) {
 		Receipt r = (Receipt) receiptListAdapter.getItem(position);
 		pr("Just clicked on view, receipt " + r);
-
 		
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
@@ -98,6 +103,5 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private ArrayAdapter receiptListAdapter;
-	private List receiptList;
 	private RBuddyApp app;
 }

@@ -35,6 +35,11 @@ public interface IReceiptFile {
 	public void setModified(Receipt r);
 
 	/**
+	 * Remove all receipts from file
+	 */
+	public void clear();
+
+	/**
 	 * Get an iterator over the receipts
 	 * @return
 	 */

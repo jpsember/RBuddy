@@ -1,9 +1,10 @@
 package js.basic;
+
 import static js.basic.Tools.*;
 import static js.basic.JSMath.*;
 
 public class StringUtil {
-	
+
 	/**
 	 * Generate a random string
 	 * 
@@ -28,4 +29,68 @@ public class StringUtil {
 		return sb.toString();
 	}
 
+	/**
+	 * Encode a string so some characters are escaped. Converts ASCII 0 => "\0";
+	 * linefeeds => "\n"; "\" => "\\"; "|" => "\}"
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String encode(String s) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch (c) {
+			case 0:
+				sb.append("\\0");
+				break;
+			case '\n':
+				sb.append("\\n");
+				break;
+			case '|':
+				sb.append("\\}");
+				break;
+			case '\\':
+				sb.append("\\\\");
+				break;
+			default:
+				sb.append(c);
+				break;
+			}
+		}
+		return sb.toString();
+	}
+
+	public static String decode(String s) {
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while (i < s.length()) {
+			char c = s.charAt(i);
+			if (c == '\\') {
+				i += 1;
+				if (i == s.length())
+					throw new IllegalArgumentException("could not decode \""
+							+ s + "\"");
+				c = s.charAt(i);
+				switch (c) {
+				case '0':
+					sb.append(0);
+					break;
+				case 'n':
+					sb.append('\n');
+					break;
+				case '}':
+					sb.append('|');
+					break;
+				default:
+					sb.append(c);
+					break;
+				}
+			} else {
+				sb.append(c);
+			}
+			i += 1;
+		}
+		return sb.toString();
+	}
 }

@@ -131,7 +131,7 @@ public class EditReceiptActivity extends Activity {
 				pr(" receipt id passed in is " + receiptId);
 			if (receiptId != 0) {
 				unimp("have data structure for receipt list, that can return receipt by id, and that flushes changes when possible");
-				this.receipt = (Receipt) app.receiptList().get(0);
+				this.receipt = app.receiptFile().getReceipt(receiptId);
 				if (db)
 					pr("  got existing receipt " + this.receipt);
 			} else {

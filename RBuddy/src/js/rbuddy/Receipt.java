@@ -2,6 +2,8 @@ package js.rbuddy;
 
 //import static js.basic.Tools.*;
 
+import java.util.StringTokenizer;
+
 import js.basic.StringUtil;
 
 public class Receipt {
@@ -9,10 +11,11 @@ public class Receipt {
 	/**
 	 * Constructor
 	 * 
-	 * Sets date to current date
+	 * Sets date to current date, string fields to the empty string, and unique identifier to zero
 	 */
 	public Receipt() {
 		setDate(JSDate.currentDate());
+		summary = "";
 	}
 
 	public JSDate getDate() {
@@ -25,6 +28,30 @@ public class Receipt {
 
 	public String getSummary() {
 		return summary;
+	}
+
+	public static Receipt decode(String s) {
+		StringTokenizer t = new StringTokenizer(s, "|");
+		String id = t.nextToken();
+		String date = t.nextToken();
+		String summary = t.nextToken();
+		if (t.hasMoreTokens())
+			throw new IllegalArgumentException("unable to decode " + s);
+		Receipt r = new Receipt();
+		r.uniqueIdentifier = Integer.parseInt(id);
+		r.summary = StringUtil.decode(summary);
+		r.date = JSDate.parse(date);
+		return r;
+	}
+
+	public String encode() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getUniqueIdentifier());
+		sb.append('|');
+		sb.append(StringUtil.encode(getSummary()));
+		sb.append('|');
+		sb.append(date.toString());
+		return sb.toString();
 	}
 
 	public void setSummary(String s) {
@@ -79,22 +106,25 @@ public class Receipt {
 
 	/**
 	 * A valid unique identifier must be a positive integer
+	 * 
 	 * @param uniqueIdentifier
 	 */
 	public void setUniqueIdentifier(int uniqueIdentifier) {
-		if (uniqueIdentifier <= 0) 
+		if (uniqueIdentifier <= 0)
 			throw new IllegalArgumentException();
-		
+
 		this.uniqueIdentifier = uniqueIdentifier;
 	}
 
 	@Override
 	public String toString() {
-		return "Receipt #"+getUniqueIdentifier()+" summary='" + summary + "'";
+		return "Receipt #" + getUniqueIdentifier() + " summary='" + summary
+				+ "'";
 	}
 
 	/**
 	 * For test purposes, build a random receipt
+	 * 
 	 * @return
 	 */
 	public static Receipt buildRandom() {
@@ -103,7 +133,7 @@ public class Receipt {
 		r.setSummary(StringUtil.randomString(30));
 		return r;
 	}
-	
+
 	private JSDate date;
 	private String summary;
 	private int uniqueIdentifier;
