@@ -21,6 +21,9 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		unimp("add 'new' or '+' button to menu to add new receipt");
+		
 		RBuddyApp.prepare(this);
 		
 		app = RBuddyApp.sharedInstance();
@@ -90,9 +93,7 @@ public class ReceiptListActivity extends Activity {
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
-		unimp("we need a string that is a unique identifier for a particular receipt to pass in the intent");
-		
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getSummary());
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
 		startActivity(intent);
 	}
 

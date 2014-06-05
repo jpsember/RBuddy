@@ -3,7 +3,7 @@ package js.rbuddy;
 
 public class Photo {
 
-	public Photo(String identifier) {
+	public Photo(int identifier) {
 		this.identifier = identifier;
 	}
 	
@@ -12,12 +12,12 @@ public class Photo {
 		return "Photo("+identifier()+")";
 	}
 	
-	public String identifier() {
+	public int identifier() {
 		return identifier;
 	}
 	
 	
 	// unique identifier that distinguishes this photo from all others in the same file
-	private String identifier;
+	private int identifier;
 	
 }

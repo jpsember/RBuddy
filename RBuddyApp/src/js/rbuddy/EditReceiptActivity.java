@@ -4,14 +4,14 @@ import static js.basic.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import js.basic.Files;
 import android.view.ViewGroup.LayoutParams;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -56,8 +56,9 @@ public class EditReceiptActivity extends Activity {
 			}
 			{
 				ImageView bitmapView = new ImageView(this);
-				bitmapView.setImageDrawable(getResources().getDrawable(
-						R.drawable.missingphoto));
+				this.photoView = bitmapView;
+				updatePhotoView();
+
 				// Give photo a fixed size that is small, but lots of weight to
 				// grow to take up what extra there is (horizontally)
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(10,
@@ -194,33 +195,34 @@ public class EditReceiptActivity extends Activity {
 
 			// Create a new photo to store this work file
 			// Create an image file name
-			String photoIdentifier = new SimpleDateFormat("yyyyMMdd_HHmmss")
-					.format(new Date());
+			int photoIdentifier = receipt.getUniqueIdentifier();
+			if (photoIdentifier == 0) {
+				photoIdentifier = app.getUniqueIdentifier();
+				receipt.setUniqueIdentifier(photoIdentifier);
+				unimp("keep track of whether receipt is 'dirty' and persist if necessary");
+			}
+
+			//
+			// String photoIdentifier = new SimpleDateFormat("yyyyMMdd_HHmmss")
+			// .format(new Date());
 			Photo photo = new Photo(photoIdentifier);
 			mainFile = app.getPhotoFile().getMainFileFor(photo);
-			if (mainFile.exists())
-				die("main file already exists:" + mainFile);
+			// if (mainFile.exists())
+			// die("main file already exists:" + mainFile);
 
 			try {
 				Files.copy(scaledFile, mainFile);
 			} catch (IOException e) {
 				die(e);
 			}
+			cachedPhoto = photo;
 
 			unimp("construct thumbnail");
 			if (db)
 				pr("created main file " + mainFile);
 		}
-		if (mainFile != null) {
-			replaceReceiptPhoto(receipt,mainFile);
-		}
 	}
 
-	private void replaceReceiptPhoto(Receipt receipt, File photoFile) {
-		// If there's an existing photo id for this receipt, use it; otherwise, allocate a new one
-		
-	}
-	
 	private void dispatchTakePictureIntent() {
 		// final boolean db = true;
 		if (db)
@@ -248,28 +250,39 @@ public class EditReceiptActivity extends Activity {
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
-	// private void preparePhotoFile() {
-	// if (photoFile != null)
-	// return;
-	//
-	// // final boolean db = true;
-	// if (db)
-	// pr("preparePhotoFile; " + stackTrace(1, 1));
-	//
-	// File d = new File(getExternalFilesDir(null), "photos");
-	// if (!d.exists()) {
-	// d.mkdir();
-	// }
-	// if (!d.isDirectory())
-	// die("failed to create directory " + d);
-	// photoFile = new PhotoFile(d);
-	// if (db)
-	// pr("preparePhotoFile, created " + photoFile + ";\ncontents=\n"
-	// + photoFile.contents());
-	// }
+	private void updatePhotoView() {
+		final boolean db = true;
+		if (db)
+			pr("updatePhotoView " + photoView);
 
-	// private PhotoFile photoFile;
+		if (photoView == null)
+			return;
+		int requestedPhotoId = 0;
+		if (receipt != null)
+			requestedPhotoId = receipt.getUniqueIdentifier();
+if (db) pr(" receipt "+receipt+"  requested id "+requestedPhotoId);
+		if (requestedPhotoId == 0) {
+			photoView.setImageDrawable(getResources().getDrawable(
+					R.drawable.missingphoto));
+		} else {
+			warning("do we really need a Photo class?");
+			if (cachedPhoto == null
+					|| cachedPhoto.identifier() != requestedPhotoId) {
+				cachedPhoto = new Photo(requestedPhotoId);
+			}
+			File imageFile = app.getPhotoFile().getMainFileFor(cachedPhoto);
+			if (db) pr(" reading bitmap from file "+imageFile);
+			Bitmap bmp = ImageUtilities.readImage(imageFile);
+			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
+					bmp));
+		}
+		// Tell photo view to refresh itself? or is this not necessary?
+	}
+
+	private Photo cachedPhoto;
 	private String pathOfTakenPhoto;
 	private RBuddyApp app;
 	private Receipt receipt;
+	private ImageView photoView;
+
 }

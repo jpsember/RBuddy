@@ -32,6 +32,11 @@ public class ImageUtilities {
 		if (db) pr("writeJPEG to "+destinationFile+", length "+destinationFile.length());
 	}
 	
+	public static Bitmap readImage(File file) {
+		Bitmap bMap = BitmapFactory.decodeFile(file.getAbsolutePath());
+		return bMap;
+	}
+	
 	/**
 	 * Construct a File for an xxxx.jpg image in the external storage directory;
 	 * delete any existing file that is at that location

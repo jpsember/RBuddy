@@ -68,7 +68,8 @@ public class PhotoFile {
 		ArrayList<Photo> list = new ArrayList();
 		for (int i = 0; i < filenames.length; i++) {
 			String filename = filenames[i];
-			String identifier = filename.substring(0,filename.length() - PHOTO_EXTENSION.length());
+			String identifierString = filename.substring(0,filename.length() - PHOTO_EXTENSION.length());
+			int identifier = Integer.parseInt(identifierString);
 			list.add(new Photo(identifier));
 		}
 		return list;
