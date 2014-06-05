@@ -113,16 +113,24 @@ public class EditReceiptActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		app = RBuddyApp.sharedInstance();
 
 		if (savedInstanceState != null) {
 			// Restore our activity's previous state
 			pathOfTakenPhoto = savedInstanceState.getString("pathOfTakenPhoto");
 		}
-		preparePhotoFile();
+		// preparePhotoFile();
 
-		unimp("get receipt from intent");
-		// Intent i = getIntent();
-		// String msg = i.getStringExtra("message");
+		{
+			Intent i = getIntent();
+			int receiptId = i.getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
+			if (receiptId != 0) {
+				unimp("have data structure for receipt list, that can return receipt by id");
+				this.receipt = (Receipt) app.receiptList().get(0);
+			} else {
+				this.receipt = new Receipt();
+			}
+		}
 		layoutElements();
 
 	}
@@ -160,47 +168,59 @@ public class EditReceiptActivity extends Activity {
 
 	@SuppressLint("SimpleDateFormat")
 	private void processPhotoResult(Intent intent) {
-		unimp("handle various problem situations in ways other than just 'die'");
-		// final boolean db = true;
-		if (db)
-			pr("processPhotoResult intent=" + intent);
+		File mainFile = null;
+		{
+			unimp("handle various problem situations in ways other than just 'die'");
+			// final boolean db = true;
+			if (db)
+				pr("processPhotoResult intent=" + intent);
 
-		if (intent != null) {
-			warning("did not expect intent to be non-null: " + intent);
+			if (intent != null) {
+				warning("did not expect intent to be non-null: " + intent);
+			}
+
+			File workFile = new File(pathOfTakenPhoto);
+			if (!workFile.isFile()) {
+				die("no work file found: " + pathOfTakenPhoto);
+			}
+
+			File scaledFile = null;
+			try {
+				scaledFile = ImageUtilities
+						.scalePhoto(workFile, 800, 800, true);
+			} catch (IOException e1) {
+				die(e1);
+			}
+
+			// Create a new photo to store this work file
+			// Create an image file name
+			String photoIdentifier = new SimpleDateFormat("yyyyMMdd_HHmmss")
+					.format(new Date());
+			Photo photo = new Photo(photoIdentifier);
+			mainFile = app.getPhotoFile().getMainFileFor(photo);
+			if (mainFile.exists())
+				die("main file already exists:" + mainFile);
+
+			try {
+				Files.copy(scaledFile, mainFile);
+			} catch (IOException e) {
+				die(e);
+			}
+
+			unimp("construct thumbnail");
+			if (db)
+				pr("created main file " + mainFile);
 		}
-
-		File workFile = new File(pathOfTakenPhoto);
-		if (!workFile.isFile()) {
-			die("no work file found: " + pathOfTakenPhoto);
+		if (mainFile != null) {
+			replaceReceiptPhoto(receipt,mainFile);
 		}
-
-		File scaledFile = null;
-		try {
-			scaledFile = ImageUtilities.scalePhoto(workFile, 800, 800, true);
-		} catch (IOException e1) {
-			die(e1);
-		}
-
-		// Create a new photo to store this work file
-		// Create an image file name
-		String photoIdentifier = new SimpleDateFormat("yyyyMMdd_HHmmss")
-				.format(new Date());
-		Photo photo = new Photo(photoIdentifier);
-		File mainFile = photoFile.getMainFileFor(photo);
-		if (mainFile.exists())
-			die("main file already exists:" + mainFile);
-
-		try {
-			Files.copy(scaledFile, mainFile);
-		} catch (IOException e) {
-			die(e);
-		}
-
-		unimp("construct thumbnail");
-		if (db)
-			pr("created main file " + mainFile);
 	}
 
+	private void replaceReceiptPhoto(Receipt receipt, File photoFile) {
+		// If there's an existing photo id for this receipt, use it; otherwise, allocate a new one
+		
+	}
+	
 	private void dispatchTakePictureIntent() {
 		// final boolean db = true;
 		if (db)
@@ -228,26 +248,28 @@ public class EditReceiptActivity extends Activity {
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
-	private void preparePhotoFile() {
-		if (photoFile != null)
-			return;
+	// private void preparePhotoFile() {
+	// if (photoFile != null)
+	// return;
+	//
+	// // final boolean db = true;
+	// if (db)
+	// pr("preparePhotoFile; " + stackTrace(1, 1));
+	//
+	// File d = new File(getExternalFilesDir(null), "photos");
+	// if (!d.exists()) {
+	// d.mkdir();
+	// }
+	// if (!d.isDirectory())
+	// die("failed to create directory " + d);
+	// photoFile = new PhotoFile(d);
+	// if (db)
+	// pr("preparePhotoFile, created " + photoFile + ";\ncontents=\n"
+	// + photoFile.contents());
+	// }
 
-		// final boolean db = true;
-		if (db)
-			pr("preparePhotoFile; " + stackTrace(1, 1));
-
-		File d = new File(getExternalFilesDir(null), "photos");
-		if (!d.exists()) {
-			d.mkdir();
-		}
-		if (!d.isDirectory())
-			die("failed to create directory " + d);
-		photoFile = new PhotoFile(d);
-		if (db)
-			pr("preparePhotoFile, created " + photoFile + ";\ncontents=\n"
-					+ photoFile.contents());
-	}
-
-	private PhotoFile photoFile;
+	// private PhotoFile photoFile;
 	private String pathOfTakenPhoto;
+	private RBuddyApp app;
+	private Receipt receipt;
 }

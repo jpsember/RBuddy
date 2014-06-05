@@ -21,12 +21,9 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		{
-			startApp(); // does nothing if already started
-			JSDate.setFactory(AndroidDate.androidDateFactory);
-		}
+		RBuddyApp.prepare(this);
 		
+		app = RBuddyApp.sharedInstance();
 		
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
@@ -56,23 +53,13 @@ public class ReceiptListActivity extends Activity {
 	    }
 	}
 
-	private List constructReceiptList() {
-		List list = new ArrayList();
-		int NUM_RECEIPTS = 50;
-		if (db) timeStamp("building receipts");
-		for (int i = 0; i < NUM_RECEIPTS; i++) {
-			list.add(Receipt.buildRandom());
-		}
-		if (db) timeStamp("done building");
-		return list;
-	}
 
 	// Construct a view to be used for the list items
 	private ListView constructListView() {
 
 		ListView listView = new ListView(this);
 
-		List receiptList = constructReceiptList();
+		List receiptList = app.receiptList();
 		ArrayAdapter arrayAdapter = new ReceiptListAdapter(this, receiptList);
 		listView.setAdapter(arrayAdapter);
 
@@ -105,10 +92,11 @@ public class ReceiptListActivity extends Activity {
 				EditReceiptActivity.class);
 		unimp("we need a string that is a unique identifier for a particular receipt to pass in the intent");
 		
-		intent.putExtra("message", r.getSummary());
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getSummary());
 		startActivity(intent);
 	}
 
 	private ArrayAdapter receiptListAdapter;
 	private List receiptList;
+	private RBuddyApp app;
 }
