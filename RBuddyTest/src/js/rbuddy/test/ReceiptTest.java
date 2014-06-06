@@ -4,13 +4,12 @@ import org.junit.*;
 
 //import static org.junit.Assert.*;
 import js.rbuddy.JSDate;
-//import static js.basic.Tools.*;
 import js.rbuddy.Receipt;
 
 public class ReceiptTest extends js.testUtils.MyTest {
 
 	private void verifySummary(String input, String expOutput) {
-		Receipt r = new Receipt();
+		Receipt r = new Receipt(42);
 		r.setSummary(input);
 		assertStringsMatch(r.getSummary(), expOutput);
 	}
@@ -35,29 +34,36 @@ public class ReceiptTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testConstructorStartsWithCurrentDate() {
-		Receipt r = new Receipt();
+		Receipt r = new Receipt(42);
 		assertStringsMatch(JSDate.currentDate(), r.getDate());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testAttemptToAssignIllegalUniqueIdentifier() {
-		new Receipt().setUniqueIdentifier(0);
+		new Receipt(0);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testAttemptToAssignIllegalUniqueIdentifier2() {
-		new Receipt().setUniqueIdentifier(-1);
+		new Receipt(-1);
 	}
 
 	@Test
 	public void testEncode() {
-		Receipt r = new Receipt();
-		r.setUniqueIdentifier(72);
-		r.setSummary("Hey");
-		String s = r.encode();
-		
-		Receipt r2 = Receipt.decode(s);
-		assertStringsMatch(s, r2.encode());
+		{
+			Receipt r = new Receipt(72);
+			r.setSummary("\n\nA long summary\n\n\n   \n\n with several linefeeds, \"quotes\", and | some other characters | ... \n\n");
+			CharSequence s = r.encode();
+
+			Receipt r2 = Receipt.decode(s);
+			assertStringsMatch(s, r2.encode());
+		}
+		{
+			Receipt r = new Receipt(72);
+			CharSequence s = r.encode();
+			Receipt r2 = Receipt.decode(s);
+			assertStringsMatch(s, r2.encode());
+		}
 	}
-	
+
 }

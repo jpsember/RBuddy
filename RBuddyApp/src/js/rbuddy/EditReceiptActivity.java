@@ -266,17 +266,10 @@ public class EditReceiptActivity extends Activity {
 		}
 
 		ImageUtilities.orientAndScaleBitmap(workFile, 800, true);
-		int photoIdentifier = receipt.getUniqueIdentifier();
-		if (photoIdentifier == 0) {
-			photoIdentifier = app.getUniqueIdentifier();
-			receipt.setUniqueIdentifier(photoIdentifier);
-			// Note: we don't mark it as modified here; we'll assume this
-			// occurs when activity pauses
-		}
 
-		mainFile = app.getPhotoFile().getMainFileFor(photoIdentifier);
+		mainFile = app.getPhotoFile().getMainFileFor(receipt.getUniqueIdentifier());
 		if (db)
-			pr("photoIdentifier " + photoIdentifier
+			pr("receipt id " + receipt.getUniqueIdentifier()
 					+ "  copying scaled/rotated file " + workFile
 					+ " to mainFile " + mainFile);
 

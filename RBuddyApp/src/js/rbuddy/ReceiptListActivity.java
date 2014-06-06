@@ -122,8 +122,7 @@ public class ReceiptListActivity extends Activity {
 		// final boolean db = true;
 		if (db)
 			pr("\nReceiptListActivity.processAddReceipt");
-		Receipt r = new Receipt();
-		r.setUniqueIdentifier(app.getUniqueIdentifier());
+		Receipt r = new Receipt(app.getUniqueIdentifier());
 		app.receiptFile().add(r);
 		this.receiptList.add(r);
 

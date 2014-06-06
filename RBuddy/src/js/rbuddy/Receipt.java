@@ -1,7 +1,6 @@
 package js.rbuddy;
 
-import static js.basic.Tools.*;
-import java.util.StringTokenizer;
+//import static js.basic.Tools.*;
 
 import js.basic.StringUtil;
 
@@ -10,11 +9,17 @@ public class Receipt {
 	/**
 	 * Constructor
 	 * 
-	 * Sets date to current date, string fields to the empty string, and unique identifier to zero
+	 * Sets date to current date, string fields to the empty string
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if identifier <= 0
 	 */
-	public Receipt() {
+	public Receipt(int identifier) {
+		if (identifier <= 0)
+			throw new IllegalArgumentException();
+		this.uniqueIdentifier = identifier;
 		setDate(JSDate.currentDate());
-		summary = "";
+		this.summary = "";
 	}
 
 	public JSDate getDate() {
@@ -29,35 +34,31 @@ public class Receipt {
 		return summary;
 	}
 
-	public static Receipt decode(String s) {
-//		final boolean db = true;
-		if (db) pr("Receipt.decode \""+s+"\"");
-		
-		StringTokenizer t = new StringTokenizer(s, "|");
-		String id = t.nextToken();
-		if (db) pr(" id="+id);
-		String date = t.nextToken();
-		if (db) pr(" date="+date);
-		String summary = t.nextToken();
-		if (db) pr(" summary="+summary);
-		
-		if (t.hasMoreTokens())
-			throw new IllegalArgumentException("unable to decode " + s);
-		Receipt r = new Receipt();
-		r.uniqueIdentifier = Integer.parseInt(id);
-		r.summary = StringUtil.decode(summary);
-		r.date = JSDate.parse(date);
+	public static Receipt decode(CharSequence s) {
+		String[] tokens = StringUtil.tokenize(s);
+		if (tokens.length != 3)
+			throw new IllegalArgumentException("problem decoding " + s);
+
+		int f = 0;
+		Receipt r = new Receipt(Integer.parseInt(tokens[f++]));
+		r.date = JSDate.parse(tokens[f++]);
+		r.summary = StringUtil.decode(tokens[f++]).toString();
 		return r;
 	}
 
-	public String encode() {
-		StringBuilder sb = new StringBuilder();
+	public StringBuilder encode() {
+		return encode(null);
+	}
+	
+	public StringBuilder encode(StringBuilder sb) {
+		if (sb==null)
+			sb = new StringBuilder();
 		sb.append(getUniqueIdentifier());
 		sb.append('|');
 		sb.append(date.toString());
 		sb.append('|');
-		sb.append(StringUtil.encode(getSummary()));
-		return sb.toString();
+		StringUtil.encode(getSummary(), sb);
+		return sb;
 	}
 
 	public void setSummary(String s) {
@@ -110,21 +111,9 @@ public class Receipt {
 		return uniqueIdentifier;
 	}
 
-	/**
-	 * A valid unique identifier must be a positive integer
-	 * 
-	 * @param uniqueIdentifier
-	 */
-	public void setUniqueIdentifier(int uniqueIdentifier) {
-		if (uniqueIdentifier <= 0)
-			throw new IllegalArgumentException();
-
-		this.uniqueIdentifier = uniqueIdentifier;
-	}
-
 	@Override
 	public String toString() {
-		return "Receipt "+encode();
+		return "Receipt " + encode();
 	}
 
 	/**
@@ -132,8 +121,8 @@ public class Receipt {
 	 * 
 	 * @return
 	 */
-	public static Receipt buildRandom() {
-		Receipt r = new Receipt();
+	public static Receipt buildRandom(int id) {
+		Receipt r = new Receipt(id);
 		r.setDate(JSDate.buildRandom());
 		r.setSummary(StringUtil.randomString(30));
 		return r;

@@ -1,0 +1,10 @@
+split aaa|bbb|ccc||eee|:
+ --> [aaa, bbb, ccc, , eee]
+split |||:
+ --> []
+split :
+ --> []
+split abc|:
+ --> [abc]
+split |abc:
+ --> [, abc]
