@@ -296,7 +296,6 @@ public class EditReceiptActivity extends Activity {
 			die(e);
 		}
 
-		unimp("we don't need thumbnails, get rid of them");
 		if (db)
 			pr("created main file " + mainFile);
 
