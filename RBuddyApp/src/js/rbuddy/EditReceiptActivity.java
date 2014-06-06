@@ -242,7 +242,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private File getWorkPhotoFile() {
-		return ImageUtilities.constructExternalImageFile("RBuddy_work");
+		return BitmapUtil.constructExternalImageFile("RBuddy_work");
 	}
 
 	private void processPhotoResult(Intent intent) {
@@ -267,7 +267,7 @@ public class EditReceiptActivity extends Activity {
 			die("no work file found: " + workFile);
 		}
 
-		ImageUtilities.orientAndScaleBitmap(workFile, 800, true);
+		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
 
 		mainFile = app.getPhotoFile().getMainFileFor(
 				receipt.getUniqueIdentifier());
@@ -315,7 +315,7 @@ public class EditReceiptActivity extends Activity {
 		} else {
 			if (db)
 				pr(" reading bitmap from file " + imageFile);
-			bmp = ImageUtilities.readImage(imageFile);
+			bmp = BitmapUtil.readImage(imageFile);
 			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
 					bmp));
 		}

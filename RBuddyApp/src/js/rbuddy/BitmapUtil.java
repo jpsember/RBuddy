@@ -13,7 +13,7 @@ import android.media.ExifInterface;
 import android.os.Environment;
 import static js.basic.Tools.*;
 
-public class ImageUtilities {
+public class BitmapUtil {
 
 	public static final int JPEG_QUALITY_DEFAULT = 80;
 
