@@ -17,18 +17,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.text.method.TextKeyListener;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 
 public class EditReceiptActivity extends Activity {
@@ -38,20 +39,14 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onPause() {
-		// final boolean db = true;
-		if (db)
-			pr("\nEditReceiptActivity.onPause");
-		super.onPause(); // Always call the superclass method first
+		super.onPause();
 		updateReceiptWithWidgetValues();
 		app.receiptFile().flush();
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// final boolean db = true;
 		super.onCreate(savedInstanceState);
-		if (db)
-			pr("\n\nEditReceiptActivity onCreate\n");
 		app = RBuddyApp.sharedInstance();
 
 		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
@@ -204,9 +199,16 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void addSummaryWidget(ViewGroup layout) {
-		AutoCompleteTextView tf = new AutoCompleteTextView(this);
+		MultiAutoCompleteTextView tf = new MultiAutoCompleteTextView(this);
+		
 		tf.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
 				| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+		tf.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+
+		TextKeyListener input = TextKeyListener.getInstance(true,
+				TextKeyListener.Capitalize.NONE);
+		tf.setKeyListener(input);
+
 		summaryView = tf;
 		tf.setHint("Summary");
 		tf.setMinHeight(50);
@@ -267,7 +269,8 @@ public class EditReceiptActivity extends Activity {
 
 		ImageUtilities.orientAndScaleBitmap(workFile, 800, true);
 
-		mainFile = app.getPhotoFile().getMainFileFor(receipt.getUniqueIdentifier());
+		mainFile = app.getPhotoFile().getMainFileFor(
+				receipt.getUniqueIdentifier());
 		if (db)
 			pr("receipt id " + receipt.getUniqueIdentifier()
 					+ "  copying scaled/rotated file " + workFile
