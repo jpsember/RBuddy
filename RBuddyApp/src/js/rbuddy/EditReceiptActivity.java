@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import js.basic.Files;
@@ -42,7 +41,7 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onPause() {
-//		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("\nEditReceiptActivity.onPause");
 		super.onPause(); // Always call the superclass method first
@@ -52,7 +51,7 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-//		final boolean db = true;
+		// final boolean db = true;
 		super.onCreate(savedInstanceState);
 		if (db)
 			pr("\n\nEditReceiptActivity onCreate\n");
@@ -69,7 +68,7 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onResume() {
-//		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("\n\nEditReceiptActivity.resume");
 		super.onResume(); // Always call the superclass method first
@@ -180,7 +179,7 @@ public class EditReceiptActivity extends Activity {
 			String content2 = null;
 			try {
 				Date date = userDateFormat.parse(content);
-				 content2 = jsDateFormat.format(date);
+				content2 = jsDateFormat.format(date);
 			} catch (ParseException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -194,18 +193,13 @@ public class EditReceiptActivity extends Activity {
 	private SimpleDateFormat jsDateFormat;
 	private java.text.DateFormat userDateFormat;
 
-	private String cvtJSDateStringToUserDateString(String jsDateString) {
-//		final boolean db = true;
-		Date date = null;
-		try {
-			date = jsDateFormat.parse(jsDateString);
-		} catch (ParseException e) {
-			die(e);
-		}
+	private String cvtJSDateToUserDateString(JSDate jsDate) {
+		unimp("put this in AndroidDate, or better still, JSDate?  As factory method?");
+		Date date = JSDate.factory().convertJSDateToJavaDate(jsDate); // null;
 		String userDateString = userDateFormat.format(date);
 		if (db)
-			pr("cvt JSDate " + jsDateString + " --> Date " + date
-					+ " --> user " + userDateString);
+			pr("cvt JSDate " + jsDate + " --> Date " + date + " --> user "
+					+ userDateString);
 		return userDateString;
 	}
 
@@ -217,7 +211,7 @@ public class EditReceiptActivity extends Activity {
 
 		EditText tf = new EditText(this);
 		dateView = tf;
-//		pr("addDateWidget, converting receipt date " + receipt.getDate());
+		// pr("addDateWidget, converting receipt date " + receipt.getDate());
 
 		tf.setFocusable(false);
 		tf.setMinHeight(50);
@@ -233,43 +227,22 @@ public class EditReceiptActivity extends Activity {
 					@Override
 					public void onDateSet(DatePicker view, int year,
 							int monthOfYear, int dayOfMonth) {
-						
+						warning("what are the year month day returned here?  Is it safe to use them, or should we build a (java) Date object?");
+
 						JSDate date = JSDate.buildFromValues(year, monthOfYear,
 								dayOfMonth);
-//						final boolean db = true;
+						// final boolean db = true;
 						if (db)
 							pr("date set, year " + year + " month "
 									+ monthOfYear + " day " + dayOfMonth
 									+ " yields JSDate " + date);
-						dateView.setText(cvtJSDateStringToUserDateString(date
-								.toString()));
+						dateView.setText(cvtJSDateToUserDateString(date));
 					}
 				};
-				
-//				final boolean db = true;
-				
-				JSDate d = readDateFromDateWidget();
-				if (db)
-					pr("\n\n\n\ninitializing DatePickerDialog with date from widget: "
-							+ d);
-				
-				Date date = null;
-				try {
-					 date = jsDateFormat.parse(d.toString());
-				} catch (ParseException e) {
-					die(e);
-				}
-
-				final Calendar c = Calendar.getInstance();
-				c.setTime(date);
-			    int year = c.get(Calendar.YEAR);
-			    int month = c.get(Calendar.MONTH);
-			    int day = c.get(Calendar.DAY_OF_MONTH);
-
-			    if (db) pr(" init datePicker with calendar "+c+"\n y"+year+" m"+month+" d"+day);
-			    unimp("lost in the java.util.Date / Calendar morass, needs cleaing up");
-			    
-				new DatePickerDialog(EditReceiptActivity.this, dateListener, year,month,day).show();
+				int[] ymd = AndroidDate
+						.getJavaYearMonthDay(readDateFromDateWidget());
+				new DatePickerDialog(EditReceiptActivity.this, dateListener,
+						ymd[0], ymd[1], ymd[2]).show();
 			}
 		});
 	}
@@ -369,7 +342,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updatePhotoView() {
-//		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("updatePhotoView " + photoView + "; " + stackTrace(1, 3));
 
@@ -406,8 +379,7 @@ public class EditReceiptActivity extends Activity {
 		unimp("save and restore cursor position as well as text?");
 		summaryView.setText(receipt.getSummary());
 
-		dateView.setText(cvtJSDateStringToUserDateString(receipt.getDate()
-				.toString()));
+		dateView.setText(cvtJSDateToUserDateString(receipt.getDate()));
 	}
 
 	private void updateReceiptWithWidgetValues() {

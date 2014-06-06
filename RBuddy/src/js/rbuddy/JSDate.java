@@ -1,5 +1,6 @@
 package js.rbuddy;
 
+import java.util.Date;
 import java.util.Locale;
 import java.util.regex.*;
 
@@ -43,6 +44,8 @@ public class JSDate {
 		return day;
 	}
 
+	public static JSDateFactory factory() {return factory;}
+	
 	private int year, month, day;
 	private String str;
 
@@ -96,6 +99,7 @@ public class JSDate {
 	}
 
 	private static JSDateFactory factory = new JSDateFactory() {
+		
 		@Override
 		public JSDate currentDate() {
 			// For this most basic factory, we just return a constant date
@@ -107,6 +111,17 @@ public class JSDate {
 			int[] a = parseStandardDateFromString(s);
 			return new JSDate(a[0], a[1], a[2]);
 		}
+
+		@Override
+		public Date convertJSDateToJavaDate(JSDate d) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public JSDate convertJavaDateToJSDate(Date d) {
+			throw new UnsupportedOperationException();
+		}
+		
 	};
 
 	private static String buildString(int year, int month, int day) {

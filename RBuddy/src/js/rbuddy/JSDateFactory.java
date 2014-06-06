@@ -1,5 +1,7 @@
 package js.rbuddy;
 
+import java.util.Date;
+
 public interface JSDateFactory {
 	JSDate currentDate();
 
@@ -10,4 +12,16 @@ public interface JSDateFactory {
 	 * @throws IllegalArgumentException if parsing failed
 	 */
 	JSDate parse(String s);
+	
+	/**
+	 * Convert JSDate to Java date
+	 * @param d
+	 * @return
+	 */
+	Date convertJSDateToJavaDate(JSDate d);
+	
+	/**
+	 * Convert Java date to JSDate
+	 */
+	JSDate convertJavaDateToJSDate(Date d);
 }
