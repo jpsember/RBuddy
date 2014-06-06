@@ -4,9 +4,6 @@ import static js.basic.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 import js.basic.Files;
 import android.app.Activity;
@@ -38,59 +35,38 @@ public class EditReceiptActivity extends Activity {
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 
 	@Override
-	public void onSaveInstanceState(Bundle s) {
+	public void onPause() {
 		final boolean db = true;
 		if (db)
-			pr("EditReceiptActivity saving instance state");
-
+			pr("\nEditReceiptActivity.onPause");
+		super.onPause(); // Always call the superclass method first
 		updateReceiptWithWidgetValues();
-
 		app.receiptFile().flush();
-
-		// The OS may be shutting down our activity to service some other
-		// (possibly memory-intensive) task;
-		// so save our state
-//		s.putString("pathOfTakenPhoto", pathOfTakenPhoto);
-		super.onSaveInstanceState(s);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// final boolean db = true;
-
 		super.onCreate(savedInstanceState);
 		if (db)
 			pr("\n\nEditReceiptActivity onCreate\n");
 		app = RBuddyApp.sharedInstance();
 
-//		if (savedInstanceState != null) {
-//			warning("maybe move saveInstState code to single location");
-//			// Restore our activity's previous state
-//			pathOfTakenPhoto = savedInstanceState.getString("pathOfTakenPhoto");
-//		}
-//
 		{
 			Intent i = getIntent();
 			int receiptId = i.getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
-			if (db)
-				pr(" receipt id passed in is " + receiptId);
-			if (receiptId != 0) {
-				unimp("have data structure for receipt list, that can return receipt by id, and that flushes changes when possible");
-				this.receipt = app.receiptFile().getReceipt(receiptId);
-				if (db)
-					pr("  got existing receipt " + this.receipt);
-			} else {
-				this.receipt = new Receipt();
-				if (db)
-					pr("  constructed new receipt " + this.receipt);
-			}
+			ASSERT(receiptId > 0);
+			this.receipt = app.receiptFile().getReceipt(receiptId);
 		}
 		layoutElements();
+	}
 
-		if (savedInstanceState != null) {
-			unimp("save and restore cursor position as well as text?");
-			this.summaryView.setText(this.receipt.getSummary());
-		}
+	@Override
+	public void onResume() {
+		final boolean db = true;
+		if (db)
+			pr("\n\nEditReceiptActivity.resume");
+		super.onResume(); // Always call the superclass method first
+		readWidgetValuesFromReceipt();
 	}
 
 	@Override
@@ -183,11 +159,29 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
-	private static final Calendar myCalendar = Calendar.getInstance();
+	// private static final Calendar myCalendar = Calendar.getInstance();
+
+	/**
+	 * Parse JSDate from date widget, if possible
+	 * 
+	 * @return JSDate, or null if parsing failed
+	 */
+	private JSDate readDateFromDateWidget() {
+		String content = dateView.getText().toString();
+		JSDate ret = receipt.getDate();
+		try {
+			ret = JSDate.parse(content);
+		} catch (IllegalArgumentException e) {
+			warning("failed to parse " + content);
+		}
+		return ret;
+	}
 
 	private void addDateWidget(ViewGroup layout) {
 		EditText tf = new EditText(this);
 		dateView = tf;
+		dateView.setText(receipt.getDate().toString());
+
 		tf.setFocusable(false);
 		tf.setMinHeight(50);
 		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -198,31 +192,25 @@ public class EditReceiptActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 
-				DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+				DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
 					@Override
 					public void onDateSet(DatePicker view, int year,
 							int monthOfYear, int dayOfMonth) {
-						// TODO Auto-generated method stub
-						myCalendar.set(Calendar.YEAR, year);
-						myCalendar.set(Calendar.MONTH, monthOfYear);
-						myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-						updateLabel();
+						JSDate date = JSDate.buildFromValues(year, monthOfYear,
+								dayOfMonth);
+						dateView.setText(date.toString());
+						// updateReceiptWithWidgetValues();
 					}
 				};
-
-				new DatePickerDialog(EditReceiptActivity.this, date, myCalendar
-						.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-						myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+				JSDate d = receipt.getDate();
+				// final boolean db = true;
+				if (db)
+					pr("initializing DatePickerDialog with date from receipt: "
+							+ d);
+				new DatePickerDialog(EditReceiptActivity.this, dateListener, d
+						.year(), d.month(), d.day()).show();
 			}
 		});
-	}
-
-	private void updateLabel() {
-
-		String myFormat = "MM/dd/yy"; // In which you need put here
-		SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-		dateView.setText(sdf.format(myCalendar.getTime()));
 	}
 
 	private void addSummaryWidget(ViewGroup layout) {
@@ -252,9 +240,6 @@ public class EditReceiptActivity extends Activity {
 
 		File workFile = getWorkPhotoFile();
 		workFile.delete();
-		
-		// save work file in instance field, so we can refer to it later
-//		pathOfTakenPhoto = workFile.getPath();
 
 		Uri uri = Uri.fromFile(workFile);
 		if (db)
@@ -270,7 +255,6 @@ public class EditReceiptActivity extends Activity {
 
 	private void processPhotoResult(Intent intent) {
 		// final boolean db = true;
-
 		if (db)
 			pr("\n\nprocessPhotoResult intent " + intent);
 
@@ -286,7 +270,6 @@ public class EditReceiptActivity extends Activity {
 			}
 
 			File workFile = getWorkPhotoFile();
-//			new File(pathOfTakenPhoto);
 			if (db)
 				pr(" pathOfTakenPhoto " + workFile);
 			if (!workFile.isFile()) {
@@ -294,13 +277,12 @@ public class EditReceiptActivity extends Activity {
 			}
 
 			ImageUtilities.orientAndScaleBitmap(workFile, 800, true);
-			// Create a new photo to store this work file
-			// Create an image file name
 			int photoIdentifier = receipt.getUniqueIdentifier();
 			if (photoIdentifier == 0) {
 				photoIdentifier = app.getUniqueIdentifier();
 				receipt.setUniqueIdentifier(photoIdentifier);
-				unimp("keep track of whether receipt is 'dirty' and persist if necessary");
+				// Note: we don't mark it as modified here; we'll assume this
+				// occurs when activity pauses
 			}
 
 			mainFile = app.getPhotoFile().getMainFileFor(photoIdentifier);
@@ -322,7 +304,6 @@ public class EditReceiptActivity extends Activity {
 			if (db)
 				pr("updating photo view");
 			updatePhotoView();
-			unimp("it's rotating the photo funny");
 		}
 	}
 
@@ -353,14 +334,22 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
-	void updateReceiptWithWidgetValues() {
-		if (receipt == null)
-			return;
+	private void readWidgetValuesFromReceipt() {
+		unimp("save and restore cursor position as well as text?");
+		summaryView.setText(receipt.getSummary());
+		dateView.setText(receipt.getDate().toString());
+	}
+
+	private void updateReceiptWithWidgetValues() {
+		if (db)
+			pr("\n\nupdateReceiptWithWidgetValues");
+		receipt.setDate(readDateFromDateWidget());
 		receipt.setSummary(summaryView.getText().toString());
+		if (db)
+			pr(" receipt now: " + receipt);
 		app.receiptFile().setModified(receipt);
 	}
 
-//	private String pathOfTakenPhoto;
 	private RBuddyApp app;
 	private Receipt receipt;
 	private ImageView photoView;

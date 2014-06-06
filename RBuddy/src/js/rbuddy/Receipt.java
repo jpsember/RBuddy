@@ -124,8 +124,7 @@ public class Receipt {
 
 	@Override
 	public String toString() {
-		return "Receipt #" + getUniqueIdentifier() + " summary='" + summary
-				+ "'";
+		return "Receipt "+encode();
 	}
 
 	/**

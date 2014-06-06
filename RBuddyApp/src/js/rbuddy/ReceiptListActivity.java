@@ -26,6 +26,9 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		final boolean db = true;
+		if (db) pr("\n\nReceiptListActivity.onCreate bundle "+savedInstanceState);
+		
 		super.onCreate(savedInstanceState);
 		
 		unimp("add 'new' or '+' button to menu to add new receipt");
@@ -43,6 +46,15 @@ public class ReceiptListActivity extends Activity {
 		layout.addView(lv);
 	}
 
+	@Override
+	public void onResume() {
+		final boolean db = true;
+		if (db) pr("\n\nReceiptListActivity.resume");
+		  super.onResume();  // Always call the superclass method first
+	    unimp("maybe we want to only do this if editing actually occurred? otherwise we lose our place?");
+		receiptListAdapter.notifyDataSetChanged();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu items for use in the action bar
@@ -101,32 +113,43 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processAddReceipt() {
+		final boolean db = true;
+		if (db) pr("\nReceiptListActivity.processAddReceipt");
 		Receipt r = new Receipt();
 		r.setUniqueIdentifier(app.getUniqueIdentifier());
 		app.receiptFile().add(r);
-		
+		this.receiptList.add(r);
+
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
 		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
+		if (db) pr(" starting activity "+intent);
 		startActivity(intent);
+		if (db) pr(" done starting activity");
 		
-		unimp("do we want to delay adding the receipt to the list until the activity returns?");
-
-		this.receiptList.add(r);
-		receiptListAdapter.notifyDataSetChanged();
+		unimp("detect upon return whether receipt was actually edited at all, and delete if no photo or other fields");
+//		
+//		unimp("do we want to delay adding the receipt to the list until the activity returns?");
+//
+//		receiptListAdapter.notifyDataSetChanged();
 		
 }
 	
 	private void processReceiptSelection(int position) {
-		Receipt r = (Receipt) receiptListAdapter.getItem(position);
+	final boolean db = true;
+if (db) pr("\nReceiptListActivity.processReceiptSelection "+position);
+		
+	Receipt r = (Receipt) receiptListAdapter.getItem(position);
 		pr("Just clicked on view, receipt " + r);
 		
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
 		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
+		if (db) pr(" start activity "+intent);
 		startActivity(intent);
+		if (db) pr(" done start activity\n");
 		unimp("refresh Receipt item if it's visible (which we assume it is in this case)");
 	}
 
