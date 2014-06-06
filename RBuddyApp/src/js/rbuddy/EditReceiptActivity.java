@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import js.basic.Files;
-import js.basic.Tools;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -306,29 +305,17 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updatePhotoView() {
-		// final boolean db = true;
-		if (db)
-			pr("updatePhotoView " + photoView + "; " + stackTrace(1, 3));
-
 		if (photoView == null)
 			return;
-		int requestedPhotoId = 0;
-
-		requestedPhotoId = receipt.getUniqueIdentifier();
-		if (db)
-			pr(" receipt " + receipt + "  requested id " + requestedPhotoId);
-		File imageFile = app.getPhotoFile().getMainFileFor(requestedPhotoId);
-		Bitmap bmp = null;
+		PhotoFile pf = app.getPhotoFile();
 
 		// If no image exists, display placeholder instead
-		if (!imageFile.isFile()) {
+		if (!pf.photoExists(receipt.getUniqueIdentifier())) {
 			photoView.setImageDrawable(getResources().getDrawable(
-					Tools.rnd.nextInt(8) == 6 ? R.drawable.missingphoto
-							: R.drawable.missingphoto2));
+					R.drawable.missingphoto));
 		} else {
-			if (db)
-				pr(" reading bitmap from file " + imageFile);
-			bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+			File imageFile = pf.getMainFileFor(receipt.getUniqueIdentifier());
+			Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
 					bmp));
 		}

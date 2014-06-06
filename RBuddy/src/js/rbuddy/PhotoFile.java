@@ -31,6 +31,11 @@ public class PhotoFile {
 		return thumbDirectory != null;
 	}
 
+	public boolean photoExists(int photoId) {
+		File f = getMainFileFor(photoId);
+		return f.isFile();
+	}
+	
 	public File getThumbFileFor(int photoId) {
 		if (!includesThumbnails())
 			throw new IllegalStateException();
