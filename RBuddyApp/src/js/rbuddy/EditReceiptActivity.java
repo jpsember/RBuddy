@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -315,7 +316,7 @@ public class EditReceiptActivity extends Activity {
 		} else {
 			if (db)
 				pr(" reading bitmap from file " + imageFile);
-			bmp = BitmapUtil.readImage(imageFile);
+			bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
 					bmp));
 		}

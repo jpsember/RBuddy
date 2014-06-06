@@ -35,20 +35,6 @@ public class BitmapUtil {
 					+ ", length " + destinationFile.length());
 	}
 
-	public static Bitmap readImage(File file) {
-		unimp("rename ImageUtilities -> BitmapUtil");
-
-		// final boolean db = true;
-		if (db)
-			pr("\n\nreadImage " + file);
-		String path = file.getAbsolutePath();
-		unimp("should we throw an exception if no such file exists?");
-		Bitmap bMap = BitmapFactory.decodeFile(path);
-		if (db)
-			pr(" read " + bMap);
-		return bMap;
-	}
-
 	/**
 	 * Rotate a bitmap if its orientation (as recorded by the camera) indicates
 	 * it needs rotation; optionally rotate bitmap as well. These are combined
