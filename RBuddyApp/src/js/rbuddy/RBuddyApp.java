@@ -72,23 +72,6 @@ public class RBuddyApp {
 		return receiptFile;
 	}
 	
-//	public ArrayList receiptList() {
-//		if (receiptList == null) {
-//			ArrayList list = new ArrayList();
-//			int NUM_RECEIPTS = 50;
-//			if (db)
-//				timeStamp("building receipts");
-//			for (int i = 0; i < NUM_RECEIPTS; i++) {
-//				list.add(Receipt.buildRandom());
-//			}
-//			if (db)
-//				timeStamp("done building");
-//			receiptList = list;
-//
-//		}
-//		return receiptList;
-//	}
-
 	public int getUniqueIdentifier() {
 		int value;
 		synchronized (this) {
@@ -119,6 +102,5 @@ public class RBuddyApp {
 	private static RBuddyApp sharedInstance;
 	private Activity context;
 	private PhotoFile photoFile;
-//	private ArrayList receiptList;
 	private IReceiptFile receiptFile;
 }

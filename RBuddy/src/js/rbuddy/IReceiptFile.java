@@ -8,6 +8,7 @@ public interface IReceiptFile {
 	 * Retrieve a receipt, given its identifier
 	 * @param uniqueIdentifier
 	 * @return receipt
+	 * @throws IllegalArgumentException if no such receipt exists
 	 */
 	public Receipt getReceipt(int uniqueIdentifier);
 	
@@ -18,19 +19,22 @@ public interface IReceiptFile {
 	
 	/**
 	 * Add a receipt
-	 * @param r
+	 * @param r Receipt
+	 * @throws IllegalArgumentException if receipt already exists in file
 	 */
 	public void add(Receipt r);
 	
 	/**
 	 * Delete a receipt
 	 * @param r
+	 * @throws IllegalArgumentException if no such receipt exists
 	 */
 	public void delete(Receipt r);
 	
 	/**
 	 * Mark a receipt as being modified, so that it is written when the file is flushed
 	 * @param r
+	 * @throws IllegalArgumentException if no such receipt exists
 	 */
 	public void setModified(Receipt r);
 

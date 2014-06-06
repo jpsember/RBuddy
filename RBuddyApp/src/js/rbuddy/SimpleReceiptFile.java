@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import js.basic.Tools;
-import android.content.Context;
 import static js.basic.Tools.*;
 
 public class SimpleReceiptFile implements IReceiptFile {
@@ -22,11 +21,25 @@ public class SimpleReceiptFile implements IReceiptFile {
 		unimp("some way of determining if receipt has really changed; note that iterator is returning values without going through getReceipt()");
 	}
 
+	private Receipt getReceiptFromMap(int identifier, boolean expectedToExist) {
+		if (identifier <= 0) throw new IllegalArgumentException("bad id "+identifier);
+		
+		Receipt r = (Receipt) map.get(identifier);
+		if (r == null) {
+			if (expectedToExist)
+				throw new IllegalArgumentException("no receipt found with id "
+						+ identifier);
+		} else {
+			if (!expectedToExist)
+				throw new IllegalArgumentException("receipt with id "
+						+ identifier + " already exists");
+		}
+		return r;
+	}
+
 	@Override
 	public Receipt getReceipt(int uniqueIdentifier) {
-		Receipt r = (Receipt) map.get(uniqueIdentifier);
-		ASSERT(r != null);
-		return r;
+		return getReceiptFromMap(uniqueIdentifier,true);
 	}
 
 	@Override
@@ -45,12 +58,9 @@ public class SimpleReceiptFile implements IReceiptFile {
 				sb.append(r.encode());
 				sb.append('\n');
 			}
-			FileOutputStream fs;
 			try {
-				fs = RBuddyApp
-						.sharedInstance()
-						.activity()
-						.openFileOutput(RECEIPTS_FILENAME, Context.MODE_PRIVATE);
+				FileOutputStream fs;
+				fs = new FileOutputStream(getFile());
 				if (db)
 					pr(" writing:\n" + sb);
 				fs.write(sb.toString().getBytes());
@@ -63,15 +73,14 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void add(Receipt r) {
-		ASSERT(r.getUniqueIdentifier() != 0);
-		ASSERT(!map.containsKey(r.getUniqueIdentifier()));
+		getReceiptFromMap(r.getUniqueIdentifier(),false);
 		map.put(r.getUniqueIdentifier(), r);
 		setModified(r);
 	}
 
 	@Override
 	public void delete(Receipt r) {
-		ASSERT(map.containsKey(r.getUniqueIdentifier()));
+		getReceiptFromMap(r.getUniqueIdentifier(),true);
 		map.remove(r.getUniqueIdentifier());
 		setChanges();
 	}
@@ -96,25 +105,32 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
+	private File receiptFile;
+
+	private File getFile() {
+		if (receiptFile == null) {
+			receiptFile = new File(RBuddyApp.sharedInstance().activity()
+					.getExternalFilesDir(null), RECEIPTS_FILENAME);
+			if (!receiptFile.exists()) {
+					warning("no receipt file found: "
+							+ receiptFile.getAbsolutePath());
+			}
+
+		}
+		return receiptFile;
+	}
+
 	private void readAllReceipts() {
 		// final boolean db = true;
 		if (db)
-			pr("readAllReceipts\n");
+			pr("\n\nSimpleReceiptFile.readAllReceipts\n");
 		ASSERT(map.isEmpty());
 
-		File f = new File(RECEIPTS_FILENAME);
-		if (!f.exists()) {
-			if (db)
-				warning("no receipt file found: " + f);
+		if (!getFile().exists())
 			return;
-		}
 
 		try {
-			FileInputStream fs;
-			fs = RBuddyApp.sharedInstance().activity()
-					.openFileInput(RECEIPTS_FILENAME);
-			if (db)
-				pr(" opened input stream\n");
+			FileInputStream fs = new FileInputStream(getFile());
 			BufferedReader reader = new BufferedReader(
 					new InputStreamReader(fs));
 			while (true) {
@@ -148,7 +164,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
-	private static final String RECEIPTS_FILENAME = "receipts2.txt";
+	private static final String RECEIPTS_FILENAME = "receipts.txt";
 
 	private boolean changes;
 	private Map map;
