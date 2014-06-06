@@ -19,8 +19,9 @@ public class AndroidDate extends JSDate {
 
 	@SuppressLint("SimpleDateFormat")
 	public static final JSDateFactory androidDateFactory = new JSDateFactory() {
-		
-		private SimpleDateFormat jsDateFormat =  new SimpleDateFormat("yyyy-MM-dd");
+
+		private SimpleDateFormat jsDateFormat = new SimpleDateFormat(
+				"yyyy-MM-dd");
 
 		@Override
 		public Date convertJSDateToJavaDate(JSDate d) {
@@ -38,8 +39,7 @@ public class AndroidDate extends JSDate {
 			String jsString = jsDateFormat.format(d);
 			return parse(jsString);
 		}
-		 
-	
+
 		@Override
 		public JSDate currentDate() {
 			return convertJavaDateToJSDate(new Date());
@@ -52,18 +52,40 @@ public class AndroidDate extends JSDate {
 		}
 
 	};
-	
+
 	private static Calendar calendar;
-	
+
 	public static int[] getJavaYearMonthDay(JSDate jsDate) {
 		Date date = androidDateFactory.convertJSDateToJavaDate(jsDate);
-		if (calendar == null) calendar = Calendar.getInstance();
+		if (calendar == null)
+			calendar = Calendar.getInstance();
 		calendar.setTime(date);
-	    int year = calendar.get(Calendar.YEAR);
-	    int month = calendar.get(Calendar.MONTH);
-	    int day = calendar.get(Calendar.DAY_OF_MONTH);
-	    int[] ret = {year,month,day};
-	    return ret;
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH);
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+		int[] ret = { year, month, day };
+		return ret;
 	}
-	
+
+	private static java.text.DateFormat userDateFormat;
+
+	private static java.text.DateFormat userDateFormat() {
+		if (userDateFormat == null) {
+			userDateFormat = android.text.format.DateFormat
+					.getDateFormat(RBuddyApp.sharedInstance().activity());
+		}
+		return userDateFormat;
+	}
+
+	public static JSDate parseJSDateFromUserString(String userString)
+			throws ParseException {
+		Date date = userDateFormat().parse(userString);
+		return JSDate.factory().convertJavaDateToJSDate(date);
+
+	}
+
+	public static String formatUserDateFromJSDate(JSDate date) {
+		return userDateFormat().format(factory().convertJSDateToJavaDate(date));
+	}
+
 }

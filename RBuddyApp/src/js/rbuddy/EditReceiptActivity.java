@@ -5,12 +5,9 @@ import static js.basic.Tools.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import js.basic.Files;
 import js.basic.Tools;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -57,12 +54,10 @@ public class EditReceiptActivity extends Activity {
 			pr("\n\nEditReceiptActivity onCreate\n");
 		app = RBuddyApp.sharedInstance();
 
-		{
-			Intent i = getIntent();
-			int receiptId = i.getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
-			ASSERT(receiptId > 0);
-			this.receipt = app.receiptFile().getReceipt(receiptId);
-		}
+		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
+		ASSERT(receiptId > 0);
+		this.receipt = app.receiptFile().getReceipt(receiptId);
+
 		layoutElements();
 	}
 
@@ -71,7 +66,7 @@ public class EditReceiptActivity extends Activity {
 		// final boolean db = true;
 		if (db)
 			pr("\n\nEditReceiptActivity.resume");
-		super.onResume(); // Always call the superclass method first
+		super.onResume();
 		readWidgetValuesFromReceipt();
 	}
 
@@ -96,11 +91,6 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// final boolean db = true;
-		if (db)
-			pr("onActivityResult\n requestCode=" + requestCode
-					+ "\n resultCode=" + resultCode + "\n intent=" + data);
-
 		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 			processPhotoResult(data);
 		}
@@ -119,7 +109,6 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void addPhotoWidget(ViewGroup layout) {
-		unimp("if no photo exists, use default; currently nothing is showing up");
 
 		// Nest the image view within a horizontal layout, to add a 'camera'
 		// button to the bottom right
@@ -165,8 +154,6 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
-	// private static final Calendar myCalendar = Calendar.getInstance();
-
 	/**
 	 * Parse JSDate from date widget, if possible
 	 * 
@@ -176,42 +163,17 @@ public class EditReceiptActivity extends Activity {
 		String content = dateView.getText().toString();
 		JSDate ret = receipt.getDate();
 		try {
-			String content2 = null;
-			try {
-				Date date = userDateFormat.parse(content);
-				content2 = jsDateFormat.format(date);
-			} catch (ParseException e) {
-				throw new IllegalArgumentException(e);
-			}
-			ret = JSDate.parse(content2);
-		} catch (IllegalArgumentException e) {
-			warning("failed to parse " + content);
+			ret = AndroidDate.parseJSDateFromUserString(content);
+		} catch (ParseException e) {
+			warning("problem parsing " + e);
 		}
 		return ret;
 	}
 
-	private SimpleDateFormat jsDateFormat;
-	private java.text.DateFormat userDateFormat;
-
-	private String cvtJSDateToUserDateString(JSDate jsDate) {
-		unimp("put this in AndroidDate, or better still, JSDate?  As factory method?");
-		Date date = JSDate.factory().convertJSDateToJavaDate(jsDate); // null;
-		String userDateString = userDateFormat.format(date);
-		if (db)
-			pr("cvt JSDate " + jsDate + " --> Date " + date + " --> user "
-					+ userDateString);
-		return userDateString;
-	}
-
-	@SuppressLint("SimpleDateFormat")
 	private void addDateWidget(ViewGroup layout) {
-
-		jsDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		userDateFormat = android.text.format.DateFormat.getDateFormat(this);
 
 		EditText tf = new EditText(this);
 		dateView = tf;
-		// pr("addDateWidget, converting receipt date " + receipt.getDate());
 
 		tf.setFocusable(false);
 		tf.setMinHeight(50);
@@ -227,16 +189,10 @@ public class EditReceiptActivity extends Activity {
 					@Override
 					public void onDateSet(DatePicker view, int year,
 							int monthOfYear, int dayOfMonth) {
-						warning("what are the year month day returned here?  Is it safe to use them, or should we build a (java) Date object?");
-
 						JSDate date = JSDate.buildFromValues(year, monthOfYear,
 								dayOfMonth);
-						// final boolean db = true;
-						if (db)
-							pr("date set, year " + year + " month "
-									+ monthOfYear + " day " + dayOfMonth
-									+ " yields JSDate " + date);
-						dateView.setText(cvtJSDateToUserDateString(date));
+						dateView.setText(AndroidDate
+								.formatUserDateFromJSDate(date));
 					}
 				};
 				int[] ymd = AndroidDate
@@ -293,52 +249,51 @@ public class EditReceiptActivity extends Activity {
 			pr("\n\nprocessPhotoResult intent " + intent);
 
 		File mainFile = null;
-		{
-			unimp("handle various problem situations in ways other than just 'die'");
-			// final boolean db = true;
-			if (db)
-				pr("processPhotoResult intent=" + intent);
+		unimp("handle various problem situations in ways other than just 'die'");
+		// final boolean db = true;
+		if (db)
+			pr("processPhotoResult intent=" + intent);
 
-			if (intent != null) {
-				warning("did not expect intent to be non-null: " + intent);
-			}
-
-			File workFile = getWorkPhotoFile();
-			if (db)
-				pr(" pathOfTakenPhoto " + workFile);
-			if (!workFile.isFile()) {
-				die("no work file found: " + workFile);
-			}
-
-			ImageUtilities.orientAndScaleBitmap(workFile, 800, true);
-			int photoIdentifier = receipt.getUniqueIdentifier();
-			if (photoIdentifier == 0) {
-				photoIdentifier = app.getUniqueIdentifier();
-				receipt.setUniqueIdentifier(photoIdentifier);
-				// Note: we don't mark it as modified here; we'll assume this
-				// occurs when activity pauses
-			}
-
-			mainFile = app.getPhotoFile().getMainFileFor(photoIdentifier);
-			if (db)
-				pr("photoIdentifier " + photoIdentifier
-						+ "  copying scaled/rotated file " + workFile
-						+ " to mainFile " + mainFile);
-
-			try {
-				Files.copy(workFile, mainFile);
-			} catch (IOException e) {
-				die(e);
-			}
-
-			unimp("construct thumbnail");
-			if (db)
-				pr("created main file " + mainFile);
-
-			if (db)
-				pr("updating photo view");
-			updatePhotoView();
+		if (intent != null) {
+			warning("did not expect intent to be non-null: " + intent);
 		}
+
+		File workFile = getWorkPhotoFile();
+		if (db)
+			pr(" pathOfTakenPhoto " + workFile);
+		if (!workFile.isFile()) {
+			die("no work file found: " + workFile);
+		}
+
+		ImageUtilities.orientAndScaleBitmap(workFile, 800, true);
+		int photoIdentifier = receipt.getUniqueIdentifier();
+		if (photoIdentifier == 0) {
+			photoIdentifier = app.getUniqueIdentifier();
+			receipt.setUniqueIdentifier(photoIdentifier);
+			// Note: we don't mark it as modified here; we'll assume this
+			// occurs when activity pauses
+		}
+
+		mainFile = app.getPhotoFile().getMainFileFor(photoIdentifier);
+		if (db)
+			pr("photoIdentifier " + photoIdentifier
+					+ "  copying scaled/rotated file " + workFile
+					+ " to mainFile " + mainFile);
+
+		try {
+			Files.copy(workFile, mainFile);
+		} catch (IOException e) {
+			die(e);
+		}
+
+		unimp("we don't need thumbnails, get rid of them");
+		if (db)
+			pr("created main file " + mainFile);
+
+		if (db)
+			pr("updating photo view");
+		updatePhotoView();
+
 	}
 
 	private void updatePhotoView() {
@@ -349,46 +304,36 @@ public class EditReceiptActivity extends Activity {
 		if (photoView == null)
 			return;
 		int requestedPhotoId = 0;
-		ASSERT(receipt != null);
 
 		requestedPhotoId = receipt.getUniqueIdentifier();
 		if (db)
 			pr(" receipt " + receipt + "  requested id " + requestedPhotoId);
-		{
-			File imageFile = app.getPhotoFile()
-					.getMainFileFor(requestedPhotoId);
-			Bitmap bmp = null;
+		File imageFile = app.getPhotoFile().getMainFileFor(requestedPhotoId);
+		Bitmap bmp = null;
 
-			// If no image exists, display placeholder instead
-			if (!imageFile.isFile()) {
-				photoView.setImageDrawable(getResources().getDrawable(
-						Tools.rnd.nextInt(8) == 6 ? R.drawable.missingphoto
-								: R.drawable.missingphoto2));
-			} else {
-
-				if (db)
-					pr(" reading bitmap from file " + imageFile);
-				bmp = ImageUtilities.readImage(imageFile);
-				photoView.setImageDrawable(new BitmapDrawable(this
-						.getResources(), bmp));
-			}
+		// If no image exists, display placeholder instead
+		if (!imageFile.isFile()) {
+			photoView.setImageDrawable(getResources().getDrawable(
+					Tools.rnd.nextInt(8) == 6 ? R.drawable.missingphoto
+							: R.drawable.missingphoto2));
+		} else {
+			if (db)
+				pr(" reading bitmap from file " + imageFile);
+			bmp = ImageUtilities.readImage(imageFile);
+			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
+					bmp));
 		}
 	}
 
 	private void readWidgetValuesFromReceipt() {
 		unimp("save and restore cursor position as well as text?");
 		summaryView.setText(receipt.getSummary());
-
-		dateView.setText(cvtJSDateToUserDateString(receipt.getDate()));
+		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
 	}
 
 	private void updateReceiptWithWidgetValues() {
-		if (db)
-			pr("\n\nupdateReceiptWithWidgetValues");
 		receipt.setDate(readDateFromDateWidget());
 		receipt.setSummary(summaryView.getText().toString());
-		if (db)
-			pr(" receipt now: " + receipt);
 		app.receiptFile().setModified(receipt);
 	}
 
