@@ -26,6 +26,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.view.KeyEvent;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -201,14 +202,26 @@ public class EditReceiptActivity extends Activity {
 
 	private void addSummaryWidget(ViewGroup layout) {
 		MultiAutoCompleteTextView tf = new MultiAutoCompleteTextView(this);
-		
-		tf.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-				| InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+
+		tf.setInputType(InputType.TYPE_CLASS_TEXT
+				| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+
 		tf.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
-		TextKeyListener input = TextKeyListener.getInstance(true,
-				TextKeyListener.Capitalize.NONE);
-		tf.setKeyListener(input);
+		tf.setKeyListener(TextKeyListener.getInstance(true,
+				TextKeyListener.Capitalize.NONE));
+
+		// This makes pressing the 'done' keyboard key close the keyboard
+		tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				return false;
+			}
+		});
+
+		// May or may not be useful; let's see after adding other components
+		// tf.clearFocus();
 
 		summaryView = tf;
 		tf.setHint("Summary");
@@ -323,8 +336,8 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void readWidgetValuesFromReceipt() {
-		unimp("save and restore cursor position as well as text?");
 		summaryView.setText(receipt.getSummary());
+		summaryView.setSelection(summaryView.getText().length());
 		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
 	}
 
@@ -337,6 +350,6 @@ public class EditReceiptActivity extends Activity {
 	private RBuddyApp app;
 	private Receipt receipt;
 	private ImageView photoView;
-	private TextView summaryView;
+	private EditText summaryView;
 	private TextView dateView;
 }
