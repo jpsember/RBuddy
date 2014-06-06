@@ -4,8 +4,14 @@ import static js.basic.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import js.basic.Files;
+import js.basic.Tools;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -36,7 +42,7 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onPause() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db)
 			pr("\nEditReceiptActivity.onPause");
 		super.onPause(); // Always call the superclass method first
@@ -46,6 +52,7 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+//		final boolean db = true;
 		super.onCreate(savedInstanceState);
 		if (db)
 			pr("\n\nEditReceiptActivity onCreate\n");
@@ -62,7 +69,7 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onResume() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db)
 			pr("\n\nEditReceiptActivity.resume");
 		super.onResume(); // Always call the superclass method first
@@ -170,17 +177,47 @@ public class EditReceiptActivity extends Activity {
 		String content = dateView.getText().toString();
 		JSDate ret = receipt.getDate();
 		try {
-			ret = JSDate.parse(content);
+			String content2 = null;
+			try {
+				Date date = userDateFormat.parse(content);
+				 content2 = jsDateFormat.format(date);
+			} catch (ParseException e) {
+				throw new IllegalArgumentException(e);
+			}
+			ret = JSDate.parse(content2);
 		} catch (IllegalArgumentException e) {
 			warning("failed to parse " + content);
 		}
 		return ret;
 	}
 
+	private SimpleDateFormat jsDateFormat;
+	private java.text.DateFormat userDateFormat;
+
+	private String cvtJSDateStringToUserDateString(String jsDateString) {
+//		final boolean db = true;
+		Date date = null;
+		try {
+			date = jsDateFormat.parse(jsDateString);
+		} catch (ParseException e) {
+			die(e);
+		}
+		String userDateString = userDateFormat.format(date);
+		if (db)
+			pr("cvt JSDate " + jsDateString + " --> Date " + date
+					+ " --> user " + userDateString);
+		return userDateString;
+	}
+
+	@SuppressLint("SimpleDateFormat")
 	private void addDateWidget(ViewGroup layout) {
+
+		jsDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		userDateFormat = android.text.format.DateFormat.getDateFormat(this);
+
 		EditText tf = new EditText(this);
 		dateView = tf;
-		dateView.setText(receipt.getDate().toString());
+//		pr("addDateWidget, converting receipt date " + receipt.getDate());
 
 		tf.setFocusable(false);
 		tf.setMinHeight(50);
@@ -196,19 +233,43 @@ public class EditReceiptActivity extends Activity {
 					@Override
 					public void onDateSet(DatePicker view, int year,
 							int monthOfYear, int dayOfMonth) {
+						
 						JSDate date = JSDate.buildFromValues(year, monthOfYear,
 								dayOfMonth);
-						dateView.setText(date.toString());
-						// updateReceiptWithWidgetValues();
+//						final boolean db = true;
+						if (db)
+							pr("date set, year " + year + " month "
+									+ monthOfYear + " day " + dayOfMonth
+									+ " yields JSDate " + date);
+						dateView.setText(cvtJSDateStringToUserDateString(date
+								.toString()));
 					}
 				};
-				JSDate d = receipt.getDate();
-				// final boolean db = true;
+				
+//				final boolean db = true;
+				
+				JSDate d = readDateFromDateWidget();
 				if (db)
-					pr("initializing DatePickerDialog with date from receipt: "
+					pr("\n\n\n\ninitializing DatePickerDialog with date from widget: "
 							+ d);
-				new DatePickerDialog(EditReceiptActivity.this, dateListener, d
-						.year(), d.month(), d.day()).show();
+				
+				Date date = null;
+				try {
+					 date = jsDateFormat.parse(d.toString());
+				} catch (ParseException e) {
+					die(e);
+				}
+
+				final Calendar c = Calendar.getInstance();
+				c.setTime(date);
+			    int year = c.get(Calendar.YEAR);
+			    int month = c.get(Calendar.MONTH);
+			    int day = c.get(Calendar.DAY_OF_MONTH);
+
+			    if (db) pr(" init datePicker with calendar "+c+"\n y"+year+" m"+month+" d"+day);
+			    unimp("lost in the java.util.Date / Calendar morass, needs cleaing up");
+			    
+				new DatePickerDialog(EditReceiptActivity.this, dateListener, year,month,day).show();
 			}
 		});
 	}
@@ -308,36 +369,45 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updatePhotoView() {
-		// final boolean db = true;
+//		final boolean db = true;
 		if (db)
-			pr("updatePhotoView " + photoView);
+			pr("updatePhotoView " + photoView + "; " + stackTrace(1, 3));
 
 		if (photoView == null)
 			return;
 		int requestedPhotoId = 0;
-		if (receipt != null)
-			requestedPhotoId = receipt.getUniqueIdentifier();
+		ASSERT(receipt != null);
+
+		requestedPhotoId = receipt.getUniqueIdentifier();
 		if (db)
 			pr(" receipt " + receipt + "  requested id " + requestedPhotoId);
-		if (requestedPhotoId == 0) {
-			photoView.setImageDrawable(getResources().getDrawable(
-					R.drawable.missingphoto));
-		} else {
+		{
 			File imageFile = app.getPhotoFile()
 					.getMainFileFor(requestedPhotoId);
-			if (db)
-				pr(" reading bitmap from file " + imageFile);
-			Bitmap bmp = ImageUtilities.readImage(imageFile);
+			Bitmap bmp = null;
 
-			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
-					bmp));
+			// If no image exists, display placeholder instead
+			if (!imageFile.isFile()) {
+				photoView.setImageDrawable(getResources().getDrawable(
+						Tools.rnd.nextInt(8) == 6 ? R.drawable.missingphoto
+								: R.drawable.missingphoto2));
+			} else {
+
+				if (db)
+					pr(" reading bitmap from file " + imageFile);
+				bmp = ImageUtilities.readImage(imageFile);
+				photoView.setImageDrawable(new BitmapDrawable(this
+						.getResources(), bmp));
+			}
 		}
 	}
 
 	private void readWidgetValuesFromReceipt() {
 		unimp("save and restore cursor position as well as text?");
 		summaryView.setText(receipt.getSummary());
-		dateView.setText(receipt.getDate().toString());
+
+		dateView.setText(cvtJSDateStringToUserDateString(receipt.getDate()
+				.toString()));
 	}
 
 	private void updateReceiptWithWidgetValues() {

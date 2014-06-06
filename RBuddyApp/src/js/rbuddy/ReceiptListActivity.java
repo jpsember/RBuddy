@@ -26,12 +26,10 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db) pr("\n\nReceiptListActivity.onCreate bundle "+savedInstanceState);
 		
 		super.onCreate(savedInstanceState);
-		
-		unimp("add 'new' or '+' button to menu to add new receipt");
 		
 		RBuddyApp.prepare(this);
 		
@@ -48,7 +46,7 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public void onResume() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db) pr("\n\nReceiptListActivity.resume");
 		  super.onResume();  // Always call the superclass method first
 	    unimp("maybe we want to only do this if editing actually occurred? otherwise we lose our place?");
@@ -113,7 +111,7 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processAddReceipt() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db) pr("\nReceiptListActivity.processAddReceipt");
 		Receipt r = new Receipt();
 		r.setUniqueIdentifier(app.getUniqueIdentifier());

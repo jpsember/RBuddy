@@ -16,7 +16,7 @@ public class AndroidDate extends JSDate {
 		public JSDate currentDate() {
 			Calendar c = Calendar.getInstance();
 			int year = c.get(Calendar.YEAR);
-			int month = c.get(Calendar.MONTH);
+			int month = 1+c.get(Calendar.MONTH);
 			int day = c.get(Calendar.DAY_OF_MONTH);
 			return new AndroidDate(year, month, day);
 		}

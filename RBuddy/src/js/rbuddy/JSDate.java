@@ -1,11 +1,15 @@
 package js.rbuddy;
 
+import java.util.Locale;
 import java.util.regex.*;
 
 import static js.basic.Tools.*;
 
 public class JSDate {
 
+	public static final int MONTH_BASE = 0;
+	public static final int DAY_BASE = 1;
+	
 	/**
 	 * Constructor for subclasses only
 	 */
@@ -22,7 +26,7 @@ public class JSDate {
 	 */
 	public String toString() {
 		if (str == null) {
-			str = String.format("%04d-%02d-%02d", year, month, day);
+			str = buildString(year, month, day);
 		}
 		return str;
 	}
@@ -70,13 +74,24 @@ public class JSDate {
 	 */
 	protected static int[] parseStandardDateFromString(String s) {
 		Matcher m = dateRegExPattern.matcher(s);
-		if (!m.matches())
+		int[] a = null;
+		do {
+			if (!m.matches())
+				break;
+
+			int year = Integer.parseInt(m.group(1));
+			int month = Integer.parseInt(m.group(2)) + (MONTH_BASE - 1);
+			int day = Integer.parseInt(m.group(3)) + (DAY_BASE-1);
+			if (month < MONTH_BASE || day < DAY_BASE || month >= 12+MONTH_BASE || day >= 31 + DAY_BASE)
+				break;
+
+			int[] b = { year, month, day };
+			a = b;
+		} while (false);
+		
+		if (a == null)
 			throw new IllegalArgumentException("failed parsing date: " + s);
 
-		int year = Integer.parseInt(m.group(1));
-		int month = Integer.parseInt(m.group(2));
-		int day = Integer.parseInt(m.group(3));
-		int[] a = { year, month, day };
 		return a;
 	}
 
@@ -84,7 +99,7 @@ public class JSDate {
 		@Override
 		public JSDate currentDate() {
 			// For this most basic factory, we just return a constant date
-			return new JSDate(1965, 10, 31);
+			return new JSDate(1965, 10 + MONTH_BASE, 31);
 		}
 
 		@Override
@@ -94,15 +109,19 @@ public class JSDate {
 		}
 	};
 
+	private static String buildString(int year, int month, int day) {
+		return String.format(Locale.US, "%04d-%02d-%02d", year, month + (1 - MONTH_BASE),
+				day + (1 - DAY_BASE));
+	}
+
 	public static JSDate buildFromValues(int year, int month, int day) {
-		String str = String.format("%04d-%02d-%02d", year, month, day);
-		return JSDate.parse(str);
+		return JSDate.parse(buildString(year, month, day));
 	}
 
 	public static JSDate buildRandom() {
 		int year = rnd.nextInt(4) + 2010;
-		int month = rnd.nextInt(12);
-		int day = rnd.nextInt(28);
+		int month = MONTH_BASE + rnd.nextInt(12);
+		int day = DAY_BASE +rnd.nextInt(28);
 		return buildFromValues(year, month, day);
 	}
 }

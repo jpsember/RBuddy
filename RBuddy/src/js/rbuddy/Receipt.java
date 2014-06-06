@@ -30,7 +30,7 @@ public class Receipt {
 	}
 
 	public static Receipt decode(String s) {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db) pr("Receipt.decode \""+s+"\"");
 		
 		StringTokenizer t = new StringTokenizer(s, "|");

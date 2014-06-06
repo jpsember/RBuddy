@@ -42,6 +42,7 @@ public class ImageUtilities {
 		if (db)
 			pr("\n\nreadImage " + file);
 		String path = file.getAbsolutePath();
+		unimp("should we throw an exception if no such file exists?");
 		Bitmap bMap = BitmapFactory.decodeFile(path);
 		if (db)
 			pr(" read " + bMap);
