@@ -101,8 +101,17 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
+//	public void onPause() {
+//    	super.onPause();
+//    	toast("onPause: bye bye!");
+//    }
+
 	@Override
 	public void onSaveInstanceState(Bundle s) {
+		final boolean db = true;
+		if (db) pr("EditReceiptActivity saving instance state");
+		app.receiptFile().flush();
+		
 		// The OS may be shutting down our activity to service some other
 		// (possibly memory-intensive) task;
 		// so save our state
@@ -204,6 +213,7 @@ public class EditReceiptActivity extends Activity {
 
 	private void processPhotoResult(Intent intent) {
 		// final boolean db = true;
+		
 		if (db)
 			pr("\n\nprocessPhotoResult intent " + intent);
 

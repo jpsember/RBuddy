@@ -19,6 +19,12 @@ import android.widget.ListView;
 public class ReceiptListActivity extends Activity {
 
 	@Override
+	public void onSaveInstanceState(Bundle s) {
+		app.receiptFile().flush();
+		super.onSaveInstanceState(s);
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
@@ -51,6 +57,9 @@ public class ReceiptListActivity extends Activity {
 	        case R.id.action_settings:
 	            unimp("settings");
 	            return true;
+	        case R.id.action_add:
+	        	processAddReceipt();
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -75,7 +84,7 @@ public class ReceiptListActivity extends Activity {
 		// Store references to both the ArrayAdapter and the backing ArrayList,
 		// to make responding to selection actions more convenient.
 		this.receiptListAdapter = arrayAdapter;
-//		this.receiptList = receiptList;
+		this.receiptList = receiptList;
 		if (db) pr("adapter="+this.receiptListAdapter);
 		
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -91,6 +100,21 @@ public class ReceiptListActivity extends Activity {
 		return listView;
 	}
 
+	private void processAddReceipt() {
+		Receipt r = new Receipt();
+		r.setUniqueIdentifier(app.getUniqueIdentifier());
+		app.receiptFile().add(r);
+		// Start the edit receipt activity
+		Intent intent = new Intent(getApplicationContext(),
+				EditReceiptActivity.class);
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
+		startActivity(intent);
+		this.receiptList.add(r);
+		receiptListAdapter.notifyDataSetChanged();
+		
+		unimp("refresh Receipt item if it's visible (which we assume it is in this case)");
+}
+	
 	private void processReceiptSelection(int position) {
 		Receipt r = (Receipt) receiptListAdapter.getItem(position);
 		pr("Just clicked on view, receipt " + r);
@@ -100,8 +124,10 @@ public class ReceiptListActivity extends Activity {
 				EditReceiptActivity.class);
 		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
 		startActivity(intent);
+		unimp("refresh Receipt item if it's visible (which we assume it is in this case)");
 	}
 
 	private ArrayAdapter receiptListAdapter;
+	private List receiptList;
 	private RBuddyApp app;
 }

@@ -29,6 +29,10 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void flush() {
+		final boolean db = true;
+		if (db)
+			pr("SimpleReceiptFile flush, changes " + changes);
+
 		if (changes) {
 			changes = false;
 
@@ -44,6 +48,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 						.sharedInstance()
 						.activity()
 						.openFileOutput(RECEIPTS_FILENAME, Context.MODE_PRIVATE);
+				if (db)
+					pr(" writing:\n" + sb);
 				fs.write(sb.toString().getBytes());
 				fs.close();
 			} catch (IOException e) {
@@ -64,12 +70,12 @@ public class SimpleReceiptFile implements IReceiptFile {
 	public void delete(Receipt r) {
 		ASSERT(map.containsKey(r.getUniqueIdentifier()));
 		map.remove(r.getUniqueIdentifier());
-		changes = true;
+		setChanges();
 	}
 
 	@Override
 	public void setModified(Receipt r) {
-		changes = true;
+		setChanges();
 	}
 
 	@Override
@@ -83,7 +89,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	public void clear() {
 		if (!map.isEmpty()) {
 			map.clear();
-			changes = true;
+			setChanges();
 		}
 	}
 
@@ -94,8 +100,11 @@ public class SimpleReceiptFile implements IReceiptFile {
 		ASSERT(map.isEmpty());
 
 		File f = new File(RECEIPTS_FILENAME);
-		if (!f.exists()) return;
-		
+		if (!f.exists()) {
+			warning("no receipt file found: " + f);
+			return;
+		}
+
 		try {
 			FileInputStream fs;
 			fs = RBuddyApp.sharedInstance().activity()
@@ -124,7 +133,18 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
-	private static final String RECEIPTS_FILENAME = "receipts.txt";
+	private void setChanges() {
+		final boolean db = true;
+		if (db)
+			pr("setChanges\n");
+		if (!changes) {
+			if (db)
+				pr("  ....... changes now true\n");
+			changes = true;
+		}
+	}
+
+	private static final String RECEIPTS_FILENAME = "receipts2.txt";
 
 	private boolean changes;
 	private Map map;

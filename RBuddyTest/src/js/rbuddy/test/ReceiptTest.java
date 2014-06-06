@@ -7,23 +7,22 @@ import js.rbuddy.JSDate;
 //import static js.basic.Tools.*;
 import js.rbuddy.Receipt;
 
-
 public class ReceiptTest extends js.testUtils.MyTest {
 
 	private void verifySummary(String input, String expOutput) {
-	Receipt r = new Receipt();
-	r.setSummary(input);
-	assertStringsMatch(r.getSummary(),expOutput);
+		Receipt r = new Receipt();
+		r.setSummary(input);
+		assertStringsMatch(r.getSummary(), expOutput);
 	}
-	
+
 	@Test
 	public void testSummaryLeadSpaces() {
-		verifySummary("   leading spaces","leading spaces");
+		verifySummary("   leading spaces", "leading spaces");
 	}
-	
+
 	@Test
 	public void testSummaryTrailingSpaces() {
-		verifySummary("trailing spaces   ","trailing spaces");
+		verifySummary("trailing spaces   ", "trailing spaces");
 	}
 
 	@Test
@@ -31,25 +30,34 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		verifySummary("linefeeds\n\n\nembedded", "linefeeds embedded");
 		verifySummary("linefeeds    \t\n\n  embedded    aaa \n\n \n bbb ",
 				"linefeeds embedded aaa bbb");
-		verifySummary(" \n\n \n ",
-				"");
+		verifySummary(" \n\n \n ", "");
 	}
-	
+
 	@Test
 	public void testConstructorStartsWithCurrentDate() {
 		Receipt r = new Receipt();
 		assertStringsMatch(JSDate.currentDate(), r.getDate());
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
+
+	@Test(expected = IllegalArgumentException.class)
 	public void testAttemptToAssignIllegalUniqueIdentifier() {
 		new Receipt().setUniqueIdentifier(0);
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
+
+	@Test(expected = IllegalArgumentException.class)
 	public void testAttemptToAssignIllegalUniqueIdentifier2() {
 		new Receipt().setUniqueIdentifier(-1);
 	}
+
+	@Test
+	public void testEncode() {
+		Receipt r = new Receipt();
+		r.setUniqueIdentifier(72);
+		r.setSummary("Hey");
+		String s = r.encode();
+		
+		Receipt r2 = Receipt.decode(s);
+		assertStringsMatch(s, r2.encode());
+	}
 	
 }
-

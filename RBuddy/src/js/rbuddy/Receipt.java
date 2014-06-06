@@ -1,7 +1,6 @@
 package js.rbuddy;
 
-//import static js.basic.Tools.*;
-
+import static js.basic.Tools.*;
 import java.util.StringTokenizer;
 
 import js.basic.StringUtil;
@@ -31,10 +30,17 @@ public class Receipt {
 	}
 
 	public static Receipt decode(String s) {
+		final boolean db = true;
+		if (db) pr("Receipt.decode \""+s+"\"");
+		
 		StringTokenizer t = new StringTokenizer(s, "|");
 		String id = t.nextToken();
+		if (db) pr(" id="+id);
 		String date = t.nextToken();
+		if (db) pr(" date="+date);
 		String summary = t.nextToken();
+		if (db) pr(" summary="+summary);
+		
 		if (t.hasMoreTokens())
 			throw new IllegalArgumentException("unable to decode " + s);
 		Receipt r = new Receipt();
@@ -48,9 +54,9 @@ public class Receipt {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getUniqueIdentifier());
 		sb.append('|');
-		sb.append(StringUtil.encode(getSummary()));
-		sb.append('|');
 		sb.append(date.toString());
+		sb.append('|');
+		sb.append(StringUtil.encode(getSummary()));
 		return sb.toString();
 	}
 
