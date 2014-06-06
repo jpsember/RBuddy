@@ -144,8 +144,7 @@ public class ImageUtilities {
 	}
 
 	/**
-	 * Construct a File for an xxxx.jpg image in the external storage directory;
-	 * delete any existing file that is at that location
+	 * Construct a File for an xxxx.jpg image in the external storage directory
 	 * 
 	 * @param name
 	 *            the 'xxxx'
@@ -157,7 +156,7 @@ public class ImageUtilities {
 		File imageFile = new File(storageDir, "JS_" + name
 				+ PhotoFile.PHOTO_EXTENSION);
 		imageFile = imageFile.getAbsoluteFile();
-		imageFile.delete();
+//		imageFile.delete();
 		return imageFile;
 	}
 

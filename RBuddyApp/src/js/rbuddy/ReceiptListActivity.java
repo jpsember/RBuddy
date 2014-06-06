@@ -104,15 +104,18 @@ public class ReceiptListActivity extends Activity {
 		Receipt r = new Receipt();
 		r.setUniqueIdentifier(app.getUniqueIdentifier());
 		app.receiptFile().add(r);
+		
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
 		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
 		startActivity(intent);
+		
+		unimp("do we want to delay adding the receipt to the list until the activity returns?");
+
 		this.receiptList.add(r);
 		receiptListAdapter.notifyDataSetChanged();
 		
-		unimp("refresh Receipt item if it's visible (which we assume it is in this case)");
 }
 	
 	private void processReceiptSelection(int position) {

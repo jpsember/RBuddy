@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import js.basic.Tools;
 import android.content.Context;
 import static js.basic.Tools.*;
 
@@ -18,6 +19,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	public SimpleReceiptFile() {
 		this.map = new HashMap();
 		readAllReceipts();
+		unimp("some way of determining if receipt has really changed; note that iterator is returning values without going through getReceipt()");
 	}
 
 	@Override
@@ -29,9 +31,10 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void flush() {
-		final boolean db = true;
+		// final boolean db = true;
 		if (db)
-			pr("SimpleReceiptFile flush, changes " + changes);
+			pr("SimpleReceiptFile flush, changes " + changes + "; "
+					+ Tools.stackTrace(1, 3));
 
 		if (changes) {
 			changes = false;
@@ -94,14 +97,15 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void readAllReceipts() {
-		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("readAllReceipts\n");
 		ASSERT(map.isEmpty());
 
 		File f = new File(RECEIPTS_FILENAME);
 		if (!f.exists()) {
-			warning("no receipt file found: " + f);
+			if (db)
+				warning("no receipt file found: " + f);
 			return;
 		}
 
@@ -134,7 +138,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void setChanges() {
-		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("setChanges\n");
 		if (!changes) {
