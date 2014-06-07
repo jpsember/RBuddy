@@ -283,9 +283,9 @@ public class EditReceiptActivity extends Activity {
 		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
 
 		mainFile = app.getPhotoFile().getMainFileFor(
-				receipt.getUniqueIdentifier());
+				receipt.getId());
 		if (db)
-			pr("receipt id " + receipt.getUniqueIdentifier()
+			pr("receipt id " + receipt.getId()
 					+ "  copying scaled/rotated file " + workFile
 					+ " to mainFile " + mainFile);
 
@@ -310,11 +310,11 @@ public class EditReceiptActivity extends Activity {
 		PhotoFile pf = app.getPhotoFile();
 
 		// If no image exists, display placeholder instead
-		if (!pf.photoExists(receipt.getUniqueIdentifier())) {
+		if (!pf.photoExists(receipt.getId())) {
 			photoView.setImageDrawable(getResources().getDrawable(
 					R.drawable.missingphoto));
 		} else {
-			File imageFile = pf.getMainFileFor(receipt.getUniqueIdentifier());
+			File imageFile = pf.getMainFileFor(receipt.getId());
 			Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
 					bmp));

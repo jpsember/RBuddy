@@ -1,6 +1,11 @@
 package js.rbuddy;
 
-//import static js.basic.Tools.*;
+import static js.basic.Tools.*;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import js.basic.StringUtil;
 
@@ -9,7 +14,8 @@ public class Receipt {
 	/**
 	 * Constructor
 	 * 
-	 * Sets date to current date, string fields to the empty string
+	 * Sets date to current date, string fields to the empty string, tags empty
+	 * set
 	 * 
 	 * @throws IllegalArgumentException
 	 *             if identifier <= 0
@@ -17,9 +23,10 @@ public class Receipt {
 	public Receipt(int identifier) {
 		if (identifier <= 0)
 			throw new IllegalArgumentException();
-		this.uniqueIdentifier = identifier;
+		this.id = identifier;
 		setDate(JSDate.currentDate());
 		this.summary = "";
+		this.tags = new TreeSet<String>();
 	}
 
 	public JSDate getDate() {
@@ -36,28 +43,58 @@ public class Receipt {
 
 	public static Receipt decode(CharSequence s) {
 		String[] tokens = StringUtil.tokenize(s);
-		if (tokens.length != 3)
+		boolean problem = true;
+		Receipt r = null;
+		do {
+			if (tokens.length < 4)
+				break;
+
+			int f = 0;
+			r = new Receipt(Integer.parseInt(tokens[f++]));
+			r.date = JSDate.parse(tokens[f++]);
+			r.summary = StringUtil.decode(tokens[f++]).toString();
+
+			int nTags = Integer.parseInt(tokens[f++]);
+			if (nTags < 0)
+				break;
+
+			if (f+nTags > tokens.length) break;
+			
+			Set<String> set = new TreeSet<String>();
+			for (int i = 0; i < nTags; i++) {
+				set.add(tokens[f++]);
+			}
+			r.setTags(set);
+			
+			if (f != tokens.length) break;
+			problem = false;
+		} while (false);
+		if (problem)
 			throw new IllegalArgumentException("problem decoding " + s);
 
-		int f = 0;
-		Receipt r = new Receipt(Integer.parseInt(tokens[f++]));
-		r.date = JSDate.parse(tokens[f++]);
-		r.summary = StringUtil.decode(tokens[f++]).toString();
 		return r;
 	}
 
 	public StringBuilder encode() {
 		return encode(null);
 	}
-	
+
 	public StringBuilder encode(StringBuilder sb) {
-		if (sb==null)
+		if (sb == null)
 			sb = new StringBuilder();
-		sb.append(getUniqueIdentifier());
+		sb.append(getId());
 		sb.append('|');
 		sb.append(date.toString());
 		sb.append('|');
 		StringUtil.encode(getSummary(), sb);
+
+		// Encode tags by preceding with number of tags
+		sb.append('|');
+		sb.append(tags.size());
+		for (Iterator<String> it = tags.iterator(); it.hasNext();) {
+			sb.append('|');
+			StringUtil.encode(it.next(), sb);
+		}
 		return sb;
 	}
 
@@ -107,8 +144,8 @@ public class Receipt {
 
 	}
 
-	public int getUniqueIdentifier() {
-		return uniqueIdentifier;
+	public int getId() {
+		return id;
 	}
 
 	@Override
@@ -128,7 +165,34 @@ public class Receipt {
 		return r;
 	}
 
+	/**
+	 * Get the set of tags
+	 * 
+	 * @return set of strings
+	 */
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<String> set) {
+		unimp("figure out how to impose limit on set size");
+		this.tags = set;
+	}
+
+	public static Set<String> setFromStrings(String[] strs) {
+		Set<String> s = new TreeSet<String>(Arrays.asList(strs));
+		return s;
+	}
+	
+	// private static StringBuilder encodeTags(Set<String>tags) {
+	// StringBuilder sb = new StringBuilder();
+	// Iterator it = tags.iterator();
+	// while (it.hasNext()) {
+	// }
+	// }
+
+	private Set<String> tags;
 	private JSDate date;
 	private String summary;
-	private int uniqueIdentifier;
+	private int id;
 }

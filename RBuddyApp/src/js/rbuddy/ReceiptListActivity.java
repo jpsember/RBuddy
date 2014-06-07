@@ -129,7 +129,7 @@ public class ReceiptListActivity extends Activity {
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
 		if (db)
 			pr(" starting activity " + intent);
 		startActivity(intent);
@@ -143,7 +143,7 @@ public class ReceiptListActivity extends Activity {
 		Receipt r = (Receipt) receiptListAdapter.getItem(position);
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getUniqueIdentifier());
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
 		startActivity(intent);
 	}
 

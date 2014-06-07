@@ -73,15 +73,15 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void add(Receipt r) {
-		getReceiptFromMap(r.getUniqueIdentifier(),false);
-		map.put(r.getUniqueIdentifier(), r);
+		getReceiptFromMap(r.getId(),false);
+		map.put(r.getId(), r);
 		setModified(r);
 	}
 
 	@Override
 	public void delete(Receipt r) {
-		getReceiptFromMap(r.getUniqueIdentifier(),true);
-		map.remove(r.getUniqueIdentifier());
+		getReceiptFromMap(r.getId(),true);
+		map.remove(r.getId());
 		setChanges();
 	}
 
@@ -145,7 +145,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 				Receipt r = Receipt.decode(line);
 				if (db)
 					pr(" decoded as " + r);
-				map.put(r.getUniqueIdentifier(), r);
+				map.put(r.getId(), r);
 			}
 			fs.close();
 		} catch (IOException e) {

@@ -1,5 +1,9 @@
 package js.rbuddy.test;
 
+import static org.junit.Assert.*;
+
+import java.util.Set;
+
 import org.junit.*;
 
 //import static org.junit.Assert.*;
@@ -53,6 +57,7 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		{
 			Receipt r = new Receipt(72);
 			r.setSummary("\n\nA long summary\n\n\n   \n\n with several linefeeds, \"quotes\", and | some other characters | ... \n\n");
+			r.setTags(Receipt.setFromStrings("alpha beta gamma".split(" ")));
 			CharSequence s = r.encode();
 
 			Receipt r2 = Receipt.decode(s);
@@ -66,4 +71,15 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		}
 	}
 
+	@Test public void testTags() {
+		{
+			Receipt r = new Receipt(72);
+			r.setTags(Receipt.setFromStrings("alpha beta gamma".split(" ")));
+			Set<String> tags = r.getTags();
+			assertTrue(tags.size() == 3);
+			assertTrue(tags.contains("alpha"));
+			assertFalse(tags.contains("delta"));
+		}
+	}
+	
 }
