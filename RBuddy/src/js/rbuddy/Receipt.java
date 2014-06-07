@@ -2,7 +2,6 @@ package js.rbuddy;
 
 import static js.basic.Tools.*;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -10,6 +9,8 @@ import java.util.TreeSet;
 import js.basic.StringUtil;
 
 public class Receipt {
+
+	public static final int MAX_TAGS = 5;
 
 	/**
 	 * Constructor
@@ -58,15 +59,17 @@ public class Receipt {
 			if (nTags < 0)
 				break;
 
-			if (f+nTags > tokens.length) break;
-			
+			if (f + nTags > tokens.length)
+				break;
+
 			Set<String> set = new TreeSet<String>();
 			for (int i = 0; i < nTags; i++) {
 				set.add(tokens[f++]);
 			}
 			r.setTags(set);
-			
-			if (f != tokens.length) break;
+
+			if (f != tokens.length)
+				break;
 			problem = false;
 		} while (false);
 		if (problem)
@@ -174,22 +177,104 @@ public class Receipt {
 		return tags;
 	}
 
+	/**
+	 * Used in setTags(); flushes tag being built, adds to set if nonempty;
+	 * clears buffer
+	 * 
+	 * @param str
+	 * @param set
+	 */
+	private static void flush(StringBuilder str, Set<String> set) {
+		String s = str.toString();
+		ASSERT(s.length() > 0);
+		if (set.size() < MAX_TAGS) {
+			set.add(s);
+		}
+		str.setLength(0);
+	}
+
+	/**
+	 * Set tags by parsing a script of comma(or linefeed)-separated tags
+	 * 
+	 * @param s
+	 */
+	public void setTags(CharSequence s) {
+		Set<String> set = new TreeSet<String>();
+		int state = 0;
+		StringBuilder buffer = new StringBuilder();
+		int cursor = 0;
+		while (cursor < s.length()) {
+			char c = s.charAt(cursor);
+			cursor++;
+
+			// linefeeds are treated identically as commas
+			if (c == ',')
+				c = '\n';
+			if (c < ' ' && c != '\n')
+				c = ' ';
+
+			switch (state) {
+			case 0:
+				if (c > ' ') {
+					buffer.append(c);
+					state = 1;
+				}
+				break;
+			case 1:
+				if (c == '\n') {
+					flush(buffer, set);
+					state = 0;
+				} else if (c == ' ') {
+					state = 2;
+				} else {
+					buffer.append(c);
+				}
+				break;
+			case 2:
+				if (c == '\n') {
+					flush(buffer, set);
+					state = 0;
+				} else if (c > ' ') {
+					buffer.append(' ');
+					buffer.append(c);
+					state = 1;
+				}
+				break;
+			}
+		}
+		if (buffer.length() != 0)
+			flush(buffer, set);
+		setTags(set);
+	}
+
+	/**
+	 * Set tags
+	 * 
+	 * @param set
+	 *            set of zero to MAX_TAGS tags
+	 */
 	public void setTags(Set<String> set) {
-		unimp("figure out how to impose limit on set size");
+		if (set.size() > MAX_TAGS)
+			throw new IllegalArgumentException("too many tags");
 		this.tags = set;
 	}
 
-	public static Set<String> setFromStrings(String[] strs) {
-		Set<String> s = new TreeSet<String>(Arrays.asList(strs));
-		return s;
+	/**
+	 * Get receipt's tags as a user-displayable string
+	 * 
+	 * @return tags separated by commas
+	 */
+	public String getTagsString() {
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> it = tags.iterator();
+		while (it.hasNext()) {
+			String s = it.next();
+			if (sb.length() > 0)
+				sb.append(", ");
+			sb.append(s);
+		}
+		return sb.toString();
 	}
-	
-	// private static StringBuilder encodeTags(Set<String>tags) {
-	// StringBuilder sb = new StringBuilder();
-	// Iterator it = tags.iterator();
-	// while (it.hasNext()) {
-	// }
-	// }
 
 	private Set<String> tags;
 	private JSDate date;
