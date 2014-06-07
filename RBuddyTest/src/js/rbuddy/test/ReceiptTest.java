@@ -2,6 +2,9 @@ package js.rbuddy.test;
 
 import static org.junit.Assert.*;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.*;
@@ -136,7 +139,60 @@ public class ReceiptTest extends js.testUtils.MyTest {
 			Receipt r2 = new Receipt(73);
 			r2.setTags(s);
 			String s2 = r2.getTagsString();
-			assertStringsMatch(s,s2);
+			assertStringsMatch(s, s2);
+		}
+	}
+
+	@Test
+	public void testCurrencyFormatterVariousCountries() {
+		double value = 1323.526;
+
+		NumberFormat[] fmts = { NumberFormat.getCurrencyInstance(Locale.US),
+				NumberFormat.getCurrencyInstance(Locale.FRENCH), 
+				NumberFormat.getCurrencyInstance(Locale.JAPAN), 		
+		};
+
+		System.out.println("value=" + value);
+		for (int i = 0; i < fmts.length; i++) {
+
+			NumberFormat f = fmts[i];
+			pr("\n" + f.getCurrency());
+
+			String s = f.format(value);
+			pr(" format()= '" + s + "'");
+			Number n = null;
+			try {
+				n = f.parse(s);
+				pr(" parse()= " + n);
+			} catch (ParseException e) {
+				pr(" parse failed: " + e);
+			}
+		}
+	}
+
+	@Test
+	public void testCurrencyFormatterSloppyParseInput() {
+
+		NumberFormat f = NumberFormat.getCurrencyInstance(Locale.US);
+
+		String[] script = { "$123", "123", "123.30", "$123.3", "$123.",
+				"$5000", "$5000.2", };
+
+		for (int i = 0; i < script.length; i++) {
+			String s = script[i];
+			pr("Parsing '" + s + "'");
+			Number n = null;
+			try {
+				n = f.parse(s);
+				pr(" yields " + n);
+			} catch (ParseException e) {
+				pr(" parse failed: " + e);
+				warning("If the user omits '$', parsing fails.  We could then tack on a '$' and try the parsing again, but this "
+						+ "add-hoc approach has problems, since the user may be in another Locale (i.e. Euros).  One possible approach "
+						+ "is to put a fixed amount like 1234.56 through a formatter for the user's Locale and see what it produces, and"
+						+ " use the result to infer an appropriate preprocessing to apply to the user's string before attempting to parse it."
+						+ "  There may exist some utilities that do this already... more research is required.");
+			}
 		}
 	}
 
