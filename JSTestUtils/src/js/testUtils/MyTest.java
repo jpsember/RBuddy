@@ -1,10 +1,13 @@
 package js.testUtils;
 
 import static org.junit.Assert.*;
+
 import org.junit.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
+
 import static js.basic.Tools.*;
 
 public class MyTest {
@@ -20,6 +23,7 @@ public class MyTest {
 	@Before
 	public void setUp() {
 		tempDirectory = null;
+		random = null;
 	}
 
 	@After
@@ -59,5 +63,18 @@ public class MyTest {
 		return tempDirectory;
 	}
 
+	public Random random() {
+		if (random == null) {
+			resetSeed(1942);
+		}
+		return random;
+	}
+	
+	public Random resetSeed(int seed) {
+		random = new Random(seed);
+		return random;
+	}
+	
+	private Random random;
 	private File tempDirectory;
 }

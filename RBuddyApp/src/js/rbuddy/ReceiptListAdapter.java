@@ -73,11 +73,11 @@ public class ReceiptListAdapter extends ArrayAdapter {
 		// Customize this view by updating the various child views to display
 		// the particular receipt
 
-		((TextView) listItemView.findViewWithTag("date")).setText(r.getDate()
-				.toString());
+		((TextView) listItemView.findViewWithTag("date")).setText(
+				AndroidDate.formatUserDateFromJSDate(r.getDate()));
 		((TextView) listItemView.findViewWithTag("summary")).setText(
-				""+ position + // prefix with position so we can verify that clicking on positions 10..19 does a deletion
-				": " + r.getSummary());
+//				""+ position + ": "+// prefix with position so we can verify that clicking on positions 10..19 does a deletion
+				 r.getSummary());
 
 		return listItemView;
 	}

@@ -5,7 +5,6 @@ import static js.basic.Tools.*;
 import java.util.*;
 
 import android.view.ViewGroup.LayoutParams;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,40 +15,45 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Button;
 
 public class ReceiptListActivity extends Activity {
 
 	@Override
+	public void onSaveInstanceState(Bundle s) {
+		app.receiptFile().flush();
+		super.onSaveInstanceState(s);
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		// final boolean db = true;
+		if (db)
+			pr("\n\nReceiptListActivity.onCreate bundle " + savedInstanceState);
+
 		super.onCreate(savedInstanceState);
 
-		Intent i = getIntent();
-		String msg = i.getStringExtra("message");
+		RBuddyApp.prepare(this);
+
+		app = RBuddyApp.sharedInstance();
 
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 
-		{
-			Button btn = new Button(this);
-			btn.setText("Return to " + msg);
-			LayoutParams layoutParam = new LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			layout.addView(btn, layoutParam);
-			btn.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					finish();
-				}
-			});
-		}
 		ListView lv = constructListView();
 		layout.addView(lv);
+	}
+
+	@Override
+	public void onResume() {
+		// final boolean db = true;
+		if (db)
+			pr("\n\nReceiptListActivity.resume");
 		
-		// If we want the 'up' button to appear to go back to the main activity, we do this:
-	    ActionBar actionBar = getActionBar();
-	    actionBar.setDisplayHomeAsUpEnabled(true);
+		super.onResume(); // Always call the superclass method first
+		unimp("maybe we want to only do this if editing actually occurred? otherwise we lose our place?");
+		receiptListAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -61,28 +65,27 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle presses on the action bar items
-	    switch (item.getItemId()) {
-	        case R.id.action_search:
-	        warning("for now, just doing finish() for search action");    
-	        	finish();
-	            return true;
-	        case R.id.action_settings:
-	            unimp("settings");
-	            return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
+		// Handle presses on the action bar items
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			unimp("settings");
+			return true;
+		case R.id.action_add:
+			processAddReceipt();
+			return true;
+		case R.id.action_search:
+			warning("for search, calling finish() instead");
+			finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
-	private List constructReceiptList() {
-		List list = new ArrayList();
-		int NUM_RECEIPTS = 200;
-		timeStamp("building receipts");
-		for (int i = 0; i < NUM_RECEIPTS; i++) {
-			list.add(Receipt.buildRandom());
-		}
-		timeStamp("done building");
+	private List buildListOfReceipts() {
+		ArrayList list = new ArrayList();
+		for (Iterator it = app.receiptFile().iterator(); it.hasNext();)
+			list.add(it.next());
 		return list;
 	}
 
@@ -91,7 +94,7 @@ public class ReceiptListActivity extends Activity {
 
 		ListView listView = new ListView(this);
 
-		List receiptList = constructReceiptList();
+		List receiptList = buildListOfReceipts(); // app.receiptList();
 		ArrayAdapter arrayAdapter = new ReceiptListAdapter(this, receiptList);
 		listView.setAdapter(arrayAdapter);
 
@@ -99,6 +102,8 @@ public class ReceiptListActivity extends Activity {
 		// to make responding to selection actions more convenient.
 		this.receiptListAdapter = arrayAdapter;
 		this.receiptList = receiptList;
+		if (db)
+			pr("adapter=" + this.receiptListAdapter);
 
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView aView, View v, int position,
@@ -113,17 +118,36 @@ public class ReceiptListActivity extends Activity {
 		return listView;
 	}
 
+	private void processAddReceipt() {
+		// final boolean db = true;
+		if (db)
+			pr("\nReceiptListActivity.processAddReceipt");
+		Receipt r = new Receipt(app.getUniqueIdentifier());
+		app.receiptFile().add(r);
+		this.receiptList.add(r);
+
+		// Start the edit receipt activity
+		Intent intent = new Intent(getApplicationContext(),
+				EditReceiptActivity.class);
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
+		if (db)
+			pr(" starting activity " + intent);
+		startActivity(intent);
+		if (db)
+			pr(" done starting activity");
+
+		unimp("detect upon return whether receipt was actually edited at all, and delete if no photo or other fields");
+	}
+
 	private void processReceiptSelection(int position) {
 		Receipt r = (Receipt) receiptListAdapter.getItem(position);
-		pr("Just clicked on view, receipt " + r);
-
-		if (position >= 10 && position <= 20) {
-			// Try deleting this particular receipt
-			receiptList.remove(position);
-			receiptListAdapter.notifyDataSetChanged();
-		}
+		Intent intent = new Intent(getApplicationContext(),
+				EditReceiptActivity.class);
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
+		startActivity(intent);
 	}
 
 	private ArrayAdapter receiptListAdapter;
 	private List receiptList;
+	private RBuddyApp app;
 }

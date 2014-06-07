@@ -1,9 +1,12 @@
 package js.basic;
+
 import static js.basic.Tools.*;
 import static js.basic.JSMath.*;
 
+import java.util.ArrayList;
+
 public class StringUtil {
-	
+
 	/**
 	 * Generate a random string
 	 * 
@@ -26,6 +29,118 @@ public class StringUtil {
 			}
 		}
 		return sb.toString();
+	}
+
+	public static StringBuilder encode(String s) {
+		return encode(s, null);
+	}
+
+	/**
+	 * Encode a string so some characters are escaped. Converts ASCII 0 => "\0";
+	 * linefeeds => "\n"; "\" => "\\"; "|" => "\}"
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static StringBuilder encode(String s, StringBuilder sb) {
+		// final boolean db = true;
+		if (db)
+			pr("\n\nStringUtil.encode '" + s + "'");
+		if (sb == null)
+			sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch (c) {
+			case 0:
+				sb.append("\\0");
+				break;
+			case '\n':
+				sb.append("\\n");
+				break;
+			case '|':
+				sb.append("\\}");
+				break;
+			case '\\':
+				sb.append("\\\\");
+				break;
+			default:
+				sb.append(c);
+				break;
+			}
+			if (db)
+				pr("Processed character " + (int) c + ", buffer now:\n" + sb);
+		}
+		return sb;
+	}
+
+	public static StringBuilder decode(CharSequence s) {
+		return decode(s, null);
+	}
+
+	public static StringBuilder decode(CharSequence s, StringBuilder sb) {
+		// final boolean db = true;
+		if (db)
+			pr("\n\nStringUtil.decode '" + s + "'");
+		if (sb == null)
+			sb = new StringBuilder();
+		int i = 0;
+		while (i < s.length()) {
+			char c = s.charAt(i);
+			if (db)
+				pr("Processing character " + (int) c + ", buffer now:\n" + sb);
+			if (c == '\\') {
+				i += 1;
+				if (i == s.length())
+					throw new IllegalArgumentException("could not decode \""
+							+ s + "\"");
+				c = s.charAt(i);
+				switch (c) {
+				case '0':
+					sb.append((char) 0);
+					break;
+				case 'n':
+					sb.append('\n');
+					break;
+				case '}':
+					sb.append('|');
+					break;
+				default:
+					sb.append(c);
+					break;
+				}
+			} else {
+				sb.append(c);
+			}
+			i += 1;
+		}
+		return sb;
+	}
+
+	/**
+	 * Split string into tokens, where delimeter is '|'; respects empty tokens
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String[] tokenize(CharSequence ss) {
+		String s = ss.toString();
+		ArrayList a = new ArrayList();
+		int cursor = 0;
+		int lastTokenPosition = -1;
+		while (true) {
+			boolean done = (cursor == s.length());
+			if (done || s.charAt(cursor) == '|') {
+				int tokenLength = cursor - (lastTokenPosition + 1);
+				if (tokenLength >= 0) {
+					a.add(s.substring(lastTokenPosition + 1, cursor));
+				}
+				lastTokenPosition = cursor;
+			}
+			if (done)
+				break;
+			cursor++;
+		}
+		return (String[]) a.toArray(new String[a.size()]);
 	}
 
 }
