@@ -11,7 +11,7 @@ import org.junit.*;
 
 //import static org.junit.Assert.*;
 import js.rbuddy.TagSet;
-import static js.basic.Tools.*;
+//import static js.basic.Tools.*;
 
 public class TagSetTest extends js.testUtils.MyTest {
 
@@ -38,9 +38,6 @@ public class TagSetTest extends js.testUtils.MyTest {
 		String[] script = {};
 		if (s.length() > 0)
 			script = s.split("(?!^)");
-		// final boolean db = true;
-		if (db)
-			pr("addedScript '" + s + "', script length " + script.length);
 		assertEquals(script.length, s.length());
 		addScript(script);
 	}
@@ -53,6 +50,24 @@ public class TagSetTest extends js.testUtils.MyTest {
 		}
 		return sb.toString();
 	}
+
+	@Test
+	/**
+	 * Add random tags to a set with a large capacity, and simulate it using a simple
+	 * but slower data structure; verify that the contents match afterwards.
+	 */
+	public void testEncodeDecode() {
+		build();
+		String[] script = {"alpha","bravo charlie","delta epsilon gamma","whisky","foxtrot","echo","zulu","november"};
+		for (int i = 0; i < 20; i++) {
+			ts.addTag(script[random().nextInt(script.length)]);
+		}
+		String s = ts.encode();
+		TagSet ts2 = TagSet.decode(s);
+		assertStringsMatch(toString(ts.tags()),toString(ts2.tags()));
+		assertStringsMatch(s,ts2.encode());
+	}
+	
 
 	@Test
 	public void testEmptySet() {
@@ -196,4 +211,5 @@ public class TagSetTest extends js.testUtils.MyTest {
 			assertTrue(set.tags().contains(name));
 		}
 	}
+	
 }

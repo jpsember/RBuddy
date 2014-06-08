@@ -114,11 +114,13 @@ public class TagSet {
 	}
 
 	public static TagSet decode(String s) {
-		unimp("we can do this quicker by inserting objects ourselves");
+		// We could do this quicker by inserting objects ourselves, 
+		// but this is simpler and has an asymptotically equivalent runtime.
 		String[] strs = s.split("\\n");
 		TagSet set = new TagSet();
-		for (int i = strs.length - 1; i >= 0; i--)
+		for (int i = 0; i < strs.length; i++) {
 			set.addTag(strs[i]);
+		}
 		return set;
 	}
 
