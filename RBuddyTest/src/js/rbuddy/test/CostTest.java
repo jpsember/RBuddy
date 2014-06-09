@@ -9,9 +9,9 @@ import org.junit.Test;
 import static js.basic.Tools.pr;
 import static js.basic.Tools.warning;
 import static org.junit.Assert.*;
-import js.rbuddy.TimCost;
+import js.rbuddy.Cost;
 
-public class TimCostTest extends js.testUtils.MyTest {
+public class CostTest extends js.testUtils.MyTest {
 
 	// the value of this object ALWAYS represents a positive number of pennies
 
@@ -23,7 +23,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 
 		// see that we can set it by integer
 		int ival = 456;
-		TimCost c = new TimCost(ival);
+		Cost c = new Cost(ival);
 		assertTrue(c.getValue() == ival);
 
 	}
@@ -44,7 +44,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testNormalAmount() {
 
 		String s = "123.45";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 12345);
 	}
 
@@ -52,24 +52,24 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testNormal2() {
 
 		String s = "$123.45";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 12345);
 	}
 
 	@Test
 	public void testNormal3() {
-		TimCost.setUserCurrencyFormat(NumberFormat
+		Cost.setUserCurrencyFormat(NumberFormat
 				.getCurrencyInstance(Locale.US));
 
 		String s = "$  123.45";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 12345);
 
-		TimCost.setUserCurrencyFormat(NumberFormat
+		Cost.setUserCurrencyFormat(NumberFormat
 				.getCurrencyInstance(Locale.GERMANY));
 
 		s = "\u20ac123.45";
-		c = new TimCost(s);
+		c = new Cost(s);
 		assertTrue(c.getValue() == 12345);
 	}
 
@@ -80,7 +80,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testDollarAmount() {
 
 		String s = "67";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 6700);
 	}
 
@@ -88,7 +88,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testDollar2() {
 
 		String s = "$67";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 6700);
 	}
 
@@ -96,7 +96,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testDollar3() {
 
 		String s = "$67.00";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 6700);
 	}
 
@@ -104,7 +104,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testDollar4() {
 
 		String s = "67.00";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertEqualsFloat(67.0, c.getValue());
 	}
 
@@ -112,7 +112,7 @@ public class TimCostTest extends js.testUtils.MyTest {
 	public void testDollar5() {
 
 		String s = "$ 67";
-		TimCost c = new TimCost(s);
+		Cost c = new Cost(s);
 		assertTrue(c.getValue() == 6700);
 	}
 

@@ -3,7 +3,7 @@ package js.rbuddy;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class TimCost {
+public class Cost {
 
 	
 	private static NumberFormat getUserCurrencyFormat() {
@@ -33,7 +33,7 @@ public class TimCost {
 
 	
 	// constructor for 'internal' amount
-	public TimCost(int amount) {
+	public Cost(int amount) {
 
 		value = amount;
 
@@ -46,7 +46,7 @@ public class TimCost {
 	 * Constructor that parses user string (Locale-specific)
 	 * @param s
 	 */
-	public TimCost(String s) {
+	public Cost(String s) {
 
 		value =  parse(s);
 
