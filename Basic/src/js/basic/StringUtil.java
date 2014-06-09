@@ -3,8 +3,6 @@ package js.basic;
 import static js.basic.Tools.*;
 import static js.basic.JSMath.*;
 
-import java.util.ArrayList;
-
 public class StringUtil {
 
 	/**
@@ -115,32 +113,4 @@ public class StringUtil {
 		}
 		return sb;
 	}
-
-	/**
-	 * Split string into tokens, where delimeter is '|'; respects empty tokens
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static String[] tokenize(CharSequence ss) {
-		String s = ss.toString();
-		ArrayList a = new ArrayList();
-		int cursor = 0;
-		int lastTokenPosition = -1;
-		while (true) {
-			boolean done = (cursor == s.length());
-			if (done || s.charAt(cursor) == '|') {
-				int tokenLength = cursor - (lastTokenPosition + 1);
-				if (tokenLength >= 0) {
-					a.add(s.substring(lastTokenPosition + 1, cursor));
-				}
-				lastTokenPosition = cursor;
-			}
-			if (done)
-				break;
-			cursor++;
-		}
-		return (String[]) a.toArray(new String[a.size()]);
-	}
-
 }
