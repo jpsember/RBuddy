@@ -1,10 +1,5 @@
 package js.rbuddy;
 
-import static js.basic.Tools.die;
-import static js.basic.Tools.stackTrace;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TimCost {
 
