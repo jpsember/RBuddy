@@ -12,6 +12,10 @@ import static js.basic.Tools.*;
 
 public class MyTest {
 
+	public static void assertEqualsFloat(double expected, double got) {
+		assertEquals(expected, got, 1e-10);
+	}
+
 	public static void assertStringsMatch(Object s1, Object s2) {
 		if (s1 == null)
 			s1 = "<null>";
@@ -69,12 +73,12 @@ public class MyTest {
 		}
 		return random;
 	}
-	
+
 	public Random resetSeed(int seed) {
 		random = new Random(seed);
 		return random;
 	}
-	
+
 	private Random random;
 	private File tempDirectory;
 }
