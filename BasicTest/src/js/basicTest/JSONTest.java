@@ -6,9 +6,13 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.*;
 
+import js.basic.JSONInterface;
 import js.basic.JSONEncoder;
 import js.basic.JSONException;
 import js.basic.JSONInputStream;
@@ -146,4 +150,49 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
+	private static class OurClass implements JSONInterface {
+
+		public static final JSONInterface factory = new OurClass("", 0);
+
+		public OurClass(String message, int number) {
+			map.put("message", message);
+			map.put("number", number);
+			for (int i = 0; i < array.length; i++)
+				array[i] = (number + i + 1) * (number + i + 1);
+		}
+
+		private int[] array = new int[3];
+		private Map map = new HashMap();
+
+		@Override
+		public String toString() {
+			return map.get("message") + "/" + map.get("number") + "/"
+					+ Arrays.toString(array);
+		}
+
+		@Override
+		public void encode(JSONEncoder encoder) {
+			Object[] items = { map.get("message"), map.get("number") };
+			encoder.encode(items);
+		}
+
+		@Override
+		public Object decode(JSONInputStream stream) {
+			ArrayList array = stream.readArray();
+			return new OurClass(//
+					(String) array.get(0), //
+					((Double) array.get(1)).intValue()//
+			);
+		}
+	}
+
+	@Test
+	public void testInterface() {
+		OurClass c = new OurClass("hello", 42);
+		enc().encode(c);
+		String s = enc().toString();
+		json(s);
+		OurClass c2 = (OurClass) json.read(OurClass.factory);
+		assertStringsMatch(c, c2);
+	}
 }

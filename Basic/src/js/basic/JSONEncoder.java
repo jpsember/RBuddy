@@ -14,6 +14,10 @@ public class JSONEncoder {
 		return sb.toString();
 	}
 
+	public void encode(JSONInterface jsonInstance) {
+		jsonInstance.encode(this);
+	}
+
 	public void encode(Object value) {
 		if (value instanceof Number)
 			encode(((Number) value).doubleValue());
@@ -148,7 +152,7 @@ public class JSONEncoder {
 				if (c >= ' ' && c < 0x7f)
 					sb.append(c);
 				else {
-					sb.append(String.format("\\u%04x", (int)c));
+					sb.append(String.format("\\u%04x", (int) c));
 				}
 				break;
 			}

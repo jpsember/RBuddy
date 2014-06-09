@@ -110,6 +110,14 @@ public class JSONInputStream extends InputStream {
 				| (parseDigit() << 4) | parseDigit());
 	}
 
+	public int readInt() {
+		double d = readNumber();
+		int i = (int) Math.round(d);
+		if (i != d)
+			throw new JSONException("not an integer");
+		return i;
+	}
+
 	public double readNumber() {
 		sb.setLength(0);
 		int state = 0;
@@ -193,6 +201,10 @@ public class JSONInputStream extends InputStream {
 			throw new JSONException(e);
 		}
 		return value;
+	}
+
+	public Object read(JSONInterface jsonInstance) {
+		return jsonInstance.decode(this);
 	}
 
 	public Map readObject() {
