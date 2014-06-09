@@ -1049,4 +1049,14 @@ public final class Tools {
 		pr(sb);
 	}
 
+	/**
+	 * Remove the last item from a list and return it
+	 * @param list
+	 * @return
+	 */
+	public static Object pop(List list) {
+		Object obj = list.remove(list.size()-1);
+		return obj;
+	}
+	
 }

@@ -1,15 +1,16 @@
 package js.rbuddy;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import js.basic.Files;
+import js.basic.JSONEncoder;
+import js.basic.JSONParser;
 import js.basic.Tools;
 import static js.basic.Tools.*;
 
@@ -22,8 +23,9 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private Receipt getReceiptFromMap(int identifier, boolean expectedToExist) {
-		if (identifier <= 0) throw new IllegalArgumentException("bad id "+identifier);
-		
+		if (identifier <= 0)
+			throw new IllegalArgumentException("bad id " + identifier);
+
 		Receipt r = (Receipt) map.get(identifier);
 		if (r == null) {
 			if (expectedToExist)
@@ -39,31 +41,36 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public Receipt getReceipt(int uniqueIdentifier) {
-		return getReceiptFromMap(uniqueIdentifier,true);
+		return getReceiptFromMap(uniqueIdentifier, true);
 	}
 
 	@Override
 	public void flush() {
-		// final boolean db = true;
+		//final boolean db = true;
 		if (db)
 			pr("SimpleReceiptFile flush, changes " + changes + "; "
 					+ Tools.stackTrace(1, 3));
 
 		if (changes) {
 			changes = false;
-
-			StringBuilder sb = new StringBuilder();
+			String text;
+			{
+			JSONEncoder json = new JSONEncoder();
+			json.enterList();
 			for (Iterator it = map.values().iterator(); it.hasNext();) {
 				Receipt r = (Receipt) it.next();
-				sb.append(r.encode());
-				sb.append('\n');
+				r.encode(json);
 			}
+			json.exitList();
+			text = json.toString();
+			}
+			
 			try {
 				FileOutputStream fs;
 				fs = new FileOutputStream(getFile());
 				if (db)
-					pr(" writing:\n" + sb);
-				fs.write(sb.toString().getBytes());
+					pr(" writing:\n" + text);
+				fs.write(text.getBytes());
 				fs.close();
 			} catch (IOException e) {
 				die(e);
@@ -73,14 +80,14 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void add(Receipt r) {
-		getReceiptFromMap(r.getId(),false);
+		getReceiptFromMap(r.getId(), false);
 		map.put(r.getId(), r);
 		setModified(r);
 	}
 
 	@Override
 	public void delete(Receipt r) {
-		getReceiptFromMap(r.getId(),true);
+		getReceiptFromMap(r.getId(), true);
 		map.remove(r.getId());
 		setChanges();
 	}
@@ -112,8 +119,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 			receiptFile = new File(RBuddyApp.sharedInstance().activity()
 					.getExternalFilesDir(null), RECEIPTS_FILENAME);
 			if (!receiptFile.exists()) {
-					warning("no receipt file found: "
-							+ receiptFile.getAbsolutePath());
+				warning("no receipt file found: "
+						+ receiptFile.getAbsolutePath());
 			}
 
 		}
@@ -121,7 +128,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void readAllReceipts() {
-		// final boolean db = true;
+//		final boolean db = true;
 		if (db)
 			pr("\n\nSimpleReceiptFile.readAllReceipts\n");
 		ASSERT(map.isEmpty());
@@ -129,25 +136,28 @@ public class SimpleReceiptFile implements IReceiptFile {
 		if (!getFile().exists())
 			return;
 
+		if (db) {
+			try {
+				pr("receipt file:\n" + Files.readTextFile(getFile()));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+
 		try {
 			FileInputStream fs = new FileInputStream(getFile());
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(fs));
-			while (true) {
-				String line = reader.readLine();
-				if (line == null)
-					break;
-				line = line.trim();
-				if (line.length() == 0)
-					continue;
-				if (db)
-					pr(" read line " + line);
-				Receipt r = Receipt.decode(line);
-				if (db)
-					pr(" decoded as " + r);
-				map.put(r.getId(), r);
-			}
+			JSONParser json = new JSONParser(fs);
 			fs.close();
+
+			json.enterList();
+			while (json.hasNext()) {
+				Receipt r = (Receipt) Receipt.JSON_PARSER.parse(json);
+				map.put(r.getId(), r);
+				if (db)
+					pr(" read receipt: " + r);
+			}
+			json.exit();
 		} catch (IOException e) {
 			die(e);
 		}
@@ -164,7 +174,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
-	private static final String RECEIPTS_FILENAME = "receipts.txt";
+	
+	private static final String RECEIPTS_FILENAME = "receipts__json.txt";
 
 	private boolean changes;
 	private Map map;

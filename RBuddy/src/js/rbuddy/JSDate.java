@@ -4,9 +4,13 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.*;
 
+import js.basic.IJSONParser;
+import js.basic.JSONEncoder;
+import js.basic.JSONParser;
+import js.basic.IJSONEncoder;
 import static js.basic.Tools.*;
 
-public class JSDate {
+public class JSDate implements IJSONEncoder {
 
 	public static final int MONTH_BASE = 0;
 	public static final int DAY_BASE = 1;
@@ -139,4 +143,17 @@ public class JSDate {
 		int day = DAY_BASE +rnd.nextInt(28);
 		return buildFromValues(year, month, day);
 	}
+
+	@Override
+	public void encode(JSONEncoder encoder) {
+		encoder.encode(this.toString());
+	}
+	
+	public static final IJSONParser JSON_PARSER = new IJSONParser() {
+		@Override
+		public Object parse(JSONParser json) {
+			return JSDate.parse(json.nextString());
+		}
+	};
+	
 }

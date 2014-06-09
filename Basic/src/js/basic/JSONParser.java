@@ -6,25 +6,143 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static js.basic.Tools.*;
 
-public class JSONInputStream extends InputStream {
+public class JSONParser {
 
-	public JSONInputStream(String string) {
+	public JSONParser(String string) {
 		try {
-			stream = new ByteArrayInputStream(string.getBytes("UTF-8"));
+			InputStream stream = new ByteArrayInputStream(
+					string.getBytes("UTF-8"));
+			readValueFromStream(stream);
 		} catch (UnsupportedEncodingException e) {
 			throw new JSONException(e);
 		}
 	}
 
-	public JSONInputStream(InputStream stream) {
-		this.stream = stream;
+	public Object next() {
+		Object value = this.iterator.next();
+		
+		if (currentMap != null) {
+			this.valueForLastKey = currentMap.get(value);
+		}
+		return value;
 	}
 
-	public Object readValue() {
+	public String nextKey() {
+		if (currentMap == null) throw new IllegalStateException("not iterating within map");
+		return (String)next();
+	}
+	
+	/**
+	 * Get the value for the last key read; assumes iterating within map
+	 * @return
+	 */
+	public Object keyValue() {
+		if (currentMap == null) throw new IllegalStateException("not iterating within map");
+		return this.valueForLastKey;
+	}
+	
+	public int nextInt() {
+		return ((Double) next()).intValue();
+	}
+
+	public double nextDouble() {
+		return ((Double) next()).doubleValue();
+	}
+
+	public String nextString() {
+		String s = (String) next();
+		return s;
+	}
+
+	/**
+	 * Starts iterating through the current object, which is assumed to be a
+	 * list
+	 */
+	public void enterList() {
+		ArrayList list = (ArrayList) next();
+		pushParseLocation();
+		startProcessing(list);
+	}
+
+	/**
+	 * Starts iterating through the current object, which is assumed to be a map
+	 */
+	public void enterMap() {
+		Map map = (Map) next();
+		pushParseLocation();
+		startProcessing(map);
+	}
+
+	/**
+	 * Stop iterating through the current object, and resume the previous
+	 * object; throws exception if the current object's iteration is not
+	 * complete
+	 */
+	public void exit() {
+		exit(true);
+	}
+
+	/**
+	 * Stop iterating through the current object, and resume the previous object
+	 */
+	public void exit(boolean verifyNoItemsRemain) {
+		if (verifyNoItemsRemain) {
+			if (iterator.hasNext())
+				throw new IllegalStateException("incomplete iteration");
+		}
+		if (parseStack.isEmpty())
+			throw new IllegalStateException("cannot exit from top level");
+		this.iterator = (Iterator) pop(parseStack);
+		this.currentContainer = pop(parseStack);
+		if (this.currentContainer instanceof Map) {
+			this.currentMap = (Map)this.currentContainer;
+		} else {
+			this.currentMap = null;
+		}
+		this.valueForLastKey = null;
+	}
+
+	private void pushParseLocation() {
+		parseStack.add(this.currentContainer);
+		parseStack.add(this.iterator);
+	}
+
+	public JSONParser(InputStream stream) {
+		readValueFromStream(stream);
+	}
+
+	private void readValueFromStream(InputStream s) {
+		this.stream = s;
+		Object topLevelValue = readValue();
+		verifyDone();
+		// Construct a list that contains this single object
+		ArrayList topLevelList = new ArrayList();
+		topLevelList.add(topLevelValue);
+		startProcessing(topLevelList);
+	}
+
+	private void startProcessing(ArrayList list) {
+		this.currentContainer = list;
+		this.currentMap = null;
+		this.iterator = list.iterator();
+	}
+
+	private void startProcessing(Map map) {
+		this.currentContainer = map;
+		this.currentMap = map;
+		this.iterator = map.keySet().iterator();
+	}
+
+	public boolean hasNext() {
+		return this.iterator.hasNext();
+	}
+
+	private Object readValue() {
 		int c = peek(true);
 		switch (c) {
 		case '"':
@@ -44,7 +162,7 @@ public class JSONInputStream extends InputStream {
 		}
 	}
 
-	public String readString() {
+	private String readString() {
 		sb.setLength(0);
 		read('"', true);
 		while (true) {
@@ -110,22 +228,26 @@ public class JSONInputStream extends InputStream {
 				| (parseDigit() << 4) | parseDigit());
 	}
 
-	public int readInt() {
-		double d = readNumber();
-		int i = (int) Math.round(d);
-		if (i != d)
-			throw new JSONException("not an integer");
-		return i;
-	}
+	// private int readInt() {
+	// double d = readNumber();
+	// int i = (int) Math.round(d);
+	// if (i != d)
+	// throw new JSONException("not an integer");
+	// return i;
+	// }
 
-	public double readNumber() {
+	private double readNumber() {
+		// final boolean db = true;
+		if (db)
+			pr("\n\nreadNumber");
 		sb.setLength(0);
 		int state = 0;
 		boolean done = false;
 		while (true) {
 			int c = peek(false);
 			boolean isDigit = (c >= '0' && c <= '9');
-
+			if (db)
+				pr(" state=" + state + " c=" + (char) c + " buffer:" + sb);
 			int oldState = state;
 			state = -1;
 			switch (oldState) {
@@ -189,8 +311,11 @@ public class JSONInputStream extends InputStream {
 			if (done)
 				break;
 
-			if (state < 0)
+			if (state < 0) {
+				if (db)
+					pr("   ...throwing exception");
 				throw new JSONException("unexpected input");
+			}
 			sb.append((char) c);
 			read2(false);
 		}
@@ -203,11 +328,11 @@ public class JSONInputStream extends InputStream {
 		return value;
 	}
 
-	public Object read(JSONInterface jsonInstance) {
-		return jsonInstance.decode(this);
+	public Object read(IJSONParser parser) {
+		return parser.parse(this);
 	}
 
-	public Map readObject() {
+	private Map readObject() {
 		Map m = new HashMap();
 		read('{', true);
 		if (peek(true) != '}') {
@@ -225,18 +350,20 @@ public class JSONInputStream extends InputStream {
 		return m;
 	}
 
-	public ArrayList readArray() {
+	private ArrayList readArray() {
 		// final boolean db = true;
 		if (db)
-			pr("readArray");
+			pr("\n\nreadArray");
 		ArrayList a = new ArrayList();
 		read('[', true);
+		if (db) pr(" seeing if immediately ends... peek="+(char)peek(true));
 		if (peek(true) != ']') {
 			while (true) {
 				if (db)
-					pr(" peek = " + (char) peek(false));
+					pr("  reading next value, peek = " + (char) peek(false));
 				Object value = readValue();
 				a.add(value);
+				
 				if (peek(true) != ',')
 					break;
 				read2(false);
@@ -251,22 +378,22 @@ public class JSONInputStream extends InputStream {
 			read(s.charAt(i), false);
 	}
 
-	public void readNull() {
+	private void readNull() {
 		readExpString("null");
 	}
 
-	public boolean readBoolean() {
+	private Boolean readBoolean() {
 		if (peek(false) == 't') {
 			readExpString("true");
-			return true;
+			return Boolean.TRUE;
 		} else {
 			readExpString("false");
-			return false;
+			return Boolean.FALSE;
 		}
 	}
 
 	private int peek(boolean ignoreWhitespace) {
-		// final boolean db = true;
+		  final boolean db = false;
 		if (db)
 			pr("peek(ignore=" + ignoreWhitespace + ", peek=" + peek + ")");
 		if (peek < 0) {
@@ -290,14 +417,8 @@ public class JSONInputStream extends InputStream {
 		if (p < 0)
 			throw new JSONException("end of input");
 		peek = -1;
-		return p;
-	}
-
-	@Override
-	public int read() {
-		int p = peek(false);
-		peek = -1;
-		return p;
+		if (db) pr("Read char: "+(char)p);
+			return p;
 	}
 
 	private void read(int expectedChar, boolean ignoreWhitespace) {
@@ -306,7 +427,7 @@ public class JSONInputStream extends InputStream {
 			throw new JSONException("unexpected input");
 	}
 
-	public void verifyDone() {
+	private void verifyDone() {
 		if (peek(true) >= 0)
 			throw new JSONException("extra input");
 	}
@@ -314,4 +435,11 @@ public class JSONInputStream extends InputStream {
 	private StringBuilder sb = new StringBuilder();
 	private int peek = -1;
 	private InputStream stream;
+
+	private Object currentContainer;
+	private Map currentMap; // null if current container is not a map
+	private Object valueForLastKey;
+	// iterator into current object (map or list)
+	private Iterator iterator;
+	private ArrayList parseStack = new ArrayList();
 }

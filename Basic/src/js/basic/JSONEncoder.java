@@ -1,8 +1,10 @@
 package js.basic;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static js.basic.Tools.*;
 
@@ -14,7 +16,7 @@ public class JSONEncoder {
 		return sb.toString();
 	}
 
-	public void encode(JSONInterface jsonInstance) {
+	public void encode(IJSONEncoder jsonInstance) {
 		jsonInstance.encode(this);
 	}
 
@@ -29,6 +31,8 @@ public class JSONEncoder {
 			encode((Map) value);
 		else if (value instanceof List)
 			encode((List) value);
+		else if (value instanceof Set)
+			encode((Set) value);
 		else if (value instanceof Object[])
 			encode((Object[]) value);
 		else if (value instanceof int[])
@@ -62,52 +66,46 @@ public class JSONEncoder {
 
 	public void encode(Map map2) {
 		// final boolean db = true;
-		sb.append('{');
-		boolean first = true;
+		enterMap();
 
 		Map<String, Object> map = (Map<String, Object>) map2;
 
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
-
-			if (!first) {
-				sb.append(',');
-			}
-			first = false;
 			encode(entry.getKey());
-			sb.append(':');
 			Object value = entry.getValue();
 			encode(value);
 		}
-		sb.append('}');
+		exitMap();
 	}
 
 	public void encode(List list) {
-		sb.append('[');
-		boolean first = true;
-		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			if (!first) {
-				sb.append(',');
-			}
-			first = false;
+		encodeAsList(list.iterator());
+	}
+
+	private void encodeAsList(Iterator iter) {
+
+		enterList();
+		while (iter.hasNext()) {
 			encode(iter.next());
 		}
-		sb.append(']');
+		exitList();
+	}
+
+	public void encode(Set set) {
+		encodeAsList(set.iterator());
 	}
 
 	public void encode(Object[] array) {
-		sb.append('[');
-		boolean first = true;
+
+		enterList();
 		for (int i = 0; i < array.length; i++) {
-			if (!first) {
-				sb.append(',');
-			}
-			first = false;
 			encode(array[i]);
 		}
-		sb.append(']');
+		exitList();
 	}
 
 	public void encode(double d) {
+		prepareForNextValue();
 		// final boolean db = true;
 		long intValue = Math.round(d);
 		if (d == intValue) {
@@ -123,6 +121,7 @@ public class JSONEncoder {
 	}
 
 	public void encode(String s) {
+		prepareForNextValue();
 		sb.append('"');
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
@@ -161,15 +160,97 @@ public class JSONEncoder {
 	}
 
 	public void encode(boolean b) {
+		prepareForNextValue();
 		sb.append(b ? "true" : "false");
 	}
 
 	public void encodeNull() {
+		prepareForNextValue();
 		sb.append("null");
 	}
 
 	public void clear() {
 		sb.setLength(0);
 	}
+
+	public void enterList() {
+		prepareForNextValue();
+		pushState();
+		collectionType = COLLECTION_LIST;
+		collectionLength = 0;
+		valueIsNext = false;
+		sb.append('[');
+	}
+
+	public void exitList() {
+		if (collectionType != COLLECTION_LIST)
+			throw new IllegalStateException();
+		sb.append(']');
+		popState();
+	}
+
+	private void popState() {
+		valueIsNext = (Boolean) pop(stateStack);
+		collectionLength = (Integer) pop(stateStack);
+		collectionType = (Integer) pop(stateStack);
+
+	}
+
+	private void pushState() {
+		stateStack.add(collectionType);
+		stateStack.add(collectionLength);
+		stateStack.add(valueIsNext);
+	}
+
+	public void enterMap() {
+		prepareForNextValue();
+		pushState();
+		collectionType = COLLECTION_MAP;
+		collectionLength = 0;
+		valueIsNext = false;
+		sb.append('{');
+	}
+
+	public void exitMap() {
+		if (collectionType != COLLECTION_MAP)
+			throw new IllegalStateException();
+		sb.append('}');
+		popState();
+	}
+
+	private void prepareForNextValue() {
+		switch (collectionType) {
+		case COLLECTION_NONE:
+			if (collectionLength != 0)
+				throw new IllegalStateException(
+						"multiple items while not within list or map");
+			collectionLength++;
+			break;
+		case COLLECTION_LIST:
+			if (collectionLength != 0)
+				sb.append(',');
+			collectionLength++;
+			break;
+		case COLLECTION_MAP:
+			if (valueIsNext) {
+				sb.append(':');
+				valueIsNext = false;
+			} else {
+				valueIsNext = true;
+				if (collectionLength != 0)
+					sb.append(',');
+				collectionLength++;
+			}
+			break;
+		}
+	}
+
+	private static final int COLLECTION_NONE = 0, COLLECTION_LIST = 1,
+			COLLECTION_MAP = 2;
+
+	private int collectionType = COLLECTION_NONE;
+	private int collectionLength;
+	private boolean valueIsNext;
+	private ArrayList stateStack = new ArrayList();
 
 }

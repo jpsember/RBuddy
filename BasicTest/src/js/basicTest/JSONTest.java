@@ -12,20 +12,21 @@ import java.util.Map;
 
 import org.junit.*;
 
-import js.basic.JSONInterface;
+import js.basic.IJSONParser;
+import js.basic.IJSONEncoder;
 import js.basic.JSONEncoder;
 import js.basic.JSONException;
-import js.basic.JSONInputStream;
+import js.basic.JSONParser;
 import static js.basic.Tools.*;
 
 public class JSONTest extends js.testUtils.MyTest {
 
-	private JSONInputStream json(String s) {
-		json = new JSONInputStream(s);
+	private JSONParser json(String s) {
+		json = new JSONParser(s);
 		return json;
 	}
 
-	private JSONInputStream json;
+	private JSONParser json;
 
 	@Test
 	public void testNumbers() {
@@ -33,25 +34,31 @@ public class JSONTest extends js.testUtils.MyTest {
 		for (int i = 0; i < script.length; i++) {
 			String s = script[i];
 			json(s);
-			double d = json.readNumber();
-			json.verifyDone();
+
+			double d = json.nextDouble();
+			assertFalse(json.hasNext());
 			assertEquals(Double.parseDouble(s), d, 1e-10);
 		}
 	}
 
 	@Test
 	public void testBadNumbers() {
+		// final boolean db = true;
+		if (db)
+			pr("\n\n\n\n----------------------------------------------------------\ntestBadNumbers\n");
 		String script[] = { "-", "00", "12.", ".42", "123ee", "123e-", };
 		for (int i = 0; i < script.length; i++) {
 			String s = script[i];
+			if (db)
+				pr("\n-----------------\n constructing json for '" + s + "'");
 			try {
 				json(s);
-				json.readNumber();
-				json.verifyDone();
 				fail("expected exception with '" + s + "'");
 			} catch (JSONException e) {
 			}
 		}
+		if (db)
+			pr("\n\n\n");
 	}
 
 	private JSONEncoder newEnc() {
@@ -71,9 +78,8 @@ public class JSONTest extends js.testUtils.MyTest {
 	public void testStreamConstructor() throws UnsupportedEncodingException {
 		String orig = "[0,1,2,3,\"hello\"]";
 		InputStream stream = new ByteArrayInputStream(orig.getBytes("UTF-8"));
-		json = new JSONInputStream(stream);
-		Object a = json.readArray();
-		json.verifyDone();
+		json = new JSONParser(stream);
+		Object a = json.next();
 		assertTrue(a instanceof ArrayList);
 
 		enc().encode(a);
@@ -86,13 +92,55 @@ public class JSONTest extends js.testUtils.MyTest {
 		String orig = "[0,1,2,3,\"hello\"]";
 
 		json(orig);
-		Object a = json.readArray();
-		json.verifyDone();
-		assertTrue(a instanceof ArrayList);
+		json.enterList();
+		for (int i = 0; i < 4; i++) {
+			assertTrue(json.hasNext());
+			assertEquals(i, json.nextInt());
+		}
+		assertTrue(json.hasNext());
+		assertStringsMatch("hello", json.nextString());
+		assertFalse(json.hasNext());
+		json.exit();
+	}
 
-		enc().encode(a);
+	@Test
+	public void testMap() {
+		String orig = "{\"u\":14,\"m\":false,\"w\":null,\"k\":true}";
+		json(orig);
+
+		json.enterMap();
+		Map m = new HashMap();
+		for (int i = 0; i < 4; i++) {
+			String key = json.nextKey();
+			Object value = json.keyValue();
+			assertFalse(m.containsKey(key));
+			m.put(key, value);
+
+		}
+		json.exit();
+
+		assertStringsMatch(m.get("u"), "14.0");
+		assertStringsMatch(m.get("m"), "false");
+		assertTrue(m.get("w") == null);
+		assertStringsMatch(m.get("k"), "true");
+	}
+
+	@Test
+	public void testEncodeMap() {
+		JSONEncoder enc = new JSONEncoder();
+		enc.enterMap();
+		enc.encode("a");
+
+		enc.enterList();
+		enc.encode(12);
+		enc.encode(17);
+		enc.exitList();
+
+		enc.encode("b");
+		enc.encode(true);
+		enc.exitMap();
 		String s = enc.toString();
-		assertStringsMatch(s, orig);
+		assertStringsMatch("{\"a\":[12,17],\"b\":true}", s);
 	}
 
 	@Test
@@ -113,7 +161,7 @@ public class JSONTest extends js.testUtils.MyTest {
 		enc().encode(originalString);
 		String jsonString = enc.toString();
 		json(jsonString);
-		String decodedString = json.readString();
+		String decodedString = json.nextString();
 		assertStringsMatch(decodedString, originalString);
 	}
 
@@ -137,8 +185,8 @@ public class JSONTest extends js.testUtils.MyTest {
 				pr("\n testing '" + s + "'");
 
 			json(s);
-			Object obj = json.readValue();
-			json.verifyDone();
+			Object obj = json.next();
+			assertFalse(json.hasNext());
 			if (db)
 				pr("  parsed " + obj + " (type = " + obj.getClass() + ")");
 
@@ -150,9 +198,19 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
-	private static class OurClass implements JSONInterface {
+	private static class OurClass implements IJSONEncoder {
 
-		public static final JSONInterface factory = new OurClass("", 0);
+		public static final IJSONParser parser = new IJSONParser() {
+
+			@Override
+			public Object parse(JSONParser json) {
+				json.enterList();
+				String message = json.nextString();
+				int number = json.nextInt();
+				json.exit();
+				return new OurClass(message, number);
+			}
+		};
 
 		public OurClass(String message, int number) {
 			map.put("message", message);
@@ -175,15 +233,6 @@ public class JSONTest extends js.testUtils.MyTest {
 			Object[] items = { map.get("message"), map.get("number") };
 			encoder.encode(items);
 		}
-
-		@Override
-		public Object decode(JSONInputStream stream) {
-			ArrayList array = stream.readArray();
-			return new OurClass(//
-					(String) array.get(0), //
-					((Double) array.get(1)).intValue()//
-			);
-		}
 	}
 
 	@Test
@@ -192,7 +241,7 @@ public class JSONTest extends js.testUtils.MyTest {
 		enc().encode(c);
 		String s = enc().toString();
 		json(s);
-		OurClass c2 = (OurClass) json.read(OurClass.factory);
+		OurClass c2 = (OurClass) json.read(OurClass.parser);
 		assertStringsMatch(c, c2);
 	}
 }

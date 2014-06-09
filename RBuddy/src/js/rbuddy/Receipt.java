@@ -2,13 +2,18 @@ package js.rbuddy;
 
 import static js.basic.Tools.*;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import js.basic.IJSONParser;
+import js.basic.JSONEncoder;
+import js.basic.JSONParser;
+import js.basic.IJSONEncoder;
 import js.basic.StringUtil;
 
-public class Receipt {
+public class Receipt implements IJSONEncoder {
 
 	public static final int MAX_TAGS = 5;
 
@@ -40,65 +45,6 @@ public class Receipt {
 
 	public String getSummary() {
 		return summary;
-	}
-
-	public static Receipt decode(CharSequence s) {
-		String[] tokens = StringUtil.tokenize(s);
-		boolean problem = true;
-		Receipt r = null;
-		do {
-			if (tokens.length < 4)
-				break;
-
-			int f = 0;
-			r = new Receipt(Integer.parseInt(tokens[f++]));
-			r.date = JSDate.parse(tokens[f++]);
-			r.summary = StringUtil.decode(tokens[f++]).toString();
-
-			int nTags = Integer.parseInt(tokens[f++]);
-			if (nTags < 0)
-				break;
-
-			if (f + nTags > tokens.length)
-				break;
-
-			Set<String> set = new TreeSet<String>();
-			for (int i = 0; i < nTags; i++) {
-				set.add(tokens[f++]);
-			}
-			r.setTags(set);
-
-			if (f != tokens.length)
-				break;
-			problem = false;
-		} while (false);
-		if (problem)
-			throw new IllegalArgumentException("problem decoding " + s);
-
-		return r;
-	}
-
-	public StringBuilder encode() {
-		return encode(null);
-	}
-
-	public StringBuilder encode(StringBuilder sb) {
-		if (sb == null)
-			sb = new StringBuilder();
-		sb.append(getId());
-		sb.append('|');
-		sb.append(date.toString());
-		sb.append('|');
-		StringUtil.encode(getSummary(), sb);
-
-		// Encode tags by preceding with number of tags
-		sb.append('|');
-		sb.append(tags.size());
-		for (Iterator<String> it = tags.iterator(); it.hasNext();) {
-			sb.append('|');
-			StringUtil.encode(it.next(), sb);
-		}
-		return sb;
 	}
 
 	public void setSummary(String s) {
@@ -153,7 +99,9 @@ public class Receipt {
 
 	@Override
 	public String toString() {
-		return "Receipt " + encode();
+		JSONEncoder json = new JSONEncoder();
+		json.encode(this);
+		return "Receipt " + json;
 	}
 
 	/**
@@ -280,4 +228,39 @@ public class Receipt {
 	private JSDate date;
 	private String summary;
 	private int id;
+
+	@Override
+	public void encode(JSONEncoder encoder) {
+		ArrayList a = new ArrayList();
+		a.add(getId());
+		a.add(date.toString());
+		a.add(getSummary());
+		a.add(getTags());
+		encoder.encode(a);
+	}
+
+	public static final IJSONParser JSON_PARSER = new IJSONParser() {
+		@Override
+		public Object parse(JSONParser json) {
+			json.enterList();
+			int id = json.nextInt();
+			JSDate date = (JSDate) json.read(JSDate.JSON_PARSER);
+			String summary = json.nextString();
+
+			Set<String> tags = new TreeSet<String>();
+			json.enterList();
+			while (json.hasNext())
+				tags.add(json.nextString());
+			json.exit();
+
+			json.exit();
+
+			Receipt r = new Receipt(id);
+			r.summary = summary;
+			r.date = date;
+			r.tags = tags;
+			return r;
+
+		}
+	};
 }

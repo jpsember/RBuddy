@@ -10,6 +10,8 @@ import java.util.Set;
 import org.junit.*;
 
 import js.basic.IOSnapshot;
+import js.basic.JSONEncoder;
+import js.basic.JSONParser;
 //import static org.junit.Assert.*;
 import js.rbuddy.JSDate;
 import js.rbuddy.Receipt;
@@ -59,21 +61,19 @@ public class ReceiptTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testEncode() {
-		{
-			Receipt r = new Receipt(72);
-			r.setSummary("\n\nA long summary\n\n\n   \n\n with several linefeeds, \"quotes\", and | some other characters | ... \n\n");
-			r.setTags("alpha,beta,gamma");
-			CharSequence s = r.encode();
+		Receipt r = new Receipt(72);
+		r.setSummary("\n\nA long summary\n\n\n   \n\n with several linefeeds, \"quotes\", and | some other characters | ... \n\n");
+		r.setTags("alpha,beta,gamma");
+		JSONEncoder enc = new JSONEncoder();
+		r.encode(enc);
+		String s = enc.toString();
 
-			Receipt r2 = Receipt.decode(s);
-			assertStringsMatch(s, r2.encode());
-		}
-		{
-			Receipt r = new Receipt(72);
-			CharSequence s = r.encode();
-			Receipt r2 = Receipt.decode(s);
-			assertStringsMatch(s, r2.encode());
-		}
+		JSONParser js = new JSONParser(s);
+		Receipt r2 = (Receipt) Receipt.JSON_PARSER.parse(js);
+
+		JSONEncoder enc2 = new JSONEncoder();
+		r2.encode(enc2);
+		assertStringsMatch(s, enc2.toString());
 	}
 
 	@Test
@@ -148,9 +148,8 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		double value = 1323.526;
 
 		NumberFormat[] fmts = { NumberFormat.getCurrencyInstance(Locale.US),
-				NumberFormat.getCurrencyInstance(Locale.FRENCH), 
-				NumberFormat.getCurrencyInstance(Locale.JAPAN), 		
-		};
+				NumberFormat.getCurrencyInstance(Locale.FRENCH),
+				NumberFormat.getCurrencyInstance(Locale.JAPAN), };
 
 		System.out.println("value=" + value);
 		for (int i = 0; i < fmts.length; i++) {
