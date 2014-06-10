@@ -10,7 +10,7 @@ public interface IReceiptFile {
 	 * @return receipt
 	 * @throws IllegalArgumentException if no such receipt exists
 	 */
-	public Receipt getReceipt(int uniqueIdentifier);
+	public Receipt getReceipt(int id);
 	
 	/**
 	 * Flush any changes 
@@ -30,6 +30,13 @@ public interface IReceiptFile {
 	 * @throws IllegalArgumentException if no such receipt exists
 	 */
 	public void delete(Receipt r);
+	
+	/**
+	 * Determine if a receipt with a particular id exists
+	 * @param id
+	 * @return true if it exists
+	 */
+	public boolean exists(int id);
 	
 	/**
 	 * Mark a receipt as being modified, so that it is written when the file is flushed

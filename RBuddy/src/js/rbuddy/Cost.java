@@ -1,12 +1,12 @@
 package js.rbuddy;
 
 import java.text.NumberFormat;
-import java.util.Locale;
+//import java.util.Locale;
 
 public class Cost {
 
 	
-	private static NumberFormat getUserCurrencyFormat() {
+	/*private*/ static NumberFormat getUserCurrencyFormat() {
 		// use lazy initialization to construct this only when needed
 		if (userCurrencyFormat == null) {
 			// get the formatter that is appropriate to the user's location

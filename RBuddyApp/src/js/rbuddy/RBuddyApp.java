@@ -18,10 +18,13 @@ public class RBuddyApp {
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 	private static final String KEY_UNIQUE_IDENTIFIER = "unique_id";
 
-	public static void prepare(Activity activity) {
-		assertUIThread();
+	public static void prepare(Context context) {
 		if (sharedInstance == null) {
-			sharedInstance = new RBuddyApp(activity);
+			final boolean db = true;
+			if (!testing())
+				assertUIThread();
+			sharedInstance = new RBuddyApp(context);
+			if (db) pr("RBuddyApp.prepare, prepared sharedInstance "+sharedInstance);
 		}
 	}
 
@@ -31,8 +34,13 @@ public class RBuddyApp {
 	 * @return
 	 */
 	public static RBuddyApp sharedInstance() {
-		if (sharedInstance == null)
-			die("RBuddyApp must be prepared");
+		if (sharedInstance == null) {
+			if (testing()) {
+				sharedInstance = new RBuddyApp(null);
+			} else {
+				die("RBuddyApp must be prepared");
+			}
+		}
 
 		return sharedInstance;
 	}
@@ -42,6 +50,7 @@ public class RBuddyApp {
 			die("not running within UI thread");
 		}
 	}
+
 
 	public PhotoFile getPhotoFile() {
 		if (photoFile == null) {
@@ -71,7 +80,7 @@ public class RBuddyApp {
 		}
 		return receiptFile;
 	}
-	
+
 	public int getUniqueIdentifier() {
 		int value;
 		synchronized (this) {
@@ -87,20 +96,26 @@ public class RBuddyApp {
 		return preferences;
 	}
 
-	public Activity activity() {
+	public Context activity() {
 		return this.context;
 	}
-	
-	private RBuddyApp(Activity activity) {
-		this.context = activity;
-		this.preferences = activity.getPreferences(Context.MODE_PRIVATE);
+
+	private RBuddyApp(Context context) {
+		unimp("rename .activity() to .context()");
+		this.context = context;
+		if (context instanceof Activity) {
+			this.preferences = ((Activity) context)
+					.getPreferences(Context.MODE_PRIVATE);
+		} else {
+			this.preferences = context.getSharedPreferences("__RBuddyApp_test_",Context.MODE_PRIVATE);
+		}
 		startApp(); // does nothing if already started
 		JSDate.setFactory(AndroidDate.androidDateFactory);
 	}
 
 	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
-	private Activity context;
+	private Context context;
 	private PhotoFile photoFile;
 	private IReceiptFile receiptFile;
 }
