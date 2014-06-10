@@ -72,7 +72,7 @@ public class AndroidDate extends JSDate {
 	private static java.text.DateFormat userDateFormat() {
 		if (userDateFormat == null) {
 			userDateFormat = android.text.format.DateFormat
-					.getDateFormat(RBuddyApp.sharedInstance().activity());
+					.getDateFormat(RBuddyApp.sharedInstance().context());
 		}
 		return userDateFormat;
 	}

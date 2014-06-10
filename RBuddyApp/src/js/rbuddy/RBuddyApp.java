@@ -96,12 +96,11 @@ public class RBuddyApp {
 		return preferences;
 	}
 
-	public Context activity() {
+	public Context context() {
 		return this.context;
 	}
 
 	private RBuddyApp(Context context) {
-		unimp("rename .activity() to .context()");
 		this.context = context;
 		if (context instanceof Activity) {
 			this.preferences = ((Activity) context)

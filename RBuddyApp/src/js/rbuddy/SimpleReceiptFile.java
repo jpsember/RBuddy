@@ -30,7 +30,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	public static File fileForBaseName(String baseName) {
-		return new File(RBuddyApp.sharedInstance().activity()
+		return new File(RBuddyApp.sharedInstance().context()
 				.getExternalFilesDir(null), baseName);
 	}
 
