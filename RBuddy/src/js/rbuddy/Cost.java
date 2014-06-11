@@ -4,17 +4,22 @@ import static js.basic.Tools.pr;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
-//import java.util.Locale;
-import java.util.Currency;
 import static js.basic.Tools.*;
 
 public class Cost {
 
+	@Override
 	public String toString() {
+		return toString(true);
+	}
+
+	public String toString(boolean zeroAsEmptyString) {
+		if (zeroAsEmptyString && value == 0)
+			return "";
 		NumberFormat f = getUserCurrencyFormat();
 		return f.format(value);
 	}
-	
+
 	private static NumberFormat getUserCurrencyFormat() {
 		// use lazy initialization to construct this only when needed
 		if (userCurrencyFormat == null) {
@@ -69,7 +74,10 @@ public class Cost {
 	 * If THAT fails, then throw a 'NumberFormatException'.
 	 */
 	private static double parse(String s) {
-
+		// An empty string is always interpreted as zero.
+		if (s.isEmpty())
+			return 0;
+		
 		/*
 		 * NumberFormat[] fmts = { NumberFormat.getCurrencyInstance(Locale.US),
 		 * NumberFormat.getCurrencyInstance(Locale.FRENCH),
@@ -85,9 +93,9 @@ public class Cost {
 
 		NumberFormat f = getUserCurrencyFormat();
 
-//		Currency c = f.getCurrency();
+		// Currency c = f.getCurrency();
 
-//		pr("\n" + "tim was here " + c.getSymbol());
+		// pr("\n" + "tim was here " + c.getSymbol());
 
 		Number n = null;
 		try {

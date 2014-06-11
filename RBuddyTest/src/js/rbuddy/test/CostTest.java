@@ -13,6 +13,18 @@ import js.rbuddy.Cost;
 
 public class CostTest extends js.testUtils.MyTest {
 
+	// Convenience methods to set specific locales 
+	private void setLocale(Locale locale) {
+		Cost.setUserCurrencyFormat(NumberFormat
+				.getCurrencyInstance(locale));
+	}
+
+	@Override
+	public void setUp() {
+		super.setUp();
+		setLocale(Locale.US);
+	}
+	
 	// the value of this object ALWAYS represents a positive number of pennies
 
 	// if you don't send anything in, it is failure
@@ -58,8 +70,6 @@ public class CostTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testNormal3() {
-		Cost.setUserCurrencyFormat(NumberFormat
-				.getCurrencyInstance(Locale.US));
 
 		String s = "$123.45";
 		Cost c = new Cost(s);
@@ -134,7 +144,8 @@ public class CostTest extends js.testUtils.MyTest {
 
 	// either 0 decimal places or two
 
-	@Test
+	// Disable this test; it wasn't really a test, just an experiment to get familiar with Java API
+//	@Test
 	public void testCurrencyFormatterVariousCountries() {
 		double value = 1323.526;
 
@@ -160,7 +171,8 @@ public class CostTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
+	// Disable; was just an experiment
+	// @Test
 	public void testCurrencyFormatterSloppyParseInput() {
 
 		NumberFormat f = NumberFormat.getCurrencyInstance(Locale.US);
@@ -184,6 +196,12 @@ public class CostTest extends js.testUtils.MyTest {
 						+ "  There may exist some utilities that do this already... more research is required.");
 			}
 		}
+	}
+
+	@Test
+	public void testParseEmptyString() {
+		Cost c = new Cost("");
+		assertEqualsFloat(0,c.getValue());
 	}
 
 }
