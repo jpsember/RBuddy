@@ -1,6 +1,5 @@
 package js.rbuddy;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import js.basic.IJSONParser;

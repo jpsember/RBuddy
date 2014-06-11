@@ -273,12 +273,12 @@ public class EditReceiptActivity extends Activity {
 					Cost c = new Cost(0);
 					try {
 						String s = costView.getText().toString();
-						c = parseCostFromString(s);
+						c = new Cost(s);
 					} catch (NumberFormatException e) {
 						warning("Failed to parse " + costView.getText()
 								+ "; clearing");
 					}
-					costView.setText(costToString(c));
+					costView.setText(c.toString());
 				}
 			}
 		});
@@ -411,28 +411,12 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
-	private static String costToString(Cost cost) {
-		unimp("It would be nice to make this an option on Cost's toString() method, and to silently treat \"\" as 0");
-		if (cost.getValue() == 0)
-			return "";
-		return cost.toString();
-	}
-
 	private void readWidgetValuesFromReceipt() {
 		summaryView.setText(receipt.getSummary());
 		summaryView.setSelection(summaryView.getText().length());
 		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
-		costView.setText(costToString(receipt.getCost()));
+		costView.setText(receipt.getCost().toString());
 		tagsView.setText(receipt.getTags().format());
-	}
-
-	private static Cost parseCostFromString(String s) {
-		Cost c;
-		if (s.length() == 0)
-			c = new Cost(0);
-		else
-			c = new Cost(s);
-		return c;
 	}
 
 	private void updateReceiptWithWidgetValues() {
@@ -443,7 +427,7 @@ public class EditReceiptActivity extends Activity {
 		Cost c = null;
 		try {
 			String s = costView.getText().toString();
-			c = parseCostFromString(s);
+			c = new Cost(s);
 		} catch (NumberFormatException e) {
 			final boolean db = true;
 			if (db)
