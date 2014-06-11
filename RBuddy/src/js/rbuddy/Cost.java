@@ -11,13 +11,8 @@ import static js.basic.Tools.*;
 public class Cost {
 
 	public String toString() {
-		
 		NumberFormat f = getUserCurrencyFormat();
-		Currency c = f.getCurrency();
-		String result = c.getSymbol() + value;
-		//String result = c.getSymbol();
-		return result;
-		
+		return f.format(value);
 	}
 	
 	private static NumberFormat getUserCurrencyFormat() {

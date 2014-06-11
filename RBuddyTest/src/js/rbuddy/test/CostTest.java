@@ -78,9 +78,9 @@ public class CostTest extends js.testUtils.MyTest {
 		Cost.setUserCurrencyFormat(NumberFormat
 				.getCurrencyInstance(Locale.US));
 
-		String s = "$123.45";
+		String s = "$1,123.00";
 		Cost c = new Cost(s);
-		assertStringsMatch("$123.45",c.toString());
+		assertStringsMatch("$1,123.00",c.toString());
 	}
 
 	// all the correct ways i can think of to express
