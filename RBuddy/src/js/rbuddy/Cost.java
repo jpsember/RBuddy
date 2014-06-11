@@ -4,8 +4,8 @@ import static js.basic.Tools.pr;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
-import java.util.Currency;
+//import java.util.Locale;
+//import java.util.Currency;
 import static js.basic.Tools.*;
 
 public class Cost {
