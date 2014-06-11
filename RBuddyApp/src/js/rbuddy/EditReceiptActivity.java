@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
@@ -101,6 +102,7 @@ public class EditReceiptActivity extends Activity {
 
 		addPhotoWidget(layout);
 		addDateWidget(layout);
+		addCostWidget(layout);
 		addSummaryWidget(layout);
 	}
 
@@ -199,6 +201,50 @@ public class EditReceiptActivity extends Activity {
 		});
 	}
 
+	private void addCostWidget(ViewGroup layout) {
+		TextView tf = new EditText(this);
+		costView = tf;
+
+		tf.setInputType(InputType.TYPE_CLASS_NUMBER
+				| InputType.TYPE_NUMBER_FLAG_DECIMAL
+				| InputType.TYPE_NUMBER_FLAG_SIGNED);
+
+		// This makes pressing the 'done' keyboard key close the keyboard
+		tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				return false;
+			}
+		});
+
+		// When this view loses focus, immediately attempt to parse the user's text;
+		// if it fails, clear the field (and hence clear the cost to 0)
+		
+		// This may not work very well in practice; see, e.g.,
+		// http://stackoverflow.com/questions/10627137/how-can-i-know-when-a-edittext-lost-focus
+		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (!hasFocus) {
+					Cost c = new Cost(0);
+					try {
+						String s = costView.getText().toString();
+						c = parseCostFromString(s);
+					} catch (NumberFormatException e) {
+						warning("Failed to parse "+costView.getText()+"; clearing");
+					}
+					costView.setText(costToString(c));
+				}
+			}
+		});
+
+		tf.setHint("Amount");
+		tf.setMinHeight(50);
+		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT);
+		layout.addView(tf, layoutParam);
+	}
+
 	private void addSummaryWidget(ViewGroup layout) {
 		MultiAutoCompleteTextView tf = new MultiAutoCompleteTextView(this);
 
@@ -282,8 +328,7 @@ public class EditReceiptActivity extends Activity {
 
 		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
 
-		mainFile = app.getPhotoFile().getMainFileFor(
-				receipt.getId());
+		mainFile = app.getPhotoFile().getMainFileFor(receipt.getId());
 		if (db)
 			pr("receipt id " + receipt.getId()
 					+ "  copying scaled/rotated file " + workFile
@@ -321,16 +366,45 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
+	private static String costToString(Cost cost) {
+		unimp("It would be nice to make this an option on Cost's toString() method, and to silently treat \"\" as 0");
+		if (cost.getValue() == 0)
+			return "";
+		return cost.toString();
+	}
+
 	private void readWidgetValuesFromReceipt() {
 		summaryView.setText(receipt.getSummary());
 		summaryView.setSelection(summaryView.getText().length());
 		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
+		costView.setText(costToString(receipt.getCost()));
+	}
+
+	private static Cost parseCostFromString(String s) {
+		Cost c;
+		if (s.length() == 0)
+			c = new Cost(0);
+		else
+			c = new Cost(s);
+		return c;
 	}
 
 	private void updateReceiptWithWidgetValues() {
 		receipt.setDate(readDateFromDateWidget());
 		receipt.setSummary(summaryView.getText().toString());
 		app.receiptFile().setModified(receipt);
+
+		Cost c = null;
+		try {
+			String s = costView.getText().toString();
+			c = parseCostFromString(s);
+		} catch (NumberFormatException e) {
+			final boolean db = true;
+			if (db)
+				pr("(attempting to parse '" + costView + "', caught " + e + ")");
+		}
+		if (c != null)
+			receipt.setCost(c);
 	}
 
 	private RBuddyApp app;
@@ -338,4 +412,6 @@ public class EditReceiptActivity extends Activity {
 	private ImageView photoView;
 	private EditText summaryView;
 	private TextView dateView;
+	private TextView costView;
+
 }

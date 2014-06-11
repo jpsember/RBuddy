@@ -23,7 +23,7 @@ public class RBuddyApp {
 
 	public static void prepare(Context context) {
 		if (sharedInstance == null) {
-			final boolean db = true;
+//			final boolean db = true;
 			if (!testing())
 				assertUIThread();
 			sharedInstance = new RBuddyApp(context);
