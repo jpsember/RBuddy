@@ -3,7 +3,10 @@ package js.rbuddy;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import js.basic.IJSONEncoder;
+import js.basic.JSONEncoder;
 import static js.basic.Tools.*;
 
 /**
@@ -15,7 +18,7 @@ import static js.basic.Tools.*;
  * @author jeff
  * 
  */
-public class TagSet {
+public class TagSet implements IJSONEncoder {
 
 	public TagSet(int maxTags) {
 		this.maxTags = maxTags;
@@ -114,7 +117,7 @@ public class TagSet {
 	}
 
 	public static TagSet decode(String s) {
-		// We could do this quicker by inserting objects ourselves, 
+		// We could do this quicker by inserting objects ourselves,
 		// but this is simpler and has an asymptotically equivalent runtime.
 		String[] strs = s.split("\\n");
 		TagSet set = new TagSet();
@@ -161,15 +164,68 @@ public class TagSet {
 
 	/**
 	 * Given a set of tag names, construct user-displayable string
-	 * @param tags 
+	 * 
+	 * @param tags
 	 * @return
 	 */
 	public static String formatTagNameSet(Set<String> tags) {
-		throw new UnsupportedOperationException();
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
+			String name = iter.next();
+			if (sb.length() != 0)
+				sb.append(", ");
+			sb.append(name);
+		}
+		return sb.toString();
 	}
-	
+
+	/**
+	 * Construct an empty tag name set, one that will sort tags into
+	 * alphabetical order
+	 * 
+	 * @return
+	 */
+	public static Set<String> constructTagNameSet() {
+		return new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+	}
+
 	private int size;
 	private TagEntry headEntry, tailEntry;
 	private int maxTags;
 	private TreeMap<String, TagEntry> tagMap;
+
+	@Override
+	public void encode(JSONEncoder encoder) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * Parse a string of comma- (or perhaps period-) delimited tags to a set
+	 * 
+	 * @param s
+	 * @return
+	 * @throws IllegalArgumentException
+	 *             if parsing failed (but impossible for this to happen at present)
+	 */
+	public static Set<String> parseTagNameSet(String s) {
+		Set<String> tagNameSet = constructTagNameSet();
+		int cursor = 0;
+		int lastDelimeter = -1;
+
+		// add a trailing delimeter to perform final tag 'flush'
+		s = s + ",";
+		while (cursor < s.length()) {
+			char c = s.charAt(cursor);
+			if (c == ',' || c == '.') {
+				String tagName = s.substring(lastDelimeter + 1, cursor);
+				tagName = tagName.trim();
+				if (!tagName.isEmpty())
+					tagNameSet.add(tagName);
+				lastDelimeter = cursor;
+			}
+			cursor++;
+		}
+		return tagNameSet;
+	}
 }

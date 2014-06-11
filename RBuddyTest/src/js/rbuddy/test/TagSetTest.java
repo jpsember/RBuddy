@@ -1,5 +1,6 @@
 package js.rbuddy.test;
 
+import static js.basic.Tools.*;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
@@ -9,9 +10,8 @@ import java.util.Set;
 
 import org.junit.*;
 
-//import static org.junit.Assert.*;
 import js.rbuddy.TagSet;
-//import static js.basic.Tools.*;
+import js.testUtils.IOSnapshot;
 
 public class TagSetTest extends js.testUtils.MyTest {
 
@@ -209,6 +209,61 @@ public class TagSetTest extends js.testUtils.MyTest {
 				.hasNext();) {
 			String name = iter.next();
 			assertTrue(set.tags().contains(name));
+		}
+	}
+	
+	@Test
+	public void testFormatEmptyTagNameSet() {
+		Set<String> tagSet = TagSet.constructTagNameSet();
+		assertStringsMatch("",TagSet.formatTagNameSet(tagSet));
+	}
+	
+	@Test
+	public void testTagNameSetIsCaseInsensitive() {
+		Set<String> tagSet = TagSet.constructTagNameSet();
+		tagSet.add("hello");
+		tagSet.add("Hello");
+		tagSet.add("hEllO");
+		assertTrue(tagSet.size() == 1);
+	}
+	
+	@Test
+	public void testTagNameSetFormat() {
+		IOSnapshot.open();
+		
+		Set<String> tagSet = TagSet.constructTagNameSet();
+		tagSet.add("medium");
+		tagSet.add("large box");
+		tagSet.add("tiny");
+		tagSet.add("big");
+		tagSet.add("small");
+		
+		pr(TagSet.formatTagNameSet(tagSet));
+		
+		IOSnapshot.close();
+	}
+	
+	@Test
+	public void testTagNameSetParse() {
+		
+		String[] script = {
+				"","",//
+				"   ","",//
+				"alpha","alpha",//
+				"nospace,aftercomma","aftercomma, nospace",//
+				"two words","two words",//
+				"two words,then three words","then three words, two words", //
+				"trailingcomma,","trailingcomma",//
+				"boo,trailingcommaandwhitespace   ,","boo, trailingcommaandwhitespace",//
+				"boo.trailingcommaandwhitespace   ...  . . ","boo, trailingcommaandwhitespace",//
+		};
+		
+		for (int i = 0; i<script.length; i+=2) {
+			String s = script[i];
+			String sExp = script[i+1];
+			Set<String> tagNameSet = TagSet.parseTagNameSet(s);
+			String s2 = TagSet.formatTagNameSet(tagNameSet);
+			assertStringsMatch(sExp,s2);
 		}
 	}
 	
