@@ -7,33 +7,36 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
-    
-    	<!--     we need the camera to take photos of receipts (though I suppose we could allow just existing photos) -->    
-	<uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18"/>
+
+    <!-- we need the camera to take photos of receipts (though I suppose we could allow just existing photos) -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
     <!-- not sure if this is required... -->
-    <uses-permission android:name="android.permission.CAMERA"/>
-    
-    
-    
-	<!-- for an online icon generator, see http://romannurik.github.io/AndroidAssetStudio/icons-launcher.html -->
-    <application 
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- for an online icon generator, see http://romannurik.github.io/AndroidAssetStudio/icons-launcher.html -->
+    <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher" 
-        android:label="@string/app_name">
-        
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
         <activity
             android:name=".ReceiptListActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".EditReceiptActivity">
+        <activity
+            android:name=".EditReceiptActivity"
+            android:windowSoftInputMode="stateUnchanged" >
         </activity>
     </application>
-	
-	
+
 </manifest>
