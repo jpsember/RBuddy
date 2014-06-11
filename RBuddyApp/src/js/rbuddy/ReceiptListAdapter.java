@@ -19,7 +19,7 @@ public class ReceiptListAdapter extends ArrayAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-//		final boolean db = true;
+		// final boolean db = true;
 
 		Receipt r = (Receipt) getItem(position);
 		if (db)
@@ -34,7 +34,8 @@ public class ReceiptListAdapter extends ArrayAdapter {
 			LinearLayout view = new LinearLayout(this.getContext());
 			listItemView = view;
 			final int LIST_ITEM_PADDING = 10;
-			view.setPadding(LIST_ITEM_PADDING, LIST_ITEM_PADDING, LIST_ITEM_PADDING, LIST_ITEM_PADDING);
+			view.setPadding(LIST_ITEM_PADDING, LIST_ITEM_PADDING,
+					LIST_ITEM_PADDING, LIST_ITEM_PADDING);
 			view.setOrientation(LinearLayout.HORIZONTAL);
 
 			final int LIST_ITEM_HEIGHT = 80;
@@ -58,6 +59,14 @@ public class ReceiptListAdapter extends ArrayAdapter {
 				tv.setLayoutParams(lp);
 				view.addView(tv);
 			}
+			{
+				TextView tv = new TextView(this.getContext());
+				tv.setTag("cost");
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+						120, LIST_ITEM_HEIGHT, 0.0f);
+				tv.setLayoutParams(lp);
+				view.addView(tv);
+			}
 
 			{
 				TextView tv = new TextView(this.getContext());
@@ -73,11 +82,12 @@ public class ReceiptListAdapter extends ArrayAdapter {
 		// Customize this view by updating the various child views to display
 		// the particular receipt
 
-		((TextView) listItemView.findViewWithTag("date")).setText(
-				AndroidDate.formatUserDateFromJSDate(r.getDate()));
-		((TextView) listItemView.findViewWithTag("summary")).setText(
-//				""+ position + ": "+// prefix with position so we can verify that clicking on positions 10..19 does a deletion
-				 r.getSummary());
+		((TextView) listItemView.findViewWithTag("date")).setText(AndroidDate
+				.formatUserDateFromJSDate(r.getDate()));
+		((TextView) listItemView.findViewWithTag("cost")).setText(r.getCost()
+				.toString());
+		((TextView) listItemView.findViewWithTag("summary")).setText(r
+				.getSummary());
 
 		return listItemView;
 	}

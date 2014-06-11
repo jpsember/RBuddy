@@ -73,7 +73,7 @@ public final class Tools {
 
 		StackTraceElement[] elist = t.getStackTrace();
 
-		int s0 = 1+skipCount;
+		int s0 = 1 + skipCount;
 		int s1 = s0 + displayCount;
 
 		for (int i = s0; i < s1; i++) {
@@ -945,14 +945,18 @@ public final class Tools {
 		return sb.toString();
 	}
 
-	// This global flag determines whether the line numbers that appear in
-	// warnings (and 'unimp' messages)
-	// are to be replaced with constant placeholders ('XXX') so that old
-	// snapshots remain valid even if
-	// a line number associated with a warning has changed.
-	static boolean sanitizeLineNumbers;
+	private static boolean sanitizeLineNumbers;
 	private static Pattern lineNumbersPattern;
 
+	/**
+	 * Optionally replace literal line numbers that appear in warnings (and 'unimp' messages)
+	 * with constant placeholders ('XXX') so that old snapshots remain valid even if the line
+	 * numbers have changed.
+	 */
+	public static void setSanitizeLineNumbers(boolean f) {
+		sanitizeLineNumbers = f;
+	}
+	
 	/**
 	 * Replace all line numbers within a stack trace with 'XXX' so they are
 	 * ignored within snapshots; has no effect if sanitize is not active
@@ -969,36 +973,6 @@ public final class Tools {
 			s = m.replaceAll("_XXX");
 		}
 		return s;
-	}
-
-	private static boolean appStarted;
-
-	/**
-	 * Perform any desired operations the first time an app starts; for
-	 * development only.
-	 */
-	public static void startApp() {
-		if (!appStarted) {
-			appStarted = true;
-
-			AndroidSystemOutFilter.install();
-
-			// Print message about app starting. Print a bunch of newlines to
-			// simulate
-			// clearing the console, and for convenience, print the time of day
-			// so we can figure out if the
-			// output is current or not.
-
-			String strTime = "";
-			{
-				Calendar cal = Calendar.getInstance();
-				java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
-						"h:mm:ss", Locale.CANADA);
-				strTime = sdf.format(cal.getTime());
-			}
-			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
-					+ strTime + " -------------\n\n\n");
-		}
 	}
 
 	/**
@@ -1026,7 +1000,7 @@ public final class Tools {
 
 	private static void timeStamp(Object message, int skip) {
 		long newTime = System.currentTimeMillis();
-		String location = stackTrace(2+skip, 1);
+		String location = stackTrace(2 + skip, 1);
 		if (previousTime == 0) {
 			baseTime = newTime;
 			previousTime = newTime;
@@ -1041,7 +1015,7 @@ public final class Tools {
 		sb.append(String.format("%6.2f  ", (newTime - baseTime) / 1000.0f));
 		int len = sb.length();
 		sb.append(location);
-		tab(sb, len+50);
+		tab(sb, len + 50);
 		if (message != null) {
 			sb.append(' ');
 			sb.append(message);
@@ -1051,12 +1025,28 @@ public final class Tools {
 
 	/**
 	 * Remove the last item from a list and return it
+	 * 
 	 * @param list
 	 * @return
 	 */
 	public static Object pop(List list) {
-		Object obj = list.remove(list.size()-1);
+		Object obj = list.remove(list.size() - 1);
 		return obj;
 	}
-	
+
+	private static boolean testingKnown;
+	private static boolean testing;
+
+	public static boolean testing() {
+		if (!testingKnown) {
+			try {
+				Class.forName("js.testUtils.MyTest");
+				testing = true;
+			} catch (ClassNotFoundException e) {
+			}
+			testingKnown = true;
+		}
+		return testing;
+	}
+
 }

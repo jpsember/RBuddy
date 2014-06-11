@@ -6,12 +6,13 @@ import java.util.Set;
 
 import org.junit.*;
 
-import js.basic.IOSnapshot;
 import js.basic.JSONEncoder;
 import js.basic.JSONParser;
 //import static org.junit.Assert.*;
 import js.rbuddy.JSDate;
 import js.rbuddy.Receipt;
+import js.rbuddy.Cost;
+import js.testUtils.IOSnapshot;
 import static js.basic.Tools.*;
 
 public class ReceiptTest extends js.testUtils.MyTest {
@@ -32,6 +33,14 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		verifySummary("trailing spaces   ", "trailing spaces");
 	}
 
+	@Test
+	public void testCostIsRecorded() {
+		Receipt r = new Receipt(42);
+		assertEqualsFloat(0, r.getCost().getValue());
+		r.setCost(new Cost(123.45));
+		assertEqualsFloat(123.45, r.getCost().getValue());
+		}
+	
 	@Test
 	public void testSummaryReplaceLinefeedsWithSpaces() {
 		verifySummary("linefeeds\n\n\nembedded", "linefeeds embedded");

@@ -37,10 +37,8 @@ public class Cost {
 	// menu: source / format
 
 	// constructor for 'internal' amount
-	public Cost(int amount) {
-
+	public Cost(double amount) {
 		value = amount;
-
 	}
 
 	// we really should be dealing with the fact that

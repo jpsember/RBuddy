@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Base</name>
+	<name>RBuddyAppTest</name>
 	<comment></comment>
 	<projects>
+		<project>RBuddyApp</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -32,14 +33,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>link_Basic</name>
+			<name>JSTestUtils.src</name>
 			<type>2</type>
-			<locationURI>$%7BWORKSPACE_LOC%7D/Basic/src</locationURI>
-		</link>
-		<link>
-			<name>link_RBuddy</name>
-			<type>2</type>
-			<locationURI>$%7BWORKSPACE_LOC%7D/RBuddy/src</locationURI>
+			<locationURI>$%7BWORKSPACE_LOC%7D/JSTestUtils/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

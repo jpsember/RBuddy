@@ -1,7 +1,7 @@
 package js.basicTest;
 
 import static org.junit.Assert.*;
-import js.basic.IOSnapshot;
+import js.testUtils.IOSnapshot;
 
 import org.junit.*;
 

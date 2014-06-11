@@ -17,9 +17,21 @@ import static js.basic.Tools.*;
 public class SimpleReceiptFile implements IReceiptFile {
 
 	public SimpleReceiptFile() {
+		this(null);
+	}
+
+	public SimpleReceiptFile(String baseName) {
+		if (baseName == null)
+			baseName = "receipts_json_v"+Receipt.VERSION+".txt";
+		this.baseName = baseName;
 		this.map = new HashMap();
 		readAllReceipts();
 		unimp("some way of determining if receipt has really changed; note that iterator is returning values without going through getReceipt()");
+	}
+
+	public static File fileForBaseName(String baseName) {
+		return new File(RBuddyApp.sharedInstance().context()
+				.getExternalFilesDir(null), baseName);
 	}
 
 	private Receipt getReceiptFromMap(int identifier, boolean expectedToExist) {
@@ -40,13 +52,18 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	@Override
+	public boolean exists(int id) {
+		return map.containsKey(id);
+	}
+
+	@Override
 	public Receipt getReceipt(int uniqueIdentifier) {
 		return getReceiptFromMap(uniqueIdentifier, true);
 	}
 
 	@Override
 	public void flush() {
-		//final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("SimpleReceiptFile flush, changes " + changes + "; "
 					+ Tools.stackTrace(1, 3));
@@ -55,16 +72,16 @@ public class SimpleReceiptFile implements IReceiptFile {
 			changes = false;
 			String text;
 			{
-			JSONEncoder json = new JSONEncoder();
-			json.enterList();
-			for (Iterator it = map.values().iterator(); it.hasNext();) {
-				Receipt r = (Receipt) it.next();
-				r.encode(json);
+				JSONEncoder json = new JSONEncoder();
+				json.enterList();
+				for (Iterator it = map.values().iterator(); it.hasNext();) {
+					Receipt r = (Receipt) it.next();
+					r.encode(json);
+				}
+				json.exitList();
+				text = json.toString();
 			}
-			json.exitList();
-			text = json.toString();
-			}
-			
+
 			try {
 				FileOutputStream fs;
 				fs = new FileOutputStream(getFile());
@@ -114,27 +131,23 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	private File receiptFile;
 
-	private File getFile() {
+	public File getFile() {
 		if (receiptFile == null) {
-			receiptFile = new File(RBuddyApp.sharedInstance().activity()
-					.getExternalFilesDir(null), RECEIPTS_FILENAME);
-			if (!receiptFile.exists()) {
-				warning("no receipt file found: "
-						+ receiptFile.getAbsolutePath());
-			}
-
+			receiptFile = fileForBaseName(baseName);
 		}
 		return receiptFile;
 	}
 
 	private void readAllReceipts() {
-//		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("\n\nSimpleReceiptFile.readAllReceipts\n");
 		ASSERT(map.isEmpty());
 
-		if (!getFile().exists())
+		if (!getFile().exists()) {
+			setChanges();
 			return;
+		}
 
 		if (db) {
 			try {
@@ -174,9 +187,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
-	
-	private static final String RECEIPTS_FILENAME = "receipts__json.txt";
-
+	private String baseName;
 	private boolean changes;
 	private Map map;
 }

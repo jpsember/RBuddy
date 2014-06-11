@@ -1,10 +1,11 @@
 package js.basicTest;
 
 import java.io.PrintStream;
+
 import org.junit.*;
 
 import static js.basic.Tools.*;
-import js.basic.StringPrintStream;
+import js.testUtils.StringPrintStream;
 
 public class StringPrintStreamTest extends js.testUtils.MyTest {
 

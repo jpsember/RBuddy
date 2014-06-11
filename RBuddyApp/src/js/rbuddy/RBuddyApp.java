@@ -3,6 +3,9 @@ package js.rbuddy;
 import java.io.File;
 //import java.util.ArrayList;
 
+import java.util.Calendar;
+import java.util.Locale;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,10 +21,13 @@ public class RBuddyApp {
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 	private static final String KEY_UNIQUE_IDENTIFIER = "unique_id";
 
-	public static void prepare(Activity activity) {
-		assertUIThread();
+	public static void prepare(Context context) {
 		if (sharedInstance == null) {
-			sharedInstance = new RBuddyApp(activity);
+			final boolean db = true;
+			if (!testing())
+				assertUIThread();
+			sharedInstance = new RBuddyApp(context);
+			if (db) pr("RBuddyApp.prepare, prepared sharedInstance "+sharedInstance);
 		}
 	}
 
@@ -31,8 +37,13 @@ public class RBuddyApp {
 	 * @return
 	 */
 	public static RBuddyApp sharedInstance() {
-		if (sharedInstance == null)
-			die("RBuddyApp must be prepared");
+		if (sharedInstance == null) {
+			if (testing()) {
+				sharedInstance = new RBuddyApp(null);
+			} else {
+				die("RBuddyApp must be prepared");
+			}
+		}
 
 		return sharedInstance;
 	}
@@ -42,6 +53,7 @@ public class RBuddyApp {
 			die("not running within UI thread");
 		}
 	}
+
 
 	public PhotoFile getPhotoFile() {
 		if (photoFile == null) {
@@ -71,7 +83,7 @@ public class RBuddyApp {
 		}
 		return receiptFile;
 	}
-	
+
 	public int getUniqueIdentifier() {
 		int value;
 		synchronized (this) {
@@ -87,20 +99,45 @@ public class RBuddyApp {
 		return preferences;
 	}
 
-	public Activity activity() {
+	public Context context() {
 		return this.context;
 	}
-	
-	private RBuddyApp(Activity activity) {
-		this.context = activity;
-		this.preferences = activity.getPreferences(Context.MODE_PRIVATE);
-		startApp(); // does nothing if already started
+
+	private RBuddyApp(Context context) {
+		this.context = context;
+		if (context instanceof Activity) {
+			this.preferences = ((Activity) context)
+					.getPreferences(Context.MODE_PRIVATE);
+		} else {
+			this.preferences = context.getSharedPreferences("__RBuddyApp_test_",Context.MODE_PRIVATE);
+		}
+		if (!testing()) {
+			AndroidSystemOutFilter.install();
+
+			// Print message about app starting. Print a bunch of newlines
+			// to
+			// simulate
+			// clearing the console, and for convenience, print the time of
+			// day
+			// so we can figure out if the
+			// output is current or not.
+
+			String strTime = "";
+			{
+				Calendar cal = Calendar.getInstance();
+				java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+						"h:mm:ss", Locale.CANADA);
+				strTime = sdf.format(cal.getTime());
+			}
+			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
+					+ strTime + " -------------\n\n\n");
+		}
 		JSDate.setFactory(AndroidDate.androidDateFactory);
 	}
 
 	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
-	private Activity context;
+	private Context context;
 	private PhotoFile photoFile;
 	private IReceiptFile receiptFile;
 }

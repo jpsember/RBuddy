@@ -16,7 +16,12 @@ import js.basic.StringUtil;
 public class Receipt implements IJSONEncoder {
 
 	public static final int MAX_TAGS = 5;
-
+	
+	// Version number.  If JSON format of Receipt changes, we increment this.
+	// We incorporate the version number into the receipt filename (at least in the 'simple'
+	// receipt file implementation) to ensure older, invalid files are not used.
+	public static final int VERSION = 1;
+	
 	/**
 	 * Constructor
 	 * 
@@ -33,6 +38,15 @@ public class Receipt implements IJSONEncoder {
 		setDate(JSDate.currentDate());
 		this.summary = "";
 		this.tags = new TreeSet<String>();
+		this.cost = new Cost(0);
+	}
+
+	public Cost getCost() {
+		return this.cost;
+	}
+
+	public void setCost(Cost c) {
+		this.cost = c;
 	}
 
 	public JSDate getDate() {
@@ -224,17 +238,13 @@ public class Receipt implements IJSONEncoder {
 		return sb.toString();
 	}
 
-	private Set<String> tags;
-	private JSDate date;
-	private String summary;
-	private int id;
-
 	@Override
 	public void encode(JSONEncoder encoder) {
 		ArrayList a = new ArrayList();
 		a.add(getId());
 		a.add(date.toString());
 		a.add(getSummary());
+		a.add(getCost().getValue());
 		a.add(getTags());
 		encoder.encode(a);
 	}
@@ -246,7 +256,8 @@ public class Receipt implements IJSONEncoder {
 			int id = json.nextInt();
 			JSDate date = (JSDate) json.read(JSDate.JSON_PARSER);
 			String summary = json.nextString();
-
+			double costValue = json.nextDouble();
+			
 			Set<String> tags = new TreeSet<String>();
 			json.enterList();
 			while (json.hasNext())
@@ -259,8 +270,17 @@ public class Receipt implements IJSONEncoder {
 			r.summary = summary;
 			r.date = date;
 			r.tags = tags;
+			r.cost = new Cost(costValue);
+			
 			return r;
 
 		}
 	};
+
+	private Set<String> tags;
+	private JSDate date;
+	private String summary;
+	private int id;
+	private Cost cost;
+
 }
