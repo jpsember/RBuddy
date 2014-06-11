@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.junit.*;
 
+import js.basic.JSONEncoder;
+import js.basic.JSONParser;
 import js.rbuddy.TagSet;
 import js.rbuddy.TagSetFile;
 import js.testUtils.IOSnapshot;
@@ -58,18 +60,19 @@ public class TagSetTest extends js.testUtils.MyTest {
 	 * Add random tags to a set with a large capacity, and simulate it using a simple
 	 * but slower data structure; verify that the contents match afterwards.
 	 */
-	public void testEncodeDecode() {
+	public void testJSON() {
 		build();
-		String[] script = {"alpha","bravo charlie","delta epsilon gamma","whisky","foxtrot","echo","zulu","november"};
+		String[] script = { "alpha", "bravo charlie", "delta epsilon gamma",
+				"whisky", "foxtrot", "echo", "zulu", "november" };
 		for (int i = 0; i < 20; i++) {
 			ts.addTag(script[random().nextInt(script.length)]);
 		}
-		String s = ts.encode();
-		TagSetFile ts2 = TagSetFile.decode(s);
-		assertStringsMatch(toString(ts.tags()),toString(ts2.tags()));
-		assertStringsMatch(s,ts2.encode());
+		String s = JSONEncoder.toJSON(ts);
+		TagSetFile ts2 = (TagSetFile) JSONParser.parse(s,
+				TagSetFile.JSON_PARSER);
+		assertStringsMatch(toString(ts.tags()), toString(ts2.tags()));
+		assertStringsMatch(s, JSONEncoder.toJSON(ts2));
 	}
-	
 
 	@Test
 	public void testEmptySet() {
@@ -201,11 +204,12 @@ public class TagSetTest extends js.testUtils.MyTest {
 				}
 			}
 		}
-		
-		// We've added so many, and don't expect a ridiculous number of collisions; hence the
+
+		// We've added so many, and don't expect a ridiculous number of
+		// collisions; hence the
 		// tag set ought to be full
-		assertEquals(set.size(), maxTagSetSize); 
-		
+		assertEquals(set.size(), maxTagSetSize);
+
 		// Verify that the contents are equal
 		for (Iterator<String> iter = nameToBirthdayMap.keySet().iterator(); iter
 				.hasNext();) {
@@ -213,61 +217,72 @@ public class TagSetTest extends js.testUtils.MyTest {
 			assertTrue(set.tags().contains(name));
 		}
 	}
-	
+
 	@Test
 	public void testFormatEmptyTagNameSet() {
 		TagSet tagSet = new TagSet();
-		assertStringsMatch("",tagSet.format());
+		assertStringsMatch("", tagSet.format());
 	}
-	
+
 	@Test
 	public void testTagNameSetIsCaseInsensitive() {
 		ArrayList list = new ArrayList();
-		list.add("hello");list.add("Hello");list.add("hEllO");
+		list.add("hello");
+		list.add("Hello");
+		list.add("hEllO");
 		TagSet tagSet = new TagSet(list.iterator());
 		assertTrue(tagSet.size() == 1);
 	}
-	
+
 	@Test
 	public void testTagNameSetFormat() {
 		IOSnapshot.open();
-		
+
 		ArrayList tagSet = new ArrayList();
 		tagSet.add("medium");
 		tagSet.add("large box");
 		tagSet.add("tiny");
 		tagSet.add("big");
 		tagSet.add("small");
-		
+
 		TagSet ts = new TagSet(tagSet.iterator());
-		
+
 		pr(ts.format());
-		
+
 		IOSnapshot.close();
 	}
-	
+
 	@Test
 	public void testTagNameSetParse() {
-		
+
 		String[] script = {
-				"","",//
-				"   ","",//
-				"alpha","alpha",//
-				"nospace,aftercomma","aftercomma, nospace",//
-				"two words","two words",//
-				"two words,then three words","then three words, two words", //
-				"trailingcomma,","trailingcomma",//
-				"boo,trailingcommaandwhitespace   ,","boo, trailingcommaandwhitespace",//
-				"boo.trailingcommaandwhitespace   ...  . . ","boo, trailingcommaandwhitespace",//
+				"",
+				"",//
+				"   ",
+				"",//
+				"alpha",
+				"alpha",//
+				"nospace,aftercomma",
+				"nospace, aftercomma",//
+				"two words",
+				"two words",//
+				"two words,then three words",
+				"two words, then three words", //
+				"trailingcomma,",
+				"trailingcomma",//
+				"boo,trailingcommaandwhitespace   ,",
+				"boo, trailingcommaandwhitespace",//
+				"boo.trailingcommaandwhitespace   ...  . . ",
+				"boo, trailingcommaandwhitespace",//
 		};
-		
-		for (int i = 0; i<script.length; i+=2) {
+
+		for (int i = 0; i < script.length; i += 2) {
 			String s = script[i];
-			String sExp = script[i+1];
+			String sExp = script[i + 1];
 			TagSet tagSet = TagSet.parse(s);
 			String s2 = tagSet.format();
-			assertStringsMatch(sExp,s2);
+			assertStringsMatch(sExp, s2);
 		}
 	}
-	
+
 }

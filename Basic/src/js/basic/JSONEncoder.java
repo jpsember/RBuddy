@@ -12,7 +12,21 @@ public class JSONEncoder {
 
 	private StringBuilder sb = new StringBuilder();
 
-	public String toString() {
+	/**
+	 * Utility method that constructs an encoder, uses it to encode an object,
+	 * and returns the resulting JSON string
+	 * 
+	 * @param encodableObject
+	 *            object that implements the IJSONEncoder interface
+	 * @return JSON string
+	 */
+	public static String toJSON(IJSONEncoder encodableObject) {
+		JSONEncoder encoder = new JSONEncoder();
+		encoder.encode(encodableObject);
+		return encoder.toString();
+	}
+
+public String toString() {
 		return sb.toString();
 	}
 

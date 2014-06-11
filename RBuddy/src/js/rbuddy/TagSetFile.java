@@ -5,7 +5,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import js.basic.IJSONEncoder;
+import js.basic.IJSONParser;
 import js.basic.JSONEncoder;
+import js.basic.JSONParser;
 import static js.basic.Tools.*;
 
 public class TagSetFile implements IJSONEncoder {
@@ -85,7 +87,7 @@ public class TagSetFile implements IJSONEncoder {
 		}
 
 		if (db)
-			pr("tagSet now, in reverse priority order:\n" + encode()
+			pr("tagSet now, in reverse priority order:\n" + JSONEncoder.toJSON(this)  
 					+ "\n---------------------------");
 
 		return tagExists;
@@ -95,44 +97,10 @@ public class TagSetFile implements IJSONEncoder {
 		return tagMap.keySet();
 	}
 
-	public String encode() {
-		StringBuilder sb = new StringBuilder();
-		TagEntry entry = tailEntry.next;
-		while (entry != null) {
-			sb.append(entry.name);
-			sb.append('\n');
-			entry = entry.next;
-		}
-		return sb.toString();
-	}
-
-	public static TagSetFile decode(String s) {
-		// We could do this quicker by inserting objects ourselves,
-		// but this is simpler and has an asymptotically equivalent runtime.
-		String[] strs = s.split("\\n");
-		TagSetFile set = new TagSetFile();
-		for (int i = 0; i < strs.length; i++) {
-			set.addTag(strs[i]);
-		}
-		return set;
-	}
-
 	private static class TagEntry {
 		public TagEntry(String name) {
 			this.name = name;
 		}
-
-		// Reenable these lines if debugging is required
-		// @Override
-		// public String toString() {
-		// String s = "<" + name + " => ";
-		// if (next != null)
-		// s += next.name;
-		// else
-		// s += "null";
-		// s += ">";
-		// return s;
-		// }
 
 		private String name;
 		private TagEntry next;
@@ -152,16 +120,39 @@ public class TagSetFile implements IJSONEncoder {
 		}
 	}
 
-
 	private int size;
 	private TagEntry headEntry, tailEntry;
 	private int maxTags;
 	private TreeMap<String, TagEntry> tagMap;
 
 	@Override
-	public void encode(JSONEncoder encoder) {
-		// TODO Auto-generated method stub
-
+	public void encode(JSONEncoder json) {
+		// We'll encode the tag names in order from last to first,
+		// since this is the only way we can iterate over them in order of
+		// recency of use, and also it's natural to add them in this order to
+		// end up with the original sequence.
+		json.enterList();
+		TagEntry entry = tailEntry.next;
+		while (entry != null) {
+			json.encode(entry.name);
+			entry = entry.next;
+		}
+		json.exitList();
 	}
+
+	public static final IJSONParser JSON_PARSER = new IJSONParser() {
+		@Override
+		public Object parse(JSONParser json) {
+			// The tag names appear in order of least-recently-used first. By
+			// adding them in this order, the first one processed will end up at
+			// the end of the list, as we would like.
+			TagSetFile tf = new TagSetFile();
+			json.enterList();
+			while (json.hasNext())
+				tf.addTag(json.nextString());
+			json.exit();
+			return tf;
+		}
+	};
 
 }

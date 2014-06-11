@@ -13,6 +13,19 @@ import static js.basic.Tools.*;
 
 public class JSONParser {
 
+	/**
+	 * Utility method that constructs a parser, and given a string and an
+	 * IJSONParser, parses and returns an object
+	 * 
+	 * @param jsonString
+	 * @param objectParser
+	 * @return
+	 */
+	public static Object parse(String jsonString, IJSONParser objectParser) {
+		JSONParser parser = new JSONParser(jsonString);
+		return parser.read(objectParser);
+	}
+
 	public JSONParser(String string) {
 		try {
 			InputStream stream = new ByteArrayInputStream(
@@ -33,19 +46,22 @@ public class JSONParser {
 	}
 
 	public String nextKey() {
-		if (currentMap == null) throw new IllegalStateException("not iterating within map");
-		return (String)next();
+		if (currentMap == null)
+			throw new IllegalStateException("not iterating within map");
+		return (String) next();
 	}
-	
+
 	/**
 	 * Get the value for the last key read; assumes iterating within map
+	 * 
 	 * @return
 	 */
 	public Object keyValue() {
-		if (currentMap == null) throw new IllegalStateException("not iterating within map");
+		if (currentMap == null)
+			throw new IllegalStateException("not iterating within map");
 		return this.valueForLastKey;
 	}
-	
+
 	public int nextInt() {
 		return ((Double) next()).intValue();
 	}
@@ -100,7 +116,7 @@ public class JSONParser {
 		this.iterator = (Iterator) pop(parseStack);
 		this.currentContainer = pop(parseStack);
 		if (this.currentContainer instanceof Map) {
-			this.currentMap = (Map)this.currentContainer;
+			this.currentMap = (Map) this.currentContainer;
 		} else {
 			this.currentMap = null;
 		}
@@ -356,14 +372,15 @@ public class JSONParser {
 			pr("\n\nreadArray");
 		ArrayList a = new ArrayList();
 		read('[', true);
-		if (db) pr(" seeing if immediately ends... peek="+(char)peek(true));
+		if (db)
+			pr(" seeing if immediately ends... peek=" + (char) peek(true));
 		if (peek(true) != ']') {
 			while (true) {
 				if (db)
 					pr("  reading next value, peek = " + (char) peek(false));
 				Object value = readValue();
 				a.add(value);
-				
+
 				if (peek(true) != ',')
 					break;
 				read2(false);
@@ -393,7 +410,7 @@ public class JSONParser {
 	}
 
 	private int peek(boolean ignoreWhitespace) {
-		  final boolean db = false;
+		final boolean db = false;
 		if (db)
 			pr("peek(ignore=" + ignoreWhitespace + ", peek=" + peek + ")");
 		if (peek < 0) {
@@ -417,8 +434,9 @@ public class JSONParser {
 		if (p < 0)
 			throw new JSONException("end of input");
 		peek = -1;
-		if (db) pr("Read char: "+(char)p);
-			return p;
+		if (db)
+			pr("Read char: " + (char) p);
+		return p;
 	}
 
 	private void read(int expectedChar, boolean ignoreWhitespace) {
