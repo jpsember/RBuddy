@@ -3,6 +3,9 @@ package js.rbuddy;
 import java.io.File;
 //import java.util.ArrayList;
 
+import java.util.Calendar;
+import java.util.Locale;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -108,7 +111,27 @@ public class RBuddyApp {
 		} else {
 			this.preferences = context.getSharedPreferences("__RBuddyApp_test_",Context.MODE_PRIVATE);
 		}
-		startApp(); // does nothing if already started
+		if (!testing()) {
+			AndroidSystemOutFilter.install();
+
+			// Print message about app starting. Print a bunch of newlines
+			// to
+			// simulate
+			// clearing the console, and for convenience, print the time of
+			// day
+			// so we can figure out if the
+			// output is current or not.
+
+			String strTime = "";
+			{
+				Calendar cal = Calendar.getInstance();
+				java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+						"h:mm:ss", Locale.CANADA);
+				strTime = sdf.format(cal.getTime());
+			}
+			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
+					+ strTime + " -------------\n\n\n");
+		}
 		JSDate.setFactory(AndroidDate.androidDateFactory);
 	}
 

@@ -1,6 +1,8 @@
-package js.basic;
+package js.rbuddy;
 
 import java.io.*;
+
+import js.basic.Tools;
 
 /**
  * Install a filter on System.out so multiple linefeeds are NOT filtered

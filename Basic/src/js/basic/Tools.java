@@ -971,40 +971,6 @@ public final class Tools {
 		return s;
 	}
 
-	private static boolean appStarted;
-
-	/**
-	 * Perform any desired operations the first time an app starts; for
-	 * development only.
-	 */
-	public static void startApp() {
-		if (!appStarted) {
-			appStarted = true;
-
-			if (!testing()) {
-				AndroidSystemOutFilter.install();
-
-				// Print message about app starting. Print a bunch of newlines
-				// to
-				// simulate
-				// clearing the console, and for convenience, print the time of
-				// day
-				// so we can figure out if the
-				// output is current or not.
-
-				String strTime = "";
-				{
-					Calendar cal = Calendar.getInstance();
-					java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
-							"h:mm:ss", Locale.CANADA);
-					strTime = sdf.format(cal.getTime());
-				}
-				pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
-						+ strTime + " -------------\n\n\n");
-			}
-		}
-	}
-
 	/**
 	 * This main() method is provided for running quick tests
 	 */
