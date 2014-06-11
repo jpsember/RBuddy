@@ -1,11 +1,15 @@
 package js.rbuddy;
 
+import static js.basic.Tools.pr;
+
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
+import java.util.Currency;
+import static js.basic.Tools.*;
 
 public class Cost {
 
-	
 	private static NumberFormat getUserCurrencyFormat() {
 		// use lazy initialization to construct this only when needed
 		if (userCurrencyFormat == null) {
@@ -15,40 +19,42 @@ public class Cost {
 		}
 		return userCurrencyFormat;
 	}
-	
+
 	/**
-	 * For test purposes, we want to be able to test various currencies,
-	 * not just ours (which may in fact be different for other testers).
+	 * For test purposes, we want to be able to test various currencies, not
+	 * just ours (which may in fact be different for other testers).
+	 * 
 	 * @param format
 	 */
 	public static void setUserCurrencyFormat(NumberFormat format) {
 		userCurrencyFormat = format;
 	}
-	
+
 	private static NumberFormat userCurrencyFormat;
-	
+
 	// what is the keyboard command to do the auto indent?
-	
+
 	// menu: source / format
 
-	
 	// constructor for 'internal' amount
 	public Cost(int amount) {
 
 		value = amount;
 
 	}
+
 	// we really should be dealing with the fact that
 	// "123.45" in is one hundred twenty three dollars and forty five cents
 	// right now i am pretending the string must be pennies
-	
+
 	/**
 	 * Constructor that parses user string (Locale-specific)
+	 * 
 	 * @param s
 	 */
 	public Cost(String s) {
 
-		value =  parse(s);
+		value = parse(s);
 
 	}
 
@@ -61,16 +67,35 @@ public class Cost {
 	 */
 	private static double parse(String s) {
 
-		if (s.equals("4.52")) 
-			return 4.52;
-		
-		 // if i want it to fail
-		 
-	// if i want it to return as if they typed 0.00	 
-	//return 0;	 
-		throw new NumberFormatException();
-		}
+		/*
+		 * NumberFormat[] fmts = { NumberFormat.getCurrencyInstance(Locale.US),
+		 * NumberFormat.getCurrencyInstance(Locale.FRENCH),
+		 * NumberFormat.getCurrencyInstance(Locale.JAPAN), };
+		 */
+		/*
+		 * NumberFormat f = fmts[i]; pr("\n" + f.getCurrency());
+		 * 
+		 * String s = f.format(value); pr(" format()= '" + s + "'"); Number n =
+		 * null; try { n = f.parse(s); pr(" parse()= " + n); } catch
+		 * (ParseException e) { pr(" parse failed: " + e); }
+		 */
 
+		NumberFormat f = getUserCurrencyFormat();
+
+//		Currency c = f.getCurrency();
+
+//		pr("\n" + "tim was here " + c.getSymbol());
+
+		Number n = null;
+		try {
+			n = f.parse(s);
+			return n.doubleValue();
+		} catch (ParseException e) {
+			pr(" parse failed: " + e);
+			unimp("not done... try other heuristics before giving up");
+		}
+		throw new NumberFormatException();
+	}
 
 	public double getValue() {
 		return value;
