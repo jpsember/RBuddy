@@ -1,1 +1,1 @@
-big, large box, medium, small, tiny
+medium, large box, tiny, big, small

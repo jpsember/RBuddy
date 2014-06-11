@@ -5,7 +5,6 @@ import static js.basic.Tools.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Set;
 
 import js.basic.Files;
 import android.app.Activity;
@@ -219,30 +218,23 @@ public class EditReceiptActivity extends Activity {
 		// tags
 		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
-				final boolean db = true;
-				if (db)
-					pr("onFocusChange " + v0);
 				if (!hasFocus) {
 					TagsEditText v = (TagsEditText) v0;
-					Set<String> tagNameSet = null;
+					TagSet tagNameSet = null;
 					try {
 						String s = v.getText().toString();
-						if (db)
-							pr("  attempting to parse " + s);
-						tagNameSet = TagSet.parseTagNameSet(s);
+						tagNameSet = TagSet.parse(s);
 					} catch (IllegalArgumentException e) {
-						warning("Failed to parse " + v.getText() + ": " + e);
+						if (db) pr("Failed to parse " + v.getText() + ": " + e);
 					}
 					if (tagNameSet != null) {
-						if (db)
-							pr(" updating receipt tags: " + tagNameSet);
 						receipt.setTags(tagNameSet);
 					}
 					// If parsing failed, we restore the text to the last legal
 					// value;
 					// and if it succeeded, we update the text to the 'massaged'
 					// version of the user's input
-					v.setText(TagSet.formatTagNameSet(receipt.getTags()));
+					v.setText(receipt.getTags().format());
 				}
 			}
 		});
@@ -431,8 +423,7 @@ public class EditReceiptActivity extends Activity {
 		summaryView.setSelection(summaryView.getText().length());
 		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
 		costView.setText(costToString(receipt.getCost()));
-		unimp("rename Receipt.getTags -> getTagNameSet?  Or add another class for TagSetFile?");
-		tagsView.setText(TagSet.formatTagNameSet(receipt.getTags()));
+		tagsView.setText(receipt.getTags().format());
 	}
 
 	private static Cost parseCostFromString(String s) {

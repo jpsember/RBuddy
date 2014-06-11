@@ -3,6 +3,7 @@ package js.rbuddy.test;
 import static js.basic.Tools.*;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,17 +12,18 @@ import java.util.Set;
 import org.junit.*;
 
 import js.rbuddy.TagSet;
+import js.rbuddy.TagSetFile;
 import js.testUtils.IOSnapshot;
 
 public class TagSetTest extends js.testUtils.MyTest {
 
-	private TagSet ts;
+	private TagSetFile ts;
 
 	private static final int OUR_MAX_SIZE = 5;
 
-	private TagSet build() {
+	private TagSetFile build() {
 		if (ts == null)
-			ts = new TagSet(OUR_MAX_SIZE);
+			ts = new TagSetFile(OUR_MAX_SIZE);
 		return ts;
 	}
 
@@ -63,7 +65,7 @@ public class TagSetTest extends js.testUtils.MyTest {
 			ts.addTag(script[random().nextInt(script.length)]);
 		}
 		String s = ts.encode();
-		TagSet ts2 = TagSet.decode(s);
+		TagSetFile ts2 = TagSetFile.decode(s);
 		assertStringsMatch(toString(ts.tags()),toString(ts2.tags()));
 		assertStringsMatch(s,ts2.encode());
 	}
@@ -150,7 +152,7 @@ public class TagSetTest extends js.testUtils.MyTest {
 	public void testLargeTagSet() {
 
 		int maxTagSetSize = 5000;
-		TagSet set = new TagSet(maxTagSetSize);
+		TagSetFile set = new TagSetFile(maxTagSetSize);
 
 		// Construct a map of elements we expect to see in the tag set, mapped
 		// to the step number when they were 'born'
@@ -214,16 +216,15 @@ public class TagSetTest extends js.testUtils.MyTest {
 	
 	@Test
 	public void testFormatEmptyTagNameSet() {
-		Set<String> tagSet = TagSet.constructTagNameSet();
-		assertStringsMatch("",TagSet.formatTagNameSet(tagSet));
+		TagSet tagSet = new TagSet();
+		assertStringsMatch("",tagSet.format());
 	}
 	
 	@Test
 	public void testTagNameSetIsCaseInsensitive() {
-		Set<String> tagSet = TagSet.constructTagNameSet();
-		tagSet.add("hello");
-		tagSet.add("Hello");
-		tagSet.add("hEllO");
+		ArrayList list = new ArrayList();
+		list.add("hello");list.add("Hello");list.add("hEllO");
+		TagSet tagSet = new TagSet(list.iterator());
 		assertTrue(tagSet.size() == 1);
 	}
 	
@@ -231,14 +232,16 @@ public class TagSetTest extends js.testUtils.MyTest {
 	public void testTagNameSetFormat() {
 		IOSnapshot.open();
 		
-		Set<String> tagSet = TagSet.constructTagNameSet();
+		ArrayList tagSet = new ArrayList();
 		tagSet.add("medium");
 		tagSet.add("large box");
 		tagSet.add("tiny");
 		tagSet.add("big");
 		tagSet.add("small");
 		
-		pr(TagSet.formatTagNameSet(tagSet));
+		TagSet ts = new TagSet(tagSet.iterator());
+		
+		pr(ts.format());
 		
 		IOSnapshot.close();
 	}
@@ -261,8 +264,8 @@ public class TagSetTest extends js.testUtils.MyTest {
 		for (int i = 0; i<script.length; i+=2) {
 			String s = script[i];
 			String sExp = script[i+1];
-			Set<String> tagNameSet = TagSet.parseTagNameSet(s);
-			String s2 = TagSet.formatTagNameSet(tagNameSet);
+			TagSet tagSet = TagSet.parse(s);
+			String s2 = tagSet.format();
 			assertStringsMatch(sExp,s2);
 		}
 	}

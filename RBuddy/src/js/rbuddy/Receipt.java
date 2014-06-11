@@ -1,11 +1,7 @@
 package js.rbuddy;
 
-import static js.basic.Tools.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 import js.basic.IJSONParser;
 import js.basic.JSONEncoder;
@@ -15,12 +11,10 @@ import js.basic.StringUtil;
 
 public class Receipt implements IJSONEncoder {
 
-	public static final int MAX_TAGS = 5;
-	
 	// Version number.  If JSON format of Receipt changes, we increment this.
 	// We incorporate the version number into the receipt filename (at least in the 'simple'
 	// receipt file implementation) to ensure older, invalid files are not used.
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	
 	/**
 	 * Constructor
@@ -37,7 +31,7 @@ public class Receipt implements IJSONEncoder {
 		this.id = identifier;
 		setDate(JSDate.currentDate());
 		this.summary = "";
-		this.tags = new TreeSet<String>();
+		this.tags = new TagSet();
 		this.cost = new Cost(0);
 	}
 
@@ -135,78 +129,8 @@ public class Receipt implements IJSONEncoder {
 	 * 
 	 * @return set of strings
 	 */
-	public Set<String> getTags() {
+	public TagSet getTags() {
 		return tags;
-	}
-
-	/**
-	 * Used in setTags(); flushes tag being built, adds to set if nonempty;
-	 * clears buffer
-	 * 
-	 * @param str
-	 * @param set
-	 */
-	private static void flush(StringBuilder str, Set<String> set) {
-		String s = str.toString();
-		ASSERT(s.length() > 0);
-		if (set.size() < MAX_TAGS) {
-			set.add(s);
-		}
-		str.setLength(0);
-	}
-
-	/**
-	 * Set tags by parsing a script of comma(or linefeed)-separated tags
-	 * 
-	 * @param s
-	 */
-	public void setTags(CharSequence s) {
-		Set<String> set = new TreeSet<String>();
-		int state = 0;
-		StringBuilder buffer = new StringBuilder();
-		int cursor = 0;
-		while (cursor < s.length()) {
-			char c = s.charAt(cursor);
-			cursor++;
-
-			// linefeeds are treated identically as commas
-			if (c == ',')
-				c = '\n';
-			if (c < ' ' && c != '\n')
-				c = ' ';
-
-			switch (state) {
-			case 0:
-				if (c > ' ') {
-					buffer.append(c);
-					state = 1;
-				}
-				break;
-			case 1:
-				if (c == '\n') {
-					flush(buffer, set);
-					state = 0;
-				} else if (c == ' ') {
-					state = 2;
-				} else {
-					buffer.append(c);
-				}
-				break;
-			case 2:
-				if (c == '\n') {
-					flush(buffer, set);
-					state = 0;
-				} else if (c > ' ') {
-					buffer.append(' ');
-					buffer.append(c);
-					state = 1;
-				}
-				break;
-			}
-		}
-		if (buffer.length() != 0)
-			flush(buffer, set);
-		setTags(set);
 	}
 
 	/**
@@ -215,9 +139,7 @@ public class Receipt implements IJSONEncoder {
 	 * @param set
 	 *            set of zero to MAX_TAGS tags
 	 */
-	public void setTags(Set<String> set) {
-		if (set.size() > MAX_TAGS)
-			throw new IllegalArgumentException("too many tags");
+	public void setTags(TagSet set) {
 		this.tags = set;
 	}
 
@@ -239,14 +161,14 @@ public class Receipt implements IJSONEncoder {
 	}
 
 	@Override
-	public void encode(JSONEncoder encoder) {
-		ArrayList a = new ArrayList();
-		a.add(getId());
-		a.add(date.toString());
-		a.add(getSummary());
-		a.add(getCost().getValue());
-		a.add(getTags());
-		encoder.encode(a);
+	public void encode(JSONEncoder j) {
+		j.enterList();
+		j.encode(getId());
+		j.encode(date);
+		j.encode(getSummary());
+		j.encode(getCost().getValue());
+		j.encode(getTags());
+		j.exitList();
 	}
 
 	public static final IJSONParser JSON_PARSER = new IJSONParser() {
@@ -258,11 +180,7 @@ public class Receipt implements IJSONEncoder {
 			String summary = json.nextString();
 			double costValue = json.nextDouble();
 			
-			Set<String> tags = new TreeSet<String>();
-			json.enterList();
-			while (json.hasNext())
-				tags.add(json.nextString());
-			json.exit();
+			TagSet tags = (TagSet)json.read(TagSet.JSON_PARSER);
 
 			json.exit();
 
@@ -277,7 +195,7 @@ public class Receipt implements IJSONEncoder {
 		}
 	};
 
-	private Set<String> tags;
+	private TagSet tags;
 	private JSDate date;
 	private String summary;
 	private int id;
