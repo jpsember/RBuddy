@@ -22,7 +22,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	public SimpleReceiptFile(String baseName) {
 		if (baseName == null)
-			baseName = "receipts_json.txt";
+			baseName = "receipts_json_v"+Receipt.VERSION+".txt";
 		this.baseName = baseName;
 		this.map = new HashMap();
 		readAllReceipts();

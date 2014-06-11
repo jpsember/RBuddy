@@ -33,10 +33,8 @@ public class Cost {
 
 	
 	// constructor for 'internal' amount
-	public Cost(int amount) {
-
+	public Cost(double amount) {
 		value = amount;
-
 	}
 	// we really should be dealing with the fact that
 	// "123.45" in is one hundred twenty three dollars and forty five cents
