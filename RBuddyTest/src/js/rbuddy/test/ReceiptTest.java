@@ -6,12 +6,12 @@ import java.util.Set;
 
 import org.junit.*;
 
-import js.basic.IOSnapshot;
 import js.basic.JSONEncoder;
 import js.basic.JSONParser;
 //import static org.junit.Assert.*;
 import js.rbuddy.JSDate;
 import js.rbuddy.Receipt;
+import js.testUtils.IOSnapshot;
 import static js.basic.Tools.*;
 
 public class ReceiptTest extends js.testUtils.MyTest {

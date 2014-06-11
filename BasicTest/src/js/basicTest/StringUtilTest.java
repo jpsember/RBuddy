@@ -4,8 +4,8 @@ package js.basicTest;
 
 import org.junit.*;
 
-import js.basic.IOSnapshot;
 import js.basic.StringUtil;
+import js.testUtils.IOSnapshot;
 
 public class StringUtilTest extends js.testUtils.MyTest {
 

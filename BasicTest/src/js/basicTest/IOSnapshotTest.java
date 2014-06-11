@@ -1,7 +1,8 @@
 package js.basicTest;
 
 import org.junit.*;
-import js.basic.IOSnapshot;
+
+import js.testUtils.IOSnapshot;
 
 public class IOSnapshotTest extends js.testUtils.MyTest {
 

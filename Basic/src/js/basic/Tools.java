@@ -945,14 +945,18 @@ public final class Tools {
 		return sb.toString();
 	}
 
-	// This global flag determines whether the line numbers that appear in
-	// warnings (and 'unimp' messages)
-	// are to be replaced with constant placeholders ('XXX') so that old
-	// snapshots remain valid even if
-	// a line number associated with a warning has changed.
-	static boolean sanitizeLineNumbers;
+	private static boolean sanitizeLineNumbers;
 	private static Pattern lineNumbersPattern;
 
+	/**
+	 * Optionally replace literal line numbers that appear in warnings (and 'unimp' messages)
+	 * with constant placeholders ('XXX') so that old snapshots remain valid even if the line
+	 * numbers have changed.
+	 */
+	public static void setSanitizeLineNumbers(boolean f) {
+		sanitizeLineNumbers = f;
+	}
+	
 	/**
 	 * Replace all line numbers within a stack trace with 'XXX' so they are
 	 * ignored within snapshots; has no effect if sanitize is not active

@@ -1,4 +1,4 @@
-package js.basic;
+package js.testUtils;
 
 import static js.basic.Tools.*;
 
@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.regex.*;
+
+import js.basic.Files;
 
 /**
  * Designed to be called from within a unit test.  Captures System.out and System.err, and verifies
@@ -70,8 +72,8 @@ public class IOSnapshot {
 	private void doClose() {
 		System.setOut(originalStdOut);
 		System.setErr(originalStdErr);
-		Tools.sanitizeLineNumbers = false;
-		String content = capturedStdOut.content();
+		setSanitizeLineNumbers(false);
+String content = capturedStdOut.content();
 		String content2 = capturedStdErr.content();
 		if (content2.length() > 0)
 			content = content + "\n*** System.err:\n" + content2;
@@ -118,8 +120,8 @@ public class IOSnapshot {
 		capturedStdErr = StringPrintStream.build();
 		originalStdErr = System.err;
 		System.setErr(capturedStdErr);
-
-		Tools.sanitizeLineNumbers = true;
+		
+		setSanitizeLineNumbers(true);
 	}
 
 	private static File determineSnapshotDirectory() {

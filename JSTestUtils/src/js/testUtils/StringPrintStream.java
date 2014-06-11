@@ -1,4 +1,4 @@
-package js.basic;
+package js.testUtils;
 
 import static js.basic.Tools.*;
 
