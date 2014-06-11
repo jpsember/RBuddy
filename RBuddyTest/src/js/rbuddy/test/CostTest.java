@@ -73,6 +73,16 @@ public class CostTest extends js.testUtils.MyTest {
 //		assertTrue(c.getValue() == 12345);
 	}
 
+	@Test
+	public void testFormattingViaToString() {
+		Cost.setUserCurrencyFormat(NumberFormat
+				.getCurrencyInstance(Locale.US));
+
+		String s = "$1,123.00";
+		Cost c = new Cost(s);
+		assertStringsMatch("$1,123.00",c.toString());
+	}
+
 	// all the correct ways i can think of to express
 	// sixty seven dollars...
 
