@@ -5,11 +5,21 @@ import static js.basic.Tools.pr;
 import java.text.NumberFormat;
 import java.text.ParseException;
 //import java.util.Locale;
-//import java.util.Currency;
+import java.util.Currency;
 import static js.basic.Tools.*;
 
 public class Cost {
 
+	public String toString() {
+		
+		NumberFormat f = getUserCurrencyFormat();
+		Currency c = f.getCurrency();
+		String result = c.getSymbol() + value;
+		//String result = c.getSymbol();
+		return result;
+		
+	}
+	
 	private static NumberFormat getUserCurrencyFormat() {
 		// use lazy initialization to construct this only when needed
 		if (userCurrencyFormat == null) {
