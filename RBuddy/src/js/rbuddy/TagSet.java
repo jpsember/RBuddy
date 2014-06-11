@@ -159,6 +159,15 @@ public class TagSet {
 		}
 	}
 
+	/**
+	 * Given a set of tag names, construct user-displayable string
+	 * @param tags 
+	 * @return
+	 */
+	public static String formatTagNameSet(Set<String> tags) {
+		throw new UnsupportedOperationException();
+	}
+	
 	private int size;
 	private TagEntry headEntry, tailEntry;
 	private int maxTags;

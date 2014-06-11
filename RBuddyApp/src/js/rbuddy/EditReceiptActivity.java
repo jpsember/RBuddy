@@ -103,6 +103,7 @@ public class EditReceiptActivity extends Activity {
 		addPhotoWidget(layout);
 		addDateWidget(layout);
 		addCostWidget(layout);
+		addTagsWidget(layout);
 		addSummaryWidget(layout);
 	}
 
@@ -201,6 +202,40 @@ public class EditReceiptActivity extends Activity {
 		});
 	}
 
+	private void addTagsWidget(ViewGroup layout) {
+		TagsEditText tf = new TagsEditText(this);
+		tagsView = tf;
+		// This makes pressing the 'done' keyboard key close the keyboard
+		tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				return false;
+			}
+		});
+
+		// When this view loses focus, immediately attempt to parse the user's
+		// tags
+		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (!hasFocus) {
+					
+					try {
+						String s = costView.getText().toString();
+						unimp("parse tags: "+s);
+					}
+					catch (Throwable e) {
+						warning("Failed to parse " + costView.getText()+": "+e);
+					}
+				}
+			}
+		});
+		tf.setMinHeight(50);
+		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT);
+		layout.addView(tf, layoutParam);
+	}
+
 	private void addCostWidget(ViewGroup layout) {
 		TextView tf = new EditText(this);
 		costView = tf;
@@ -218,9 +253,10 @@ public class EditReceiptActivity extends Activity {
 			}
 		});
 
-		// When this view loses focus, immediately attempt to parse the user's text;
+		// When this view loses focus, immediately attempt to parse the user's
+		// text;
 		// if it fails, clear the field (and hence clear the cost to 0)
-		
+
 		// This may not work very well in practice; see, e.g.,
 		// http://stackoverflow.com/questions/10627137/how-can-i-know-when-a-edittext-lost-focus
 		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -231,7 +267,8 @@ public class EditReceiptActivity extends Activity {
 						String s = costView.getText().toString();
 						c = parseCostFromString(s);
 					} catch (NumberFormatException e) {
-						warning("Failed to parse "+costView.getText()+"; clearing");
+						warning("Failed to parse " + costView.getText()
+								+ "; clearing");
 					}
 					costView.setText(costToString(c));
 				}
@@ -378,6 +415,7 @@ public class EditReceiptActivity extends Activity {
 		summaryView.setSelection(summaryView.getText().length());
 		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
 		costView.setText(costToString(receipt.getCost()));
+		tagsView.setText(""); 
 	}
 
 	private static Cost parseCostFromString(String s) {
@@ -413,5 +451,6 @@ public class EditReceiptActivity extends Activity {
 	private EditText summaryView;
 	private TextView dateView;
 	private TextView costView;
+	private TagsEditText tagsView;
 
 }
