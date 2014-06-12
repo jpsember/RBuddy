@@ -11,11 +11,12 @@ import java.util.Map;
 import js.basic.Files;
 import js.basic.JSONEncoder;
 import js.basic.JSONParser;
-import js.basic.Tools;
 import static js.basic.Tools.*;
 
 public class SimpleReceiptFile implements IReceiptFile {
 
+	public static final boolean SHOW_FILE_ACTIVITY = TagSetFile.SHOW_FILE_ACTIVITY;
+	
 	public SimpleReceiptFile() {
 		this(null, null);
 	}
@@ -34,6 +35,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	public TagSetFile readTagSetFile() {
+		final boolean db = SHOW_FILE_ACTIVITY;
 		if (tagSetFile == null) {
 			tagSetStorageFile = fileForBaseName(tagSetFileBaseName);
 			TagSetFile tf = null;
@@ -42,6 +44,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 					tf = (TagSetFile) JSONParser.parse(
 							Files.readTextFile(tagSetStorageFile),
 							TagSetFile.JSON_PARSER);
+					if (db) pr("readTagSetFile: "+tf);
 				} catch (IOException e) {
 					warning("caught " + e + ", starting with empty tag file");
 				}
@@ -55,13 +58,12 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void flushTagSetFile() {
-//		final boolean db = true;
+		final boolean db = SHOW_FILE_ACTIVITY;
 		if (tagSetFile != null) {
 			File file = fileForBaseName(tagSetFileBaseName);
 			try {
+				if (db) pr("\nflushTagSetFile, writing "+file+": "+tagSetFile);
 				String json = JSONEncoder.toJSON(tagSetFile);
-				if (db) pr(" writing TagSet to "+file+":\n"+json);
-				
 				Files.writeTextFile(file, json);
 			} catch (IOException e) {
 				warning("caught " + e + ", unable to write tag file");
@@ -103,12 +105,9 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void flush() {
-		// final boolean db = true;
-		if (db)
-			pr("SimpleReceiptFile flush, changes " + changes + "; "
-					+ Tools.stackTrace(1, 3));
-
 		if (changes) {
+			final boolean db = SHOW_FILE_ACTIVITY;
+			if (db) pr("SimpleReceiptFile flush; called from "+stackTrace(1,1));
 			changes = false;
 			String text;
 			{
@@ -217,14 +216,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void setChanges() {
-//		final boolean db = true;
-		if (db)
-			pr("setChanges; called from "+Tools.stackTrace(0,5));
-		if (!changes) {
-			if (db)
-				pr("  ....... changes now true\n");
-			changes = true;
-		}
+		changes = true;
 	}
 
 	private File receiptFile;

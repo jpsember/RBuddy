@@ -41,6 +41,15 @@ public class EditReceiptActivity extends Activity {
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 
 	@Override
+	public void onResume() {
+		// final boolean db = true;
+		if (db)
+			pr("\n\nEditReceiptActivity.resume");
+		super.onResume();
+		readWidgetValuesFromReceipt();
+	}
+
+	@Override
 	public void onPause() {
 		super.onPause();
 		updateReceiptWithWidgetValues();
@@ -57,15 +66,6 @@ public class EditReceiptActivity extends Activity {
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 
 		layoutElements();
-	}
-
-	@Override
-	public void onResume() {
-		// final boolean db = true;
-		if (db)
-			pr("\n\nEditReceiptActivity.resume");
-		super.onResume();
-		readWidgetValuesFromReceipt();
 	}
 
 	@Override

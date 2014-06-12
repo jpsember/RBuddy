@@ -14,6 +14,8 @@ import static js.basic.Tools.*;
 
 public class TagSetFile implements IJSONEncoder {
 
+	public static final boolean SHOW_FILE_ACTIVITY = false;
+
 	public TagSetFile(int maxTags) {
 		this.maxTags = maxTags;
 		tailEntry = new TagEntry(null);
@@ -29,10 +31,11 @@ public class TagSetFile implements IJSONEncoder {
 	}
 
 	public int size() {
-		return size;
+		return tagMap.size();
 	}
 
 	public boolean addTag(String name) {
+		final boolean db = SHOW_FILE_ACTIVITY;
 		TagEntry entry = tagMap.get(name);
 		boolean tagExists = (entry != null);
 
@@ -69,10 +72,16 @@ public class TagSetFile implements IJSONEncoder {
 				tagMap.put(name, entry);
 			}
 		} else {
+			if (db) {
+				pr("addTag " + name + ", doesn't exist");
+				if (tagNamesList != null)
+					pr("  invalidating existing names list: " + tagNamesList);
+			}
+
 			// Invalidate any existing tags list
 			this.tagNamesList = null;
-			
-			if (size == maxTags) {
+
+			if (size() == maxTags) {
 				entry = tailEntry.next;
 
 				tagMap.remove(entry.name);
@@ -81,7 +90,6 @@ public class TagSetFile implements IJSONEncoder {
 				entry.next = null;
 				entry.name = name;
 			} else {
-				size++;
 				entry = new TagEntry(name);
 			}
 			headEntry.next = entry;
@@ -92,7 +100,8 @@ public class TagSetFile implements IJSONEncoder {
 		}
 
 		if (db)
-			pr("tagSet now, in reverse priority order:\n" + JSONEncoder.toJSON(this)  
+			pr("tagSet now, in reverse priority order:\n"
+					+ JSONEncoder.toJSON(this)
 					+ "\n---------------------------");
 
 		return tagExists;
@@ -103,18 +112,25 @@ public class TagSetFile implements IJSONEncoder {
 	}
 
 	/**
-	 * Get a list of the tag names.  This is NOT backed by the tag set file (i.e. changes made to this list will not affect the tag set file)
+	 * Get a list of the tag names. This is NOT backed by the tag set file (i.e.
+	 * changes made to this list will not affect the tag set file)
+	 * 
 	 * @return
 	 */
 	public List<String> tagNamesList() {
+		final boolean db = SHOW_FILE_ACTIVITY;
+		if (db)
+			pr("get tagNamesList\n");
 		if (tagNamesList == null) {
 			ArrayList<String> al = new ArrayList();
 			al.addAll(tagMap.keySet());
 			tagNamesList = al;
+			if (db)
+				pr(" constructed: " + tagNamesList);
 		}
 		return tagNamesList;
 	}
-	
+
 	private static class TagEntry {
 		public TagEntry(String name) {
 			this.name = name;
@@ -168,7 +184,12 @@ public class TagSetFile implements IJSONEncoder {
 		}
 	};
 
-	private int size;
+	@Override
+	public String toString() {
+		return "TagSetFile (size=" + size() + " of max " + maxTags + ") "
+				+ JSONEncoder.toJSON(this);
+	}
+
 	private TagEntry headEntry, tailEntry;
 	private int maxTags;
 	private TreeMap<String, TagEntry> tagMap;

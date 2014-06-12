@@ -23,11 +23,13 @@ public class RBuddyApp {
 
 	public static void prepare(Context context) {
 		if (sharedInstance == null) {
-//			final boolean db = true;
+			// final boolean db = true;
 			if (!testing())
 				assertUIThread();
 			sharedInstance = new RBuddyApp(context);
-			if (db) pr("RBuddyApp.prepare, prepared sharedInstance "+sharedInstance);
+			if (db)
+				pr("RBuddyApp.prepare, prepared sharedInstance "
+						+ sharedInstance);
 		}
 	}
 
@@ -53,7 +55,6 @@ public class RBuddyApp {
 			die("not running within UI thread");
 		}
 	}
-
 
 	public PhotoFile getPhotoFile() {
 		if (photoFile == null) {
@@ -90,7 +91,7 @@ public class RBuddyApp {
 		receiptFile();
 		return tagSetFile;
 	}
-	
+
 	public int getUniqueIdentifier() {
 		int value;
 		synchronized (this) {
@@ -116,7 +117,8 @@ public class RBuddyApp {
 			this.preferences = ((Activity) context)
 					.getPreferences(Context.MODE_PRIVATE);
 		} else {
-			this.preferences = context.getSharedPreferences("__RBuddyApp_test_",Context.MODE_PRIVATE);
+			this.preferences = context.getSharedPreferences(
+					"__RBuddyApp_test_", Context.MODE_PRIVATE);
 		}
 		if (!testing()) {
 			AndroidSystemOutFilter.install();

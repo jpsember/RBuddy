@@ -19,12 +19,6 @@ import android.widget.ListView;
 public class ReceiptListActivity extends Activity {
 
 	@Override
-	public void onSaveInstanceState(Bundle s) {
-		app.receiptFile().flush();
-		super.onSaveInstanceState(s);
-	}
-
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// final boolean db = true;
 		if (db)
@@ -55,6 +49,12 @@ public class ReceiptListActivity extends Activity {
 		receiptListAdapter.notifyDataSetChanged();
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		app.receiptFile().flush();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu items for use in the action bar
