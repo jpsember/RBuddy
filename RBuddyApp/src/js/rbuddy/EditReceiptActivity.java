@@ -476,6 +476,7 @@ public class EditReceiptActivity extends Activity {
 				pr(" changed, marking receipt as modified");
 			app.receiptFile().setModified(receipt);
 			if (ts != null) {
+				if (db)
 					pr("  moving tags to front of queue");
 				ts.moveTagsToFrontOfQueue(app.tagSetFile());
 			}

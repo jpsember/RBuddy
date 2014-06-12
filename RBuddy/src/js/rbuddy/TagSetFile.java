@@ -1,6 +1,8 @@
 package js.rbuddy;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -67,6 +69,9 @@ public class TagSetFile implements IJSONEncoder {
 				tagMap.put(name, entry);
 			}
 		} else {
+			// Invalidate any existing tags list
+			this.tagNamesList = null;
+			
 			if (size == maxTags) {
 				entry = tailEntry.next;
 
@@ -97,6 +102,19 @@ public class TagSetFile implements IJSONEncoder {
 		return tagMap.keySet();
 	}
 
+	/**
+	 * Get a list of the tag names.  This is NOT backed by the tag set file (i.e. changes made to this list will not affect the tag set file)
+	 * @return
+	 */
+	public List<String> tagNamesList() {
+		if (tagNamesList == null) {
+			ArrayList<String> al = new ArrayList();
+			al.addAll(tagMap.keySet());
+			tagNamesList = al;
+		}
+		return tagNamesList;
+	}
+	
 	private static class TagEntry {
 		public TagEntry(String name) {
 			this.name = name;
@@ -119,11 +137,6 @@ public class TagSetFile implements IJSONEncoder {
 						+ entry);
 		}
 	}
-
-	private int size;
-	private TagEntry headEntry, tailEntry;
-	private int maxTags;
-	private TreeMap<String, TagEntry> tagMap;
 
 	@Override
 	public void encode(JSONEncoder json) {
@@ -155,4 +168,9 @@ public class TagSetFile implements IJSONEncoder {
 		}
 	};
 
+	private int size;
+	private TagEntry headEntry, tailEntry;
+	private int maxTags;
+	private TreeMap<String, TagEntry> tagMap;
+	private List<String> tagNamesList;
 }

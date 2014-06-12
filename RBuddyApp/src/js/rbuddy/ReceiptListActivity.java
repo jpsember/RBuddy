@@ -50,7 +50,7 @@ public class ReceiptListActivity extends Activity {
 		// final boolean db = true;
 		if (db)
 			pr("\n\nReceiptListActivity.resume");
-		
+
 		super.onResume(); // Always call the superclass method first
 		receiptListAdapter.notifyDataSetChanged();
 	}
@@ -118,9 +118,6 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processAddReceipt() {
-		// final boolean db = true;
-		if (db)
-			pr("\nReceiptListActivity.processAddReceipt");
 		Receipt r = new Receipt(app.getUniqueIdentifier());
 		app.receiptFile().add(r);
 		this.receiptList.add(r);
@@ -129,13 +126,7 @@ public class ReceiptListActivity extends Activity {
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
 		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
-		if (db)
-			pr(" starting activity " + intent);
 		startActivity(intent);
-		if (db)
-			pr(" done starting activity");
-
-		unimp("detect upon return whether receipt was actually edited at all, and delete if no photo or other fields");
 	}
 
 	private void processReceiptSelection(int position) {
