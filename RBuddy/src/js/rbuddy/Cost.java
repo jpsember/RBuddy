@@ -1,12 +1,6 @@
 package js.rbuddy;
 
-import static js.basic.Tools.pr;
-
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Currency;
-
-import static js.basic.Tools.*;
 
 public class Cost {
 
@@ -136,15 +130,3 @@ public class Cost {
 	private double value;
 
 }
-// private String determineTestName() {
-// String st = stackTrace(2, 5);
-//
-// // Look for first occurrence of '.testXXX:'
-// Pattern p = Pattern.compile("\\.test(\\w+):");
-// Matcher m = p.matcher(st);
-// if (!m.find())
-// die("no 'test' method name found in stack trace:\n" + st);
-// String matchName = m.group(1);
-// return matchName;
-// }
-//
