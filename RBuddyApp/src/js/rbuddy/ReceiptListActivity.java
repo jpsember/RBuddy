@@ -31,8 +31,7 @@ public class ReceiptListActivity extends Activity {
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 
-		ListView lv = constructListView();
-		layout.addView(lv);
+		layout.addView(constructListView());
 	}
 
 	@Override
@@ -81,7 +80,7 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	// Construct a view to be used for the list items
-	private ListView constructListView() {
+	private View constructListView() {
 
 		ListView listView = new ListView(this);
 

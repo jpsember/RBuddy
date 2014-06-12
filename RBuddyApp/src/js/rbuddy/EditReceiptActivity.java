@@ -24,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.view.KeyEvent;
@@ -33,6 +32,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class EditReceiptActivity extends Activity {
@@ -95,32 +95,42 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void layoutElements() {
+		ScrollView scrollView = new ScrollView(this);
+		{
+			scrollView.setLayoutParams(new LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+
+			// Don't know if it's possible, or even necessary, to set '
+			// android:scrollbars="vertical" '
+		}
 
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
-		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
+
+		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT);
+
+		layout.addView(addPhotoWidget(), true ? lp
+				: new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 200,
+						1.0f));
+		layout.addView(addDateWidget(), lp);
+		layout.addView(addCostWidget(), lp);
+		layout.addView(addTagsWidget(), lp);
+		layout.addView(addSummaryWidget(), lp);
+
+		scrollView.addView(layout);
+
+		setContentView(scrollView, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 
-		addPhotoWidget(layout);
-		addDateWidget(layout);
-		addCostWidget(layout);
-		addTagsWidget(layout);
-		addSummaryWidget(layout);
 	}
 
-	private void addPhotoWidget(ViewGroup layout) {
+	private View addPhotoWidget() {
 
 		// Nest the image view within a horizontal layout, to add a 'camera'
 		// button to the bottom right
 		LinearLayout l2 = new LinearLayout(this);
 		l2.setOrientation(LinearLayout.HORIZONTAL);
-		{
-			// Give this layout a fixed size that is small, but lots of
-			// weight to grow to take up what extra there is.
-			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, 10, 1.0f);
-			layout.addView(l2, p);
-		}
 
 		{
 			ImageView bitmapView = new ImageView(this);
@@ -152,6 +162,8 @@ public class EditReceiptActivity extends Activity {
 			updatePhotoView();
 
 		}
+		return l2;
+
 	}
 
 	/**
@@ -170,16 +182,12 @@ public class EditReceiptActivity extends Activity {
 		return ret;
 	}
 
-	private void addDateWidget(ViewGroup layout) {
+	private View addDateWidget() {
 
 		EditText tf = new EditText(this);
 		dateView = tf;
 
 		tf.setFocusable(false);
-		tf.setMinHeight(50);
-		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		layout.addView(tf, layoutParam);
 
 		tf.setOnClickListener(new OnClickListener() {
 			@Override
@@ -201,9 +209,10 @@ public class EditReceiptActivity extends Activity {
 						ymd[0], ymd[1], ymd[2]).show();
 			}
 		});
+		return tf;
 	}
 
-	private void addTagsWidget(ViewGroup layout) {
+	private View addTagsWidget() {
 		TagsEditText tf = new TagsEditText(this);
 		tagsView = tf;
 		// This makes pressing the 'done' keyboard key close the keyboard
@@ -219,7 +228,7 @@ public class EditReceiptActivity extends Activity {
 		// tags
 		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
-//				final boolean db = true;
+				// final boolean db = true;
 				if (db)
 					pr("TagsWidget, focus changed, hasFocus now " + hasFocus);
 				if (!hasFocus) {
@@ -252,13 +261,10 @@ public class EditReceiptActivity extends Activity {
 				}
 			}
 		});
-		tf.setMinHeight(50);
-		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		layout.addView(tf, layoutParam);
+		return tagsView;
 	}
 
-	private void addCostWidget(ViewGroup layout) {
+	private View addCostWidget() {
 		TextView tf = new EditText(this);
 		costView = tf;
 
@@ -298,41 +304,37 @@ public class EditReceiptActivity extends Activity {
 		});
 
 		tf.setHint("Amount");
-		tf.setMinHeight(50);
-		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		layout.addView(tf, layoutParam);
+		return tf;
 	}
 
-	private void addSummaryWidget(ViewGroup layout) {
+	private View addSummaryWidget() {
 		MultiAutoCompleteTextView tf = new MultiAutoCompleteTextView(this);
 
-		tf.setInputType(InputType.TYPE_CLASS_TEXT
-				| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+		tf.setHint("Summary");
+		tf.setInputType(InputType.TYPE_CLASS_TEXT //
+				| InputType.TYPE_TEXT_FLAG_MULTI_LINE //
+				| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES //
+		);
+		tf.setMinLines(3);
 
-		tf.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+		if (false) {
+			// Not sure whether this did anything
+			tf.setKeyListener(TextKeyListener.getInstance(true,
+					TextKeyListener.Capitalize.NONE));
 
-		tf.setKeyListener(TextKeyListener.getInstance(true,
-				TextKeyListener.Capitalize.NONE));
-
-		// This makes pressing the 'done' keyboard key close the keyboard
-		tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId,
-					KeyEvent event) {
-				return false;
-			}
-		});
-
-		// May or may not be useful; let's see after adding other components
-		// tf.clearFocus();
+			// This makes pressing the 'done' keyboard key close the keyboard... but
+			// with a multiline field, I don't think it displays a 'done' key
+			tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView v, int actionId,
+						KeyEvent event) {
+					return false;
+				}
+			});
+		}
 
 		summaryView = tf;
-		tf.setHint("Summary");
-		tf.setMinHeight(50);
-		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		layout.addView(tf, layoutParam);
+		return tf;
 	}
 
 	private void dispatchTakePictureIntent() {
@@ -434,7 +436,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updateReceiptWithWidgetValues() {
-//		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("\nupdateReceiptWithWidgetValues\n");
 
