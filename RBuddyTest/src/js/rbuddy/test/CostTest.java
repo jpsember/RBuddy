@@ -71,8 +71,16 @@ public class CostTest extends js.testUtils.MyTest {
 	@Test
 	public void testNormal3() {
 
-		String s = "$123.45";
+		String s = "123.45";
 		Cost c = new Cost(s);
+		assertTrue(c.getValue() == 123.45);
+		
+		s = "$123.45";
+		c = new Cost(s);
+		assertTrue(c.getValue() == 123.45);
+		
+		s = "^123.45";
+		c = new Cost(s);
 		assertTrue(c.getValue() == 123.45);
 		
 //		Cost.setUserCurrencyFormat(NumberFormat

@@ -4,6 +4,8 @@ import static js.basic.Tools.pr;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Currency;
+
 import static js.basic.Tools.*;
 
 public class Cost {
@@ -91,23 +93,42 @@ public class Cost {
 		 * (ParseException e) { pr(" parse failed: " + e); }
 		 */
 
-		NumberFormat f = getUserCurrencyFormat();
-
+		// we are not gonna use currency stuff anymore
+		// and are just trying to get a number to parse...
+		//NumberFormat f = getUserCurrencyFormat();
 		// Currency c = f.getCurrency();
-
 		// pr("\n" + "tim was here " + c.getSymbol());
 
-		Number n = null;
-		try {
-			n = f.parse(s);
-			return n.doubleValue();
-		} catch (ParseException e) {
-			pr(" parse failed: " + e);
-			unimp("not done... try other heuristics before giving up");
-		}
-		throw new NumberFormatException();
-	}
+		
+		s = s.replaceAll("[^\\d.]", "");
 
+		
+			Double d = Double.parseDouble(s);
+			return d;
+			
+		
+			
+			//pr(" first parse failed: " + e);
+			//unimp("not done... try other heuristics before giving up");
+		}
+		
+//		try {
+//			// try putting the dollar sign at the front...
+//			
+//			pr(" so we try to add the correct prefix...");
+//			Currency c = f.getCurrency();
+//			String firstfix = c.getSymbol() + s;
+//			n = f.parse(firstfix);
+//			pr(" which worked!");
+//			return n.doubleValue();
+//		} catch (ParseException e) {
+//			pr(" second parse failed: " + e);
+//		}
+		// maybe we should try something else like removing spaces between $ and number...
+		
+//		pr("TJS parse of the input fell all the way through...");
+//		throw new NumberFormatException();
+	
 	public double getValue() {
 		return value;
 	}
