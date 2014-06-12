@@ -17,16 +17,53 @@ import static js.basic.Tools.*;
 public class SimpleReceiptFile implements IReceiptFile {
 
 	public SimpleReceiptFile() {
-		this(null);
+		this(null, null);
 	}
 
-	public SimpleReceiptFile(String baseName) {
-		if (baseName == null)
-			baseName = "receipts_json_v"+Receipt.VERSION+".txt";
-		this.baseName = baseName;
+	public SimpleReceiptFile(String receiptsBaseName, String tagsBaseName) {
+		if (receiptsBaseName == null)
+			receiptsBaseName = "receipts_json_v" + Receipt.VERSION + ".txt";
+		this.receiptsBaseName = receiptsBaseName;
+
+		if (tagsBaseName == null)
+			tagsBaseName = "tags_json_v" + Receipt.VERSION + ".txt";
+		this.tagSetFileBaseName = tagsBaseName;
+
 		this.map = new HashMap();
 		readAllReceipts();
 		unimp("some way of determining if receipt has really changed; note that iterator is returning values without going through getReceipt()");
+	}
+
+	public TagSetFile readTagSetFile() {
+		if (tagSetFile == null) {
+			tagSetStorageFile = fileForBaseName(tagSetFileBaseName);
+			TagSetFile tf = null;
+			if (tagSetStorageFile.isFile()) {
+				try {
+					tf = (TagSetFile) JSONParser.parse(
+							Files.readTextFile(tagSetStorageFile),
+							TagSetFile.JSON_PARSER);
+				} catch (IOException e) {
+					warning("caught " + e + ", starting with empty tag file");
+				}
+			}
+			if (tf == null) {
+				tf = new TagSetFile();
+			}
+			tagSetFile = tf;
+		}
+		return tagSetFile;
+	}
+
+	private void flushTagSetFile() {
+		if (tagSetFile != null) {
+			File file = fileForBaseName(tagSetFileBaseName);
+			try {
+				Files.writeTextFile(file, JSONEncoder.toJSON(tagSetFile));
+			} catch (IOException e) {
+				warning("caught " + e + ", unable to write tag file");
+			}
+		}
 	}
 
 	public static File fileForBaseName(String baseName) {
@@ -92,6 +129,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 			} catch (IOException e) {
 				die(e);
 			}
+
+			flushTagSetFile();
 		}
 	}
 
@@ -111,6 +150,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void setModified(Receipt r) {
+
 		setChanges();
 	}
 
@@ -129,11 +169,9 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
-	private File receiptFile;
-
 	public File getFile() {
 		if (receiptFile == null) {
-			receiptFile = fileForBaseName(baseName);
+			receiptFile = fileForBaseName(receiptsBaseName);
 		}
 		return receiptFile;
 	}
@@ -187,7 +225,11 @@ public class SimpleReceiptFile implements IReceiptFile {
 		}
 	}
 
-	private String baseName;
+	private File receiptFile;
+	private File tagSetStorageFile;
+	private TagSetFile tagSetFile;
+	private String receiptsBaseName;
+	private String tagSetFileBaseName;
 	private boolean changes;
 	private Map map;
 }

@@ -1,9 +1,13 @@
 package js.rbuddy.test;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import js.rbuddy.Receipt;
 import js.rbuddy.SimpleReceiptFile;
+import js.rbuddy.TagSetFile;
 
 public class SimpleReceiptFileTest extends JSAndroidTestCase {
 
@@ -11,7 +15,7 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 
 	private SimpleReceiptFile constructFile() {
 		if (rf == null) {
-			rf = new SimpleReceiptFile(BASENAME);
+			rf = new SimpleReceiptFile(BASENAME,BASENAME);
 		}
 		return rf;
 	}
@@ -66,6 +70,22 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 		close();
 	}
 
+	public void testUpdatesTags() {
+		constructFile();
+		TagSetFile tf = rf.readTagSetFile();
+		generate(80, 50);
+		
+		Set<String> tags = new HashSet<String>(tf.tags());
+		
+		close();
+
+		constructFile();
+		tf = rf.readTagSetFile();
+		for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
+			assertTrue(tf.tags().contains(iter.next()));
+		}
+	}
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
