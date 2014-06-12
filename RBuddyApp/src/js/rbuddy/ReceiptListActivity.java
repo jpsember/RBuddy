@@ -20,10 +20,6 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// final boolean db = true;
-		if (db)
-			pr("\n\nReceiptListActivity.onCreate bundle " + savedInstanceState);
-
 		super.onCreate(savedInstanceState);
 
 		RBuddyApp.prepare(this);
@@ -41,10 +37,6 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public void onResume() {
-		// final boolean db = true;
-		if (db)
-			pr("\n\nReceiptListActivity.resume");
-
 		super.onResume(); // Always call the superclass method first
 		receiptListAdapter.notifyDataSetChanged();
 	}
