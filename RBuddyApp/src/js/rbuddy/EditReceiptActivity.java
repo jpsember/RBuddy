@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import js.basic.Files;
+import js.basic.JSONEncoder;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -218,7 +219,7 @@ public class EditReceiptActivity extends Activity {
 		// tags
 		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
-				final boolean db = true;
+//				final boolean db = true;
 				if (db)
 					pr("TagsWidget, focus changed, hasFocus now " + hasFocus);
 				if (!hasFocus) {
@@ -433,13 +434,16 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updateReceiptWithWidgetValues() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db)
 			pr("\nupdateReceiptWithWidgetValues\n");
+
+		// To detect if changes have actually occurred, compare JSON
+		// representations of the receipt before and after updating the fields.
+		String origJSON = JSONEncoder.toJSON(receipt);
+
 		receipt.setDate(readDateFromDateWidget());
 		receipt.setSummary(summaryView.getText().toString());
-
-		app.receiptFile().setModified(receipt);
 
 		Cost c = null;
 		try {
@@ -459,10 +463,22 @@ public class EditReceiptActivity extends Activity {
 			if (db)
 				pr("  replacing receipt's tags with " + ts);
 			receipt.setTags(ts);
-			if (db)
-				pr("  moving tags to front of queue");
-			ts.moveTagsToFrontOfQueue(app.tagSetFile());
 		} catch (IllegalArgumentException e) {
+		}
+
+		String newJSON = JSONEncoder.toJSON(receipt);
+		if (db)
+			pr("comparing old and new JSON:\n --> " + origJSON + "\n --> "
+					+ newJSON);
+
+		if (!origJSON.equals(newJSON)) {
+			if (db)
+				pr(" changed, marking receipt as modified");
+			app.receiptFile().setModified(receipt);
+			if (ts != null) {
+					pr("  moving tags to front of queue");
+				ts.moveTagsToFrontOfQueue(app.tagSetFile());
+			}
 		}
 	}
 

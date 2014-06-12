@@ -1,6 +1,6 @@
 package js.rbuddy;
 
-import static js.basic.Tools.pr;
+import static js.basic.Tools.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -123,7 +123,7 @@ public class TagSet implements IJSONEncoder {
 	 *            TagSetFile
 	 */
 	public void moveTagsToFrontOfQueue(TagSetFile tagSetFile) {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db)
 			pr("\n\nmoveTagsToFrontOfQueue for " + this);
 		Iterator<String> iter = this.iterator();

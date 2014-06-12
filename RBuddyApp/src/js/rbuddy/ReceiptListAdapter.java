@@ -39,7 +39,6 @@ public class ReceiptListAdapter extends ArrayAdapter {
 			view.setOrientation(LinearLayout.HORIZONTAL);
 
 			final int LIST_ITEM_HEIGHT = 80;
-			unimp("how do we deal with view sizes systematically, w.r.t. different Android devices?");
 
 			// Construct the various child views contained in this list view.
 			// We'll refer to the individual views by tags that are strings

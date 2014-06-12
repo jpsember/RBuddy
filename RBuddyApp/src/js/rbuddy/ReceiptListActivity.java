@@ -52,7 +52,6 @@ public class ReceiptListActivity extends Activity {
 			pr("\n\nReceiptListActivity.resume");
 		
 		super.onResume(); // Always call the superclass method first
-		unimp("maybe we want to only do this if editing actually occurred? otherwise we lose our place?");
 		receiptListAdapter.notifyDataSetChanged();
 	}
 

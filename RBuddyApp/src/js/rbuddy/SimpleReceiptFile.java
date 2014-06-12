@@ -31,7 +31,6 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 		this.map = new HashMap();
 		readAllReceipts();
-		unimp("some way of determining if receipt has really changed; note that iterator is returning values without going through getReceipt()");
 	}
 
 	public TagSetFile readTagSetFile() {
@@ -56,7 +55,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void flushTagSetFile() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (tagSetFile != null) {
 			File file = fileForBaseName(tagSetFileBaseName);
 			try {
@@ -218,9 +217,9 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void setChanges() {
-		final boolean db = true;
+//		final boolean db = true;
 		if (db)
-			pr("setChanges; called from "+Tools.stackTrace(0,10));
+			pr("setChanges; called from "+Tools.stackTrace(0,5));
 		if (!changes) {
 			if (db)
 				pr("  ....... changes now true\n");
