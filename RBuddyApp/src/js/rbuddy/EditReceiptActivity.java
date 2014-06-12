@@ -218,23 +218,36 @@ public class EditReceiptActivity extends Activity {
 		// tags
 		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
+				final boolean db = true;
+				if (db)
+					pr("TagsWidget, focus changed, hasFocus now " + hasFocus);
 				if (!hasFocus) {
 					TagsEditText v = (TagsEditText) v0;
 					TagSet tagNameSet = null;
+					String s = v.getText().toString();
+					if (db)
+						pr("  attempting to parse TagSet from " + s);
 					try {
-						String s = v.getText().toString();
 						tagNameSet = TagSet.parse(s);
 					} catch (IllegalArgumentException e) {
-						if (db) pr("Failed to parse " + v.getText() + ": " + e);
+						if (db)
+							pr("Failed to parse " + v.getText() + ": " + e);
 					}
+
+					// Update the view's contents with either a 'cleaned up'
+					// version of what the user entered,
+					// or (if it didn't parse correctly), the receipt's tag set.
+					//
+					// If the former occurs, note that we'll be parsing the
+					// view's text into a TagSet and
+					// storing it as the new receipt tag set when we call
+					// updateReceiptWithWidgetValues() later.
+					//
 					if (tagNameSet != null) {
-						receipt.setTags(tagNameSet);
+						v.setText(tagNameSet.format());
+					} else {
+						v.setText(receipt.getTags().format());
 					}
-					// If parsing failed, we restore the text to the last legal
-					// value;
-					// and if it succeeded, we update the text to the 'massaged'
-					// version of the user's input
-					v.setText(receipt.getTags().format());
 				}
 			}
 		});
@@ -420,8 +433,12 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updateReceiptWithWidgetValues() {
+		final boolean db = true;
+		if (db)
+			pr("\nupdateReceiptWithWidgetValues\n");
 		receipt.setDate(readDateFromDateWidget());
 		receipt.setSummary(summaryView.getText().toString());
+
 		app.receiptFile().setModified(receipt);
 
 		Cost c = null;
@@ -429,12 +446,24 @@ public class EditReceiptActivity extends Activity {
 			String s = costView.getText().toString();
 			c = new Cost(s);
 		} catch (NumberFormatException e) {
-			final boolean db = true;
 			if (db)
 				pr("(attempting to parse '" + costView + "', caught " + e + ")");
 		}
 		if (c != null)
 			receipt.setCost(c);
+
+		TagSet ts = null;
+		try {
+			String s = tagsView.getText().toString();
+			ts = TagSet.parse(s);
+			if (db)
+				pr("  replacing receipt's tags with " + ts);
+			receipt.setTags(ts);
+			if (db)
+				pr("  moving tags to front of queue");
+			ts.moveTagsToFrontOfQueue(app.tagSetFile());
+		} catch (IllegalArgumentException e) {
+		}
 	}
 
 	private RBuddyApp app;

@@ -79,11 +79,18 @@ public class RBuddyApp {
 
 	public IReceiptFile receiptFile() {
 		if (receiptFile == null) {
-			receiptFile = new SimpleReceiptFile();
+			SimpleReceiptFile s = new SimpleReceiptFile();
+			receiptFile = s;
+			tagSetFile = s.readTagSetFile();
 		}
 		return receiptFile;
 	}
 
+	public TagSetFile tagSetFile() {
+		receiptFile();
+		return tagSetFile;
+	}
+	
 	public int getUniqueIdentifier() {
 		int value;
 		synchronized (this) {
@@ -140,4 +147,5 @@ public class RBuddyApp {
 	private Context context;
 	private PhotoFile photoFile;
 	private IReceiptFile receiptFile;
+	private TagSetFile tagSetFile;
 }

@@ -56,10 +56,14 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void flushTagSetFile() {
+		final boolean db = true;
 		if (tagSetFile != null) {
 			File file = fileForBaseName(tagSetFileBaseName);
 			try {
-				Files.writeTextFile(file, JSONEncoder.toJSON(tagSetFile));
+				String json = JSONEncoder.toJSON(tagSetFile);
+				if (db) pr(" writing TagSet to "+file+":\n"+json);
+				
+				Files.writeTextFile(file, json);
 			} catch (IOException e) {
 				warning("caught " + e + ", unable to write tag file");
 			}
@@ -150,7 +154,6 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void setModified(Receipt r) {
-
 		setChanges();
 	}
 
@@ -215,9 +218,9 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void setChanges() {
-		// final boolean db = true;
+		final boolean db = true;
 		if (db)
-			pr("setChanges\n");
+			pr("setChanges; called from "+Tools.stackTrace(0,10));
 		if (!changes) {
 			if (db)
 				pr("  ....... changes now true\n");

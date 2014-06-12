@@ -1,5 +1,7 @@
 package js.rbuddy;
 
+import static js.basic.Tools.pr;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -108,10 +110,29 @@ public class TagSet implements IJSONEncoder {
 	@Override
 	public void encode(JSONEncoder encoder) {
 		encoder.enterList();
-		for (Iterator<String> s = tags.iterator(); s.hasNext(); ) {
+		for (Iterator<String> s = tags.iterator(); s.hasNext();) {
 			encoder.encode(s.next());
 		}
 		encoder.exitList();
+	}
+
+	/**
+	 * Move a receipt's tags (if any) to the front of a TagSetFile's queue.
+	 * 
+	 * @param tagSetFile
+	 *            TagSetFile
+	 */
+	public void moveTagsToFrontOfQueue(TagSetFile tagSetFile) {
+		final boolean db = true;
+		if (db)
+			pr("\n\nmoveTagsToFrontOfQueue for " + this);
+		Iterator<String> iter = this.iterator();
+		while (iter.hasNext()) {
+			String tagName = iter.next();
+			if (db)
+				pr(" ...re-adding tag " + tagName);
+			tagSetFile.addTag(tagName);
+		}
 	}
 
 }
