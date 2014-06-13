@@ -1,4 +1,4 @@
-package js.basicTest;
+package js.jsonTest;
 
 import static org.junit.Assert.*;
 
@@ -12,13 +12,13 @@ import java.util.Map;
 
 import org.junit.*;
 
-import js.basic.IJSONParser;
-import js.basic.IJSONEncoder;
-import js.basic.JSONEncoder;
-import js.basic.JSONException;
-import js.basic.JSONParser;
+import js.json.IJSONEncoder;
+import js.json.IJSONParser;
+import js.json.JSONEncoder;
+import js.json.JSONException;
+import js.json.JSONParser;
 import static js.basic.Tools.*;
-import static js.basic.JSONTools.*;
+import static js.json.JSONTools.*;
 
 public class JSONTest extends js.testUtils.MyTest {
 
@@ -109,7 +109,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		String s = "{'description':{'type':'text','hint':'enter something here'}}";
 		s = s.replace('\'', '"');
 		json(s);
-		json.setTrace(true);
 		Map map = (Map) json.next();
 		assertTrue(map.containsKey("description"));
 	}

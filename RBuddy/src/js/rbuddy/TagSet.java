@@ -8,10 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import js.basic.IJSONEncoder;
-import js.basic.IJSONParser;
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
+import js.json.*;
 
 public class TagSet implements IJSONEncoder {
 	public static final int MAX_SIZE = 5;

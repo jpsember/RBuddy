@@ -8,9 +8,7 @@ import java.util.TreeSet;
 
 import android.content.Context;
 import android.widget.LinearLayout;
-import js.basic.IJSONEncoder;
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
+import js.json.*;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 

@@ -1,4 +1,4 @@
-package js.basic;
+package js.json;
 
 public class JSONTools {
 

@@ -4,10 +4,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.*;
 
-import js.basic.IJSONParser;
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
-import js.basic.IJSONEncoder;
+import js.json.*;
 import static js.basic.Tools.*;
 
 public class JSDate implements IJSONEncoder {

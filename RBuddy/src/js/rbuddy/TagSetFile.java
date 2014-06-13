@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
-import js.basic.IJSONEncoder;
-import js.basic.IJSONParser;
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
+import js.json.*;
 import static js.basic.Tools.*;
 
 public class TagSetFile implements IJSONEncoder {

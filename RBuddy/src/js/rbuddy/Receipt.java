@@ -2,10 +2,7 @@ package js.rbuddy;
 
 import java.util.Iterator;
 
-import js.basic.IJSONParser;
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
-import js.basic.IJSONEncoder;
+import js.json.*;
 import js.basic.StringUtil;
 
 public class Receipt implements IJSONEncoder {

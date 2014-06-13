@@ -1,4 +1,4 @@
-package js.basic;
+package js.json;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

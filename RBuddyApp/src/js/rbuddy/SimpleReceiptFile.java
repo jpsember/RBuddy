@@ -9,8 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import js.basic.Files;
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
+import js.json.*;
 import static js.basic.Tools.*;
 
 public class SimpleReceiptFile implements IReceiptFile {

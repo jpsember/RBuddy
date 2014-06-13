@@ -1,4 +1,4 @@
-package js.basic;
+package js.json;
 
 import java.util.ArrayList;
 import java.util.Iterator;
