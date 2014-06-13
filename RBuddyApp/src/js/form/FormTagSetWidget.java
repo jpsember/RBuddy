@@ -1,6 +1,9 @@
 package js.form;
 
 import static js.basic.Tools.*;
+
+import java.util.Map;
+
 import js.rbuddy.RBuddyApp;
 import js.rbuddy.TagSet;
 import js.rbuddy.TagSetFile;
@@ -13,14 +16,17 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.Tokenizer;
 
 public class FormTagSetWidget extends FormTextWidget {
-	public FormTagSetWidget(FormItem item) {
-		super(item);
+	public FormTagSetWidget(FormItem item, Map args) {
+		super(item, args);
 	}
 
-	protected void constructInput() {
-		MultiAutoCompleteTextView textView = new MultiAutoCompleteTextView(
-				context());
-		input = textView;
+	protected void constructInput(Map arguments) {
+		arguments.put("autocompletion", "multiple");
+
+		super.constructInput(arguments);
+
+		MultiAutoCompleteTextView textView = (MultiAutoCompleteTextView) input;
+
 		textView.setInputType(InputType.TYPE_CLASS_TEXT);
 		textView.setTokenizer(new OurTokenizer());
 		textView.setKeyListener(TextKeyListener.getInstance(true,

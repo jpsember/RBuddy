@@ -27,6 +27,10 @@ public class JSONParser {
 	}
 
 	public JSONParser(String string) {
+		final boolean db = false;
+		if (db) pr("JSONParser constructed for:\n "+string);
+		setTrace(db);
+		
 		try {
 			InputStream stream = new ByteArrayInputStream(
 					string.getBytes("UTF-8"));
@@ -249,16 +253,8 @@ public class JSONParser {
 				| (parseDigit() << 4) | parseDigit());
 	}
 
-	// private int readInt() {
-	// double d = readNumber();
-	// int i = (int) Math.round(d);
-	// if (i != d)
-	// throw new JSONException("not an integer");
-	// return i;
-	// }
-
 	private double readNumber() {
-		// final boolean db = true;
+		final boolean db = false;
 		if (db)
 			pr("\n\nreadNumber");
 		sb.setLength(0);
@@ -346,6 +342,7 @@ public class JSONParser {
 		} catch (NumberFormatException e) {
 			throw new JSONException(e);
 		}
+		if (db) pr(" returning number: "+value);
 		return value;
 	}
 
@@ -362,8 +359,9 @@ public class JSONParser {
 				read(':', true);
 				Object value = readValue();
 				m.put(key, value);
-				if (peek(true) != ',')
+				if (peek(true) != ',') {
 					break;
+				}
 				read2(false);
 			}
 		}
@@ -418,6 +416,11 @@ public class JSONParser {
 		final boolean db = false;
 		if (db)
 			pr("peek(ignore=" + ignoreWhitespace + ", peek=" + peek + ")");
+		
+		// If we are ignoring whitespace, throw out peek value if it's whitespace
+		if (ignoreWhitespace && peek <= ' ')
+			peek = -1;
+		
 		if (peek < 0) {
 			try {
 				while (true) {
@@ -427,9 +430,15 @@ public class JSONParser {
 					if (trace) {
 						String s = (peek < 0) ? "EOF" : Character
 								.toString((char) peek);
-						if (s == "\n")
+						boolean newline = (s == "\n");
+						if (newline)
 							s = "\\n";
-						System.out.println("JSON > " + s);
+						if (traceBuffer.length() > 110) {
+							traceBuffer.replace(0, 4, "...");
+						}
+						traceBuffer.append(s);
+						System.out.println("JSON: "+traceBuffer+"\n"+stackTrace(1,1));
+						if (newline)traceBuffer.setLength(0);
 					}
 
 					if (!ignoreWhitespace || peek > ' ' || peek < 0)
@@ -467,7 +476,8 @@ public class JSONParser {
 	private int peek = -1;
 	private InputStream stream;
 	private boolean trace;
-
+	private StringBuilder traceBuffer = new StringBuilder();
+	
 	private Object currentContainer;
 	private Map currentMap; // null if current container is not a map
 	private Object valueForLastKey;

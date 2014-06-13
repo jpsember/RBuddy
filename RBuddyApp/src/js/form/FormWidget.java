@@ -54,6 +54,12 @@ abstract class FormWidget {
 	}
 
 	/**
+	 * sets the minimum number of lines (i.e. for TextView)
+	 */
+	public void setMinLines(int minLines) {
+	}
+
+	/**
 	 * Parse JSDate
 	 * 
 	 * @return JSDate, or null if parsing failed

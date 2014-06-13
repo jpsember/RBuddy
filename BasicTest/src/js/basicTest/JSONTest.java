@@ -18,6 +18,7 @@ import js.basic.JSONEncoder;
 import js.basic.JSONException;
 import js.basic.JSONParser;
 import static js.basic.Tools.*;
+import static js.basic.JSONTools.*;
 
 public class JSONTest extends js.testUtils.MyTest {
 
@@ -102,17 +103,16 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertFalse(json.hasNext());
 		json.exit();
 	}
-	
+
 	@Test
 	public void testReadMapAsSingleObject() {
 		String s = "{'description':{'type':'text','hint':'enter something here'}}";
 		s = s.replace('\'', '"');
 		json(s);
 		json.setTrace(true);
-		Map map = (Map)json.next();
+		Map map = (Map) json.next();
 		assertTrue(map.containsKey("description"));
 	}
-	
 
 	@Test
 	public void testMap() {
@@ -178,20 +178,23 @@ public class JSONTest extends js.testUtils.MyTest {
 
 	@Test
 	public void testSymmetry() {
-		String script[] = { "0",//
+		String script[] = {//
+				"0",//
 				"1",//
 				"-1.2352E20",//
 				"-1.2352E-20",//
 				"0.5",//
-				"{\"hey\":42}", //
+				"{'hey':42}", //
 				"[1,2,3,4]",//
-				"{\"hey\":42,\"you\":43}",//
-				"{\"hey\":{\"you\":17},\"array\":[1,2,3,4]}",//
+				"{'hey':42,'you':43}",//
+				"{'hey':{'you':17},'array':[1,2,3,4]}",//
+				"{'trailing number':5}",//
+				"{  'favorite song': { '_skip_order': 3, 'type': 'text','hint': 'name of song','zminlines': 5 },'wow':12 } ",//
 		};
-		// final boolean db = true;
+//		final boolean db = true;
 
 		for (int i = 0; i < script.length; i++) {
-			String s = script[i];
+			String s = swapQuotes(script[i]);
 			if (db)
 				pr("\n testing '" + s + "'");
 
@@ -205,7 +208,14 @@ public class JSONTest extends js.testUtils.MyTest {
 			String s2 = enc.toString();
 			if (db)
 				pr(" encoded is " + s2);
-			assertStringsMatch(s, s2);
+
+			Object obj2 = json(s2).next();
+			if (db)
+				pr("parsed object: " + obj2);
+
+			newEnc().encode(obj2);
+			String s3 = enc.toString();
+			assertStringsMatch(s2, s3);
 		}
 	}
 

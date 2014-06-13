@@ -26,7 +26,7 @@ public class JSONEncoder {
 		return encoder.toString();
 	}
 
-public String toString() {
+	public String toString() {
 		return sb.toString();
 	}
 
@@ -118,6 +118,10 @@ public String toString() {
 		exitList();
 	}
 
+	public void encode(Number number) {
+		encode(number.doubleValue());
+	}
+	
 	public void encode(double d) {
 		prepareForNextValue();
 		// final boolean db = true;

@@ -29,38 +29,43 @@ public class FormItem {
 
 		// Process type first, since this constructs the widget
 		{
-			String type = str(map, "type", null);
+			String type = strArg(map, "type", null);
 			if (type == null)
 				throw new IllegalArgumentException(
 						"no type specified for form item");
-			setType(type);
+			setType(type,map);
 		}
-		setOrder(dbl(map, "order", ORDER_UNDEFINED));
-
-		widget.setHint(str(map, "hint", null));
+		setOrder(dblArg(map, "order", ORDER_UNDEFINED));
+		widget.setMinLines(intArg(map,"minlines",1));
+		widget.setHint(strArg(map, "hint", null));
 	}
 
-	private static String str(Map map, String key, String defaultValue) {
+	static String strArg(Map map, String key, String defaultValue) {
 		String val = (String) map.get(key);
 		if (val == null)
 			val = defaultValue;
 		return val;
 	}
 
-	private static double dbl(Map map, String key, double defaultValue) {
+	static double dblArg(Map map, String key, double defaultValue) {
 		Number num = (Number) map.get(key);
 		if (num == null)
 			return defaultValue;
 		return num.doubleValue();
 	}
+	static int intArg(Map map, String key, int defaultValue) {
+		return (int)Math.round(dblArg(map,key,defaultValue));
+	}
 
-	private void setType(String type) {
+	private void setType(String type, Map args) {
 		if (type.equals("text")) {
-			widget = new FormTextWidget(this);
+			widget = new FormTextWidget(this,args);
 		} else if (type.equals("date")) {
-			widget = new FormDateWidget(this);
+			widget = new FormDateWidget(this,args);
 		} else if (type.equals("tagset")) {
-			widget = new FormTagSetWidget(this);
+			widget = new FormTagSetWidget(this,args);
+		} else if (type.equals("cost")) {
+			widget = new FormCostWidget(this,args);
 		} else
 			throw new IllegalArgumentException("unknown form item type: "
 					+ type);
