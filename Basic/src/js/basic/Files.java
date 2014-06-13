@@ -7,17 +7,13 @@ public class Files {
 	private static final String LINE_SEPARATOR = System
 			.getProperty("line.separator");
 
-	/**
-	 * Read a file into a string
-	 * 
-	 * @param path
-	 *            file to read
-	 * @return String
-	 */
-	public static String readTextFile(File file) throws IOException {
-		StringBuilder sb = new StringBuilder();
+	public static String readTextFile(InputStream stream) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+		return readTextFile(reader);
+}
 
-		BufferedReader input = new BufferedReader(new FileReader(file));
+	private static String readTextFile(BufferedReader input) throws IOException {
+		StringBuilder sb = new StringBuilder();
 		try {
 			String line = null;
 			/*
@@ -32,6 +28,18 @@ public class Files {
 			input.close();
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Read a file into a string
+	 * 
+	 * @param path
+	 *            file to read
+	 * @return String
+	 */
+	public static String readTextFile(File file) throws IOException {
+		BufferedReader input = new BufferedReader(new FileReader(file));
+		return readTextFile(input);
 	}
 
 	public static void writeTextFile(File file, String content,
@@ -54,16 +62,16 @@ public class Files {
 	}
 
 	public static void copy(File src, File dst) throws IOException {
-	    InputStream in = new FileInputStream(src);
-	    OutputStream out = new FileOutputStream(dst);
+		InputStream in = new FileInputStream(src);
+		OutputStream out = new FileOutputStream(dst);
 
-	    // Transfer bytes from in to out
-	    byte[] buf = new byte[1024];
-	    int len;
-	    while ((len = in.read(buf)) > 0) {
-	        out.write(buf, 0, len);
-	    }
-	    in.close();
-	    out.close();
+		// Transfer bytes from in to out
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		in.close();
+		out.close();
 	}
 }

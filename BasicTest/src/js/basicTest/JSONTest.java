@@ -102,6 +102,17 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertFalse(json.hasNext());
 		json.exit();
 	}
+	
+	@Test
+	public void testReadMapAsSingleObject() {
+		String s = "{'description':{'type':'text','hint':'enter something here'}}";
+		s = s.replace('\'', '"');
+		json(s);
+		json.setTrace(true);
+		Map map = (Map)json.next();
+		assertTrue(map.containsKey("description"));
+	}
+	
 
 	@Test
 	public void testMap() {

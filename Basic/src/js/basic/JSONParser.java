@@ -51,6 +51,11 @@ public class JSONParser {
 		return (String) next();
 	}
 
+	public void setTrace(boolean t) {
+		trace = t;
+		if (trace) warning("enabling trace, called from "+stackTrace(1,1));
+	}
+
 	/**
 	 * Get the value for the last key read; assumes iterating within map
 	 * 
@@ -348,7 +353,7 @@ public class JSONParser {
 		return parser.parse(this);
 	}
 
-	private Map readObject() {
+	public Map readObject() {
 		Map m = new HashMap();
 		read('{', true);
 		if (peek(true) != '}') {
@@ -419,6 +424,14 @@ public class JSONParser {
 					peek = stream.read();
 					if (db)
 						pr(" stream.read() returned " + peek);
+					if (trace) {
+						String s = (peek < 0) ? "EOF" : Character
+								.toString((char) peek);
+						if (s == "\n")
+							s = "\\n";
+						System.out.println("JSON > " + s);
+					}
+
 					if (!ignoreWhitespace || peek > ' ' || peek < 0)
 						break;
 				}
@@ -453,6 +466,7 @@ public class JSONParser {
 	private StringBuilder sb = new StringBuilder();
 	private int peek = -1;
 	private InputStream stream;
+	private boolean trace;
 
 	private Object currentContainer;
 	private Map currentMap; // null if current container is not a map
