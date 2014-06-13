@@ -4,36 +4,26 @@ import static js.basic.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 
 import js.basic.Files;
+import js.form.Form;
 import js.json.*;
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
+//import android.graphics.Bitmap;
+//import android.graphics.BitmapFactory;
+//import android.graphics.drawable.BitmapDrawable;
+//import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.text.InputType;
-import android.text.method.TextKeyListener;
+//import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
+//import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
-import android.view.KeyEvent;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.MultiAutoCompleteTextView;
+//import android.widget.Button;
+//import android.widget.ImageView;
+//import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 public class EditReceiptActivity extends Activity {
 
@@ -95,271 +85,89 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void layoutElements() {
-		ScrollView scrollView = new ScrollView(this);
-		{
-			scrollView.setLayoutParams(new LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-
-			// Don't know if it's possible, or even necessary, to set '
-			// android:scrollbars="vertical" '
-		}
-
-		LinearLayout layout = new LinearLayout(this);
-		layout.setOrientation(LinearLayout.VERTICAL);
-
-		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-
-		layout.addView(addPhotoWidget(), true ? lp
-				: new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 200,
-						1.0f));
-		layout.addView(addDateWidget(), lp);
-		layout.addView(addCostWidget(), lp);
-		layout.addView(addTagsWidget(), lp);
-		layout.addView(addSummaryWidget(), lp);
-
-		scrollView.addView(layout);
-
-		setContentView(scrollView, new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
-
-	}
-
-	private View addPhotoWidget() {
-
-		// Nest the image view within a horizontal layout, to add a 'camera'
-		// button to the bottom right
-		LinearLayout l2 = new LinearLayout(this);
-		l2.setOrientation(LinearLayout.HORIZONTAL);
-
-		{
-			ImageView bitmapView = new ImageView(this);
-			this.photoView = bitmapView;
-
-			// Give photo a fixed size that is small, but lots of weight to
-			// grow to take up what extra there is (horizontally)
-			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(10,
-					LayoutParams.MATCH_PARENT, 1.0f);
-			l2.addView(bitmapView, p);
-			{
-				Button btn = new Button(this);
-				LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-						0.0f);
-				l2.addView(btn, p2);
-				btn.setCompoundDrawablesWithIntrinsicBounds(getResources()
-						.getDrawable(android.R.drawable.ic_menu_camera), null,
-						null, null);
-
-				btn.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						EditReceiptActivity a = (EditReceiptActivity) v
-								.getContext();
-						a.dispatchTakePictureIntent();
-					}
-				});
-			}
-			updatePhotoView();
-
-		}
-		return l2;
-
-	}
-
-	/**
-	 * Parse JSDate from date widget, if possible
-	 * 
-	 * @return JSDate, or null if parsing failed
-	 */
-	private JSDate readDateFromDateWidget() {
-		String content = dateView.getText().toString();
-		JSDate ret = receipt.getDate();
+		String jsonString = null;
 		try {
-			ret = AndroidDate.parseJSDateFromUserString(content);
-		} catch (ParseException e) {
-			warning("problem parsing " + e);
+			jsonString = Files.readTextFile(getResources().openRawResource(
+					R.raw.form_edit_receipt));
+		} catch (IOException e) {
+			die(e);
 		}
-		return ret;
+		this.form = Form.parse(this, jsonString);
+
+		ScrollView scrollView = new ScrollView(this);
+		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT));
+		scrollView.addView(form.getView());
+
+		unimp("add photo widget");
+
+		setContentView(scrollView);
 	}
 
-	private View addDateWidget() {
+	// private View addPhotoWidget() {
+	//
+	// // Nest the image view within a horizontal layout, to add a 'camera'
+	// // button to the bottom right
+	// LinearLayout l2 = new LinearLayout(this);
+	// l2.setOrientation(LinearLayout.HORIZONTAL);
+	//
+	// {
+	// ImageView bitmapView = new ImageView(this);
+	// this.photoView = bitmapView;
+	//
+	// // Give photo a fixed size that is small, but lots of weight to
+	// // grow to take up what extra there is (horizontally)
+	// LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(10,
+	// LayoutParams.MATCH_PARENT, 1.0f);
+	// l2.addView(bitmapView, p);
+	// {
+	// Button btn = new Button(this);
+	// LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(
+	// LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+	// 0.0f);
+	// l2.addView(btn, p2);
+	// btn.setCompoundDrawablesWithIntrinsicBounds(getResources()
+	// .getDrawable(android.R.drawable.ic_menu_camera), null,
+	// null, null);
+	//
+	// btn.setOnClickListener(new View.OnClickListener() {
+	// public void onClick(View v) {
+	// EditReceiptActivity a = (EditReceiptActivity) v
+	// .getContext();
+	// a.dispatchTakePictureIntent();
+	// }
+	// });
+	// }
+	// updatePhotoView();
+	//
+	// }
+	// return l2;
+	//
+	// }
 
-		EditText tf = new EditText(this);
-		dateView = tf;
-
-		tf.setFocusable(false);
-
-		tf.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-
-				DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
-					@Override
-					public void onDateSet(DatePicker view, int year,
-							int monthOfYear, int dayOfMonth) {
-						JSDate date = JSDate.buildFromValues(year, monthOfYear,
-								dayOfMonth);
-						dateView.setText(AndroidDate
-								.formatUserDateFromJSDate(date));
-					}
-				};
-				int[] ymd = AndroidDate
-						.getJavaYearMonthDay(readDateFromDateWidget());
-				new DatePickerDialog(EditReceiptActivity.this, dateListener,
-						ymd[0], ymd[1], ymd[2]).show();
-			}
-		});
-		return tf;
-	}
-
-	private View addTagsWidget() {
-		TagsEditText tf = new TagsEditText(this);
-		tagsView = tf;
-		// This makes pressing the 'done' keyboard key close the keyboard
-		tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId,
-					KeyEvent event) {
-				return false;
-			}
-		});
-
-		// When this view loses focus, immediately attempt to parse the user's
-		// tags
-		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
-			public void onFocusChange(View v0, boolean hasFocus) {
-				// final boolean db = true;
-				if (db)
-					pr("TagsWidget, focus changed, hasFocus now " + hasFocus);
-				if (!hasFocus) {
-					TagsEditText v = (TagsEditText) v0;
-					TagSet tagNameSet = null;
-					String s = v.getText().toString();
-					if (db)
-						pr("  attempting to parse TagSet from " + s);
-					try {
-						tagNameSet = TagSet.parse(s);
-					} catch (IllegalArgumentException e) {
-						if (db)
-							pr("Failed to parse " + v.getText() + ": " + e);
-					}
-
-					// Update the view's contents with either a 'cleaned up'
-					// version of what the user entered,
-					// or (if it didn't parse correctly), the receipt's tag set.
-					//
-					// If the former occurs, note that we'll be parsing the
-					// view's text into a TagSet and
-					// storing it as the new receipt tag set when we call
-					// updateReceiptWithWidgetValues() later.
-					//
-					if (tagNameSet != null) {
-						v.setText(tagNameSet.format());
-					} else {
-						v.setText(receipt.getTags().format());
-					}
-				}
-			}
-		});
-		return tagsView;
-	}
-
-	private View addCostWidget() {
-		TextView tf = new EditText(this);
-		costView = tf;
-
-		tf.setInputType(InputType.TYPE_CLASS_NUMBER
-				| InputType.TYPE_NUMBER_FLAG_DECIMAL
-				| InputType.TYPE_NUMBER_FLAG_SIGNED);
-
-		// This makes pressing the 'done' keyboard key close the keyboard
-		tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId,
-					KeyEvent event) {
-				return false;
-			}
-		});
-
-		// When this view loses focus, immediately attempt to parse the user's
-		// text;
-		// if it fails, clear the field (and hence clear the cost to 0)
-
-		// This may not work very well in practice; see, e.g.,
-		// http://stackoverflow.com/questions/10627137/how-can-i-know-when-a-edittext-lost-focus
-		tf.setOnFocusChangeListener(new OnFocusChangeListener() {
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (!hasFocus) {
-					Cost c = new Cost(0);
-					try {
-						String s = costView.getText().toString();
-						c = new Cost(s);
-					} catch (NumberFormatException e) {
-						warning("Failed to parse " + costView.getText()
-								+ "; clearing");
-					}
-					costView.setText(c.toString());
-				}
-			}
-		});
-
-		tf.setHint("Amount");
-		return tf;
-	}
-
-	private View addSummaryWidget() {
-		MultiAutoCompleteTextView tf = new MultiAutoCompleteTextView(this);
-
-		tf.setHint("Summary");
-		tf.setInputType(InputType.TYPE_CLASS_TEXT //
-				| InputType.TYPE_TEXT_FLAG_MULTI_LINE //
-				| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES //
-		);
-		tf.setMinLines(3);
-
-		if (false) {
-			// Not sure whether this did anything
-			tf.setKeyListener(TextKeyListener.getInstance(true,
-					TextKeyListener.Capitalize.NONE));
-
-			// This makes pressing the 'done' keyboard key close the keyboard... but
-			// with a multiline field, I don't think it displays a 'done' key
-			tf.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-				@Override
-				public boolean onEditorAction(TextView v, int actionId,
-						KeyEvent event) {
-					return false;
-				}
-			});
-		}
-
-		summaryView = tf;
-		return tf;
-	}
-
-	private void dispatchTakePictureIntent() {
-		// final boolean db = true;
-		if (db)
-			pr("dispatching an intent to take a picture\n");
-
-		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-		if (intent.resolveActivity(getPackageManager()) == null) {
-			if (db)
-				pr(" could not resolve activity");
-			return;
-		}
-
-		File workFile = getWorkPhotoFile();
-		workFile.delete();
-
-		Uri uri = Uri.fromFile(workFile);
-		if (db)
-			pr("Uri.fromFile(workFile)=" + uri);
-		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-
-		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-	}
+	// private void dispatchTakePictureIntent() {
+	// // final boolean db = true;
+	// if (db)
+	// pr("dispatching an intent to take a picture\n");
+	//
+	// Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	//
+	// if (intent.resolveActivity(getPackageManager()) == null) {
+	// if (db)
+	// pr(" could not resolve activity");
+	// return;
+	// }
+	//
+	// File workFile = getWorkPhotoFile();
+	// workFile.delete();
+	//
+	// Uri uri = Uri.fromFile(workFile);
+	// if (db)
+	// pr("Uri.fromFile(workFile)=" + uri);
+	// intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+	//
+	// startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+	// }
 
 	private File getWorkPhotoFile() {
 		return BitmapUtil.constructExternalImageFile("RBuddy_work");
@@ -404,35 +212,35 @@ public class EditReceiptActivity extends Activity {
 		if (db)
 			pr("created main file " + mainFile);
 
-		if (db)
-			pr("updating photo view");
-		updatePhotoView();
+		unimp("unpdate photo view");
+		// if (db)
+		// pr("updating photo view");
+		// updatePhotoView();
 
 	}
 
-	private void updatePhotoView() {
-		if (photoView == null)
-			return;
-		PhotoFile pf = app.getPhotoFile();
-
-		// If no image exists, display placeholder instead
-		if (!pf.photoExists(receipt.getId())) {
-			photoView.setImageDrawable(getResources().getDrawable(
-					R.drawable.missingphoto));
-		} else {
-			File imageFile = pf.getMainFileFor(receipt.getId());
-			Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-			photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
-					bmp));
-		}
-	}
+	// private void updatePhotoView() {
+	// if (photoView == null)
+	// return;
+	// PhotoFile pf = app.getPhotoFile();
+	//
+	// // If no image exists, display placeholder instead
+	// if (!pf.photoExists(receipt.getId())) {
+	// photoView.setImageDrawable(getResources().getDrawable(
+	// R.drawable.missingphoto));
+	// } else {
+	// File imageFile = pf.getMainFileFor(receipt.getId());
+	// Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+	// photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
+	// bmp));
+	// }
+	// }
 
 	private void readWidgetValuesFromReceipt() {
-		summaryView.setText(receipt.getSummary());
-		summaryView.setSelection(summaryView.getText().length());
-		dateView.setText(AndroidDate.formatUserDateFromJSDate(receipt.getDate()));
-		costView.setText(receipt.getCost().toString());
-		tagsView.setText(receipt.getTags().format());
+		form.setValue("summary", receipt.getSummary());
+		form.setValue("cost", receipt.getCost());
+		form.setValue("date",receipt.getDate());
+		form.setValue("tags", receipt.getTags());
 	}
 
 	private void updateReceiptWithWidgetValues() {
@@ -444,29 +252,13 @@ public class EditReceiptActivity extends Activity {
 		// representations of the receipt before and after updating the fields.
 		String origJSON = JSONEncoder.toJSON(receipt);
 
-		receipt.setDate(readDateFromDateWidget());
-		receipt.setSummary(summaryView.getText().toString());
+		receipt.setSummary(form.getValue("summary"));
+		receipt.setCost(new Cost(form.getValue("cost"), true));
+		JSDate date = JSDate.parse(form.getValue("date"), true);
+		receipt.setDate(date);
 
-		Cost c = null;
-		try {
-			String s = costView.getText().toString();
-			c = new Cost(s);
-		} catch (NumberFormatException e) {
-			if (db)
-				pr("(attempting to parse '" + costView + "', caught " + e + ")");
-		}
-		if (c != null)
-			receipt.setCost(c);
-
-		TagSet ts = null;
-		try {
-			String s = tagsView.getText().toString();
-			ts = TagSet.parse(s);
-			if (db)
-				pr("  replacing receipt's tags with " + ts);
-			receipt.setTags(ts);
-		} catch (IllegalArgumentException e) {
-		}
+		String newTagSetString = form.getValue("tags");
+		receipt.setTags(TagSet.parse(form.getValue("tags"), new TagSet()));
 
 		String newJSON = JSONEncoder.toJSON(receipt);
 		if (db)
@@ -477,20 +269,17 @@ public class EditReceiptActivity extends Activity {
 			if (db)
 				pr(" changed, marking receipt as modified");
 			app.receiptFile().setModified(receipt);
-			if (ts != null) {
+			if (!newTagSetString.equals(receipt.getTags().toString())) {
 				if (db)
 					pr("  moving tags to front of queue");
-				ts.moveTagsToFrontOfQueue(app.tagSetFile());
+				receipt.getTags().moveTagsToFrontOfQueue(app.tagSetFile());
 			}
 		}
 	}
 
 	private RBuddyApp app;
 	private Receipt receipt;
-	private ImageView photoView;
-	private EditText summaryView;
-	private TextView dateView;
-	private TextView costView;
-	private TagsEditText tagsView;
+	private Form form;
 
+	// private ImageView photoView;
 }

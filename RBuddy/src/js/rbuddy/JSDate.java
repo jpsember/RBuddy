@@ -11,7 +11,7 @@ public class JSDate implements IJSONEncoder {
 
 	public static final int MONTH_BASE = 0;
 	public static final int DAY_BASE = 1;
-	
+
 	/**
 	 * Constructor for subclasses only
 	 */
@@ -45,8 +45,10 @@ public class JSDate implements IJSONEncoder {
 		return day;
 	}
 
-	public static JSDateFactory factory() {return factory;}
-	
+	public static JSDateFactory factory() {
+		return factory;
+	}
+
 	private int year, month, day;
 	private String str;
 
@@ -65,7 +67,20 @@ public class JSDate implements IJSONEncoder {
 	}
 
 	public static JSDate parse(String s) {
-		return factory.parse(s);
+		return parse(s,false);
+	}
+
+	public static JSDate parse(String s, boolean returnCurrentDateIfParseFails) {
+		JSDate d = null;
+		try {
+			d = factory.parse(s);
+		} catch (IllegalArgumentException e) {
+			if (returnCurrentDateIfParseFails)
+				d = currentDate();
+			else
+				throw e;
+		}
+		return d;
 	}
 
 	private static Pattern dateRegExPattern = Pattern
@@ -85,14 +100,15 @@ public class JSDate implements IJSONEncoder {
 
 			int year = Integer.parseInt(m.group(1));
 			int month = Integer.parseInt(m.group(2)) + (MONTH_BASE - 1);
-			int day = Integer.parseInt(m.group(3)) + (DAY_BASE-1);
-			if (month < MONTH_BASE || day < DAY_BASE || month >= 12+MONTH_BASE || day >= 31 + DAY_BASE)
+			int day = Integer.parseInt(m.group(3)) + (DAY_BASE - 1);
+			if (month < MONTH_BASE || day < DAY_BASE
+					|| month >= 12 + MONTH_BASE || day >= 31 + DAY_BASE)
 				break;
 
 			int[] b = { year, month, day };
 			a = b;
 		} while (false);
-		
+
 		if (a == null)
 			throw new IllegalArgumentException("failed parsing date: " + s);
 
@@ -100,7 +116,7 @@ public class JSDate implements IJSONEncoder {
 	}
 
 	private static JSDateFactory factory = new JSDateFactory() {
-		
+
 		@Override
 		public JSDate currentDate() {
 			// For this most basic factory, we just return a constant date
@@ -122,12 +138,12 @@ public class JSDate implements IJSONEncoder {
 		public JSDate convertJavaDateToJSDate(Date d) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 	};
 
 	private static String buildString(int year, int month, int day) {
-		return String.format(Locale.US, "%04d-%02d-%02d", year, month + (1 - MONTH_BASE),
-				day + (1 - DAY_BASE));
+		return String.format(Locale.US, "%04d-%02d-%02d", year, month
+				+ (1 - MONTH_BASE), day + (1 - DAY_BASE));
 	}
 
 	public static JSDate buildFromValues(int year, int month, int day) {
@@ -137,7 +153,7 @@ public class JSDate implements IJSONEncoder {
 	public static JSDate buildRandom() {
 		int year = rnd.nextInt(4) + 2010;
 		int month = MONTH_BASE + rnd.nextInt(12);
-		int day = DAY_BASE +rnd.nextInt(28);
+		int day = DAY_BASE + rnd.nextInt(28);
 		return buildFromValues(year, month, day);
 	}
 
@@ -145,12 +161,12 @@ public class JSDate implements IJSONEncoder {
 	public void encode(JSONEncoder encoder) {
 		encoder.encode(this.toString());
 	}
-	
+
 	public static final IJSONParser JSON_PARSER = new IJSONParser() {
 		@Override
 		public Object parse(JSONParser json) {
 			return JSDate.parse(json.nextString());
 		}
 	};
-	
+
 }

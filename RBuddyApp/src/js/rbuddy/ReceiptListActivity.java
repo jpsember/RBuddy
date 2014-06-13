@@ -21,7 +21,7 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 
 public class ReceiptListActivity extends Activity {
-	private static final boolean EXPERIMENT = true;
+	private static final boolean EXPERIMENT = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -1,0 +1,6 @@
+{
+  "summary": { "order":10, "type":"text", "minlines":5,"autocompletion":"single"}
+  ,"cost": {"order":5,"type":"cost", "hint":"amount"}
+  ,"date":{"order":7,"type":"date"}
+  ,"tags":{"order":8,"type":"tagset"}
+}

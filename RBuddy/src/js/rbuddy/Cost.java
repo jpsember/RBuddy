@@ -57,9 +57,21 @@ public class Cost {
 	 * @param s
 	 */
 	public Cost(String s) {
+		this(s, false);
+	}
 
-		value = parse(s);
-
+	/**
+	 * Constructor that parses user string (Locale-specific)
+	 * 
+	 * @param s
+	 */
+	public Cost(String s, boolean useZeroIfParseFails) {
+		try {
+			value = parse(s);
+		} catch (NumberFormatException e) {
+			if (!useZeroIfParseFails)
+				throw e;
+		}
 	}
 
 	/*
@@ -73,7 +85,7 @@ public class Cost {
 		// An empty string is always interpreted as zero.
 		if (s.isEmpty())
 			return 0;
-		
+
 		/*
 		 * NumberFormat[] fmts = { NumberFormat.getCurrencyInstance(Locale.US),
 		 * NumberFormat.getCurrencyInstance(Locale.FRENCH),
@@ -89,40 +101,37 @@ public class Cost {
 
 		// we are not gonna use currency stuff anymore
 		// and are just trying to get a number to parse...
-		//NumberFormat f = getUserCurrencyFormat();
+		// NumberFormat f = getUserCurrencyFormat();
 		// Currency c = f.getCurrency();
 		// pr("\n" + "tim was here " + c.getSymbol());
 
-		
 		s = s.replaceAll("[^\\d.]", "");
 
-		
-			Double d = Double.parseDouble(s);
-			return d;
-			
-		
-			
-			//pr(" first parse failed: " + e);
-			//unimp("not done... try other heuristics before giving up");
-		}
-		
-//		try {
-//			// try putting the dollar sign at the front...
-//			
-//			pr(" so we try to add the correct prefix...");
-//			Currency c = f.getCurrency();
-//			String firstfix = c.getSymbol() + s;
-//			n = f.parse(firstfix);
-//			pr(" which worked!");
-//			return n.doubleValue();
-//		} catch (ParseException e) {
-//			pr(" second parse failed: " + e);
-//		}
-		// maybe we should try something else like removing spaces between $ and number...
-		
-//		pr("TJS parse of the input fell all the way through...");
-//		throw new NumberFormatException();
-	
+		Double d = Double.parseDouble(s);
+		return d;
+
+		// pr(" first parse failed: " + e);
+		// unimp("not done... try other heuristics before giving up");
+	}
+
+	// try {
+	// // try putting the dollar sign at the front...
+	//
+	// pr(" so we try to add the correct prefix...");
+	// Currency c = f.getCurrency();
+	// String firstfix = c.getSymbol() + s;
+	// n = f.parse(firstfix);
+	// pr(" which worked!");
+	// return n.doubleValue();
+	// } catch (ParseException e) {
+	// pr(" second parse failed: " + e);
+	// }
+	// maybe we should try something else like removing spaces between $ and
+	// number...
+
+	// pr("TJS parse of the input fell all the way through...");
+	// throw new NumberFormatException();
+
 	public double getValue() {
 		return value;
 	}

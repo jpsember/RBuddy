@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
+import static js.basic.Tools.*;
 import android.content.Context;
 import android.widget.LinearLayout;
 import js.json.*;
@@ -15,6 +15,7 @@ import android.view.ViewGroup.LayoutParams;
 public class Form implements IJSONEncoder {
 	private Form(Context context) {
 		this.context = context;
+		unimp("rename FormItem -> FormField?");
 	}
 
 	private Context context;
@@ -70,7 +71,7 @@ public class Form implements IJSONEncoder {
 		orderedItems.addAll(formItemsMap.values());
 		return orderedItems;
 	}
-	
+
 	public View getView() {
 		if (layout == null) {
 			LinearLayout layout = new LinearLayout(context);
@@ -84,6 +85,28 @@ public class Form implements IJSONEncoder {
 			}
 		}
 		return layout;
+	}
+
+	/**
+	 * Get value from a form field
+	 */
+	public String getValue(String fieldName) {
+		return getField(fieldName).getWidget().getValue();
+	}
+
+	/**
+	 * Write value to form field
+	 */
+	public void setValue(String fieldName, Object value) {
+		getField(fieldName).getWidget().setValue(value.toString());
+	}
+	
+	private FormItem getField(String fieldName) {
+		FormItem field = itemsMap.get(fieldName);
+		if (field == null)
+			throw new IllegalArgumentException("no field found with name "
+					+ fieldName);
+		return field;
 	}
 
 	private View layout;

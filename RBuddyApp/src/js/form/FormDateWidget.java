@@ -25,9 +25,15 @@ public class FormDateWidget extends FormTextWidget {
 			}
 		});
 	}
-	
+
 	@Override
-	public JSDate getDate() {
+	public void setValue(String value) {
+		JSDate date = JSDate.parse(value, true);
+		super.setValue(AndroidDate.formatUserDateFromJSDate(date));
+	}
+
+	@Override
+	public String getValue() {
 		String content = input.getText().toString();
 		JSDate ret = null;
 		try {
@@ -35,7 +41,7 @@ public class FormDateWidget extends FormTextWidget {
 		} catch (ParseException e) {
 			warning("problem parsing " + e);
 		}
-		return ret;
+		return ret.toString();
 	}
 
 	private void processClick() {
@@ -48,10 +54,7 @@ public class FormDateWidget extends FormTextWidget {
 				input.setText(AndroidDate.formatUserDateFromJSDate(date));
 			}
 		};
-		JSDate date = getDate();
-		if (date == null) {
-			date = JSDate.currentDate();
-		}
+		JSDate date = JSDate.parse(getValue(), true);
 		int[] ymd = AndroidDate.getJavaYearMonthDay(date);
 
 		new DatePickerDialog(this.formItem.owner().context(), dateListener,

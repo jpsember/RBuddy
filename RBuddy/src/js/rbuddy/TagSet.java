@@ -56,8 +56,21 @@ public class TagSet implements IJSONEncoder {
 	 * 
 	 * @param tags
 	 * @return
+	 * @deprecated just use toString()
 	 */
 	public String format() {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
+			String name = iter.next();
+			if (sb.length() != 0)
+				sb.append(", ");
+			sb.append(name);
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
 			String name = iter.next();
@@ -78,6 +91,20 @@ public class TagSet implements IJSONEncoder {
 	 *             present)
 	 */
 	public static TagSet parse(String s) {
+		return parse(s, null);
+	}
+
+	/**
+	 * Parse a string of comma- (or perhaps period-) delimited tags to a set
+	 * 
+	 * @param s
+	 * @param defaultValue
+	 *            if not null, and parsing fails, returns this value
+	 * @return
+	 * @throws IllegalArgumentException
+	 *             if parsing failed and no default value was given
+	 */
+	public static TagSet parse(String s, TagSet defaultValue) {
 		ArrayList<String> tagNames = new ArrayList();
 		int cursor = 0;
 		int lastDelimeter = -1;
@@ -120,7 +147,7 @@ public class TagSet implements IJSONEncoder {
 	 *            TagSetFile
 	 */
 	public void moveTagsToFrontOfQueue(TagSetFile tagSetFile) {
-//		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			pr("\n\nmoveTagsToFrontOfQueue for " + this);
 		Iterator<String> iter = this.iterator();

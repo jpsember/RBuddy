@@ -33,10 +33,10 @@ public class FormItem {
 			if (type == null)
 				throw new IllegalArgumentException(
 						"no type specified for form item");
-			setType(type,map);
+			setType(type, map);
 		}
 		setOrder(dblArg(map, "order", ORDER_UNDEFINED));
-		widget.setMinLines(intArg(map,"minlines",1));
+		widget.setMinLines(intArg(map, "minlines", 1));
 		widget.setHint(strArg(map, "hint", null));
 	}
 
@@ -53,19 +53,20 @@ public class FormItem {
 			return defaultValue;
 		return num.doubleValue();
 	}
+
 	static int intArg(Map map, String key, int defaultValue) {
-		return (int)Math.round(dblArg(map,key,defaultValue));
+		return (int) Math.round(dblArg(map, key, defaultValue));
 	}
 
 	private void setType(String type, Map args) {
 		if (type.equals("text")) {
-			widget = new FormTextWidget(this,args);
+			widget = new FormTextWidget(this, args);
 		} else if (type.equals("date")) {
-			widget = new FormDateWidget(this,args);
+			widget = new FormDateWidget(this, args);
 		} else if (type.equals("tagset")) {
-			widget = new FormTagSetWidget(this,args);
+			widget = new FormTagSetWidget(this, args);
 		} else if (type.equals("cost")) {
-			widget = new FormCostWidget(this,args);
+			widget = new FormCostWidget(this, args);
 		} else
 			throw new IllegalArgumentException("unknown form item type: "
 					+ type);
@@ -85,6 +86,13 @@ public class FormItem {
 
 	public double getOrder() {
 		return order;
+	}
+
+	public FormWidget getWidget() {
+		if (widget == null)
+			throw new IllegalStateException("no widget defined for field "
+					+ name);
+		return widget;
 	}
 
 	private String name;

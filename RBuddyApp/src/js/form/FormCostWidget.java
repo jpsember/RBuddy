@@ -5,7 +5,6 @@ import static js.basic.Tools.*;
 import java.util.Map;
 
 import js.rbuddy.Cost;
-
 import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
@@ -39,22 +38,37 @@ public class FormCostWidget extends FormTextWidget {
 		input.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (!hasFocus) {
-					parseUserInput();
+					setValue(input.getText().toString());
 				}
 			}
 		});
 
 	}
 
-	private void parseUserInput() {
-		Cost c = new Cost(0);
-		String s = input.getText().toString();
+//	private void parseUserInput() {
+//		setValue(input.getText().toString());
+////		
+////		Cost c = new Cost(0);
+////		String s = input.getText().toString();
+////		try {
+////			c = new Cost(s);
+////		} catch (NumberFormatException e) {
+////			warning("Failed to parse " + s + "; clearing");
+////		}
+////		input.setText(c.toString());
+//	}
+
+	private String parseCost(String string, String defaultIfParsingFails) {
 		try {
-			c = new Cost(s);
+			defaultIfParsingFails = new Cost(string).toString();
 		} catch (NumberFormatException e) {
-			warning("Failed to parse " + s + "; clearing");
+			warning("Failed to parse " + string);
 		}
-		input.setText(c.toString());
+		return defaultIfParsingFails;
 	}
 
+	@Override
+	public void setValue(String value) {
+		input.setText(parseCost(value,input.getText().toString()));
+	}
 }
