@@ -2,11 +2,8 @@ package js.rbuddy;
 
 import static js.basic.Tools.*;
 
-import java.io.IOException;
 import java.util.*;
 
-import js.basic.Files;
-import js.form.Form;
 import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
 import android.content.Intent;
@@ -18,10 +15,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 
 public class ReceiptListActivity extends Activity {
-	private static final boolean EXPERIMENT = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,28 +25,6 @@ public class ReceiptListActivity extends Activity {
 		RBuddyApp.prepare(this);
 
 		app = RBuddyApp.sharedInstance();
-
-		if (EXPERIMENT) {
-			warning("doing new experiments");
-			String jsonString = null;
-			try {
-				jsonString = Files.readTextFile(getResources().openRawResource(
-						R.raw.experimental_form));
-			} catch (IOException e) {
-				die(e);
-			}
-			Form form = Form.parse(this, jsonString);
-				{
-				ScrollView scrollView = new ScrollView(this);
-				scrollView.setLayoutParams(new LayoutParams(
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-				scrollView.addView(form.getView());
-				setContentView(scrollView, new LayoutParams(
-						LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
-			}
-			return;
-		}
 
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
@@ -63,8 +36,6 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume(); // Always call the superclass method first
-		if (EXPERIMENT)
-			return;
 		receiptListAdapter.notifyDataSetChanged();
 	}
 

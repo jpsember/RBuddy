@@ -79,7 +79,6 @@ public class JSONEncoder {
 	}
 
 	public void encode(Map map2) {
-		// final boolean db = true;
 		enterMap();
 
 		Map<String, Object> map = (Map<String, Object>) map2;
@@ -124,16 +123,10 @@ public class JSONEncoder {
 	
 	public void encode(double d) {
 		prepareForNextValue();
-		// final boolean db = true;
 		long intValue = Math.round(d);
 		if (d == intValue) {
 			sb.append(intValue);
-			if (db)
-				pr(" encoding double " + d + " to int " + intValue);
 		} else {
-			if (db)
-				pr(" encoding double " + d + " as double, since != intValue "
-						+ intValue);
 			sb.append(d);
 		}
 	}

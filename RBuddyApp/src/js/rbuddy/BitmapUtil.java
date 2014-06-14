@@ -24,7 +24,6 @@ public class BitmapUtil {
 
 	public static void writeJPEG(Bitmap bitmap, File destinationFile,
 			int quality) throws IOException {
-		// final boolean db = true;
 		FileOutputStream fOut = new FileOutputStream(destinationFile);
 		bitmap.compress(Bitmap.CompressFormat.JPEG, quality, fOut);
 		fOut.flush();
@@ -50,7 +49,6 @@ public class BitmapUtil {
 	 */
 	public static void orientAndScaleBitmap(File file, int scaledDimension,
 			boolean allowScalingUp) {
-//		final boolean db = true;
 		if (db)
 			pr("\n\norientAndScaleBitmap " + file);
 

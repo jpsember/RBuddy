@@ -3,7 +3,6 @@ package js.form;
 import static js.basic.Tools.*;
 
 import java.text.ParseException;
-import java.util.Map;
 
 import js.rbuddy.AndroidDate;
 import js.rbuddy.JSDate;
@@ -13,8 +12,8 @@ import android.view.View.OnClickListener;
 import android.widget.DatePicker;
 
 public class FormDateWidget extends FormTextWidget {
-	public FormDateWidget(FormItem item, Map<String, Object> arguments) {
-		super(item, arguments);
+	public FormDateWidget(FormField owner) {
+		super(owner );
 
 		input.setFocusable(false);
 
@@ -57,7 +56,7 @@ public class FormDateWidget extends FormTextWidget {
 		JSDate date = JSDate.parse(getValue(), true);
 		int[] ymd = AndroidDate.getJavaYearMonthDay(date);
 
-		new DatePickerDialog(this.formItem.owner().context(), dateListener,
+		new DatePickerDialog(getOwner().getOwner().context(), dateListener,
 				ymd[0], ymd[1], ymd[2]).show();
 	}
 

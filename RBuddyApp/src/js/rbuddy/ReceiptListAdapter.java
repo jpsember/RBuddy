@@ -19,8 +19,6 @@ public class ReceiptListAdapter extends ArrayAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		// final boolean db = true;
-
 		Receipt r = (Receipt) getItem(position);
 		if (db)
 			pr("constructing cell for receipt " + r + ", position " + position);

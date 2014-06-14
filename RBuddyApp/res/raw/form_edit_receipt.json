@@ -1,6 +1,24 @@
-{
-  "summary": { "order":10, "type":"text", "minlines":5,"autocompletion":"single"}
-  ,"cost": {"order":5,"type":"cost", "hint":"amount"}
-  ,"date":{"order":7,"type":"date"}
-  ,"tags":{"order":8,"type":"tagset"}
-}
+[
+  {
+    "id": "date",
+    "type": "date"
+  },
+  {
+    "id": "cost",
+    "type": "cost",
+    "hint": "amount"
+  },
+  {
+    "id": "tags",
+    "type": "tagset",
+    "minlines":2
+  },
+  {
+    "id": "summary",
+    "type": "text",
+    "minlines": 5,
+    "autocompletion": "single",
+    "hint": "who / where / why / etc."
+
+  }
+]

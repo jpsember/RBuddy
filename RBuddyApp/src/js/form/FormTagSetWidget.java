@@ -1,34 +1,29 @@
 package js.form;
 
-import static js.basic.Tools.*;
-
-import java.util.Map;
+//import static js.basic.Tools.*;
 
 import js.rbuddy.RBuddyApp;
 import js.rbuddy.TagSet;
 import js.rbuddy.TagSetFile;
-import android.text.InputType;
 import android.text.method.TextKeyListener;
-import android.view.View;
-import android.view.View.OnFocusChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.Tokenizer;
 
 public class FormTagSetWidget extends FormTextWidget {
-	public FormTagSetWidget(FormItem item, Map args) {
-		super(item, args);
-		unimp("use strings to move values around; get rid of TagSet specific methods");
+	public FormTagSetWidget(FormField owner) {
+		super(owner);
 	}
 
-	protected void constructInput(Map arguments) {
-		arguments.put("autocompletion", "multiple");
+	protected String getAutoCompletionType() {
+		return "multiple";
+	}
 
-		super.constructInput(arguments);
+	protected void constructInput() {
+		super.constructInput();
 
 		MultiAutoCompleteTextView textView = (MultiAutoCompleteTextView) input;
 
-		textView.setInputType(InputType.TYPE_CLASS_TEXT);
 		textView.setTokenizer(new OurTokenizer());
 		textView.setKeyListener(TextKeyListener.getInstance(true,
 				TextKeyListener.Capitalize.NONE));
@@ -39,45 +34,16 @@ public class FormTagSetWidget extends FormTextWidget {
 				android.R.layout.simple_dropdown_item_1line, tf.tagNamesList());
 		textView.setAdapter(adapter);
 
-		// When this view loses focus, immediately attempt to parse the
-		// user's tags
-		textView.setOnFocusChangeListener(new OnFocusChangeListener() {
-			public void onFocusChange(View v0, boolean hasFocus) {
-				if (!hasFocus)
-					setValue(input.getText().toString());
-//					parseTags();
-			}
-		});
+//		// When this view loses focus, immediately attempt to parse the
+//		// user's tags
+//		textView.setOnFocusChangeListener(new OnFocusChangeListener() {
+//			public void onFocusChange(View v0, boolean hasFocus) {
+//				if (!hasFocus)
+//					setValue(input.getText().toString());
+//			}
+//		});
 	}
 
-//	private void parseTags() {
-//		TagSet tagNameSet = null;
-//		String s = input.getText().toString();
-//		if (db)
-//			pr("  attempting to parse TagSet from " + s);
-//		try {
-//			tagNameSet = TagSet.parse(s);
-//		} catch (IllegalArgumentException e) {
-//			if (db)
-//				pr("Failed to parse " + s + ": " + e);
-//		}
-//
-//		// Update the view's contents with either a 'cleaned up'
-//		// version of what the user entered,
-//		// or (if it didn't parse correctly), the receipt's tag set.
-//		//
-//		// If the former occurs, note that we'll be parsing the
-//		// view's text into a TagSet and
-//		// storing it as the new receipt tag set when we call
-//		// updateReceiptWithWidgetValues() later.
-//		//
-//		if (tagNameSet != null) {
-//			setTagSet(tagNameSet);
-//		} else {
-//			// Set to existing set, to update the text field
-//			setTagSet(this.tagNameSet);
-//		}
-//	}
 
 	@Override
 	public String getValue() {
@@ -90,19 +56,6 @@ public class FormTagSetWidget extends FormTextWidget {
 		TagSet ts = TagSet.parse(value,new TagSet());
 		super.setValue(ts.toString());
 	}
-//	@Override
-//	public TagSet getTagSet() {
-//		return tagNameSet;
-//	}
-//
-//	@Override
-//	public void setTagSet(TagSet s) {
-//		tagNameSet = s;
-//		if (input != null)
-//			input.setText(tagNameSet.format());
-//	}
-
-//	private TagSet tagNameSet = new TagSet();
 
 	/**
 	 * Tokenizer that recognizes both periods and commas as delimeters

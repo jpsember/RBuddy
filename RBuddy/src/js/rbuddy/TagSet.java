@@ -147,7 +147,6 @@ public class TagSet implements IJSONEncoder {
 	 *            TagSetFile
 	 */
 	public void moveTagsToFrontOfQueue(TagSetFile tagSetFile) {
-		// final boolean db = true;
 		if (db)
 			pr("\n\nmoveTagsToFrontOfQueue for " + this);
 		Iterator<String> iter = this.iterator();

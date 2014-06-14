@@ -32,9 +32,6 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onResume() {
-		// final boolean db = true;
-		if (db)
-			pr("\n\nEditReceiptActivity.resume");
 		super.onResume();
 		readWidgetValuesFromReceipt();
 	}
@@ -146,7 +143,6 @@ public class EditReceiptActivity extends Activity {
 	// }
 
 	// private void dispatchTakePictureIntent() {
-	// // final boolean db = true;
 	// if (db)
 	// pr("dispatching an intent to take a picture\n");
 	//
@@ -174,13 +170,11 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void processPhotoResult(Intent intent) {
-		// final boolean db = true;
 		if (db)
 			pr("\n\nprocessPhotoResult intent " + intent);
 
 		File mainFile = null;
 		unimp("handle various problem situations in ways other than just 'die'");
-		// final boolean db = true;
 		if (db)
 			pr("processPhotoResult intent=" + intent);
 
@@ -244,7 +238,6 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void updateReceiptWithWidgetValues() {
-		// final boolean db = true;
 		if (db)
 			pr("\nupdateReceiptWithWidgetValues\n");
 

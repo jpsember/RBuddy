@@ -23,7 +23,6 @@ public class RBuddyApp {
 
 	public static void prepare(Context context) {
 		if (sharedInstance == null) {
-			// final boolean db = true;
 			if (!testing())
 				assertUIThread();
 			sharedInstance = new RBuddyApp(context);
@@ -60,7 +59,6 @@ public class RBuddyApp {
 		if (photoFile == null) {
 			assertUIThread();
 
-			// final boolean db = true;
 			if (db)
 				pr("preparePhotoFile; " + stackTrace(1, 1));
 

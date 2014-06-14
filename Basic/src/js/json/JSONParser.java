@@ -370,7 +370,6 @@ public class JSONParser {
 	}
 
 	private ArrayList readArray() {
-		// final boolean db = true;
 		if (db)
 			pr("\n\nreadArray");
 		ArrayList a = new ArrayList();

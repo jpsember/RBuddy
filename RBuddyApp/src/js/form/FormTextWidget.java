@@ -1,23 +1,25 @@
 package js.form;
 
-import java.util.Map;
-
 import android.text.InputType;
+import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
+//import static js.basic.Tools.*;
 
 public class FormTextWidget extends FormWidget {
-	public FormTextWidget(FormItem item, Map arguments) {
-		super(item);
+
+	public FormTextWidget(FormField owner) {
+		super(owner);
 
 		label = new TextView(context());
-		label.setText(formItem.getName());
+		label.setText(getLabel());
 		label.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
-		constructInput(arguments);
+		constructInput();
 		input.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
 		layout.addView(label);
@@ -25,10 +27,13 @@ public class FormTextWidget extends FormWidget {
 
 	}
 
-	protected void constructInput(Map arguments) {
+	protected String getAutoCompletionType() {
+		return getOwner().strArg("autocompletion", "none");
+	}
 
-		String autoCompletion = FormItem.strArg(arguments, "autocompletion",
-				"none");
+	protected void constructInput() {
+
+		String autoCompletion = getAutoCompletionType();
 		if (autoCompletion.equals("none")) {
 			input = new EditText(context());
 		} else if (autoCompletion.equals("single")) {
@@ -43,20 +48,24 @@ public class FormTextWidget extends FormWidget {
 
 		int inputType = InputType.TYPE_CLASS_TEXT
 				| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
-		if (FormItem.intArg(arguments, "minlines", 1) > 1) {
+		if (getOwner().intArg("minlines", 1) > 1) {
 			inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE;
 		}
 		input.setInputType(inputType);
-	}
+		String hint = getOwner().strArg("hint", "");
+		if (!hint.isEmpty())
+			input.setHint(hint);
+		input.setMinLines(getOwner().intArg("minlines", 1));
+		
+		// When this view loses focus, immediately attempt to parse (and
+		// possibly correct) the user's input
+		input.setOnFocusChangeListener(new OnFocusChangeListener() {
+			public void onFocusChange(View v0, boolean hasFocus) {
+				if (!hasFocus)
+					setValue(input.getText().toString());
+			}
+		});
 
-	@Override
-	public void setHint(String h) {
-		input.setHint(h);
-	}
-
-	@Override
-	public void setMinLines(int minLines) {
-		input.setMinLines(minLines);
 	}
 
 	@Override
@@ -72,7 +81,7 @@ public class FormTextWidget extends FormWidget {
 	public String getValue() {
 		return input.getText().toString();
 	}
-	
+
 	protected TextView label;
 	protected EditText input;
 }

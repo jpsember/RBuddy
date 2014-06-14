@@ -41,9 +41,6 @@ public class StringUtil {
 	 * @return
 	 */
 	public static StringBuilder encode(String s, StringBuilder sb) {
-		// final boolean db = true;
-		if (db)
-			pr("\n\nStringUtil.encode '" + s + "'");
 		if (sb == null)
 			sb = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {
@@ -65,8 +62,6 @@ public class StringUtil {
 				sb.append(c);
 				break;
 			}
-			if (db)
-				pr("Processed character " + (int) c + ", buffer now:\n" + sb);
 		}
 		return sb;
 	}
@@ -76,9 +71,6 @@ public class StringUtil {
 	}
 
 	public static StringBuilder decode(CharSequence s, StringBuilder sb) {
-		// final boolean db = true;
-		if (db)
-			pr("\n\nStringUtil.decode '" + s + "'");
 		if (sb == null)
 			sb = new StringBuilder();
 		int i = 0;

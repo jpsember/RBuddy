@@ -4,23 +4,22 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
+//import static js.basic.Tools.*;
 
 abstract class FormWidget {
 
 	public static final LayoutParams LAYOUT_PARMS = new LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
-	public FormWidget(FormItem item) {
-		this.formItem = item;
+	public FormWidget(FormField owner) {
+		this.owner = owner;
 		this.layout = new LinearLayout(context());
 		layout.setLayoutParams(LAYOUT_PARMS);
 		layout.setOrientation(LinearLayout.VERTICAL);
-
-		displayText = item.getName();
 	}
 
 	public Context context() {
-		return formItem.owner().context();
+		return getOwner().getOwner().context();
 	}
 
 	/**
@@ -46,38 +45,34 @@ abstract class FormWidget {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * sets the hint for the widget, method should be overriden in sub-class
-	 */
-	public void setHint(String hint) {
-	}
-
-	/**
-	 * sets the minimum number of lines (i.e. for TextView)
-	 */
-	public void setMinLines(int minLines) {
-	}
-
 //	/**
-//	 * Parse JSDate
-//	 * 
-//	 * @return JSDate, or null if parsing failed
+//	 * sets the hint for the widget, method should be overriden in sub-class
 //	 */
-//	public JSDate getDate() {
-//		throw new UnsupportedOperationException();
-//	}
-
-//	public TagSet getTagSet() {
-//		throw new UnsupportedOperationException();
+//	public void setHint(String hint) {
 //	}
 //
-//	public void setTagSet(TagSet s) {
-//		throw new UnsupportedOperationException();
+//	/**
+//	 * sets the minimum number of lines (i.e. for TextView)
+//	 */
+//	public void setMinLines(int minLines) {
 //	}
 
-	protected FormItem formItem;
+	protected FormField getOwner() {
+		return owner;
+	}
+	
+	public String getLabel() {
+		return owner.strArg("label", owner.getName());
+	}
+	
+//	private String widgetLabel;
+//	public String getLabel() {
+//		return widgetLabel;
+//	}
+	
+	private FormField owner;
 	protected View view;
 	protected String _property;
-	protected String displayText;
+//	protected String displayText;
 	protected LinearLayout layout;
 }

@@ -177,7 +177,6 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void readAllReceipts() {
-		// final boolean db = true;
 		if (db)
 			pr("\n\nSimpleReceiptFile.readAllReceipts\n");
 		ASSERT(map.isEmpty());
