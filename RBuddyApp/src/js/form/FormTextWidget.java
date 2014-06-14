@@ -19,9 +19,7 @@ public class FormTextWidget extends FormWidget {
 		input.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
 		constructLabel();
-		if (label != null)
-			layout.addView(label);
-		layout.addView(input);
+		getWidgetContainer().addView(input);
 	}
 
 	protected String getAutoCompletionType() {

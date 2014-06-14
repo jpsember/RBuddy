@@ -3,7 +3,6 @@ package js.form;
 import js.rbuddy.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import android.widget.TextView;
 //import static js.basic.Tools.*;
 
 public class FormImageWidget extends FormWidget {
@@ -20,9 +19,7 @@ public class FormImageWidget extends FormWidget {
 		updatePhotoView();
 
 		constructLabel();
-		if (label != null)
-			layout.addView(label);
-		layout.addView(imageView);
+		getWidgetContainer().addView(imageView);
 	}
 
 	private void updatePhotoView() {
@@ -46,6 +43,5 @@ public class FormImageWidget extends FormWidget {
 
 	private FormDrawableProvider drawableProvider;
 	private RBuddyApp app;
-	private TextView label;
 	private ImageView imageView;
 }

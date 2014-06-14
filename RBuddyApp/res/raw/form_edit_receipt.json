@@ -6,22 +6,25 @@
   {
     "id": "cost",
     "type": "cost",
-    "label": "---Amount--- (\"label\" attribute)",
-    "hint": "amount"
+    "label": "Amount",
+    "aux": "checkbox"
   },
   {
     "id": "receipt",
     "type": "button",
     "button_label": "Photo",
+    "aux": "empty",
     "button_icon": "photo"
   },
   {
     "id": "tags",
+    "label": "Tags",
     "type": "tagset",
     "minlines": 2
   },
   {
     "id": "summary",
+    "label": "@summary",
     "type": "text",
     "minlines": 5,
     "autocompletion": "single",

@@ -63,7 +63,7 @@ public class Form implements IJSONEncoder {
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
 			for (FormField fi : fieldsList) {
-				layout.addView(fi.getWidget().getView());
+				layout.addView(fi.getWidget().getOuterContainer());
 			}
 		}
 		return layout;

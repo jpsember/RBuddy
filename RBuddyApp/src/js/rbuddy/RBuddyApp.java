@@ -150,7 +150,7 @@ public class RBuddyApp {
 			}
 			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
 					+ strTime + " -------------\n\n\n");
-			
+
 			addResourceMappings();
 		}
 		JSDate.setFactory(AndroidDate.androidDateFactory);
@@ -161,7 +161,8 @@ public class RBuddyApp {
 	 * refer to them by name (for example, we want to be able to refer to them
 	 * within JSON strings).
 	 * 
-	 * There are some facilities to do this mapping using reflection, but apparently it's really slow.
+	 * There are some facilities to do this mapping using reflection, but
+	 * apparently it's really slow.
 	 * 
 	 * @param key
 	 * @param resourceId
@@ -171,11 +172,12 @@ public class RBuddyApp {
 	}
 
 	/**
-	 * Get the resource id associated with a resource name (added earlier).  
+	 * Get the resource id associated with a resource name (added earlier).
 	 * 
 	 * @param key
 	 * @return resource id
-	 * @throws IllegalArgumentException if no mapping exists 
+	 * @throws IllegalArgumentException
+	 *             if no mapping exists
 	 */
 	public int getResource(String key) {
 		Integer id = resourceMap.get(key);
@@ -184,12 +186,36 @@ public class RBuddyApp {
 					"no resource id mapping found for " + key);
 		return id.intValue();
 	}
-	
+
 	private void addResourceMappings() {
 		addResource("photo", android.R.drawable.ic_menu_gallery);
 		addResource("camera", android.R.drawable.ic_menu_camera);
 	}
-	
+
+	public String getStringResource(String stringName) {
+		String packageName = context.getPackageName();
+		int resId = context.getResources().getIdentifier(stringName, "string",
+				packageName);
+		if (db)
+			pr("getIdentifier string='" + stringName + "' package='"
+					+ packageName + "' yields resId " + resId);
+		String str = null;
+		if (resId != 0)
+			str = context.getString(resId);
+		if (db)
+			pr(" string for id " + resId + " = " + str);
+		if (str == null)
+			throw new IllegalArgumentException("string name " + stringName
+					+ "  has resource id " + resId + ", no string found");
+		return str;
+	}
+
+	public String applyStringSubstitution(String s) {
+		if (s.startsWith("@")) {
+			s = getStringResource(s.substring(1));
+		}
+		return s;
+	}
 
 	private Map<String, Integer> resourceMap = new HashMap();
 	private SharedPreferences preferences;

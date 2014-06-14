@@ -1,14 +1,12 @@
 package js.form;
 
+//import static js.basic.Tools.*;
 import js.rbuddy.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
-//import static js.basic.Tools.*;
 
 public class FormButtonWidget extends FormWidget {
 
@@ -46,15 +44,8 @@ public class FormButtonWidget extends FormWidget {
 				hasLabel = true;
 			}
 		}
-
-		button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT));
-
 		constructLabel();
-		if (label != null)
-			layout.addView(label);
-
-		layout.addView(button);
+		getWidgetContainer().addView(button);
 	}
 
 	@Override
@@ -66,6 +57,5 @@ public class FormButtonWidget extends FormWidget {
 	protected boolean hasIcon;
 	protected boolean hasLabel;
 
-	private TextView label;
 	private View button;
 }
