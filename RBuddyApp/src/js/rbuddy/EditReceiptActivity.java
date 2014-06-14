@@ -2,7 +2,6 @@ package js.rbuddy;
 
 import static js.basic.Tools.*;
 
-import java.io.File;
 import java.io.IOException;
 
 import js.basic.Files;
@@ -29,8 +28,8 @@ import android.view.View.OnClickListener;
 
 public class EditReceiptActivity extends Activity {
 
-	// Identifiers for the intents that we may spawn
-	private static final int REQUEST_IMAGE_CAPTURE = 1;
+//	// Identifiers for the intents that we may spawn
+//	private static final int REQUEST_IMAGE_CAPTURE = 1;
 
 	@Override
 	public void onResume() {
@@ -76,12 +75,12 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-			processPhotoResult(data);
-		}
-	}
+//	@Override
+//	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+//			processPhotoResult(data);
+//		}
+//	}
 
 	private void layoutElements() {
 		String jsonString = null;
@@ -95,7 +94,7 @@ public class EditReceiptActivity extends Activity {
 		this.form.getField("receipt").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				processReceiptButtonPress();
+				processPhotoButtonPress();
 			}
 		});
 
@@ -104,15 +103,14 @@ public class EditReceiptActivity extends Activity {
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
 
-		unimp("add photo widget");
-
 		setContentView(scrollView);
 	}
 
-	private void processReceiptButtonPress() {
-		final boolean db = true;
-		if (db)
-			pr("Must now process Receipt Button Press");
+	private void processPhotoButtonPress() {
+		// Start the edit receipt activity
+		Intent intent = new Intent(getApplicationContext(), PhotoActivity.class);
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, receipt.getId());
+		startActivity(intent);
 	}
 
 	// private View addPhotoWidget() {
@@ -156,76 +154,53 @@ public class EditReceiptActivity extends Activity {
 	//
 	// }
 
-	// private void dispatchTakePictureIntent() {
-	// if (db)
-	// pr("dispatching an intent to take a picture\n");
-	//
-	// Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-	//
-	// if (intent.resolveActivity(getPackageManager()) == null) {
-	// if (db)
-	// pr(" could not resolve activity");
-	// return;
-	// }
-	//
-	// File workFile = getWorkPhotoFile();
-	// workFile.delete();
-	//
-	// Uri uri = Uri.fromFile(workFile);
-	// if (db)
-	// pr("Uri.fromFile(workFile)=" + uri);
-	// intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-	//
-	// startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-	// }
+//	private File getWorkPhotoFile() {
+//		return BitmapUtil.constructExternalImageFile("RBuddy_work");
+//	}
 
-	private File getWorkPhotoFile() {
-		return BitmapUtil.constructExternalImageFile("RBuddy_work");
-	}
-
-	private void processPhotoResult(Intent intent) {
-		if (db)
-			pr("\n\nprocessPhotoResult intent " + intent);
-
-		File mainFile = null;
-		unimp("handle various problem situations in ways other than just 'die'");
-		if (db)
-			pr("processPhotoResult intent=" + intent);
-
-		if (intent != null) {
-			warning("did not expect intent to be non-null: " + intent);
-		}
-
-		File workFile = getWorkPhotoFile();
-		if (db)
-			pr(" pathOfTakenPhoto " + workFile);
-		if (!workFile.isFile()) {
-			die("no work file found: " + workFile);
-		}
-
-		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
-
-		mainFile = app.getPhotoFile().getMainFileFor(receipt.getId());
-		if (db)
-			pr("receipt id " + receipt.getId()
-					+ "  copying scaled/rotated file " + workFile
-					+ " to mainFile " + mainFile);
-
-		try {
-			Files.copy(workFile, mainFile);
-		} catch (IOException e) {
-			die(e);
-		}
-
-		if (db)
-			pr("created main file " + mainFile);
-
-		unimp("unpdate photo view");
-		// if (db)
-		// pr("updating photo view");
-		// updatePhotoView();
-
-	}
+//	private void processPhotoResult(Intent intent) {
+//		if (db)
+//			pr("\n\nprocessPhotoResult intent " + intent);
+//
+//		File mainFile = null;
+//		unimp("handle various problem situations in ways other than just 'die'");
+//		if (db)
+//			pr("processPhotoResult intent=" + intent);
+//
+//		if (intent != null) {
+//			warning("did not expect intent to be non-null: " + intent);
+//		}
+//
+//		File workFile = getWorkPhotoFile();
+//		if (db)
+//			pr(" pathOfTakenPhoto " + workFile);
+//		if (!workFile.isFile()) {
+//			die("no work file found: " + workFile);
+//		}
+//
+//		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
+//
+//		mainFile = app.getPhotoFile().getMainFileFor(receipt.getId());
+//		if (db)
+//			pr("receipt id " + receipt.getId()
+//					+ "  copying scaled/rotated file " + workFile
+//					+ " to mainFile " + mainFile);
+//
+//		try {
+//			Files.copy(workFile, mainFile);
+//		} catch (IOException e) {
+//			die(e);
+//		}
+//
+//		if (db)
+//			pr("created main file " + mainFile);
+//
+//		unimp("unpdate photo view");
+//		// if (db)
+//		// pr("updating photo view");
+//		// updatePhotoView();
+//
+//	}
 
 	// private void updatePhotoView() {
 	// if (photoView == null)

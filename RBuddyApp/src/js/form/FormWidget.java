@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import static js.basic.Tools.*;
 
 abstract class FormWidget {
@@ -55,6 +56,15 @@ abstract class FormWidget {
 		return owner.strArg("label", owner.getId());
 	}
 
+	protected void constructLabel() {
+		String labelText = getLabel();
+		if (!labelText.isEmpty()) {
+		label = new TextView(context());
+		label.setText(labelText);
+		label.setLayoutParams(FormWidget.LAYOUT_PARMS);
+		}
+	}
+	
 	public void setOnClickListener(OnClickListener listener) {
 		throw new UnsupportedOperationException();
 	}
@@ -62,4 +72,5 @@ abstract class FormWidget {
 	private FormField owner;
 	protected View view;
 	protected LinearLayout layout;
+	protected TextView label;
 }

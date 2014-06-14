@@ -7,7 +7,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
-import android.widget.TextView;
+
 //import static js.basic.Tools.*;
 
 public class FormTextWidget extends FormWidget {
@@ -15,16 +15,13 @@ public class FormTextWidget extends FormWidget {
 	public FormTextWidget(FormField owner) {
 		super(owner);
 
-		label = new TextView(context());
-		label.setText(getLabel());
-		label.setLayoutParams(FormWidget.LAYOUT_PARMS);
-
 		constructInput();
 		input.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
-		layout.addView(label);
+		constructLabel();
+		if (label != null)
+			layout.addView(label);
 		layout.addView(input);
-
 	}
 
 	protected String getAutoCompletionType() {
@@ -56,7 +53,7 @@ public class FormTextWidget extends FormWidget {
 		if (!hint.isEmpty())
 			input.setHint(hint);
 		input.setMinLines(getOwner().intArg("minlines", 1));
-		
+
 		// When this view loses focus, immediately attempt to parse (and
 		// possibly correct) the user's input
 		input.setOnFocusChangeListener(new OnFocusChangeListener() {
@@ -82,6 +79,5 @@ public class FormTextWidget extends FormWidget {
 		return input.getText().toString();
 	}
 
-	private TextView label;
 	protected EditText input;
 }

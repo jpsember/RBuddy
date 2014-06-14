@@ -34,6 +34,8 @@ public class FormField {
 				widget = new FormCostWidget(this);
 			} else if (type.equals("imagebutton")) {
 				widget = new FormButtonWidget(this);
+			} else if (type.equals("imageview")) {
+				widget = new FormImageWidget(this);
 			} else
 				throw new IllegalArgumentException("unsupported field type "
 						+ type);

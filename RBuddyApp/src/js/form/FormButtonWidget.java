@@ -10,10 +10,6 @@ public class FormButtonWidget extends FormWidget {
 	public FormButtonWidget(FormField owner) {
 		super(owner);
 
-		label = new TextView(context());
-		label.setText(getLabel());
-		label.setLayoutParams(FormWidget.LAYOUT_PARMS);
-
 		button = new ImageButton(context());
 		button.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
@@ -22,7 +18,10 @@ public class FormButtonWidget extends FormWidget {
 		
 		button.setImageResource(android.R.drawable.ic_menu_gallery);
 
-		layout.addView(label);
+		constructLabel();
+		if (label != null)
+			layout.addView(label);
+
 		layout.addView(button);
 	}
 
