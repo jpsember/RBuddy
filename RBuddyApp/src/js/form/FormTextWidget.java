@@ -82,6 +82,6 @@ public class FormTextWidget extends FormWidget {
 		return input.getText().toString();
 	}
 
-	protected TextView label;
+	private TextView label;
 	protected EditText input;
 }

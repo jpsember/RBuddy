@@ -18,12 +18,14 @@ import android.os.Bundle;
 //import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 //import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 //import android.widget.Button;
 //import android.widget.ImageView;
 //import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.view.View.OnClickListener;
 
 public class EditReceiptActivity extends Activity {
 
@@ -90,6 +92,12 @@ public class EditReceiptActivity extends Activity {
 			die(e);
 		}
 		this.form = Form.parse(this, jsonString);
+		this.form.getField("receipt").setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				processReceiptButtonPress();
+			}
+		});
 
 		ScrollView scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -99,6 +107,12 @@ public class EditReceiptActivity extends Activity {
 		unimp("add photo widget");
 
 		setContentView(scrollView);
+	}
+
+	private void processReceiptButtonPress() {
+		final boolean db = true;
+		if (db)
+			pr("Must now process Receipt Button Press");
 	}
 
 	// private View addPhotoWidget() {
@@ -233,7 +247,7 @@ public class EditReceiptActivity extends Activity {
 	private void readWidgetValuesFromReceipt() {
 		form.setValue("summary", receipt.getSummary());
 		form.setValue("cost", receipt.getCost());
-		form.setValue("date",receipt.getDate());
+		form.setValue("date", receipt.getDate());
 		form.setValue("tags", receipt.getTags());
 	}
 

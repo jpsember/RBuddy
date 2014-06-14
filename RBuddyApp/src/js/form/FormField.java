@@ -2,6 +2,7 @@ package js.form;
 
 import java.util.Map;
 
+import android.view.View.OnClickListener;
 
 public class FormField {
 
@@ -13,7 +14,7 @@ public class FormField {
 	}
 
 	public String getId() {
-		return strArg("id",null);
+		return strArg("id", null);
 	}
 
 	public Form getOwner() {
@@ -31,6 +32,8 @@ public class FormField {
 				widget = new FormTagSetWidget(this);
 			} else if (type.equals("cost")) {
 				widget = new FormCostWidget(this);
+			} else if (type.equals("imagebutton")) {
+				widget = new FormButtonWidget(this);
 			} else
 				throw new IllegalArgumentException("unsupported field type "
 						+ type);
@@ -65,11 +68,16 @@ public class FormField {
 		String val = (String) attributes.get(key);
 		if (val == null)
 			val = defaultValue;
-		dieIfNull(val,key);
+		dieIfNull(val, key);
 		return val;
+	}
+
+	public void setOnClickListener(OnClickListener onClickListener) {
+		getWidget().setOnClickListener(onClickListener);
 	}
 
 	private Map attributes;
 	private FormWidget widget;
 	private Form owner;
+
 }

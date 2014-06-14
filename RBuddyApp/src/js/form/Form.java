@@ -82,7 +82,7 @@ public class Form implements IJSONEncoder {
 		getField(fieldName).getWidget().setValue(value.toString());
 	}
 
-	private FormField getField(String fieldName) {
+	public FormField getField(String fieldName) {
 		FormField field = itemsMap.get(fieldName);
 		if (field == null)
 			throw new IllegalArgumentException("no field found with name "

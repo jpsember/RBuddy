@@ -2,9 +2,9 @@ package js.form;
 
 import android.content.Context;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
-
 import static js.basic.Tools.*;
 
 abstract class FormWidget {
@@ -55,6 +55,10 @@ abstract class FormWidget {
 		return owner.strArg("label", owner.getId());
 	}
 
+	public void setOnClickListener(OnClickListener listener) {
+		throw new UnsupportedOperationException();
+	}
+	
 	private FormField owner;
 	protected View view;
 	protected LinearLayout layout;

@@ -6,7 +6,11 @@
   {
     "id": "cost",
     "type": "cost",
+    "label":"---Amount--- (\"label\" attribute)",
     "hint": "amount"
+  },
+  { "id": "receipt",
+  "type" : "imagebutton"
   },
   {
     "id": "tags",
