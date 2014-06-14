@@ -27,10 +27,10 @@ public class JSONParser {
 	}
 
 	public JSONParser(String string) {
-		final boolean db = false;
-		if (db) pr("JSONParser constructed for:\n "+string);
+		if (db)
+			pr("JSONParser constructed for:\n " + string);
 		setTrace(db);
-		
+
 		try {
 			InputStream stream = new ByteArrayInputStream(
 					string.getBytes("UTF-8"));
@@ -57,7 +57,8 @@ public class JSONParser {
 
 	public void setTrace(boolean t) {
 		trace = t;
-		if (trace) warning("enabling trace, called from "+stackTrace(1,1));
+		if (trace)
+			warning("enabling trace, called from " + stackTrace(1, 1));
 	}
 
 	/**
@@ -191,12 +192,12 @@ public class JSONParser {
 		sb.setLength(0);
 		read('"', true);
 		while (true) {
-			int c = read2(false);
+			int c = readCharacter(false);
 			switch (c) {
 			case '"':
 				return sb.toString();
 			case '\\': {
-				c = read2(false);
+				c = readCharacter(false);
 				switch (c) {
 				case '"':
 				case '/':
@@ -232,7 +233,7 @@ public class JSONParser {
 	}
 
 	private int parseDigit() {
-		char c = (char) read2(false);
+		char c = (char) readCharacter(false);
 		if (c >= 'A' && c <= 'F') {
 			return c - 'A' + 10;
 		}
@@ -334,7 +335,7 @@ public class JSONParser {
 				throw new JSONException("unexpected input");
 			}
 			sb.append((char) c);
-			read2(false);
+			readCharacter(false);
 		}
 		double value;
 		try {
@@ -342,7 +343,8 @@ public class JSONParser {
 		} catch (NumberFormatException e) {
 			throw new JSONException(e);
 		}
-		if (db) pr(" returning number: "+value);
+		if (db)
+			pr(" returning number: " + value);
 		return value;
 	}
 
@@ -362,7 +364,7 @@ public class JSONParser {
 				if (peek(true) != ',') {
 					break;
 				}
-				read2(false);
+				readCharacter(false);
 			}
 		}
 		read('}', true);
@@ -385,7 +387,7 @@ public class JSONParser {
 
 				if (peek(true) != ',')
 					break;
-				read2(false);
+				readCharacter(false);
 			}
 		}
 		read(']', true);
@@ -412,20 +414,21 @@ public class JSONParser {
 	}
 
 	private int peek(boolean ignoreWhitespace) {
-		final boolean db = false;
-		if (db)
-			pr("peek(ignore=" + ignoreWhitespace + ", peek=" + peek + ")");
-		
-		// If we are ignoring whitespace, throw out peek value if it's whitespace
-		if (ignoreWhitespace && peek <= ' ')
-			peek = -1;
-		
+		// If we are ignoring whitespace,
+		// and peek value matches white space, consume it
+		if (ignoreWhitespace) {
+			if (peek <= ' ')
+				peek = -1;
+			else if (peek == '/') {
+				// Peek value matches start of a comment, so read one
+				readComment();
+			}
+		}
+
 		if (peek < 0) {
 			try {
 				while (true) {
 					peek = stream.read();
-					if (db)
-						pr(" stream.read() returned " + peek);
 					if (trace) {
 						String s = (peek < 0) ? "EOF" : Character
 								.toString((char) peek);
@@ -436,12 +439,23 @@ public class JSONParser {
 							traceBuffer.replace(0, 4, "...");
 						}
 						traceBuffer.append(s);
-						System.out.println("JSON: "+traceBuffer+"\n"+stackTrace(1,1));
-						if (newline)traceBuffer.setLength(0);
+						System.out.println("JSON: " + traceBuffer + "\n"
+								+ stackTrace(1, 1));
+						if (newline)
+							traceBuffer.setLength(0);
 					}
-
-					if (!ignoreWhitespace || peek > ' ' || peek < 0)
+					if (!ignoreWhitespace)
 						break;
+					if (peek < 0)
+						break;
+					if (ignoreWhitespace) {
+						if (peek == '/') {
+							readComment();
+							continue;
+						} else if (peek <= ' ')
+							continue;
+					}
+					break;
 				}
 			} catch (IOException e) {
 				throw new JSONException(e);
@@ -450,18 +464,32 @@ public class JSONParser {
 		return peek;
 	}
 
-	private int read2(boolean ignoreWhitespace) {
-		int p = peek(ignoreWhitespace);
+	private void readComment() {
+		int c = readCharacter(false);
+		int c2 = readCharacter(false);
+		if (c != '/' || c2 != '/')
+			throw new JSONException("malformed comment: c=" + (char) c + " c2="
+					+ (char) c2);
+		while (true) {
+			c = peek(false);
+			if (c < 0)
+				break;
+			peek = -1;
+			if (c == '\n')
+				break;
+		}
+	}
+
+	private int readCharacter(boolean skipWhitespace) {
+		int p = peek(skipWhitespace);
 		if (p < 0)
 			throw new JSONException("end of input");
 		peek = -1;
-		if (db)
-			pr("Read char: " + (char) p);
 		return p;
 	}
 
 	private void read(int expectedChar, boolean ignoreWhitespace) {
-		int c = read2(ignoreWhitespace);
+		int c = readCharacter(ignoreWhitespace);
 		if (c != expectedChar)
 			throw new JSONException("unexpected input");
 	}
@@ -476,7 +504,7 @@ public class JSONParser {
 	private InputStream stream;
 	private boolean trace;
 	private StringBuilder traceBuffer = new StringBuilder();
-	
+
 	private Object currentContainer;
 	private Map currentMap; // null if current container is not a map
 	private Object valueForLastKey;

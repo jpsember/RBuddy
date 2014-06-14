@@ -24,6 +24,7 @@ public class JSONTest extends js.testUtils.MyTest {
 
 	private JSONParser json(String s) {
 		json = new JSONParser(s);
+
 		return json;
 	}
 
@@ -107,7 +108,7 @@ public class JSONTest extends js.testUtils.MyTest {
 	@Test
 	public void testReadMapAsSingleObject() {
 		String s = "{'description':{'type':'text','hint':'enter something here'}}";
-		s = s.replace('\'', '"');
+		s = swapQuotes(s);
 		json(s);
 		Map map = (Map) json.next();
 		assertTrue(map.containsKey("description"));
@@ -190,7 +191,6 @@ public class JSONTest extends js.testUtils.MyTest {
 				"{'trailing number':5}",//
 				"{  'favorite song': { '_skip_order': 3, 'type': 'text','hint': 'name of song','zminlines': 5 },'wow':12 } ",//
 		};
-//		final boolean db = true;
 
 		for (int i = 0; i < script.length; i++) {
 			String s = swapQuotes(script[i]);
@@ -215,6 +215,35 @@ public class JSONTest extends js.testUtils.MyTest {
 			newEnc().encode(obj2);
 			String s3 = enc.toString();
 			assertStringsMatch(s2, s3);
+		}
+	}
+
+	@Test
+	public void testComments() {
+
+		String script[] = {//
+				"{'hey':// this is a comment\n  // this is also a comment\n 42}",//
+				"{'hey':42}",//
+				"[42,15// start of comment\n//Another comment immediately\n    //Another comment after spaces\n,16]",//
+				"[42,15, 16]",//
+				"[42,15// zzz\n//zzz\n//zzz\n,16]",
+				"[42,15,16]",//
+		};
+
+		for (int i = 0; i < script.length; i += 2) {
+			String s = swapQuotes(script[i + 0]);
+			Object obj = json(s).next();
+
+			String s2 = swapQuotes(script[i + 1]);
+			Object obj2 = json(s2).next();
+
+			newEnc().encode(obj);
+			String enc1 = enc.toString();
+
+			newEnc().encode(obj2);
+			String enc2 = enc.toString();
+
+			assertStringsMatch(enc1, enc2);
 		}
 	}
 
