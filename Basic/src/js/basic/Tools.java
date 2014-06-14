@@ -124,14 +124,14 @@ public final class Tools {
 	 * Throw a RuntimeException
 	 */
 	public static void die() {
-		die("(no reason given)");
+		die(null,null);
 	}
 
 	/**
 	 * Throw a RuntimeException with a particular message
 	 */
 	public static void die(String message) {
-		throw new RuntimeException("Failing; " + message);
+		die(message,null);
 	}
 
 	/**
@@ -140,9 +140,18 @@ public final class Tools {
 	 * @param t
 	 */
 	public static void die(Throwable t) {
-		die("(Throwable:" + t.getMessage() + ")");
+		die(null,t);
 	}
 
+	public static void die(String message, Throwable t) {
+		if (message == null) 
+			message = "(no reason given)";
+		message = "Dying; "+message;
+		if (t == null)
+			throw new RuntimeException(message);
+		throw new RuntimeException(message,t);
+	}
+	
 	/**
 	 * Print message that code is unimplemented at current line; prints only the
 	 * first time through

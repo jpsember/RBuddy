@@ -1,11 +1,12 @@
 package js.rbuddy;
 
 import java.io.File;
-//import java.util.ArrayList;
-
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
+import js.basic.Files;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -109,6 +110,17 @@ public class RBuddyApp {
 		return this.context;
 	}
 
+	public String readTextFileResource(int resourceId) {
+		String str = null;
+		try {
+			str = Files.readTextFile(context.getResources().openRawResource(
+					resourceId));
+		} catch (Throwable e) {
+			die("problem reading resource #" + resourceId, e);
+		}
+		return str;
+	}
+
 	private RBuddyApp(Context context) {
 		this.context = context;
 		if (context instanceof Activity) {
@@ -138,10 +150,48 @@ public class RBuddyApp {
 			}
 			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
 					+ strTime + " -------------\n\n\n");
+			
+			addResourceMappings();
 		}
 		JSDate.setFactory(AndroidDate.androidDateFactory);
 	}
 
+	/**
+	 * Store the resource id associated with the resource's name, so we can
+	 * refer to them by name (for example, we want to be able to refer to them
+	 * within JSON strings).
+	 * 
+	 * There are some facilities to do this mapping using reflection, but apparently it's really slow.
+	 * 
+	 * @param key
+	 * @param resourceId
+	 */
+	public void addResource(String key, int resourceId) {
+		resourceMap.put(key, resourceId);
+	}
+
+	/**
+	 * Get the resource id associated with a resource name (added earlier).  
+	 * 
+	 * @param key
+	 * @return resource id
+	 * @throws IllegalArgumentException if no mapping exists 
+	 */
+	public int getResource(String key) {
+		Integer id = resourceMap.get(key);
+		if (id == null)
+			throw new IllegalArgumentException(
+					"no resource id mapping found for " + key);
+		return id.intValue();
+	}
+	
+	private void addResourceMappings() {
+		addResource("photo", android.R.drawable.ic_menu_gallery);
+		addResource("camera", android.R.drawable.ic_menu_camera);
+	}
+	
+
+	private Map<String, Integer> resourceMap = new HashMap();
 	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
 	private Context context;

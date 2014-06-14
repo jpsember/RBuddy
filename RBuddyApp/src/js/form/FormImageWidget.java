@@ -1,10 +1,10 @@
 package js.form;
 
-import js.rbuddy.R;
 import js.rbuddy.RBuddyApp;
+import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import static js.basic.Tools.*;
+//import static js.basic.Tools.*;
 
 public class FormImageWidget extends FormWidget {
 
@@ -12,8 +12,6 @@ public class FormImageWidget extends FormWidget {
 		super(owner);
 
 		app = RBuddyApp.sharedInstance();
-
-		unimp("need some way to specify which image is to be displayed");
 
 		imageView = new ImageView(owner.getOwner().context());
 		imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -24,16 +22,29 @@ public class FormImageWidget extends FormWidget {
 		constructLabel();
 		if (label != null)
 			layout.addView(label);
-		layout.addView(imageView); 
+		layout.addView(imageView);
 	}
 
 	private void updatePhotoView() {
-		if (imageView == null)
-			return;
-		imageView.setImageDrawable(app.context().getResources()
-				.getDrawable(R.drawable.missingphoto_landscape));
+		Drawable d = null;
+		if (drawableProvider != null)
+			d = drawableProvider.getDrawable();
+		if (d == null) {
+			d = app.context().getResources()
+					.getDrawable(android.R.drawable.ic_menu_gallery);
+		}
+		imageView.setImageDrawable(d);
 	}
 
+	@Override
+	public void setDrawableProvider(FormDrawableProvider p) {
+		if (drawableProvider != p) {
+			this.drawableProvider = p;
+			updatePhotoView();
+		}
+	}
+
+	private FormDrawableProvider drawableProvider;
 	private RBuddyApp app;
 	private TextView label;
 	private ImageView imageView;

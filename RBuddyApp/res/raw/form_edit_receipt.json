@@ -6,16 +6,19 @@
   {
     "id": "cost",
     "type": "cost",
-    "label":"---Amount--- (\"label\" attribute)",
+    "label": "---Amount--- (\"label\" attribute)",
     "hint": "amount"
   },
-  { "id": "receipt",
-  "type" : "imagebutton"
+  {
+    "id": "receipt",
+    "type": "button",
+    "button_label": "Photo",
+    "button_icon": "photo"
   },
   {
     "id": "tags",
     "type": "tagset",
-    "minlines":2
+    "minlines": 2
   },
   {
     "id": "summary",
@@ -23,6 +26,5 @@
     "minlines": 5,
     "autocompletion": "single",
     "hint": "who / where / why / etc."
-
   }
 ]

@@ -6,8 +6,6 @@ import android.view.View.OnClickListener;
 
 public class FormField {
 
-	final static double ORDER_UNDEFINED = 1e20;
-
 	public FormField(Form owner, Map attributes) {
 		this.attributes = attributes;
 		this.owner = owner;
@@ -32,7 +30,7 @@ public class FormField {
 				widget = new FormTagSetWidget(this);
 			} else if (type.equals("cost")) {
 				widget = new FormCostWidget(this);
-			} else if (type.equals("imagebutton")) {
+			} else if (type.equals("button")) {
 				widget = new FormButtonWidget(this);
 			} else if (type.equals("imageview")) {
 				widget = new FormImageWidget(this);
@@ -78,8 +76,15 @@ public class FormField {
 		getWidget().setOnClickListener(onClickListener);
 	}
 
+	/**
+	 * Package visibility, provided only for debugging
+	 * @return
+	 */
+	Map getAttributes() {
+		return attributes;
+	}
+
 	private Map attributes;
 	private FormWidget widget;
 	private Form owner;
-
 }

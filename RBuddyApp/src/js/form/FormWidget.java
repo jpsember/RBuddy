@@ -8,7 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import static js.basic.Tools.*;
 
-abstract class FormWidget {
+public abstract class FormWidget {
 
 	public static final LayoutParams LAYOUT_PARMS = new LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -66,6 +66,10 @@ abstract class FormWidget {
 	}
 
 	public void setOnClickListener(OnClickListener listener) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setDrawableProvider(FormDrawableProvider p) {
 		throw new UnsupportedOperationException();
 	}
 

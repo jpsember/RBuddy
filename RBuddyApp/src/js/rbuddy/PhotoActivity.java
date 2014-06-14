@@ -7,27 +7,24 @@ import java.io.IOException;
 
 import js.basic.Files;
 import js.form.Form;
-//import js.json.*;
+import js.form.FormDrawableProvider;
 import android.app.Activity;
 import android.content.Intent;
-//import android.graphics.Bitmap;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
-//import android.graphics.BitmapFactory;
-//import android.graphics.drawable.BitmapDrawable;
-//import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-//import android.widget.Button;
-//import android.widget.ImageView;
-//import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
-public class PhotoActivity extends Activity {
+public class PhotoActivity extends Activity implements FormDrawableProvider {
 
 	// Identifiers for the intents that we may spawn
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -48,8 +45,9 @@ public class PhotoActivity extends Activity {
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 
 		layoutElements();
-		
-		// If no photo is defined for this receipt, jump right into the take photo intent
+
+		// If no photo is defined for this receipt, jump right into the take
+		// photo intent
 		if (!app.getPhotoFile().photoExists(receipt.getId())) {
 			startImageCaptureIntent();
 		}
@@ -78,29 +76,24 @@ public class PhotoActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 			processPhotoResult(data);
-			// Now that user has presumably selected a photo, exit out to the EditReceipt activity.
+			// Now that user has presumably selected a photo, exit out to the
+			// EditReceipt activity.
 			finish();
 		}
 	}
 
 	private void layoutElements() {
-		String jsonString = null;
-		try {
-			jsonString = Files.readTextFile(getResources().openRawResource(
-					R.raw.form_photo_activity));
-		} catch (IOException e) {
-			die(e);
-		}
-		this.form = Form.parse(this, jsonString);
-		this.form.getField("takephoto").setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						startImageCaptureIntent();
-					}
-				});
+		String jsonString = app.readTextFileResource(R.raw.form_photo_activity);
 
-		unimp("add photo to layout below form, expanding to fill...");
+		this.form = Form.parse(this, jsonString);
+		form.getField("takephoto").setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startImageCaptureIntent();
+			}
+		});
+		form.getField("photo").getWidget().setDrawableProvider(this);
+
 		ScrollView scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
@@ -163,22 +156,17 @@ public class PhotoActivity extends Activity {
 		}
 	}
 
-	// private void updatePhotoView() {
-	// if (photoView == null)
-	// return;
-	// PhotoFile pf = app.getPhotoFile();
-	//
-	// // If no image exists, display placeholder instead
-	// if (!pf.photoExists(receipt.getId())) {
-	// photoView.setImageDrawable(getResources().getDrawable(
-	// R.drawable.missingphoto));
-	// } else {
-	// File imageFile = pf.getMainFileFor(receipt.getId());
-	// Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-	// photoView.setImageDrawable(new BitmapDrawable(this.getResources(),
-	// bmp));
-	// }
-	// }
+	@Override
+	public Drawable getDrawable() {
+		Drawable d = null;
+		PhotoFile pf = app.getPhotoFile();
+		if (pf.photoExists(receipt.getId())) {
+			File imageFile = pf.getMainFileFor(receipt.getId());
+			Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+			d = new BitmapDrawable(this.getResources(), bmp);
+		}
+		return d;
+	}
 
 	private Receipt receipt;
 	private RBuddyApp app;

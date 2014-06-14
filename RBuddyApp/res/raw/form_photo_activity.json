@@ -1,12 +1,14 @@
 [
   {
     "id": "takephoto",
-    "type": "imagebutton",
-    "label":""
+    "type": "button",
+    "button_icon": "camera",
+    "button_label": "",
+    "label": ""
   },
   {
     "id": "photo",
     "type": "imageview",
-    "label":""
+    "label": ""
   }
 ]
