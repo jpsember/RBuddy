@@ -59,16 +59,16 @@ abstract class FormWidget {
 	protected void constructLabel() {
 		String labelText = getLabel();
 		if (!labelText.isEmpty()) {
-		label = new TextView(context());
-		label.setText(labelText);
-		label.setLayoutParams(FormWidget.LAYOUT_PARMS);
+			label = new TextView(context());
+			label.setText(labelText);
+			label.setLayoutParams(FormWidget.LAYOUT_PARMS);
 		}
 	}
-	
+
 	public void setOnClickListener(OnClickListener listener) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	private FormField owner;
 	protected View view;
 	protected LinearLayout layout;
