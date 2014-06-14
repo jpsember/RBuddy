@@ -12,21 +12,9 @@ public class FormField {
 		this.owner = owner;
 	}
 
-	public String getName() {
+	public String getId() {
 		return strArg("id",null);
 	}
-
-	// public static FormItem buildFromMap(Form owner, String id, Map map) {
-	// FormItem f = new FormItem(owner, id, map);
-	//
-	// return f;
-	// }
-	//
-	// public static FormItem parse(Form owner, JSONParser json) {
-	// FormItem f = new FormItem(owner, json.nextKey());
-	// f.parseJSON(json);
-	// return f;
-	// }
 
 	public Form getOwner() {
 		return owner;

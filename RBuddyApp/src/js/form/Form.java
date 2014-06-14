@@ -39,12 +39,12 @@ public class Form implements IJSONEncoder {
 		while (json.hasNext()) {
 			Map attributes = (Map) json.next();
 			FormField item = new FormField(this, attributes);
-			Object prev = itemsMap.put(item.getName(), item);
+			Object prev = itemsMap.put(item.getId(), item);
 			if (prev != null)
-				throw new IllegalArgumentException("form item named "
-						+ item.getName() + " already exists");
+				throw new IllegalArgumentException("form field id "
+						+ item.getId() + " already exists");
 			fieldsList.add(item);
-			}
+		}
 		json.exit();
 	}
 
@@ -52,25 +52,6 @@ public class Form implements IJSONEncoder {
 	public void encode(JSONEncoder encoder) {
 		throw new UnsupportedOperationException();
 	}
-
-//	private static Set<FormField> getOrderedFormItems(Map formItemsMap) {
-//		// Sort those items that have defined orders by those orders, and
-//		// add them;
-//		// then process the remaining
-//		Set<FormField> orderedItems = new TreeSet(new Comparator() {
-//			@Override
-//			public int compare(Object arg0, Object arg1) {
-//				FormField f0 = (FormField) arg0;
-//				FormField f1 = (FormField) arg1;
-//				double diff = f0.getOrder() - f1.getOrder();
-//				if (diff != 0)
-//					return (int) Math.signum(diff);
-//				return f0.getName().compareTo(f1.getName());
-//			}
-//		});
-//		orderedItems.addAll(formItemsMap.values());
-//		return orderedItems;
-//	}
 
 	public View getView() {
 		if (layout == null) {

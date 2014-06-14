@@ -33,15 +33,6 @@ public class FormTagSetWidget extends FormTextWidget {
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context(),
 				android.R.layout.simple_dropdown_item_1line, tf.tagNamesList());
 		textView.setAdapter(adapter);
-
-//		// When this view loses focus, immediately attempt to parse the
-//		// user's tags
-//		textView.setOnFocusChangeListener(new OnFocusChangeListener() {
-//			public void onFocusChange(View v0, boolean hasFocus) {
-//				if (!hasFocus)
-//					setValue(input.getText().toString());
-//			}
-//		});
 	}
 
 
