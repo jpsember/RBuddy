@@ -137,7 +137,7 @@ public class TagSet implements IJSONEncoder {
 		for (Iterator<String> s = tags.iterator(); s.hasNext();) {
 			encoder.encode(s.next());
 		}
-		encoder.exitList();
+		encoder.exit();
 	}
 
 	/**

@@ -163,7 +163,7 @@ public class TagSetFile implements IJSONEncoder {
 			json.encode(entry.name);
 			entry = entry.next;
 		}
-		json.exitList();
+		json.exit();
 	}
 
 	public static final IJSONParser JSON_PARSER = new IJSONParser() {

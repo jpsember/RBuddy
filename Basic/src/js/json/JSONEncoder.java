@@ -120,7 +120,7 @@ public class JSONEncoder {
 	public void encode(Number number) {
 		encode(number.doubleValue());
 	}
-	
+
 	public void encode(double d) {
 		prepareForNextValue();
 		long intValue = Math.round(d);
@@ -193,6 +193,7 @@ public class JSONEncoder {
 		sb.append('[');
 	}
 
+	@Deprecated
 	public void exitList() {
 		if (collectionType != COLLECTION_LIST)
 			throw new IllegalStateException();
@@ -222,11 +223,23 @@ public class JSONEncoder {
 		sb.append('{');
 	}
 
+	@Deprecated
 	public void exitMap() {
 		if (collectionType != COLLECTION_MAP)
 			throw new IllegalStateException();
 		sb.append('}');
 		popState();
+	}
+
+	public void exit() {
+		if (collectionType == COLLECTION_MAP) {
+			sb.append('}');
+			popState();
+		} else if (collectionType == COLLECTION_LIST) {
+			sb.append(']');
+			popState();
+		} else
+			throw new IllegalStateException();
 	}
 
 	private void prepareForNextValue() {

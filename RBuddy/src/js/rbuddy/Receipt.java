@@ -164,7 +164,7 @@ public class Receipt implements IJSONEncoder {
 		j.encode(getSummary());
 		j.encode(getCost().getValue());
 		j.encode(getTags());
-		j.exitList();
+		j.exit();
 	}
 
 	public static final IJSONParser JSON_PARSER = new IJSONParser() {

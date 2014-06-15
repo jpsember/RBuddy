@@ -116,7 +116,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 					Receipt r = (Receipt) it.next();
 					r.encode(json);
 				}
-				json.exitList();
+				json.exit();
 				text = json.toString();
 			}
 

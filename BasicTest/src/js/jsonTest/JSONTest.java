@@ -145,11 +145,11 @@ public class JSONTest extends js.testUtils.MyTest {
 		enc.enterList();
 		enc.encode(12);
 		enc.encode(17);
-		enc.exitList();
+		enc.exit();
 
 		enc.encode("b");
 		enc.encode(true);
-		enc.exitMap();
+		enc.exit();
 		String s = enc.toString();
 		assertStringsMatch("{\"a\":[12,17],\"b\":true}", s);
 	}
