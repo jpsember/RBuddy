@@ -39,6 +39,7 @@ public class FormDateWidget extends FormTextWidget {
 			ret = AndroidDate.parseJSDateFromUserString(content);
 		} catch (ParseException e) {
 			warning("problem parsing " + e);
+			return "(no date)";
 		}
 		return ret.toString();
 	}

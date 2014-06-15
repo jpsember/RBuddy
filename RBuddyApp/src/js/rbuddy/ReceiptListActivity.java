@@ -54,17 +54,17 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle presses on the action bar items
 		switch (item.getItemId()) {
 		case R.id.action_settings:
 			unimp("settings");
 			return true;
+
 		case R.id.action_add:
 			processAddReceipt();
 			return true;
+
 		case R.id.action_search:
-			warning("for search, calling finish() instead");
-			finish();
+			doSearchActivity();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -124,6 +124,12 @@ public class ReceiptListActivity extends Activity {
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
 		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
+		startActivity(intent);
+	}
+
+	private void doSearchActivity() {
+		Intent intent = new Intent(getApplicationContext(),
+				SearchActivity.class);
 		startActivity(intent);
 	}
 

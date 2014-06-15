@@ -2,10 +2,8 @@
   {
     "id": "takephoto",
     "type": "button",
-    "button_icon": "camera",
-    "button_label": "",
-    "label": ""
-  },
+    "icon": "camera"
+   },
   {
     "id": "photo",
     "type": "imageview",

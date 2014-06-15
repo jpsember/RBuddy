@@ -34,6 +34,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".SearchActivity"
+            android:windowSoftInputMode="stateUnchanged" >
+        </activity>
+        <activity
             android:name=".EditReceiptActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>

@@ -12,9 +12,9 @@
   {
     "id": "receipt",
     "type": "button",
-    "button_label": "Photo",
+    "label": "Photo",
     "aux": "empty",
-    "button_icon": "photo"
+    "icon": "photo"
   },
   {
     "id": "tags",

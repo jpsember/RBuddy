@@ -1,0 +1,61 @@
+[
+  {
+    "id": "search",
+    "type": "button",
+    "label": "Search",
+    "icon": "search"
+  },
+  {
+    "id": "mindate",
+    "type": "date",
+    "label": "On or after",
+    "aux": "checkbox"
+  },
+  {
+    "id": "maxdate",
+    "type": "date",
+    "label": "On or before",
+    "aux": "checkbox"
+  },
+  {
+    "id": "mincost",
+    "type": "cost",
+    "label": "At least",
+    "hint": "amount",
+    "aux": "checkbox"
+  },
+  {
+    "id": "maxcost",
+    "type": "cost",
+    "label": "At most",
+    "hint": "amount",
+    "aux": "checkbox"
+  },
+  {
+    "id": "alltags",
+    "type": "tagset",
+    "label": "With ALL of these tags",
+    "aux": "checkbox"
+  },
+  {
+    "id": "anytags",
+    "type": "tagset",
+    "label": "With ANY of these tags",
+    "aux": "checkbox"
+  },
+  {
+    "id": "missingphoto",
+    "type": "button",
+    "label": "Missing photo"
+  },
+  {
+    "id": "missingcost",
+    "type": "button",
+    "label": "No amount"
+  },
+  {
+    "id": "missingtags",
+    "type": "button",
+    "label": "No tags"
+  }
+]

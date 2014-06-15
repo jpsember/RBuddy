@@ -13,10 +13,15 @@ public class FormButtonWidget extends FormWidget {
 	public FormButtonWidget(FormField owner) {
 		super(owner);
 
-		String button_icon = owner.strArg("button_icon", "");
-		String button_label = owner.strArg("button_label", "");
-
+		String button_icon = owner.strArg("icon", "");
+		String button_label = owner.strArg("label", "");
 		if (button_icon.isEmpty()) {
+			
+			if (button_label.isEmpty()) {
+			// Use id as fallback
+				button_label = owner.getId();
+			}
+			
 			if (button_label.isEmpty()) {
 				throw new IllegalArgumentException(
 						"no button label or icon defined; args "
@@ -44,7 +49,8 @@ public class FormButtonWidget extends FormWidget {
 				hasLabel = true;
 			}
 		}
-		constructLabel();
+ 
+//		constructLabel();
 		getWidgetContainer().addView(button);
 	}
 

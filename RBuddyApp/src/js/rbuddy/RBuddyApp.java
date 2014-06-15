@@ -190,7 +190,8 @@ public class RBuddyApp {
 	private void addResourceMappings() {
 		addResource("photo", android.R.drawable.ic_menu_gallery);
 		addResource("camera", android.R.drawable.ic_menu_camera);
-	}
+		addResource("search", android.R.drawable.ic_menu_search);
+}
 
 	public String getStringResource(String stringName) {
 		String packageName = context.getPackageName();
