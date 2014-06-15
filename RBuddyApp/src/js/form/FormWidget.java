@@ -36,7 +36,7 @@ public abstract class FormWidget {
 		String auxPanelType = owner.strArg("aux", "");
 
 		if (!auxPanelType.isEmpty()) {
-			
+
 			// Auxilliary checkbox enable logic
 			// ---------------------------------
 			// Construct a new ViewGroup that contains the vertical panel on the
@@ -237,7 +237,8 @@ public abstract class FormWidget {
 		View v = new View(RBuddyApp.sharedInstance().context());
 		// TODO Avoid using literal constant
 		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 4));
-		// TODO Setting color like this doesn't work: v.setBackgroundColor(color.holo_orange_light);
+		// TODO Setting color like this doesn't work:
+		// v.setBackgroundColor(color.holo_orange_light);
 		// TODO Maybe using constant DKGRAY is inappropriate
 		v.setBackgroundColor(Color.DKGRAY);
 		return v;
@@ -265,6 +266,22 @@ public abstract class FormWidget {
 		if (!enabledState)
 			return widgetValue;
 		return this.getValue();
+	}
+
+	protected boolean getEnabledState() {
+		return this.enabledState;
+	}
+
+	/**
+	 * Utility method for diagnosing focus problems
+	 */
+	static String focusInfo(View v) {
+		return v.getClass().getSimpleName()
+				+ (v.isEnabled() ? "" : " DISABLED")
+				+ (v.isFocusable() ? " FOCUSABLE" : "")
+				+ (v.isFocusableInTouchMode() ? " FOCUSINTOUCH" : "")
+				+ (v.hasFocus() ? " HASFOCUS" : "")
+				+ (v.isClickable() ? " CLICKABLE" : "");
 	}
 
 	// This is the value this widget represents, if any. It is an 'internal'

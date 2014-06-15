@@ -36,7 +36,8 @@
         <activity
             android:name=".SearchActivity"
             android:parentActivityName=".ReceiptListActivity"
-            android:windowSoftInputMode="stateUnchanged" >
+            android:windowSoftInputMode="stateUnchanged"
+             >
         </activity>
         <activity
             android:name=".EditReceiptActivity"

@@ -2,6 +2,7 @@ package js.form;
 
 import java.util.Map;
 
+import android.view.View;
 import android.view.View.OnClickListener;
 
 public class FormField {
@@ -90,6 +91,18 @@ public class FormField {
 	 */
 	Map getAttributes() {
 		return attributes;
+	}
+
+	/**
+	 * Utility method for diagnosing focus problems
+	 */
+	static String focusInfo(View v) {
+		return v.getClass().getSimpleName()
+				+ (v.isEnabled() ? "" : " DISABLED")
+				+ (v.isFocusable() ? " FOCUSABLE" : "")
+				+ (v.isFocusableInTouchMode() ? " FOCUSINTOUCH" : "")
+				+ (v.hasFocus() ? " HASFOCUS" : "")
+				+ (v.isClickable() ? " CLICKABLE" : "");
 	}
 
 	private Map attributes;
