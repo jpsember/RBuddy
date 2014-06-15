@@ -35,14 +35,17 @@
         </activity>
         <activity
             android:name=".SearchActivity"
+            android:parentActivityName=".ReceiptListActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity
             android:name=".EditReceiptActivity"
+            android:parentActivityName=".ReceiptListActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity
             android:name=".PhotoActivity"
+            android:parentActivityName=".EditReceiptActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
     </application>

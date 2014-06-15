@@ -21,7 +21,6 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		RBuddyApp.prepare(this);
 
 		app = RBuddyApp.sharedInstance();
@@ -31,6 +30,16 @@ public class ReceiptListActivity extends Activity {
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 		layout.addView(constructListView());
+
+		warning("is passing the current receipt id around in the intent practical?  perhaps a defaults setting instead");
+		if (false) { // This is not strictly necessary, and other activities
+						// will exhibit the same behaviour
+			int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID,
+					0);
+			if (receiptId > 0) {
+				unimp("scroll list so receipt #" + receiptId + " is visible");
+			}
+		}
 	}
 
 	@Override

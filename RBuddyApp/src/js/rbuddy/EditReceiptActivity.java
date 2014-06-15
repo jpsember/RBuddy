@@ -1,7 +1,6 @@
 package js.rbuddy;
 
 import static js.basic.Tools.*;
-
 import js.form.Form;
 import js.json.*;
 import android.app.Activity;
@@ -33,7 +32,6 @@ public class EditReceiptActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		app = RBuddyApp.sharedInstance();
-
 		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
@@ -54,6 +52,13 @@ public class EditReceiptActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.action_settings:
 			unimp("settings");
+			return true;
+		case android.R.id.home:
+			Intent intent = new Intent(this, ReceiptListActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			warning("does putting receipt id here help?");
+			intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, receipt.getId());
+			startActivity(intent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
