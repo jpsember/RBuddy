@@ -6,6 +6,10 @@
     "icon": "search"
   },
   {
+    "type": "header",
+    "label": "Dates"
+  },
+  {
     "id": "mindate",
     "type": "date",
     "label": "On or after",
@@ -16,6 +20,10 @@
     "type": "date",
     "label": "On or before",
     "aux": "checkbox"
+  },
+  {
+    "type": "header",
+    "label": "Amounts"
   },
   {
     "id": "mincost",
@@ -32,30 +40,38 @@
     "aux": "checkbox"
   },
   {
+    "type": "header",
+    "label": "Tags"
+  },
+  {
     "id": "alltags",
     "type": "tagset",
-    "label": "With ALL of these tags",
+    "label": "ALL of these",
     "aux": "checkbox"
   },
   {
     "id": "anytags",
     "type": "tagset",
-    "label": "With ANY of these tags",
+    "label": "ANY of these",
     "aux": "checkbox"
   },
-  {
+    {
+    "type": "header",
+    "label": "Incomplete Fields"
+  },
+{
     "id": "missingphoto",
-    "type": "button",
+    "type": "checkbox",
     "label": "Missing photo"
   },
   {
     "id": "missingcost",
-    "type": "button",
+    "type": "checkbox",
     "label": "No amount"
   },
   {
     "id": "missingtags",
-    "type": "button",
+    "type": "checkbox",
     "label": "No tags"
   }
 ]

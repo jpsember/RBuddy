@@ -16,7 +16,7 @@ public class FormDateWidget extends FormTextWidget {
 		super(owner );
 
 		input.setFocusable(false);
-
+		input.setHint(getOwner().strArg("hint", "date"));
 		input.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

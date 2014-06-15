@@ -2,6 +2,7 @@ package js.form;
 
 import js.rbuddy.RBuddyApp;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,17 +35,10 @@ public abstract class FormWidget {
 			// left, and an auxilliary panel on the right
 
 			LinearLayout horizontalPanel = new LinearLayout(context());
-			// horizontalPanel.setBackgroundColor(Color.parseColor("#332222"));
 			horizontalPanel.setLayoutParams(LAYOUT_PARMS);
 			horizontalPanel.setOrientation(LinearLayout.HORIZONTAL);
 			this.outerContainerView = horizontalPanel;
 
-			// WRAP_CONTENT should be thought of as the normal layout parameter;
-			// use the weight to distribute
-			// any extra.
-			horizontalPanel.addView(verticalPanel,
-					new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-							LayoutParams.WRAP_CONTENT, 1.0f));
 
 			final int AUX_WIDTH = 60;
 			unimp("figure out device-independent way of choosing aux panel width");
@@ -61,12 +55,19 @@ public abstract class FormWidget {
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
 						AUX_WIDTH, 10);
 				p.weight = 0;
-				// horizontalPanel.setBackgroundColor(Color.parseColor("#442222"));
 				horizontalPanel.addView(v, p);
 			} else {
 				throw new IllegalArgumentException("unknown aux panel type: "
 						+ auxPanelType);
 			}
+			
+			// WRAP_CONTENT should be thought of as the normal layout parameter;
+			// use the weight to distribute
+			// any extra.
+			horizontalPanel.addView(verticalPanel,
+					new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+							LayoutParams.WRAP_CONTENT, 1.0f));
+
 		}
 
 	}
@@ -137,6 +138,30 @@ public abstract class FormWidget {
 	}
 
 	public CheckBox getAuxCheckBox() {return auxCheckBox;}
+	
+	
+	// For lack of a better place
+	public static View horizontalSeparator() {
+		View v = new View(RBuddyApp.sharedInstance().context());
+		unimp("how do we set 1dp here, instead of '4'?");
+		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,4));
+//		v.setBackgroundColor(color.holo_orange_light);
+		unimp("color isn't showing up");
+		v.setBackgroundColor(Color.DKGRAY);
+		return v;
+	}
+	
+	// For lack of a better place
+	public static View horizontalSpace() {
+		View v = new View(RBuddyApp.sharedInstance().context());
+		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,12));
+		return v;
+	}
+
+	public static void setDebugBgnd(View view, String colorToParse) {
+		view.setBackgroundColor(Color.parseColor(colorToParse));
+	}
+	
 	
 	private FormField owner;
 	private ViewGroup outerContainerView;

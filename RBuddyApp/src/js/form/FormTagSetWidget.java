@@ -21,9 +21,13 @@ public class FormTagSetWidget extends FormTextWidget {
 
 	protected void constructInput() {
 		super.constructInput();
-
+		
+		// The input view is always MultiAutoCompleteTextView, because we overrode
+		// getAutoCompletionType() to return "multiple" 
 		MultiAutoCompleteTextView textView = (MultiAutoCompleteTextView) input;
 
+		input.setHint(getOwner().strArg("hint", "tags"));
+		
 		textView.setTokenizer(new OurTokenizer());
 		textView.setKeyListener(TextKeyListener.getInstance(true,
 				TextKeyListener.Capitalize.NONE));

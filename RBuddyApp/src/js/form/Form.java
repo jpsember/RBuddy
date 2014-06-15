@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
 //import static js.basic.Tools.*;
 import js.json.*;
 import android.content.Context;
@@ -40,10 +38,13 @@ public class Form implements IJSONEncoder {
 		while (json.hasNext()) {
 			Map attributes = (Map) json.next();
 			FormField item = new FormField(this, attributes);
-			Object prev = itemsMap.put(item.getId(), item);
-			if (prev != null)
-				throw new IllegalArgumentException("form field id "
-						+ item.getId() + " already exists");
+			String id = item.getId();
+			if (!id.isEmpty()) {
+				Object prev = itemsMap.put(item.getId(), item);
+				if (prev != null)
+					throw new IllegalArgumentException("form field id "
+							+ item.getId() + " already exists");
+			}
 			fieldsList.add(item);
 		}
 		json.exit();
@@ -91,7 +92,6 @@ public class Form implements IJSONEncoder {
 		return field;
 	}
 
-	
 	private List<FormField> fieldsList = new ArrayList();
 	private View layout;
 	private Map<String, FormField> itemsMap = new HashMap();
