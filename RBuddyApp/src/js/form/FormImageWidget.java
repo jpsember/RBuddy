@@ -3,14 +3,11 @@ package js.form;
 import js.rbuddy.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-//import static js.basic.Tools.*;
 
 public class FormImageWidget extends FormWidget {
 
 	public FormImageWidget(FormField owner) {
 		super(owner);
-
-		app = RBuddyApp.sharedInstance();
 
 		imageView = new ImageView(owner.getOwner().context());
 		imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -27,6 +24,7 @@ public class FormImageWidget extends FormWidget {
 		if (drawableProvider != null)
 			d = drawableProvider.getDrawable();
 		if (d == null) {
+			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()
 					.getDrawable(android.R.drawable.ic_menu_gallery);
 		}
@@ -40,8 +38,7 @@ public class FormImageWidget extends FormWidget {
 			updatePhotoView();
 		}
 	}
-
+	
 	private FormDrawableProvider drawableProvider;
-	private RBuddyApp app;
 	private ImageView imageView;
 }

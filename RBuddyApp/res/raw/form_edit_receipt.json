@@ -7,13 +7,11 @@
     "id": "cost",
     "type": "cost",
     "label": "Amount",
-    "aux": "checkbox"
   },
   {
     "id": "receipt",
     "type": "button",
     "label": "Photo",
-    "aux": "empty",
     "icon": "photo"
   },
   {

@@ -1,6 +1,5 @@
 package js.form;
 
-import static js.basic.Tools.*;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -15,7 +14,7 @@ public class FormCheckBoxWidget extends FormWidget {
 
 		checkBox = new CheckBox(context());
 
-		// Construct a new ViewGroup that contains the checkbox on the left and
+		// Construct a new container that contains the checkbox on the left and
 		// a label on the right
 
 		LinearLayout horizontalPanel = new LinearLayout(context());
@@ -23,8 +22,6 @@ public class FormCheckBoxWidget extends FormWidget {
 		horizontalPanel.setLayoutParams(LAYOUT_PARMS);
 		horizontalPanel.setOrientation(LinearLayout.HORIZONTAL);
 
-		final int AUX_WIDTH = 60;
-		unimp("figure out device-independent way of choosing aux panel width");
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(AUX_WIDTH,
 				LayoutParams.WRAP_CONTENT);
 		p.weight = 0;
@@ -48,6 +45,29 @@ public class FormCheckBoxWidget extends FormWidget {
 		p.gravity = Gravity.BOTTOM;
 
 		container.addView(label, p);
+	}
+
+	/**
+	 * Set displayed value; subclasses should perform whatever translation / parsing is
+	 * appropriate to convert the internal value to something displayed in the widget.
+	 * 
+	 * @param internalValue
+	 */
+	public void updateUserValue(String internalValue) {
+		boolean checked = internalValue.equals("true");
+		checkBox.setChecked(checked); 
+	}
+
+	/**
+	 * Get displayed value, and transform to 'internal' representation.
+	 */
+	public String parseUserValue() {
+		return checkBox.isChecked() ? "true" : "false";
+	}
+	
+	@Override
+	protected void setChildWidgetsEnabled(boolean enabled) {
+		checkBox.setEnabled(enabled);
 	}
 
 	private CheckBox checkBox;

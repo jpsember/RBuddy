@@ -325,7 +325,7 @@ public final class Tools {
 	public static String describe(Object obj) {
 		if (obj == null)
 			return "<null>";
-		return "<type=" + obj.getClass().getName() + " value="
+		return "<type=" + obj.getClass().getSimpleName() + " value="
 				+ d(obj.toString()) + ">";
 	}
 

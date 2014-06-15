@@ -2,13 +2,12 @@ package js.form;
 
 import android.text.InputType;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
-
-//import static js.basic.Tools.*;
 
 public class FormTextWidget extends FormWidget {
 
@@ -16,6 +15,16 @@ public class FormTextWidget extends FormWidget {
 		super(owner);
 
 		constructInput();
+
+		// Enable all the widgets in this form; this is basically the auxilliary
+		// checkbox enable logic.
+		input.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				setEnabled(true);
+			}
+		});
+
 		input.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
 		constructLabel();
@@ -56,25 +65,37 @@ public class FormTextWidget extends FormWidget {
 		// possibly correct) the user's input
 		input.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
-				if (!hasFocus)
-					setValue(input.getText().toString());
+				if (!hasFocus) {
+					losingFocus();
+				}
 			}
 		});
 
 	}
 
-	@Override
-	public void setValue(String value) {
-		input.setText(value);
+	protected void losingFocus() {
+		setValue(input.getText().toString());
+	}
 
-		// Reposition the cursor to the end of the text, in case we've just
-		// rotated the device
-		input.setSelection(input.getText().length());
+	protected void setChildWidgetsEnabled(boolean enabled) {
+		input.setEnabled(enabled);
 	}
 
 	@Override
-	public String getValue() {
+	public void updateUserValue(String value) {
+		setInputText(value);
+	}
+
+	@Override
+	public String parseUserValue() {
 		return input.getText().toString();
+	}
+
+	protected void setInputText(String s) {
+		input.setText(s);
+		// Reposition the cursor to the end of the text, in case we've just
+		// rotated the device
+		input.setSelection(input.getText().length());
 	}
 
 	protected EditText input;

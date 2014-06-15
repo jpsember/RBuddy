@@ -39,19 +39,18 @@ public class FormTagSetWidget extends FormTextWidget {
 		textView.setAdapter(adapter);
 	}
 
+	@Override
+	public void updateUserValue(String internalValue) {
+		TagSet ts = TagSet.parse(internalValue,new TagSet());
+		setInputText(ts.toString());
+	}
 
 	@Override
-	public String getValue() {
-		TagSet ts = TagSet.parse(super.getValue(),new TagSet());
+	public String parseUserValue() {
+		TagSet ts = TagSet.parse(input.getText().toString(),new TagSet());
 		return ts.toString();
 	}
 	
-	@Override
-	public void setValue(String value) {
-		TagSet ts = TagSet.parse(value,new TagSet());
-		super.setValue(ts.toString());
-	}
-
 	/**
 	 * Tokenizer that recognizes both periods and commas as delimeters
 	 */

@@ -57,6 +57,7 @@ public class SearchActivity extends Activity {
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
 
+		
 		setContentView(scrollView);
 	}
 	

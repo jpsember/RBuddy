@@ -16,16 +16,9 @@ public class FormButtonWidget extends FormWidget {
 		String button_icon = owner.strArg("icon", "");
 		String button_label = owner.strArg("label", "");
 		if (button_icon.isEmpty()) {
-			
 			if (button_label.isEmpty()) {
-			// Use id as fallback
+				// Use id as fallback
 				button_label = owner.getId();
-			}
-			
-			if (button_label.isEmpty()) {
-				throw new IllegalArgumentException(
-						"no button label or icon defined; args "
-								+ owner.getAttributes());
 			}
 			hasLabel = true;
 			Button b = new Button(context());
@@ -33,9 +26,10 @@ public class FormButtonWidget extends FormWidget {
 			button = b;
 		} else {
 			hasIcon = true;
-			int resourceId = RBuddyApp.sharedInstance().getResource(button_icon);
+			int resourceId = RBuddyApp.sharedInstance()
+					.getResource(button_icon);
 			Drawable img = context().getResources().getDrawable(resourceId);
-			
+
 			if (button_label.isEmpty()) {
 				ImageButton ib = new ImageButton(context());
 				ib.setImageDrawable(img);
@@ -49,9 +43,13 @@ public class FormButtonWidget extends FormWidget {
 				hasLabel = true;
 			}
 		}
- 
-//		constructLabel();
+
 		getWidgetContainer().addView(button);
+	}
+
+	@Override
+	protected void setChildWidgetsEnabled(boolean enabled) {
+		button.setEnabled(enabled);
 	}
 
 	@Override

@@ -1,7 +1,5 @@
 package js.form;
 
-import static js.basic.Tools.*;
-
 import java.text.ParseException;
 
 import js.rbuddy.AndroidDate;
@@ -13,10 +11,11 @@ import android.widget.DatePicker;
 
 public class FormDateWidget extends FormTextWidget {
 	public FormDateWidget(FormField owner) {
-		super(owner );
+		super(owner);
 
-		input.setFocusable(false);
 		input.setHint(getOwner().strArg("hint", "date"));
+		input.setFocusable(false);
+		input.setClickable(true);
 		input.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -26,32 +25,39 @@ public class FormDateWidget extends FormTextWidget {
 	}
 
 	@Override
-	public void setValue(String value) {
-		JSDate date = JSDate.parse(value, true);
-		super.setValue(AndroidDate.formatUserDateFromJSDate(date));
+	public void updateUserValue(String internalValue) {
+		String dispVal = "";
+		JSDate date = null;
+		try {
+			date = JSDate.parse(internalValue);
+			dispVal = AndroidDate.formatUserDateFromJSDate(date);
+		} catch (IllegalArgumentException e) {
+		}
+		setInputText(dispVal);
 	}
 
 	@Override
-	public String getValue() {
-		String content = input.getText().toString();
-		JSDate ret = null;
+	public String parseUserValue() {
+		String ret = "";
 		try {
-			ret = AndroidDate.parseJSDateFromUserString(content);
+			String content = input.getText().toString();
+			JSDate date = AndroidDate.parseJSDateFromUserString(content);
+			ret = date.toString();
 		} catch (ParseException e) {
-			warning("problem parsing " + e);
-			return "(no date)";
 		}
-		return ret.toString();
+		return ret;
 	}
 
 	private void processClick() {
+		setEnabled(true);
+
 		DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
 			@Override
 			public void onDateSet(DatePicker view, int year, int monthOfYear,
 					int dayOfMonth) {
 				JSDate date = JSDate.buildFromValues(year, monthOfYear,
 						dayOfMonth);
-				input.setText(AndroidDate.formatUserDateFromJSDate(date));
+				setInputText(AndroidDate.formatUserDateFromJSDate(date));
 			}
 		};
 		JSDate date = JSDate.parse(getValue(), true);

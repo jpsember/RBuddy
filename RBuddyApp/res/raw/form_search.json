@@ -32,6 +32,10 @@
     "hint": "amount",
     "aux": "checkbox"
   },
+  // This is how you do a separator without a label; just omit it!
+  // {
+  //   "type": "header",
+  // },
   {
     "id": "maxcost",
     "type": "cost",
