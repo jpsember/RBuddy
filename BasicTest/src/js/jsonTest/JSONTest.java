@@ -247,6 +247,35 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
+	@Test
+	public void testTrailingCommas() {
+
+		String script[] = {//
+				"{'hey':42,'you':'outthere',}",//
+				"{'hey':42,'you':'outthere'}",//
+				"[42,15,16,17,]",//
+				"[42,15,16,17]",//
+				"[42,15,16,17,null,]",//
+				"[42,15,16,17,null]",//
+		};
+
+		for (int i = 0; i < script.length; i += 2) {
+			String s = swapQuotes(script[i + 0]);
+			Object obj = json(s).next();
+
+			String s2 = swapQuotes(script[i + 1]);
+			Object obj2 = json(s2).next();
+
+			newEnc().encode(obj);
+			String enc1 = enc.toString();
+
+			newEnc().encode(obj2);
+			String enc2 = enc.toString();
+
+			assertStringsMatch(enc1, enc2);
+		}
+	}
+
 	private static class OurClass implements IJSONEncoder {
 
 		public static final IJSONParser parser = new IJSONParser() {

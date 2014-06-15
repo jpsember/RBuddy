@@ -355,40 +355,29 @@ public class JSONParser {
 	public Map readObject() {
 		Map m = new HashMap();
 		read('{', true);
-		if (peek(true) != '}') {
-			while (true) {
-				String key = readString();
-				read(':', true);
-				Object value = readValue();
-				m.put(key, value);
-				if (peek(true) != ',') {
-					break;
-				}
-				readCharacter(false);
+		while (peek(true) != '}') {
+			String key = readString();
+			read(':', true);
+			Object value = readValue();
+			m.put(key, value);
+			if (peek(true) != ',') {
+				break;
 			}
+			readCharacter(false);
 		}
 		read('}', true);
 		return m;
 	}
 
 	private ArrayList readArray() {
-		if (db)
-			pr("\n\nreadArray");
 		ArrayList a = new ArrayList();
 		read('[', true);
-		if (db)
-			pr(" seeing if immediately ends... peek=" + (char) peek(true));
-		if (peek(true) != ']') {
-			while (true) {
-				if (db)
-					pr("  reading next value, peek = " + (char) peek(false));
-				Object value = readValue();
-				a.add(value);
-
-				if (peek(true) != ',')
-					break;
-				readCharacter(false);
-			}
+		while (peek(true) != ']') {
+			Object value = readValue();
+			a.add(value);
+			if (peek(true) != ',')
+				break;
+			readCharacter(false);
 		}
 		read(']', true);
 		return a;
