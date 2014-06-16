@@ -1,9 +1,10 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import static js.basic.Tools.*;
 
 import java.util.List;
 
+import js.rbuddy.Receipt;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;

@@ -1,4 +1,4 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import static js.basic.Tools.*;
 import android.annotation.SuppressLint;
@@ -7,6 +7,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import js.rbuddy.JSDate;
+import js.rbuddy.JSDateFactory;
 
 public class AndroidDate extends JSDate {
 

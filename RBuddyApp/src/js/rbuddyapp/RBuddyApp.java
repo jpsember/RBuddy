@@ -1,4 +1,4 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import java.io.File;
 import java.util.Calendar;
@@ -7,6 +7,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import js.basic.Files;
+import js.rbuddy.IReceiptFile;
+import js.rbuddy.JSDate;
+import js.rbuddy.PhotoFile;
+import js.rbuddy.TagSetFile;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

@@ -4,9 +4,9 @@ package js.form;
 
 import java.util.Map;
 
-import js.rbuddy.RBuddyApp;
 import js.rbuddy.TagSet;
 import js.rbuddy.TagSetFile;
+import js.rbuddyapp.RBuddyApp;
 import android.text.method.TextKeyListener;
 import android.widget.ArrayAdapter;
 import android.widget.MultiAutoCompleteTextView;

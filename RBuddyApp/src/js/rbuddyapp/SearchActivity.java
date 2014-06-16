@@ -1,7 +1,8 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import static js.basic.Tools.*;
 import js.form.Form;
+import js.rbuddy.R;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;

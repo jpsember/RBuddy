@@ -1,4 +1,4 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import java.io.*;
 

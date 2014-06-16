@@ -2,7 +2,7 @@ package js.form;
 
 import java.util.Map;
 
-import js.rbuddy.RBuddyApp;
+import js.rbuddyapp.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 

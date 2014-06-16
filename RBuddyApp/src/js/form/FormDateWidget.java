@@ -3,8 +3,8 @@ package js.form;
 import java.text.ParseException;
 import java.util.Map;
 
-import js.rbuddy.AndroidDate;
 import js.rbuddy.JSDate;
+import js.rbuddyapp.AndroidDate;
 import android.app.DatePickerDialog;
 import android.widget.DatePicker;
 

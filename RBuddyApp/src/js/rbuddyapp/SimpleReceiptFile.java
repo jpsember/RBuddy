@@ -1,4 +1,4 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +10,9 @@ import java.util.Map;
 
 import js.basic.Files;
 import js.json.*;
+import js.rbuddy.IReceiptFile;
+import js.rbuddy.Receipt;
+import js.rbuddy.TagSetFile;
 import static js.basic.Tools.*;
 
 public class SimpleReceiptFile implements IReceiptFile {

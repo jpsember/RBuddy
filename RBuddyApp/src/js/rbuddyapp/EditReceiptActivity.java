@@ -1,8 +1,13 @@
-package js.rbuddy;
+package js.rbuddyapp;
 
 import static js.basic.Tools.*;
 import js.form.Form;
 import js.json.*;
+import js.rbuddy.Cost;
+import js.rbuddy.JSDate;
+import js.rbuddy.R;
+import js.rbuddy.Receipt;
+import js.rbuddy.TagSet;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
