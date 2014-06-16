@@ -124,14 +124,14 @@ public final class Tools {
 	 * Throw a RuntimeException
 	 */
 	public static void die() {
-		die(null,null);
+		die(null, null);
 	}
 
 	/**
 	 * Throw a RuntimeException with a particular message
 	 */
 	public static void die(String message) {
-		die(message,null);
+		die(message, null);
 	}
 
 	/**
@@ -140,18 +140,18 @@ public final class Tools {
 	 * @param t
 	 */
 	public static void die(Throwable t) {
-		die(null,t);
+		die(null, t);
 	}
 
 	public static void die(String message, Throwable t) {
-		if (message == null) 
+		if (message == null)
 			message = "(no reason given)";
-		message = "Dying; "+message;
+		message = "Dying; " + message;
 		if (t == null)
 			throw new RuntimeException(message);
-		throw new RuntimeException(message,t);
+		throw new RuntimeException(message, t);
 	}
-	
+
 	/**
 	 * Print message that code is unimplemented at current line; prints only the
 	 * first time through
@@ -958,14 +958,14 @@ public final class Tools {
 	private static Pattern lineNumbersPattern;
 
 	/**
-	 * Optionally replace literal line numbers that appear in warnings (and 'unimp' messages)
-	 * with constant placeholders ('XXX') so that old snapshots remain valid even if the line
-	 * numbers have changed.
+	 * Optionally replace literal line numbers that appear in warnings (and
+	 * 'unimp' messages) with constant placeholders ('XXX') so that old
+	 * snapshots remain valid even if the line numbers have changed.
 	 */
 	public static void setSanitizeLineNumbers(boolean f) {
 		sanitizeLineNumbers = f;
 	}
-	
+
 	/**
 	 * Replace all line numbers within a stack trace with 'XXX' so they are
 	 * ignored within snapshots; has no effect if sanitize is not active
@@ -1056,6 +1056,23 @@ public final class Tools {
 			testingKnown = true;
 		}
 		return testing;
+	}
+
+	/**
+	 * Find index of string within an array of strings
+	 * 
+	 * @param array
+	 *            array of strings
+	 * @param target
+	 *            string to look for
+	 * @return index of string; throws IllegalArgumentException if not found
+	 */
+	public static int indexOfString(String[] array, String target) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(target))
+				return i;
+		}
+		throw new IllegalArgumentException("string '" + target + "' not found");
 	}
 
 }

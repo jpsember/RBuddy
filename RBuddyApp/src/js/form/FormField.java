@@ -2,10 +2,8 @@ package js.form;
 
 import java.util.Map;
 
-import android.view.View;
-import android.view.View.OnClickListener;
-
-public class FormField {
+// TODO The FormField could be joined with FormWidget.
+class FormField {
 
 	public FormField(Form owner, Map attributes) {
 		this.attributes = attributes;
@@ -80,10 +78,6 @@ public class FormField {
 		return val;
 	}
 
-	public void setOnClickListener(OnClickListener onClickListener) {
-		getWidget().setOnClickListener(onClickListener);
-	}
-
 	/**
 	 * Package visibility, provided only for debugging
 	 * 
@@ -91,18 +85,6 @@ public class FormField {
 	 */
 	Map getAttributes() {
 		return attributes;
-	}
-
-	/**
-	 * Utility method for diagnosing focus problems
-	 */
-	static String focusInfo(View v) {
-		return v.getClass().getSimpleName()
-				+ (v.isEnabled() ? "" : " DISABLED")
-				+ (v.isFocusable() ? " FOCUSABLE" : "")
-				+ (v.isFocusableInTouchMode() ? " FOCUSINTOUCH" : "")
-				+ (v.hasFocus() ? " HASFOCUS" : "")
-				+ (v.isClickable() ? " CLICKABLE" : "");
 	}
 
 	private Map attributes;

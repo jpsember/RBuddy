@@ -74,22 +74,22 @@ public class Form implements IJSONEncoder {
 	 * Get value from a form field
 	 */
 	public String getValue(String fieldName) {
-		return getField(fieldName).getWidget().getValue();
+		return getField(fieldName).getValue();
 	}
 
 	/**
 	 * Write value to form field
 	 */
 	public void setValue(String fieldName, Object value) {
-		getField(fieldName).getWidget().setValue(value.toString());
+		getField(fieldName).setValue(value.toString());
 	}
 
-	public FormField getField(String fieldName) {
+	public FormWidget getField(String fieldName) {
 		FormField field = itemsMap.get(fieldName);
 		if (field == null)
 			throw new IllegalArgumentException("no field found with name "
 					+ fieldName);
-		return field;
+		return field.getWidget();
 	}
 
 	private List<FormField> fieldsList = new ArrayList();

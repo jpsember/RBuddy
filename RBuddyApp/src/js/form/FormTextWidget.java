@@ -1,34 +1,90 @@
 package js.form;
 
+import android.content.Context;
 import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.TextView;
+
+import static js.basic.Tools.*;
+
 
 public class FormTextWidget extends FormWidget {
+
+	// Here is where we describe how a particular subclass of FormTextWidget
+	// deals with keyboard focus. The default is FOCUS_NORMAL.
+	protected static final int FOCUS_NEVER = 0;
+	protected static final int FOCUS_RESISTANT = 1;
+	protected static final int FOCUS_NORMAL = 2;
+
+	private static String[] focusTypeStrings = {"never","resistant","normal"};
 
 	public FormTextWidget(FormField owner) {
 		super(owner);
 
+		this.focusType = getFocusType();
+		
 		constructInput();
 
-		// Enable all the widgets in this form; this is basically the auxilliary
-		// checkbox enable logic.
 		input.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				setEnabled(true);
+				processClick();
 			}
 		});
+
+		if (focusType <= FOCUS_RESISTANT) {
+			input.setFocusable(false);
+			input.setClickable(true);
+
+			// This makes pressing the 'done' keyboard key close the keyboard
+			input.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView v, int actionId,
+						KeyEvent event) {
+					input.setFocusable(false);
+					return false;
+				}
+			});
+
+		}
 
 		input.setLayoutParams(FormWidget.LAYOUT_PARMS);
 
 		constructLabel();
 		getWidgetContainer().addView(input);
+	}
+
+	protected void processClick() {
+		setEnabled(true);
+		if (focusType == FOCUS_RESISTANT) {
+			if (!input.isFocusableInTouchMode()) {
+				input.setFocusableInTouchMode(true);
+				input.requestFocus();
+				input.setSelection(input.getText().length());
+
+				// Keyboard is not appearing when input gets focus. This
+				// solution is
+				// from:
+				// http://stackoverflow.com/questions/5105354/how-to-show-soft-keyboard-when-edittext-is-focused
+				//
+				InputMethodManager imm = (InputMethodManager) context()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+			}
+		}
+	}
+
+	protected int getFocusType() {
+		String ft = getOwner().strArg("focus", "normal");
+		return indexOfString(focusTypeStrings,ft);
 	}
 
 	protected String getAutoCompletionType() {
@@ -66,15 +122,13 @@ public class FormTextWidget extends FormWidget {
 		input.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
 				if (!hasFocus) {
-					losingFocus();
+					setValue(input.getText().toString());
+					if (focusType <= FOCUS_RESISTANT) {
+						input.setFocusable(false);
+					}
 				}
 			}
 		});
-
-	}
-
-	protected void losingFocus() {
-		setValue(input.getText().toString());
 	}
 
 	protected void setChildWidgetsEnabled(boolean enabled) {
@@ -98,5 +152,6 @@ public class FormTextWidget extends FormWidget {
 		input.setSelection(input.getText().length());
 	}
 
+	private int focusType;
 	protected EditText input;
 }

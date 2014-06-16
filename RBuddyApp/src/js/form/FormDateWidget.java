@@ -5,23 +5,13 @@ import java.text.ParseException;
 import js.rbuddy.AndroidDate;
 import js.rbuddy.JSDate;
 import android.app.DatePickerDialog;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.DatePicker;
 
 public class FormDateWidget extends FormTextWidget {
 	public FormDateWidget(FormField owner) {
 		super(owner);
 
-		input.setHint(getOwner().strArg("hint", "date"));
-		input.setFocusable(false);
-		input.setClickable(true);
-		input.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				processClick();
-			}
-		});
+		input.setHint(getOwner().strArg("hint", "Date"));
 	}
 
 	@Override
@@ -48,9 +38,14 @@ public class FormDateWidget extends FormTextWidget {
 		return ret;
 	}
 
-	private void processClick() {
-		setEnabled(true);
+	@Override
+	protected int getFocusType() {
+		return FOCUS_NEVER;
+	}
 
+	protected void processClick() {
+		super.processClick();
+		
 		DatePickerDialog.OnDateSetListener dateListener = new DatePickerDialog.OnDateSetListener() {
 			@Override
 			public void onDateSet(DatePicker view, int year, int monthOfYear,

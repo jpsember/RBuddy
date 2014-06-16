@@ -97,7 +97,7 @@ public class PhotoActivity extends Activity implements FormDrawableProvider {
 				startImageCaptureIntent();
 			}
 		});
-		form.getField("photo").getWidget().setDrawableProvider(this);
+		form.getField("photo").setDrawableProvider(this);
 
 		ScrollView scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
