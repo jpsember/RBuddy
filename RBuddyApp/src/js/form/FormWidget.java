@@ -1,5 +1,7 @@
 package js.form;
 
+import java.util.Map;
+
 import js.rbuddy.RBuddyApp;
 import android.content.Context;
 import android.graphics.Color;
@@ -12,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import static js.basic.Tools.*;
 
 public abstract class FormWidget {
 
@@ -21,8 +24,85 @@ public abstract class FormWidget {
 	public static final LayoutParams LAYOUT_PARMS = new LayoutParams(
 			LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
-	public FormWidget(FormField owner) {
-		this.owner = owner;
+	private static final int AUXPANEL_NONE = 0;
+	private static final int AUXPANEL_EMPTY = 1;
+	private static final int AUXPANEL_CHECKBOX = 2;
+	private static String[] auxPanelTypeStrings = { "none", "empty", "checkbox" };
+
+	/**
+	 * Factory constructor
+	 * 
+	 * @param owner
+	 * @param attributes
+	 * @return an appropriate FormWidget
+	 */
+	static FormWidget build(Form owner, Map attributes) {
+		FormWidget widget;
+		String type = (String) attributes.get("type");
+		if (type == null)
+			throw new IllegalArgumentException("no type found");
+		if (type.equals("text")) {
+			widget = new FormTextWidget(owner, attributes);
+		} else if (type.equals("header")) {
+			widget = new FormHeaderWidget(owner, attributes);
+		} else if (type.equals("date")) {
+			widget = new FormDateWidget(owner, attributes);
+		} else if (type.equals("tagset")) {
+			widget = new FormTagSetWidget(owner, attributes);
+		} else if (type.equals("cost")) {
+			widget = new FormCostWidget(owner, attributes);
+		} else if (type.equals("button")) {
+			widget = new FormButtonWidget(owner, attributes);
+		} else if (type.equals("imageview")) {
+			widget = new FormImageWidget(owner, attributes);
+		} else if (type.equals("checkbox")) {
+			widget = new FormCheckBoxWidget(owner, attributes);
+		} else
+			throw new IllegalArgumentException("unsupported field type " + type);
+		return widget;
+	}
+
+	protected String getId() {
+		return strAttr("id", "");
+	}
+
+	protected Form getForm() {
+		return form;
+	}
+
+	protected double dblAttr(String key, Number defaultValue) {
+		return ((Number) attr(key, defaultValue)).doubleValue();
+	}
+
+	protected int intAttr(String key, Number defaultValue) {
+		return ((Number) attr(key, defaultValue)).intValue();
+	}
+
+	protected String strAttr(String key, String defaultValue) {
+		return (String) attr(key, defaultValue);
+	}
+
+	private Object attr(String key, Object defaultValue) {
+		Object value = attributes.get(key);
+		if (value == null)
+			value = defaultValue;
+		if (value == null)
+			throw new IllegalArgumentException("missing argument: " + key);
+		return value;
+	}
+
+	/**
+	 * Package visibility, provided only for debugging
+	 * 
+	 * @return
+	 */
+	Map getAttributes() {
+		return attributes;
+	}
+
+	protected FormWidget(Form form, Map attributes) {
+		this.form = form;
+		this.attributes = attributes;
 		this.enabledState = true;
 		this.widgetValue = "";
 
@@ -33,9 +113,8 @@ public abstract class FormWidget {
 		this.outerContainerView = verticalPanel;
 		this.widgetContainerView = verticalPanel;
 
-		String auxPanelType = owner.strArg("aux", "");
-
-		if (!auxPanelType.isEmpty()) {
+		int auxType = indexOfString(auxPanelTypeStrings, strAttr("aux", "none"));
+		if (auxType != AUXPANEL_NONE) {
 
 			// Auxilliary checkbox enable logic
 			// ---------------------------------
@@ -51,7 +130,13 @@ public abstract class FormWidget {
 			horizontalPanel.setOrientation(LinearLayout.HORIZONTAL);
 			this.outerContainerView = horizontalPanel;
 
-			if (auxPanelType.equals("checkbox")) {
+			if (auxType == AUXPANEL_EMPTY) {
+				View v = new View(context());
+				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+						AUX_WIDTH, 10);
+				p.weight = 0;
+				horizontalPanel.addView(v, p);
+			} else if (auxType == AUXPANEL_CHECKBOX) {
 				CheckBox cb = new CheckBox(context());
 				auxCheckBox = cb;
 				cb.setChecked(true);
@@ -68,27 +153,11 @@ public abstract class FormWidget {
 				p.weight = 0;
 				p.gravity = Gravity.BOTTOM;
 				horizontalPanel.addView(cb, p);
-
-			} else if (auxPanelType.equals("empty")) {
-				View v = new View(context());
-				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						AUX_WIDTH, 10);
-				p.weight = 0;
-				horizontalPanel.addView(v, p);
-			} else {
-				throw new IllegalArgumentException("unknown aux panel type: "
-						+ auxPanelType);
 			}
-
-			// WRAP_CONTENT should be thought of as the normal layout parameter;
-			// use the weight to distribute
-			// any extra.
 			horizontalPanel.addView(verticalPanel,
 					new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
 							LayoutParams.WRAP_CONTENT, 1.0f));
-
 		}
-
 	}
 
 	public void setEnabled(boolean enabled) {
@@ -139,24 +208,27 @@ public abstract class FormWidget {
 	 * @return
 	 */
 	public Context context() {
-		return getOwner().getOwner().context();
+		return getForm().context();
 	}
 
 	/**
-	 * Get the view that contains this field's widget plus any auxilliary views
+	 * Get the view containing this widget. It is most likely a view that
+	 * contains a number of child views, including an optional label, and one or
+	 * more android widgets.
 	 * 
 	 * @return
 	 */
-	public View getOuterContainer() {
+	public View getView() {
 		return outerContainerView;
 	}
 
 	/**
-	 * Get the field's main view container; the one containing the widget views
+	 * Get the main view container; the one containing the widget views; i.e.,
+	 * excluding the auxilliary view (if one exists)
 	 * 
 	 * @return
 	 */
-	public ViewGroup getWidgetContainer() {
+	protected ViewGroup getWidgetContainer() {
 		return widgetContainerView;
 	}
 
@@ -201,15 +273,15 @@ public abstract class FormWidget {
 		throw new UnsupportedOperationException();
 	}
 
-	protected FormField getOwner() {
-		return owner;
-	}
-
 	public String getLabel() {
-		String labelValue = owner.strArg("label", owner.getId());
+		String labelValue = strAttr("label", getId());
 		return RBuddyApp.sharedInstance().applyStringSubstitution(labelValue);
 	}
 
+	/**
+	 * Construct a label for this widget, which appears above the actual
+	 * widget(s)
+	 */
 	protected void constructLabel() {
 		String labelText = getLabel();
 		if (!labelText.isEmpty()) {
@@ -226,10 +298,6 @@ public abstract class FormWidget {
 
 	public void setDrawableProvider(FormDrawableProvider p) {
 		throw new UnsupportedOperationException();
-	}
-
-	public CheckBox getAuxCheckBox() {
-		return auxCheckBox;
 	}
 
 	// For lack of a better place
@@ -257,22 +325,6 @@ public abstract class FormWidget {
 	}
 
 	/**
-	 * Get the value of this widget, and return the 'stashed' value if the
-	 * widget is currently disabled
-	 * 
-	 * @return
-	 */
-	public String getValueWhenEnabled() {
-		if (!enabledState)
-			return widgetValue;
-		return this.getValue();
-	}
-
-	protected boolean getEnabledState() {
-		return this.enabledState;
-	}
-
-	/**
 	 * Utility method for diagnosing focus problems
 	 */
 	static String focusInfo(View v) {
@@ -284,6 +336,12 @@ public abstract class FormWidget {
 				+ (v.isClickable() ? " CLICKABLE" : "");
 	}
 
+	// The form that owns this widget
+	private Form form;
+
+	// Attributes defining widget type, options
+	private Map attributes;
+
 	// This is the value this widget represents, if any. It is an 'internal'
 	// string representation of the value; for example, all dates are
 	// stored using JSDate's internal representation yyyy-mm-dd, and are
@@ -291,7 +349,6 @@ public abstract class FormWidget {
 	// when displayed in the TextView.
 	private String widgetValue;
 
-	private FormField owner;
 	private ViewGroup outerContainerView;
 	private ViewGroup widgetContainerView;
 
@@ -304,5 +361,4 @@ public abstract class FormWidget {
 	// null. This is all to allow a user to start editing
 	// a 'disabled' element and automatically turn this checkbox on.
 	private boolean enabledState;
-
 }

@@ -1,15 +1,17 @@
 package js.form;
 
+import java.util.Map;
+
 import js.rbuddy.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 public class FormImageWidget extends FormWidget {
 
-	public FormImageWidget(FormField owner) {
-		super(owner);
+	public FormImageWidget(Form owner, Map attributes) {
+		super(owner,attributes);
 
-		imageView = new ImageView(owner.getOwner().context());
+		imageView = new ImageView(context());
 		imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 		imageView.setAdjustViewBounds(true);
 

@@ -37,7 +37,7 @@ public class Form implements IJSONEncoder {
 		json.enterList();
 		while (json.hasNext()) {
 			Map attributes = (Map) json.next();
-			FormField item = new FormField(this, attributes);
+			FormWidget item = FormWidget.build(this, attributes);
 			String id = item.getId();
 			if (!id.isEmpty()) {
 				Object prev = itemsMap.put(item.getId(), item);
@@ -63,8 +63,8 @@ public class Form implements IJSONEncoder {
 			layout.setLayoutParams(new LinearLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-			for (FormField fi : fieldsList) {
-				layout.addView(fi.getWidget().getOuterContainer());
+			for (FormWidget w : fieldsList) {
+				layout.addView(w.getView());
 			}
 		}
 		return layout;
@@ -84,15 +84,15 @@ public class Form implements IJSONEncoder {
 		getField(fieldName).setValue(value.toString());
 	}
 
-	public FormWidget getField(String fieldName) {
-		FormField field = itemsMap.get(fieldName);
+	public FormWidget getField(String widgetName) {
+		FormWidget field = itemsMap.get(widgetName);
 		if (field == null)
-			throw new IllegalArgumentException("no field found with name "
-					+ fieldName);
-		return field.getWidget();
+			throw new IllegalArgumentException("no widget found with name "
+					+ widgetName);
+		return field;
 	}
 
-	private List<FormField> fieldsList = new ArrayList();
+	private List<FormWidget> fieldsList = new ArrayList();
 	private View layout;
-	private Map<String, FormField> itemsMap = new HashMap();
+	private Map<String, FormWidget> itemsMap = new HashMap();
 }

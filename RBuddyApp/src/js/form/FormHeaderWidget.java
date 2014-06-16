@@ -1,15 +1,17 @@
 package js.form;
 
+import java.util.Map;
+
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class FormHeaderWidget extends FormWidget {
 
-	public FormHeaderWidget(FormField owner) {
-		super(owner);
+	public FormHeaderWidget(Form owner, Map attributes) {
+		super(owner, attributes);
 
-		String headerText = owner.strArg("label", "");
+		String headerText = strAttr("label", "");
 
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -23,4 +25,9 @@ public class FormHeaderWidget extends FormWidget {
 
 		getWidgetContainer().addView(horizontalSeparator());
 	}
+
+	protected String getId() {
+		return "";
+	}
+
 }

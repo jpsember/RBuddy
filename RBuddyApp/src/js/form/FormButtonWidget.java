@@ -1,6 +1,8 @@
 package js.form;
 
 //import static js.basic.Tools.*;
+import java.util.Map;
+
 import js.rbuddy.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -10,15 +12,14 @@ import android.widget.ImageButton;
 
 public class FormButtonWidget extends FormWidget {
 
-	public FormButtonWidget(FormField owner) {
-		super(owner);
-
-		String button_icon = owner.strArg("icon", "");
-		String button_label = owner.strArg("label", "");
+	public FormButtonWidget(Form owner, Map attributes) {
+		super(owner,attributes);
+		String button_icon = strAttr("icon", "");
+		String button_label = strAttr("label", "");
 		if (button_icon.isEmpty()) {
 			if (button_label.isEmpty()) {
 				// Use id as fallback
-				button_label = owner.getId();
+				button_label = getId();
 			}
 			hasLabel = true;
 			Button b = new Button(context());

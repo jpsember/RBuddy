@@ -1,11 +1,13 @@
 package js.form;
 
+import java.util.Map;
+
 import js.rbuddy.Cost;
 import android.text.InputType;
 
 public class FormCostWidget extends FormTextWidget {
-	public FormCostWidget(FormField owner) {
-		super(owner);
+	public FormCostWidget(Form owner, Map attributes) {
+		super(owner,attributes);
 
 		input.setInputType(InputType.TYPE_CLASS_NUMBER
 				| InputType.TYPE_NUMBER_FLAG_DECIMAL

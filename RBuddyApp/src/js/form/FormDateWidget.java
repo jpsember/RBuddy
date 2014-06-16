@@ -1,6 +1,7 @@
 package js.form;
 
 import java.text.ParseException;
+import java.util.Map;
 
 import js.rbuddy.AndroidDate;
 import js.rbuddy.JSDate;
@@ -8,10 +9,10 @@ import android.app.DatePickerDialog;
 import android.widget.DatePicker;
 
 public class FormDateWidget extends FormTextWidget {
-	public FormDateWidget(FormField owner) {
-		super(owner);
+	public FormDateWidget(Form owner, Map attributes) {
+		super(owner,attributes);
 
-		input.setHint(getOwner().strArg("hint", "Date"));
+		input.setHint(strAttr("hint", "Date"));
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public class FormDateWidget extends FormTextWidget {
 		JSDate date = JSDate.parse(getValue(), true);
 		int[] ymd = AndroidDate.getJavaYearMonthDay(date);
 
-		new DatePickerDialog(getOwner().getOwner().context(), dateListener,
+		new DatePickerDialog(context(), dateListener,
 				ymd[0], ymd[1], ymd[2]).show();
 	}
 

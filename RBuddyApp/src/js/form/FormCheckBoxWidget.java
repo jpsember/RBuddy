@@ -1,5 +1,7 @@
 package js.form;
 
+import java.util.Map;
+
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -9,8 +11,8 @@ import android.widget.TextView;
 
 public class FormCheckBoxWidget extends FormWidget {
 
-	public FormCheckBoxWidget(FormField owner) {
-		super(owner);
+	public FormCheckBoxWidget(Form owner, Map attributes) {
+		super(owner,attributes);
 
 		checkBox = new CheckBox(context());
 
@@ -28,7 +30,7 @@ public class FormCheckBoxWidget extends FormWidget {
 		p.gravity = Gravity.BOTTOM;
 		horizontalPanel.addView(checkBox, p);
 
-		String label = owner.strArg("label", owner.getId());
+		String label = strAttr("label",getId());
 		buildLabel(label, ourContainer);
 
 		getWidgetContainer().addView(ourContainer);

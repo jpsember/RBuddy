@@ -1,5 +1,7 @@
 package js.form;
 
+import java.util.Map;
+
 import android.content.Context;
 import android.text.InputType;
 import android.view.KeyEvent;
@@ -12,7 +14,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
-
 import static js.basic.Tools.*;
 
 
@@ -26,8 +27,8 @@ public class FormTextWidget extends FormWidget {
 
 	private static String[] focusTypeStrings = {"never","resistant","normal"};
 
-	public FormTextWidget(FormField owner) {
-		super(owner);
+	public FormTextWidget(Form owner, Map attributes) {
+		super(owner,attributes);
 
 		this.focusType = getFocusType();
 		
@@ -83,12 +84,12 @@ public class FormTextWidget extends FormWidget {
 	}
 
 	protected int getFocusType() {
-		String ft = getOwner().strArg("focus", "normal");
+		String ft = strAttr("focus", "normal");
 		return indexOfString(focusTypeStrings,ft);
 	}
 
 	protected String getAutoCompletionType() {
-		return getOwner().strArg("autocompletion", "none");
+		return strAttr("autocompletion", "none");
 	}
 
 	protected void constructInput() {
@@ -108,14 +109,14 @@ public class FormTextWidget extends FormWidget {
 
 		int inputType = InputType.TYPE_CLASS_TEXT
 				| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
-		if (getOwner().intArg("minlines", 1) > 1) {
+		if (intAttr("minlines", 1) > 1) {
 			inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE;
 		}
 		input.setInputType(inputType);
-		String hint = getOwner().strArg("hint", "");
+		String hint = strAttr("hint", "");
 		if (!hint.isEmpty())
 			input.setHint(hint);
-		input.setMinLines(getOwner().intArg("minlines", 1));
+		input.setMinLines(intAttr("minlines", 1));
 
 		// When this view loses focus, immediately attempt to parse (and
 		// possibly correct) the user's input
