@@ -1,0 +1,85 @@
+OSX
+----
+Make sure the 'caps lock' key is mapped to produce the control (^) key.
+Use system preferences / Keyboard / Modifier keys... if necessary.
+
+ctrl left / right
+  switch to left / right space
+
+shift-f11
+  show spaces
+
+f11
+  move other windows out of the way (temporarily) and show desktop
+
+move mouse to bottom right of screen
+  start screen saver
+
+
+Eclipse
+---------------------
+Import the latest preferences file by selecting File/Import/General/Preferences/Next;
+from preference file ~/android_development/android_base/config_files/jeff.epf
+
+
+ctrl space
+  content assist
+
+ctrl .
+  cycle through suggestions of content assist
+
+cmd .
+  advance to next issue (e.g., compile error)
+
+cmd 1
+  attempt 'quick fix' of error (often there is a single obvious fix
+  to a compile problem)
+
+cmd D
+  delete current line
+
+cmd shift F
+  Format source file
+
+cmd /
+  toggle disabling selected lines (or current line if none selected)
+
+cmd shift L   (twice)
+  display keyboard mappings
+
+double click on word with mouse
+  selects word
+
+f4 f3
+  find next occurrence of selected word (f4 isn't really required,
+  but other editors I use require it)
+
+cmd F
+  search within file
+
+cmd P
+  search within project
+
+cmd return
+  go to definition of word at cursor
+
+cmd [
+  go back to previous edit position
+
+cmd w
+  close current tab
+
+option up/down
+  move current line up or down
+
+cmd G
+  go to line number (you can often double click on lines with errors,
+  such as JUnit test results, to go to lines as well)
+
+f9
+  repeat last run (unit test, application, whatever)
+
+f5
+  refresh files (do this after selecting a package within the Package
+  Explorer; this is sometimes necessary after doing a git pull)
+
