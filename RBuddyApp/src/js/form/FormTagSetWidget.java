@@ -11,6 +11,7 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.Tokenizer;
 
 public class FormTagSetWidget extends FormTextWidget {
+	
 	public FormTagSetWidget(FormField owner) {
 		super(owner);
 	}
@@ -37,6 +38,11 @@ public class FormTagSetWidget extends FormTextWidget {
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context(),
 				android.R.layout.simple_dropdown_item_1line, tf.tagNamesList());
 		textView.setAdapter(adapter);
+	}
+
+	@Override
+	protected int getFocusType() {
+		return FOCUS_RESISTANT;
 	}
 
 	@Override

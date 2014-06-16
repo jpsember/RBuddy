@@ -32,7 +32,11 @@ public class EditReceiptActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		app = RBuddyApp.sharedInstance();
-		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
+
+		if (db) {
+			app.dumpIntent(this);
+		}
+		int receiptId = this.getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 

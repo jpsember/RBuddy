@@ -9,7 +9,9 @@ import java.util.Map;
 import js.basic.Files;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Looper;
 import static js.basic.Tools.*;
 
@@ -191,7 +193,7 @@ public class RBuddyApp {
 		addResource("photo", android.R.drawable.ic_menu_gallery);
 		addResource("camera", android.R.drawable.ic_menu_camera);
 		addResource("search", android.R.drawable.ic_menu_search);
-}
+	}
 
 	public String getStringResource(String stringName) {
 		String packageName = context.getPackageName();
@@ -216,6 +218,16 @@ public class RBuddyApp {
 			s = getStringResource(s.substring(1));
 		}
 		return s;
+	}
+
+	public void dumpIntent(Activity activity) {
+		Intent intent = activity.getIntent();
+		Bundle bundle = intent.getExtras();
+		pr(activity.getClass().getSimpleName() + " Intent:");
+		for (String key : bundle.keySet()) {
+			Object value = bundle.get(key);
+			pr("  " + key + " : " + describe(value)); 
+		}
 	}
 
 	private Map<String, Integer> resourceMap = new HashMap();
