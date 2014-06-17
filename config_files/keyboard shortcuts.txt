@@ -41,6 +41,10 @@ cmd D
 cmd shift F
   Format source file
 
+ctrl X
+  Open a type (e.g. a class); saves hunting for it in the Package Explorer;
+  I have added this to be equivalent to the built-in cmd shift T
+
 cmd /
   toggle disabling selected lines (or current line if none selected)
 

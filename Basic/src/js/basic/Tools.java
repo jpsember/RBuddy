@@ -3,7 +3,14 @@ package js.basic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -958,7 +965,7 @@ public final class Tools {
 
 	/**
 	 * Optionally replace literal line numbers that appear in warnings (and
-	 * 'unimp' messages) with constant placeholders ('XXX') so that old
+	 * 'unimp' messages) with constant placeholders ('xxx') so that old
 	 * snapshots remain valid even if the line numbers have changed.
 	 */
 	public static void setSanitizeLineNumbers(boolean f) {
@@ -966,7 +973,7 @@ public final class Tools {
 	}
 
 	/**
-	 * Replace all line numbers within a stack trace with 'XXX' so they are
+	 * Replace all line numbers within a stack trace with "xxx" so they are
 	 * ignored within snapshots; has no effect if sanitize is not active
 	 * 
 	 * @param s
