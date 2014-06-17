@@ -296,7 +296,7 @@ public abstract class FormWidget {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setDrawableProvider(FormDrawableProvider p) {
+	public void setDrawableProvider(IDrawableProvider p) {
 		throw new UnsupportedOperationException();
 	}
 

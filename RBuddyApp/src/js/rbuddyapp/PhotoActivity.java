@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import js.basic.Files;
 import js.form.Form;
-import js.form.FormDrawableProvider;
+import js.form.IDrawableProvider;
 import js.rbuddy.PhotoFile;
 import js.rbuddy.R;
 import js.rbuddy.Receipt;
@@ -27,7 +27,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
-public class PhotoActivity extends Activity implements FormDrawableProvider {
+public class PhotoActivity extends Activity implements IDrawableProvider {
 
 	// Identifiers for the intents that we may spawn
 	private static final int REQUEST_IMAGE_CAPTURE = 1;

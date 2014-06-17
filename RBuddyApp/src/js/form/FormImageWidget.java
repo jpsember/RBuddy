@@ -34,13 +34,13 @@ public class FormImageWidget extends FormWidget {
 	}
 
 	@Override
-	public void setDrawableProvider(FormDrawableProvider p) {
+	public void setDrawableProvider(IDrawableProvider p) {
 		if (drawableProvider != p) {
 			this.drawableProvider = p;
 			updatePhotoView();
 		}
 	}
 	
-	private FormDrawableProvider drawableProvider;
+	private IDrawableProvider drawableProvider;
 	private ImageView imageView;
 }
