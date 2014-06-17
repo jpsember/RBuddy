@@ -11,8 +11,8 @@ import java.util.Set;
 
 import org.junit.*;
 
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
+import js.json.JSONEncoder;
+import js.json.JSONParser;
 import js.rbuddy.TagSet;
 import js.rbuddy.TagSetFile;
 import js.testUtils.IOSnapshot;
@@ -221,7 +221,7 @@ public class TagSetTest extends js.testUtils.MyTest {
 	@Test
 	public void testFormatEmptyTagNameSet() {
 		TagSet tagSet = new TagSet();
-		assertStringsMatch("", tagSet.format());
+		assertStringsMatch("", tagSet);
 	}
 
 	@Test
@@ -247,7 +247,7 @@ public class TagSetTest extends js.testUtils.MyTest {
 
 		TagSet ts = new TagSet(tagSet.iterator());
 
-		pr(ts.format());
+		pr(ts);
 
 		IOSnapshot.close();
 	}
@@ -280,8 +280,7 @@ public class TagSetTest extends js.testUtils.MyTest {
 			String s = script[i];
 			String sExp = script[i + 1];
 			TagSet tagSet = TagSet.parse(s);
-			String s2 = tagSet.format();
-			assertStringsMatch(sExp, s2);
+			assertStringsMatch(sExp,tagSet);
 		}
 	}
 

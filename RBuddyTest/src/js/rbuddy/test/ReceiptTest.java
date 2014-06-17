@@ -2,8 +2,8 @@ package js.rbuddy.test;
 
 import org.junit.*;
 
-import js.basic.JSONEncoder;
-import js.basic.JSONParser;
+import js.json.JSONEncoder;
+import js.json.JSONParser;
 import js.rbuddy.JSDate;
 import js.rbuddy.Receipt;
 import js.rbuddy.Cost;
