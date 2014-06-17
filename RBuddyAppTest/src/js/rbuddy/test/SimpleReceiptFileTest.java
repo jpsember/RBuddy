@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import js.rbuddy.Receipt;
-import js.rbuddy.SimpleReceiptFile;
+import js.rbuddyapp.SimpleReceiptFile;
 import js.rbuddy.TagSetFile;
 
 public class SimpleReceiptFileTest extends JSAndroidTestCase {

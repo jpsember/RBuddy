@@ -1,16 +1,13 @@
 package js.testUtils;
 
-import static org.junit.Assert.*;
-
-import org.junit.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import junit.framework.TestCase;
 import static js.basic.Tools.*;
 
-public class MyTest {
+public class MyTest extends TestCase {
 
 	public static void assertEqualsFloat(double expected, double got) {
 		assertEquals(expected, got, 1e-10);
@@ -24,14 +21,15 @@ public class MyTest {
 		assertEquals(s1.toString(), s2.toString());
 	}
 
-	@Before
-	public void setUp() {
+	
+	@Override
+	protected void setUp() {
 		tempDirectory = null;
 		random = null;
 	}
 
-	@After
-	public void tearDown() {
+	@Override
+	protected void tearDown() {
 		// Remove our reference to the temporary directory, so a new one is
 		// created for the next test.
 		// In order to delete it, if it wasn't empty, we'd have to recursively

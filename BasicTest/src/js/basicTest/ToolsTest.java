@@ -1,15 +1,11 @@
 package js.basicTest;
 
-import static org.junit.Assert.*;
-import js.testUtils.IOSnapshot;
-
-import org.junit.*;
+import js.testUtils.*;
 
 import static js.basic.Tools.*;
 
-public class ToolsTest extends js.testUtils.MyTest {
+public class ToolsTest extends MyTest {
 
-	@Test
 	public void testASSERT() {
 		String msg = "";
 		ASSERT(true);
@@ -22,7 +18,6 @@ public class ToolsTest extends js.testUtils.MyTest {
 		assertTrue(msg.contains("ASSERTION FAILED"));
 	}
 
-	@Test
 	public void testfBits() {
 		assertStringsMatch("010001", fBits(17, "6"));
 		assertStringsMatch(".1...1", fBits(17, "6d"));
@@ -31,7 +26,6 @@ public class ToolsTest extends js.testUtils.MyTest {
 		assertStringsMatch("   1...1", fBits(17));
 	}
 
-	@Test
 	public void testFormatHex() {
 		assertStringsMatch("$       40", fh(64));
 		assertStringsMatch("$        0", fh(0));
@@ -39,7 +33,6 @@ public class ToolsTest extends js.testUtils.MyTest {
 		assertStringsMatch("0000_0000", toHex(null, 0, 8, false, true,false));
 	}
 
-	@Test
 	public void testFormatHexWithSnapshots() {
 		IOSnapshot.open();
 		for (int i = 0; i < 32; i++) {
@@ -59,14 +52,12 @@ public class ToolsTest extends js.testUtils.MyTest {
 		IOSnapshot.close();
 	}
 
-	@Test
 	public void testChomp() {
 		assertStringsMatch("hello", chomp("hello"));
 		assertStringsMatch("hello", chomp("hello\n"));
 		assertStringsMatch("hello", chomp("hello\n\n\n\n"));
 	}
 
-	@Test
 	public void testFormattedNumbersDisplay() {
 		double[] v = { 4.2, 4.2222222, 444.2222222, 444.2256, 444.9994,
 				444.9995, 999.9994, 999.9995, 0, 0.0000001,

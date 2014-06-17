@@ -1,19 +1,15 @@
 package js.basicTest;
 
-import org.junit.*;
+import js.testUtils.*;
 
-import js.testUtils.IOSnapshot;
+public class IOSnapshotTest extends MyTest {
 
-public class IOSnapshotTest extends js.testUtils.MyTest {
-
-	@Test
 	public void testStdOut() {
 		IOSnapshot.open();
 		System.out.println("This is printed to System.out");
 		IOSnapshot.close();
 	}
 	
-	@Test
 	public void testStdErr() {
 		IOSnapshot.open();
 		System.out.println("This is printed to System.out");
@@ -21,7 +17,6 @@ public class IOSnapshotTest extends js.testUtils.MyTest {
 		IOSnapshot.close();
 	}
 
-	@Test
 	public void testStdErrOnly() {
 		IOSnapshot.open();
 		System.err.println("This is printed to System.err");

@@ -1,15 +1,10 @@
 package js.basicTest;
 
-//import static org.junit.Assert.*;
-
-import org.junit.*;
-
 import js.basic.StringUtil;
-import js.testUtils.IOSnapshot;
+import js.testUtils.*;
 
-public class StringUtilTest extends js.testUtils.MyTest {
+public class StringUtilTest extends MyTest {
 
-	@Test
 	public void testRandomString() {
 		IOSnapshot.open();
 		for (int i = 0; i < 12; i++) {

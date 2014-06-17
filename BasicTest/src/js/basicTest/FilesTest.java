@@ -7,12 +7,9 @@ import java.io.IOException;
 
 import js.basic.Files;
 
-import org.junit.*;
+import js.testUtils.*;
 
-//import static js.basic.Tools.*;
-import static org.junit.Assert.*;
-
-public class FilesTest extends js.testUtils.MyTest {
+public class FilesTest extends MyTest {
 	
 	private static void ourWriteTextFile(File path, String content) throws IOException {
 		BufferedWriter w = new BufferedWriter(new FileWriter(path));
@@ -27,7 +24,6 @@ public class FilesTest extends js.testUtils.MyTest {
 	private final static String CONTENT = "Alpha\n   \t Bravo\n\n\nCharlie\n";
 	private final static String CONTENT2 = "Epsilon\n";
 	
-	@Test
 	public void testReadTextFile() throws IOException {
 		File path = buildFile();
 		ourWriteTextFile(path,CONTENT);
@@ -36,7 +32,6 @@ public class FilesTest extends js.testUtils.MyTest {
 		assertStringsMatch(x,CONTENT);
 	}
 	
-	@Test
 	public void testReadTextFileWithoutFinalLinefeed() throws IOException {
 		File path = buildFile();
 		ourWriteTextFile(path,CONTENT.substring(0,CONTENT.length()-1));
@@ -45,14 +40,12 @@ public class FilesTest extends js.testUtils.MyTest {
 		assertStringsMatch(x,CONTENT);
 	}
 
-	@Test
 	public void testWriteTextFile() throws IOException {
 		File path = buildFile();
 		Files.writeTextFile(path, CONTENT);
 		assertTrue(path.isFile());
 	}
 
-	@Test
 	public void testWriteTextFileWhenChanged() throws IOException {
 		File path = buildFile();
 		Files.writeTextFile(path, CONTENT);
@@ -62,7 +55,6 @@ public class FilesTest extends js.testUtils.MyTest {
 		assertStringsMatch(CONTENT2,Files.readTextFile(path));
 	}
 	
-	@Test
 	public void testWriteTextFileWhenUnchangedIfNotExplicitlyToldNotTo()
 			throws IOException {
 		File path = buildFile();
@@ -84,7 +76,6 @@ public class FilesTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	public void testDoesntWriteTextFileWhenUnchanged() throws IOException {
 		File dir = this.tempDirectory();
 		File path = new File(dir,"textfile.txt");
@@ -99,7 +90,6 @@ public class FilesTest extends js.testUtils.MyTest {
 		assertTrue(path.lastModified() < ms);
 	}
 
-	@Test
 	public void testDoesWriteTextFileWhenChanged() throws IOException {
 		File dir = this.tempDirectory();
 		File path = new File(dir,"textfile.txt");

@@ -1,14 +1,13 @@
 package js.rbuddy.test;
 
-import org.junit.*;
-
+import js.testUtils.*;
 import js.json.JSONEncoder;
 import js.json.JSONParser;
 import js.rbuddy.JSDate;
 import js.rbuddy.Receipt;
 import js.rbuddy.Cost;
 
-public class ReceiptTest extends js.testUtils.MyTest {
+public class ReceiptTest extends MyTest {
 
 	private void verifySummary(String input, String expOutput) {
 		Receipt r = new Receipt(42);
@@ -16,25 +15,21 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		assertStringsMatch(r.getSummary(), expOutput);
 	}
 
-	@Test
 	public void testSummaryLeadSpaces() {
 		verifySummary("   leading spaces", "leading spaces");
 	}
 
-	@Test
 	public void testSummaryTrailingSpaces() {
 		verifySummary("trailing spaces   ", "trailing spaces");
 	}
 
-	@Test
 	public void testCostIsRecorded() {
 		Receipt r = new Receipt(42);
 		assertEqualsFloat(0, r.getCost().getValue());
 		r.setCost(new Cost(123.45));
 		assertEqualsFloat(123.45, r.getCost().getValue());
-		}
-	
-	@Test
+	}
+
 	public void testSummaryReplaceLinefeedsWithSpaces() {
 		verifySummary("linefeeds\n\n\nembedded", "linefeeds embedded");
 		verifySummary("linefeeds    \t\n\n  embedded    aaa \n\n \n bbb ",
@@ -42,23 +37,27 @@ public class ReceiptTest extends js.testUtils.MyTest {
 		verifySummary(" \n\n \n ", "");
 	}
 
-	@Test
 	public void testConstructorStartsWithCurrentDate() {
 		Receipt r = new Receipt(42);
 		assertStringsMatch(JSDate.currentDate(), r.getDate());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
 	public void testAttemptToAssignIllegalUniqueIdentifier() {
-		new Receipt(0);
+		try {
+			new Receipt(0);
+			fail();
+		} catch (IllegalArgumentException e) {
+		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
 	public void testAttemptToAssignIllegalUniqueIdentifier2() {
-		new Receipt(-1);
+		try {
+			new Receipt(-1);
+			fail();
+		} catch (IllegalArgumentException e) {
+		}
 	}
 
-	@Test
 	public void testEncode() {
 		Receipt r = new Receipt(72);
 		r.setSummary("\n\nA long summary\n\n\n   \n\n with several linefeeds, \"quotes\", and | some other characters | ... \n\n");

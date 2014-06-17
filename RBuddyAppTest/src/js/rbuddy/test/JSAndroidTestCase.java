@@ -1,6 +1,6 @@
 package js.rbuddy.test;
 
-import js.rbuddy.RBuddyApp;
+import js.rbuddyapp.RBuddyApp;
 import android.test.AndroidTestCase;
 
 public class JSAndroidTestCase extends AndroidTestCase {

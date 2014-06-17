@@ -1,15 +1,11 @@
 package js.basicTest;
 
 import java.io.PrintStream;
-
-import org.junit.*;
-
+import js.testUtils.*;
 import static js.basic.Tools.*;
-import js.testUtils.StringPrintStream;
 
-public class StringPrintStreamTest extends js.testUtils.MyTest {
+public class StringPrintStreamTest extends MyTest {
 
-	@Test
 	public void testInterceptor() {
 
 		StringPrintStream icept = StringPrintStream.build();
@@ -22,7 +18,7 @@ public class StringPrintStreamTest extends js.testUtils.MyTest {
 		System.setOut(originalOut);
 
 		String content = icept.content();
-		assertStringsMatch("aaa\n15bbb\n",content);
+		assertStringsMatch("aaa\n15bbb\n", content);
 	}
 
 }

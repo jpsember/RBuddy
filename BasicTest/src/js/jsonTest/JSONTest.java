@@ -1,7 +1,5 @@
 package js.jsonTest;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -10,17 +8,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.*;
+import js.testUtils.*;
 
-import js.json.IJSONEncoder;
-import js.json.IJSONParser;
-import js.json.JSONEncoder;
-import js.json.JSONException;
-import js.json.JSONParser;
+import js.json.*;
 import static js.basic.Tools.*;
 import static js.json.JSONTools.*;
 
-public class JSONTest extends js.testUtils.MyTest {
+public class JSONTest extends MyTest {
 
 	private JSONParser json(String s) {
 		json = new JSONParser(s);
@@ -30,7 +24,6 @@ public class JSONTest extends js.testUtils.MyTest {
 
 	private JSONParser json;
 
-	@Test
 	public void testNumbers() {
 		String script[] = { "0", "1", "-123.52e20", "-123.52e-20", "0.5" };
 		for (int i = 0; i < script.length; i++) {
@@ -43,7 +36,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	public void testBadNumbers() {
 		// final boolean db = true;
 		if (db)
@@ -76,7 +68,6 @@ public class JSONTest extends js.testUtils.MyTest {
 
 	private JSONEncoder enc;
 
-	@Test
 	public void testStreamConstructor() throws UnsupportedEncodingException {
 		String orig = "[0,1,2,3,\"hello\"]";
 		InputStream stream = new ByteArrayInputStream(orig.getBytes("UTF-8"));
@@ -89,7 +80,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertStringsMatch(s, orig);
 	}
 
-	@Test
 	public void testArray() {
 		String orig = "[0,1,2,3,\"hello\"]";
 
@@ -105,7 +95,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		json.exit();
 	}
 
-	@Test
 	public void testReadMapAsSingleObject() {
 		String s = "{'description':{'type':'text','hint':'enter something here'}}";
 		s = swapQuotes(s);
@@ -114,7 +103,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertTrue(map.containsKey("description"));
 	}
 
-	@Test
 	public void testMap() {
 		String orig = "{\"u\":14,\"m\":false,\"w\":null,\"k\":true}";
 		json(orig);
@@ -136,7 +124,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertStringsMatch(m.get("k"), "true");
 	}
 
-	@Test
 	public void testEncodeMap() {
 		JSONEncoder enc = new JSONEncoder();
 		enc.enterMap();
@@ -154,7 +141,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertStringsMatch("{\"a\":[12,17],\"b\":true}", s);
 	}
 
-	@Test
 	public void testArrays() {
 		int[] intArray = { 1, 2, 3, 4 };
 		enc().encode(intArray);
@@ -162,7 +148,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertStringsMatch(s, "[1,2,3,4]");
 	}
 
-	@Test
 	public void testString() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 1000; i++) {
@@ -176,7 +161,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		assertStringsMatch(decodedString, originalString);
 	}
 
-	@Test
 	public void testSymmetry() {
 		String script[] = {//
 				"0",//
@@ -218,7 +202,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	public void testComments() {
 
 		String script[] = {//
@@ -226,8 +209,7 @@ public class JSONTest extends js.testUtils.MyTest {
 				"{'hey':42}",//
 				"[42,15// start of comment\n//Another comment immediately\n    //Another comment after spaces\n,16]",//
 				"[42,15, 16]",//
-				"[42,15// zzz\n//zzz\n//zzz\n,16]",
-				"[42,15,16]",//
+				"[42,15// zzz\n//zzz\n//zzz\n,16]", "[42,15,16]",//
 		};
 
 		for (int i = 0; i < script.length; i += 2) {
@@ -247,11 +229,10 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	public void testTrailingCommas() {
 
 		String script[] = {//
-				"{'hey':42,'you':'outthere',}",//
+		"{'hey':42,'you':'outthere',}",//
 				"{'hey':42,'you':'outthere'}",//
 				"[42,15,16,17,]",//
 				"[42,15,16,17]",//
@@ -313,7 +294,6 @@ public class JSONTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	public void testInterface() {
 		OurClass c = new OurClass("hello", 42);
 		enc().encode(c);

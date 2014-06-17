@@ -3,11 +3,10 @@ package js.rbuddy.test;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.junit.Test;
-
 import js.rbuddy.Cost;
+import js.testUtils.*;
 
-public class CostTest extends js.testUtils.MyTest {
+public class CostTest extends MyTest {
 
 	// Convenience methods to set specific locales
 	private void setLocale(Locale locale) {
@@ -15,7 +14,7 @@ public class CostTest extends js.testUtils.MyTest {
 	}
 
 	@Override
-	public void setUp() {
+	protected void setUp() {
 		super.setUp();
 		setLocale(Locale.US);
 	}
@@ -33,7 +32,6 @@ public class CostTest extends js.testUtils.MyTest {
 	// all the correct ways i can think of to express
 	// one hundred twenty three dollars and forty five cents...
 
-	@Test
 	public void testNormalAmount() {
 
 		String s = "123.45";
@@ -41,7 +39,6 @@ public class CostTest extends js.testUtils.MyTest {
 		assertEqualsFloat(123.45, c.getValue());
 	}
 
-	@Test
 	public void testNormal2() {
 
 		String s = "$123.45";
@@ -49,7 +46,6 @@ public class CostTest extends js.testUtils.MyTest {
 		assertEqualsFloat(123.45, c.getValue());
 	}
 
-	@Test
 	public void testNormal3() {
 
 		String s = "123.45";
@@ -72,7 +68,6 @@ public class CostTest extends js.testUtils.MyTest {
 		// assertTrue(c.getValue() == 12345);
 	}
 
-	@Test
 	public void testFormattingViaToString() {
 		Cost.setUserCurrencyFormat(NumberFormat.getCurrencyInstance(Locale.US));
 
@@ -84,31 +79,26 @@ public class CostTest extends js.testUtils.MyTest {
 	// all the correct ways i can think of to express
 	// sixty seven dollars...
 
-	@Test
 	public void testDollarAmount() {
 		Cost c = new Cost("67");
 		assertEqualsFloat(67, c.getValue());
 	}
 
-	@Test
 	public void testDollar2() {
 		Cost c = new Cost("$67");
 		assertEqualsFloat(67, c.getValue());
 	}
 
-	@Test
 	public void testDollar3() {
 		Cost c = new Cost("$67.00");
 		assertEqualsFloat(67, c.getValue());
 	}
 
-	@Test
 	public void testDollar4() {
 		Cost c = new Cost("67.00");
 		assertEqualsFloat(67, c.getValue());
 	}
 
-	@Test
 	public void testDollar5() {
 
 		String s = "$ 67";
@@ -116,13 +106,11 @@ public class CostTest extends js.testUtils.MyTest {
 		assertEqualsFloat(67, c.getValue());
 	}
 
-	@Test
 	public void testParseEmptyString() {
 		Cost c = new Cost("");
 		assertEqualsFloat(0, c.getValue());
 	}
 
-	@Test
 	public void testParsing() {
 		// Verify that it can construct Cost objects by parsing various strings
 		String[] script = { "67", "123.45", "67.00", "$ 67", "123.45" };

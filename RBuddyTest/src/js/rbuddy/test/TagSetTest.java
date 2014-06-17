@@ -1,7 +1,6 @@
 package js.rbuddy.test;
 
 import static js.basic.Tools.*;
-import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,15 +8,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.*;
-
 import js.json.JSONEncoder;
 import js.json.JSONParser;
 import js.rbuddy.TagSet;
 import js.rbuddy.TagSetFile;
-import js.testUtils.IOSnapshot;
+import js.testUtils.*;
 
-public class TagSetTest extends js.testUtils.MyTest {
+public class TagSetTest extends MyTest {
 
 	private TagSetFile ts;
 
@@ -55,7 +52,6 @@ public class TagSetTest extends js.testUtils.MyTest {
 		return sb.toString();
 	}
 
-	@Test
 	/**
 	 * Add random tags to a set with a large capacity, and simulate it using a simple
 	 * but slower data structure; verify that the contents match afterwards.
@@ -74,7 +70,6 @@ public class TagSetTest extends js.testUtils.MyTest {
 		assertStringsMatch(s, JSONEncoder.toJSON(ts2));
 	}
 
-	@Test
 	public void testEmptySet() {
 		testScr("", "");
 	}
@@ -87,57 +82,46 @@ public class TagSetTest extends js.testUtils.MyTest {
 		assertStringsMatch(exp, q);
 	}
 
-	@Test
 	public void testMoveToFrontNotNecessaryWithSize1() {
 		testScr("aaaaa", "a");
 	}
 
-	@Test
 	public void testMoveToFrontNotNecessaryWithSize2() {
 		testScr("abbb", "ab");
 	}
 
-	@Test
 	public void testMoveToFrontNotNecessaryWithSize3() {
 		testScr("abcccbbbaaabbbaaa", "abc");
 	}
 
-	@Test
 	public void testAdd2() {
 		testScr("baaaaa", "ab");
 	}
 
-	@Test
 	public void testAdd3() {
 		testScr("abcde", "abcde");
 	}
 
-	@Test
 	public void testAdd4() {
 		testScr("abcdef", "bcdef");
 	}
 
-	@Test
 	public void testAdd5() {
 		testScr("fedcba", "abcde");
 	}
 
-	@Test
 	public void testAlphaOrder() {
 		testScr("mzajhq", "ahjqz");
 	}
 
-	@Test
 	public void testAdd6() {
 		testScr("abcdeeeeeeeee", "abcde");
 	}
 
-	@Test
 	public void testAdd7() {
 		testScr("abcdeaaaaaaa", "abcde");
 	}
 
-	@Test
 	public void testMovingDifferentPositionsToFront() {
 		String s = "abcde";
 		for (int i = 0; i < s.length(); i++) {
@@ -147,7 +131,6 @@ public class TagSetTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	/**
 	 * Add random tags to a set with a large capacity, and simulate it using a simple
 	 * but slower data structure; verify that the contents match afterwards.
@@ -218,13 +201,11 @@ public class TagSetTest extends js.testUtils.MyTest {
 		}
 	}
 
-	@Test
 	public void testFormatEmptyTagNameSet() {
 		TagSet tagSet = new TagSet();
 		assertStringsMatch("", tagSet);
 	}
 
-	@Test
 	public void testTagNameSetIsCaseInsensitive() {
 		ArrayList list = new ArrayList();
 		list.add("hello");
@@ -234,7 +215,6 @@ public class TagSetTest extends js.testUtils.MyTest {
 		assertTrue(tagSet.size() == 1);
 	}
 
-	@Test
 	public void testTagNameSetFormat() {
 		IOSnapshot.open();
 
@@ -252,7 +232,6 @@ public class TagSetTest extends js.testUtils.MyTest {
 		IOSnapshot.close();
 	}
 
-	@Test
 	public void testTagNameSetParse() {
 
 		String[] script = {
