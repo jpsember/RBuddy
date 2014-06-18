@@ -5,6 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Basic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JSTestUtils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RBuddy"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

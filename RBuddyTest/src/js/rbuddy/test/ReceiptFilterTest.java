@@ -18,13 +18,22 @@ public class ReceiptFilterTest extends MyTest {
 		return f;
 	}
 
-	// A pretty useless test, just to get things going
 	public void testStoresTagSet() {
 		TagSet s = TagSet.parse("alpha,bravo,charlie delta,epsilon");
 
 		f();
 		f.setInclusiveTags(s);
 		assertEquals(s.size(), f.getInclusiveTags().size());
+	}
+
+	public void testThereAreSomeWhoKnowMeAsTim() {
+		
+		ReceiptFilter rf = new ReceiptFilter();
+		
+		rf.setMinDateActive(true);
+		
+		assertTrue(rf.isMinDateActive());
+		assertFalse(rf.isMaxDateActive());
 	}
 
 	private ReceiptFilter f;
