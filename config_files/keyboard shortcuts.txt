@@ -54,9 +54,13 @@ cmd shift L   (twice)
 double click on word with mouse
   selects word
 
+
 f4 f3
   find next occurrence of selected word (f4 isn't really required,
   but other editors I use require it)
+
+cmd J  ...then type something...
+  does incremental search; finds occurrence of what you've typed; can be followed by f3
 
 cmd F
   search within file
@@ -65,7 +69,10 @@ cmd P
   search within project
 
 cmd return
-  go to definition of word at cursor
+  go to definition of cursor element
+
+f2
+  shows documentation (Javadoc) for cursor element
 
 cmd [
   go back to previous edit position
@@ -83,7 +90,19 @@ cmd G
 f9
   repeat last run (unit test, application, whatever)
 
+option f9
+  run single JUnit test at cursor position (doesn't work for Android unit tests!)
+
+f10
+  close perspective (i.e. after running test or application) to return views to 'edit' mode
+
 f5
   refresh files (do this after selecting a package within the Package
   Explorer; this is sometimes necessary after doing a git pull)
 
+
+
+Try installing MouseFeed plugin (install site:  http://download.sigasi.com/update/mousefeed/   )
+
+This shows a little popup every time you use a mouse or menu command for something for which
+a keyboard shortcut is available.  A great idea!
