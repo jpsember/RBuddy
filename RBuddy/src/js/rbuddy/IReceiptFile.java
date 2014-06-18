@@ -6,42 +6,55 @@ public interface IReceiptFile {
 
 	/**
 	 * Retrieve a receipt, given its identifier
+	 * 
 	 * @param uniqueIdentifier
 	 * @return receipt
-	 * @throws IllegalArgumentException if no such receipt exists
+	 * @throws IllegalArgumentException
+	 *             if no such receipt exists
 	 */
 	public Receipt getReceipt(int id);
-	
+
 	/**
-	 * Flush any changes 
+	 * Flush any changes
 	 */
 	public void flush();
-	
+
 	/**
 	 * Add a receipt
-	 * @param r Receipt
-	 * @throws IllegalArgumentException if receipt already exists in file
+	 * 
+	 * @param r
+	 *            Receipt
+	 * @throws IllegalArgumentException
+	 *             if receipt already exists in file
 	 */
 	public void add(Receipt r);
-	
+
 	/**
 	 * Delete a receipt
+	 * 
 	 * @param r
-	 * @throws IllegalArgumentException if no such receipt exists
+	 * @throws IllegalArgumentException
+	 *             if no such receipt exists
 	 */
 	public void delete(Receipt r);
-	
+
 	/**
 	 * Determine if a receipt with a particular id exists
+	 * 
 	 * @param id
 	 * @return true if it exists
 	 */
 	public boolean exists(int id);
-	
+
 	/**
-	 * Mark a receipt as being modified, so that it is written when the file is flushed
+	 * Mark a receipt as modified, so any changes are guaranteed to be saved
+	 * when the file is next flushed. Implementing classes are free to optimize
+	 * this process; e.g., they may determine that the receipt has not actually
+	 * changed and does not need flushing.
+	 * 
 	 * @param r
-	 * @throws IllegalArgumentException if no such receipt exists
+	 * @throws IllegalArgumentException
+	 *             if no such receipt exists
 	 */
 	public void setModified(Receipt r);
 
@@ -52,7 +65,8 @@ public interface IReceiptFile {
 
 	/**
 	 * Get an iterator over the receipts
+	 * 
 	 * @return
 	 */
-	public Iterator iterator();
+	public Iterator<Receipt> iterator();
 }

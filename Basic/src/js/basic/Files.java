@@ -8,9 +8,10 @@ public class Files {
 			.getProperty("line.separator");
 
 	public static String readTextFile(InputStream stream) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+		BufferedReader reader = new BufferedReader(
+				new InputStreamReader(stream));
 		return readTextFile(reader);
-}
+	}
 
 	private static String readTextFile(BufferedReader input) throws IOException {
 		StringBuilder sb = new StringBuilder();
@@ -40,6 +41,22 @@ public class Files {
 	public static String readTextFile(File file) throws IOException {
 		BufferedReader input = new BufferedReader(new FileReader(file));
 		return readTextFile(input);
+	}
+
+	public static byte[] readBinaryFile(File file) throws IOException {
+		RandomAccessFile f = new RandomAccessFile(file, "r");
+		byte[] b = new byte[(int) f.length()];
+		int bytesRead = f.read(b);
+		if (bytesRead != b.length)
+			throw new IOException("failed to read all bytes from " + file);
+		return b;
+	}
+
+	public static void writeBinaryFile(File file, byte[] contents)
+			throws IOException {
+		FileOutputStream f = new FileOutputStream(file);
+		f.write(contents);
+		f.close();
 	}
 
 	public static void writeTextFile(File file, String content,

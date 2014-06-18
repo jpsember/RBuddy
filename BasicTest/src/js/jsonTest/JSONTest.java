@@ -302,4 +302,14 @@ public class JSONTest extends MyTest {
 		OurClass c2 = (OurClass) json.read(OurClass.parser);
 		assertStringsMatch(c, c2);
 	}
+
+	public void testNullAsString() {
+		json(swapQuotes("['hello',null,'there']"));
+		json.enterList();
+		assertStringsMatch("hello", json.nextString());
+		assertNull(json.nextString());
+		assertStringsMatch("there", json.nextString());
+		assertFalse(json.hasNext());
+	}
+
 }

@@ -21,3 +21,7 @@
 
 [push]
 	default = simple
+
+
+# To push ALL branches to remote, including any new ones,
+# git push --all origin

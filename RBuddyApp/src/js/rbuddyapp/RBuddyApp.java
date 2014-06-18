@@ -2,7 +2,6 @@ package js.rbuddyapp;
 
 import static js.basic.Tools.*;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -11,7 +10,6 @@ import java.util.Map;
 import js.basic.Files;
 import js.rbuddy.IReceiptFile;
 import js.rbuddy.JSDate;
-import js.rbuddy.PhotoFile;
 import js.rbuddy.TagSetFile;
 import android.app.Activity;
 import android.content.Context;
@@ -63,27 +61,6 @@ public class RBuddyApp {
 		if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
 			die("not running within UI thread");
 		}
-	}
-
-	public PhotoFile getPhotoFile() {
-		if (photoFile == null) {
-			assertUIThread();
-
-			if (db)
-				pr("preparePhotoFile; " + stackTrace(1, 1));
-
-			File d = new File(context.getExternalFilesDir(null), "photos");
-			if (!d.exists()) {
-				d.mkdir();
-			}
-			if (!d.isDirectory())
-				die("failed to create directory " + d);
-			photoFile = new PhotoFile(d);
-			if (db)
-				pr("preparePhotoFile, created " + photoFile + ";\ncontents=\n"
-						+ photoFile.contents());
-		}
-		return photoFile;
 	}
 
 	public IReceiptFile receiptFile() {
@@ -247,12 +224,26 @@ public class RBuddyApp {
 		mGoogleApiClient = c;
 	}
 
+	public void setPhotoStore(IPhotoStore ps) {
+		this.photoStore = ps;
+	}
+
+	public IPhotoStore getPhotoStore() {
+		if (photoStore == null) {
+			// TODO better location for initialization of photoStore,
+			// receiptFile
+			receiptFile();
+			photoStore = new PhotoStore();
+		}
+		return photoStore;
+	}
+
 	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();
 	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
 	private Context context;
-	private PhotoFile photoFile;
+	private IPhotoStore photoStore;
 	private IReceiptFile receiptFile;
 	private TagSetFile tagSetFile;
 }
