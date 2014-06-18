@@ -26,6 +26,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
  */
 public class RBuddyApp {
 
+	public static final boolean useGoogleAPI = false;
+
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 	private static final String KEY_UNIQUE_IDENTIFIER = "unique_id";
 
@@ -223,11 +225,13 @@ public class RBuddyApp {
 	}
 
 	public GoogleApiClient getGoogleApiClient() {
+		ASSERT(useGoogleAPI);
 		// TODO Is GoogleApiClient thread-safe? This code isn't.
 		return mGoogleApiClient;
 	}
 
 	public void setGoogleApiClient(GoogleApiClient c) {
+		ASSERT(useGoogleAPI);
 		ASSERT(mGoogleApiClient == null);
 		mGoogleApiClient = c;
 	}

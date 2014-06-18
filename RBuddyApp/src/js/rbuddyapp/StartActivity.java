@@ -79,6 +79,9 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	private RBuddyApp app;
 
 	private void connectToGoogleDrive() {
+		if (!RBuddyApp.useGoogleAPI) {
+			processGoogleApiConnected();
+		} else {
 		final boolean db = true;
 		if (db)
 			pr("\n\n" + stackTrace()
@@ -101,6 +104,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 			if (db)
 				pr(" already connected");
 			processGoogleApiConnected();
+		}
 		}
 	}
 
