@@ -151,7 +151,7 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 		byte[] jpeg = null;
 		try {
 			jpeg = Files.readBinaryFile(workFile);
-			IPhotoStore ps = app.getPhotoStore();
+			IPhotoStore ps = app.photoStore();
 			String photoId = ps.storePhoto(receipt.getPhotoId(), jpeg);
 			receipt.setPhotoId(photoId);
 			app.receiptFile().setModified(receipt);
@@ -171,7 +171,7 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 				break;
 			byte[] jpeg = null;
 			try {
-				jpeg = app.getPhotoStore().readPhoto(photoId);
+				jpeg = app.photoStore().readPhoto(photoId);
 			} catch (IOException e) {
 				warning("unable to read photo from store: " + e);
 			}

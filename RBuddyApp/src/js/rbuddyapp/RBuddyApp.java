@@ -63,18 +63,26 @@ public class RBuddyApp {
 		}
 	}
 
+	public void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
+			IPhotoStore photoStore) {
+		this.receiptFile = receiptFile;
+		this.tagSetFile = tagSetFile;
+		this.photoStore = photoStore;
+	}
+
 	public IReceiptFile receiptFile() {
-		if (receiptFile == null) {
-			SimpleReceiptFile s = new SimpleReceiptFile();
-			receiptFile = s;
-			tagSetFile = s.readTagSetFile();
-		}
+		ASSERT(receiptFile != null);
 		return receiptFile;
 	}
 
 	public TagSetFile tagSetFile() {
-		receiptFile();
+		ASSERT(tagSetFile != null);
 		return tagSetFile;
+	}
+
+	public IPhotoStore photoStore() {
+		ASSERT(photoStore != null);
+		return photoStore;
 	}
 
 	public int getUniqueIdentifier() {
@@ -226,16 +234,6 @@ public class RBuddyApp {
 
 	public void setPhotoStore(IPhotoStore ps) {
 		this.photoStore = ps;
-	}
-
-	public IPhotoStore getPhotoStore() {
-		if (photoStore == null) {
-			// TODO better location for initialization of photoStore,
-			// receiptFile
-			receiptFile();
-			photoStore = new PhotoStore();
-		}
-		return photoStore;
 	}
 
 	private GoogleApiClient mGoogleApiClient;

@@ -105,6 +105,12 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	}
 
 	private void processGoogleApiConnected() {
+		{
+			SimpleReceiptFile s = new SimpleReceiptFile();
+			IPhotoStore ps = new PhotoStore();
+			app.setUserData(s, s.readTagSetFile(), ps);
+		}
+
 		// Start the receipt list activity
 		Intent intent = new Intent(getApplicationContext(),
 				ReceiptListActivity.class);
