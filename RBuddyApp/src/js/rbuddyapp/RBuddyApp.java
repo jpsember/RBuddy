@@ -1,5 +1,7 @@
 package js.rbuddyapp;
 
+import static js.basic.Tools.*;
+
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -17,7 +19,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
-import static js.basic.Tools.*;
+
+import com.google.android.gms.common.api.GoogleApiClient;
 
 /**
  * Maintains data structures and whatnot that are global to the RBuddy app, and
@@ -230,10 +233,21 @@ public class RBuddyApp {
 		pr(activity.getClass().getSimpleName() + " Intent:");
 		for (String key : bundle.keySet()) {
 			Object value = bundle.get(key);
-			pr("  " + key + " : " + describe(value)); 
+			pr("  " + key + " : " + describe(value));
 		}
 	}
 
+	public GoogleApiClient getGoogleApiClient() {
+		// TODO Is GoogleApiClient thread-safe? This code isn't.
+		return mGoogleApiClient;
+	}
+
+	public void setGoogleApiClient(GoogleApiClient c) {
+		ASSERT(mGoogleApiClient == null);
+		mGoogleApiClient = c;
+	}
+
+	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();
 	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
