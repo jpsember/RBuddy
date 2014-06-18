@@ -7,11 +7,12 @@ import js.basic.StringUtil;
 
 public class Receipt implements IJSONEncoder {
 
-	// Version number.  If JSON format of Receipt changes, we increment this.
-	// We incorporate the version number into the receipt filename (at least in the 'simple'
-	// receipt file implementation) to ensure older, invalid files are not used.
-	public static final int VERSION = 2;
-	
+	// Version number. If JSON format of Receipt changes, we increment this.
+	// We incorporate the version number into the receipt filename (at least in
+	// the 'simple' receipt file implementation) to ensure older, invalid 
+  // files are not used.
+	public static final int VERSION = 3;
+
 	/**
 	 * Constructor
 	 * 
@@ -49,6 +50,14 @@ public class Receipt implements IJSONEncoder {
 
 	public String getSummary() {
 		return summary;
+	}
+
+	public String getPhotoId() {
+		return photoId;
+	}
+
+	public void setPhotoId(String s) {
+		this.photoId = s;
 	}
 
 	public void setSummary(String s) {
@@ -163,6 +172,7 @@ public class Receipt implements IJSONEncoder {
 		j.encode(date);
 		j.encode(getSummary());
 		j.encode(getCost().getValue());
+		j.encode(getPhotoId());
 		j.encode(getTags());
 		j.exit();
 	}
@@ -175,8 +185,8 @@ public class Receipt implements IJSONEncoder {
 			JSDate date = (JSDate) json.read(JSDate.JSON_PARSER);
 			String summary = json.nextString();
 			double costValue = json.nextDouble();
-			
-			TagSet tags = (TagSet)json.read(TagSet.JSON_PARSER);
+			String photoId = json.nextString();
+			TagSet tags = (TagSet) json.read(TagSet.JSON_PARSER);
 
 			json.exit();
 
@@ -185,7 +195,8 @@ public class Receipt implements IJSONEncoder {
 			r.date = date;
 			r.tags = tags;
 			r.cost = new Cost(costValue);
-			
+			r.photoId = photoId;
+
 			return r;
 
 		}
@@ -194,7 +205,7 @@ public class Receipt implements IJSONEncoder {
 	private TagSet tags;
 	private JSDate date;
 	private String summary;
+	private String photoId;
 	private int id;
 	private Cost cost;
-
 }

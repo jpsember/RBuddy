@@ -1,6 +1,7 @@
 package js.rbuddyapp;
 
-import java.io.File;
+import static js.basic.Tools.*;
+
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -9,7 +10,6 @@ import java.util.Map;
 import js.basic.Files;
 import js.rbuddy.IReceiptFile;
 import js.rbuddy.JSDate;
-import js.rbuddy.PhotoFile;
 import js.rbuddy.TagSetFile;
 import android.app.Activity;
 import android.content.Context;
@@ -17,13 +17,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
-import static js.basic.Tools.*;
+
+import com.google.android.gms.common.api.GoogleApiClient;
 
 /**
  * Maintains data structures and whatnot that are global to the RBuddy app, and
  * used by the various activities
  */
 public class RBuddyApp {
+
+	public static final boolean useGoogleAPI = false;
 
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 	private static final String KEY_UNIQUE_IDENTIFIER = "unique_id";
@@ -62,39 +65,26 @@ public class RBuddyApp {
 		}
 	}
 
-	public PhotoFile getPhotoFile() {
-		if (photoFile == null) {
-			assertUIThread();
-
-			if (db)
-				pr("preparePhotoFile; " + stackTrace(1, 1));
-
-			File d = new File(context.getExternalFilesDir(null), "photos");
-			if (!d.exists()) {
-				d.mkdir();
-			}
-			if (!d.isDirectory())
-				die("failed to create directory " + d);
-			photoFile = new PhotoFile(d);
-			if (db)
-				pr("preparePhotoFile, created " + photoFile + ";\ncontents=\n"
-						+ photoFile.contents());
-		}
-		return photoFile;
+	public void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
+			IPhotoStore photoStore) {
+		this.receiptFile = receiptFile;
+		this.tagSetFile = tagSetFile;
+		this.photoStore = photoStore;
 	}
 
 	public IReceiptFile receiptFile() {
-		if (receiptFile == null) {
-			SimpleReceiptFile s = new SimpleReceiptFile();
-			receiptFile = s;
-			tagSetFile = s.readTagSetFile();
-		}
+		ASSERT(receiptFile != null);
 		return receiptFile;
 	}
 
 	public TagSetFile tagSetFile() {
-		receiptFile();
+		ASSERT(tagSetFile != null);
 		return tagSetFile;
+	}
+
+	public IPhotoStore photoStore() {
+		ASSERT(photoStore != null);
+		return photoStore;
 	}
 
 	public int getUniqueIdentifier() {
@@ -230,15 +220,32 @@ public class RBuddyApp {
 		pr(activity.getClass().getSimpleName() + " Intent:");
 		for (String key : bundle.keySet()) {
 			Object value = bundle.get(key);
-			pr("  " + key + " : " + describe(value)); 
+			pr("  " + key + " : " + describe(value));
 		}
 	}
 
+	public GoogleApiClient getGoogleApiClient() {
+		ASSERT(useGoogleAPI);
+		// TODO Is GoogleApiClient thread-safe? This code isn't.
+		return mGoogleApiClient;
+	}
+
+	public void setGoogleApiClient(GoogleApiClient c) {
+		ASSERT(useGoogleAPI);
+		ASSERT(mGoogleApiClient == null);
+		mGoogleApiClient = c;
+	}
+
+	public void setPhotoStore(IPhotoStore ps) {
+		this.photoStore = ps;
+	}
+
+	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();
 	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
 	private Context context;
-	private PhotoFile photoFile;
+	private IPhotoStore photoStore;
 	private IReceiptFile receiptFile;
 	private TagSetFile tagSetFile;
 }

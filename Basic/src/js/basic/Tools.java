@@ -49,6 +49,10 @@ public final class Tools {
 		return stackTrace(1 + skipCount, displayCount, null);
 	}
 
+	public static String stackTrace() {
+		return stackTrace(1, 1, null);
+	}
+
 	/**
 	 * Construct stack trace for a throwable
 	 * 

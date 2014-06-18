@@ -15,9 +15,13 @@
   co = checkout
   st = status
   undo = checkout --
-  
+
   # Type 'git newtask <branchname>' to start a new task
   newtask = checkout origin/master -b
 
 [push]
-	default = simple
+	default = current
+
+
+# To push ALL branches to remote, including any new ones,
+# git push --all origin

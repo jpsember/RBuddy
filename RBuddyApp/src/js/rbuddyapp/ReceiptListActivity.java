@@ -6,13 +6,13 @@ import java.util.*;
 
 import js.rbuddy.R;
 import js.rbuddy.Receipt;
-import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -23,6 +23,7 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		RBuddyApp.prepare(this);
 
 		app = RBuddyApp.sharedInstance();
@@ -36,7 +37,7 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public void onResume() {
-		super.onResume(); // Always call the superclass method first
+		super.onResume();
 		receiptListAdapter.notifyDataSetChanged();
 	}
 
@@ -48,7 +49,6 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu items for use in the action bar
 		getMenuInflater().inflate(R.menu.receiptlist_activity_actions, menu);
 		return super.onCreateOptionsMenu(menu);
 	}

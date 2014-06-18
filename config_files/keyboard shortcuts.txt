@@ -102,7 +102,15 @@ f5
 
 
 
+-------------------------
+
 Try installing MouseFeed plugin (install site:  http://download.sigasi.com/update/mousefeed/   )
 
 This shows a little popup every time you use a mouse or menu command for something for which
 a keyboard shortcut is available.  A great idea!
+
+*** UPDATE: This plugin is messing with the focus when I do 'file searching' in Eclipse.
+Specifically, when I type 'cmd p', the focus does NOT APPEAR in the dialog box.
+This is so annoying I have removed mousefeed. ****
+
+

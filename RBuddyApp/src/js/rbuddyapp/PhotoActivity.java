@@ -8,7 +8,6 @@ import java.io.IOException;
 import js.basic.Files;
 import js.form.Form;
 import js.form.IDrawableProvider;
-import js.rbuddy.PhotoFile;
 import js.rbuddy.R;
 import js.rbuddy.Receipt;
 import android.app.Activity;
@@ -50,9 +49,8 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 
 		// If no photo is defined for this receipt, jump right into the take
 		// photo intent
-		if (!app.getPhotoFile().photoExists(receipt.getId())) {
+		if (receipt.getPhotoId() == null)
 			startImageCaptureIntent();
-		}
 	}
 
 	@Override
@@ -133,7 +131,6 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 		if (db)
 			pr("\n\nprocessPhotoResult intent " + intent);
 
-		File mainFile = null;
 		unimp("handle various problem situations in ways other than just 'die'");
 		if (db)
 			pr("processPhotoResult intent=" + intent);
@@ -151,15 +148,16 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 
 		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
 
-		mainFile = app.getPhotoFile().getMainFileFor(receipt.getId());
-		if (db)
-			pr("receipt id " + receipt.getId()
-					+ "  copying scaled/rotated file " + workFile
-					+ " to mainFile " + mainFile);
-
+		byte[] jpeg = null;
 		try {
-			Files.copy(workFile, mainFile);
+			jpeg = Files.readBinaryFile(workFile);
+			IPhotoStore ps = app.photoStore();
+			String photoId = ps.storePhoto(receipt.getPhotoId(), jpeg);
+			receipt.setPhotoId(photoId);
+			app.receiptFile().setModified(receipt);
 		} catch (IOException e) {
+			// TODO display popup message to user, and don't update receipt's
+			// photo id
 			die(e);
 		}
 	}
@@ -167,12 +165,21 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 	@Override
 	public Drawable getDrawable() {
 		Drawable d = null;
-		PhotoFile pf = app.getPhotoFile();
-		if (pf.photoExists(receipt.getId())) {
-			File imageFile = pf.getMainFileFor(receipt.getId());
-			Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+		do {
+			String photoId = receipt.getPhotoId();
+			if (photoId == null)
+				break;
+			byte[] jpeg = null;
+			try {
+				jpeg = app.photoStore().readPhoto(photoId);
+			} catch (IOException e) {
+				warning("unable to read photo from store: " + e);
+			}
+			if (jpeg == null)
+				break;
+			Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
 			d = new BitmapDrawable(this.getResources(), bmp);
-		}
+		} while (false);
 		return d;
 	}
 

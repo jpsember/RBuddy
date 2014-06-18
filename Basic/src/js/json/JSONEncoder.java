@@ -31,16 +31,20 @@ public class JSONEncoder {
 	}
 
 	public void encode(IJSONEncoder jsonInstance) {
+		if (jsonInstance == null) {
+			encodeNull();
+			return;
+		}
 		jsonInstance.encode(this);
 	}
 
 	public void encode(Object value) {
-		if (value instanceof Number)
+		if (value == null)
+			encodeNull();
+		else if (value instanceof Number)
 			encode(((Number) value).doubleValue());
 		else if (value instanceof Boolean)
 			encode(((Boolean) value).booleanValue());
-		else if (value == null)
-			encodeNull();
 		else if (value instanceof Map)
 			encode((Map) value);
 		else if (value instanceof List)
@@ -79,6 +83,10 @@ public class JSONEncoder {
 	}
 
 	public void encode(Map map2) {
+		if (map2 == null) {
+			encodeNull();
+			return;
+		}
 		enterMap();
 
 		Map<String, Object> map = (Map<String, Object>) map2;
@@ -88,10 +96,14 @@ public class JSONEncoder {
 			Object value = entry.getValue();
 			encode(value);
 		}
-		exitMap();
+		exit();
 	}
 
 	public void encode(List list) {
+		if (list == null) {
+			encodeNull();
+			return;
+		}
 		encodeAsList(list.iterator());
 	}
 
@@ -105,10 +117,19 @@ public class JSONEncoder {
 	}
 
 	public void encode(Set set) {
+		if (set == null) {
+			encodeNull();
+			return;
+		}
+
 		encodeAsList(set.iterator());
 	}
 
 	public void encode(Object[] array) {
+		if (array == null) {
+			encodeNull();
+			return;
+		}
 
 		enterList();
 		for (int i = 0; i < array.length; i++) {
@@ -132,6 +153,10 @@ public class JSONEncoder {
 	}
 
 	public void encode(String s) {
+		if (s == null) {
+			encodeNull();
+			return;
+		}
 		prepareForNextValue();
 		sb.append('"');
 		for (int i = 0; i < s.length(); i++) {

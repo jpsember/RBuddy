@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import js.rbuddy.PhotoFile;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -17,6 +16,7 @@ import static js.basic.Tools.*;
 public class BitmapUtil {
 
 	public static final int JPEG_QUALITY_DEFAULT = 80;
+	public static final String JPEG_EXTENSION = ".jpg";
 
 	public static void writeJPEG(Bitmap bitmap, File destinationFile)
 			throws IOException {
@@ -140,7 +140,7 @@ public class BitmapUtil {
 		File storageDir = Environment
 				.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 		File imageFile = new File(storageDir, "JS_" + name
-				+ PhotoFile.PHOTO_EXTENSION);
+ + JPEG_EXTENSION);
 		imageFile = imageFile.getAbsoluteFile();
 //		imageFile.delete();
 		return imageFile;
