@@ -53,6 +53,10 @@ public final class Tools {
 		return stackTrace(1, 1, null);
 	}
 
+	public static String hey() {
+		return "\n\n" + stackTrace(1, 1, null) + ": ";
+	}
+
 	/**
 	 * Construct stack trace for a throwable
 	 * 

@@ -26,7 +26,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
  */
 public class RBuddyApp {
 
-	public static final boolean useGoogleAPI = false;
+	public static final boolean useGoogleAPI = true;
 
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 	private static final String KEY_UNIQUE_IDENTIFIER = "unique_id";
@@ -236,9 +236,9 @@ public class RBuddyApp {
 		mGoogleApiClient = c;
 	}
 
-	public void setPhotoStore(IPhotoStore ps) {
-		this.photoStore = ps;
-	}
+	// public void setPhotoStore(IPhotoStore ps) {
+	// this.photoStore = ps;
+	// }
 
 	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();

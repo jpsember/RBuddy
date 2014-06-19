@@ -1,8 +1,6 @@
 package js.rbuddyapp;
 
-import static js.basic.Tools.pr;
-import static js.basic.Tools.stackTrace;
-import static js.basic.Tools.unimp;
+import static js.basic.Tools.*;
 import js.rbuddy.R;
 import android.app.Activity;
 import android.content.Intent;
@@ -82,38 +80,69 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 		if (!RBuddyApp.useGoogleAPI) {
 			processGoogleApiConnected();
 		} else {
-		final boolean db = true;
-		if (db)
-			pr("\n\n" + stackTrace()
-					+ " attempting to connect to Google Drive API...");
-		GoogleApiClient c = app.getGoogleApiClient();
-		if (c == null) {
+			final boolean db = true;
 			if (db)
-				pr(" building client");
-			c = new GoogleApiClient.Builder(this).addApi(Drive.API)
-					.addScope(Drive.SCOPE_FILE).addConnectionCallbacks(this)
-					.addOnConnectionFailedListener(this).build();
-			app.setGoogleApiClient(c);
-		}
-		if (!(c.isConnected() || c.isConnecting())) {
-			if (db)
-				pr(" connecting to client");
-			app.getGoogleApiClient().connect();
-		}
-		if (c.isConnected()) {
-			if (db)
-				pr(" already connected");
-			processGoogleApiConnected();
-		}
+				pr("\n\n" + stackTrace()
+						+ " attempting to connect to Google Drive API...");
+			GoogleApiClient c = app.getGoogleApiClient();
+			if (c == null) {
+				if (db)
+					pr(" building client");
+				c = new GoogleApiClient.Builder(this).addApi(Drive.API)
+						.addScope(Drive.SCOPE_FILE)
+						.addConnectionCallbacks(this)
+						.addOnConnectionFailedListener(this).build();
+				app.setGoogleApiClient(c);
+			}
+			if (!(c.isConnected() || c.isConnecting())) {
+				if (db)
+					pr(" connecting to client");
+				app.getGoogleApiClient().connect();
+			}
+			if (c.isConnected()) {
+				if (db)
+					pr(" already connected");
+				processGoogleApiConnected();
+			}
 		}
 	}
 
+	private UserData userData;
+
 	private void processGoogleApiConnected() {
+
+		final boolean db = true;
+
+		if (db)
+			pr(hey() + "processGoogleAPIConnected");
 		{
 			SimpleReceiptFile s = new SimpleReceiptFile();
 			IPhotoStore ps = new PhotoStore();
 			app.setUserData(s, s.readTagSetFile(), ps);
 		}
+
+		if (RBuddyApp.useGoogleAPI) {
+			if (db)
+				pr("constructing UserData");
+			userData = new UserData(app);
+			if (db)
+				pr("calling open() with null callback");
+			userData.open(new Runnable() {
+				@Override
+				public void run() {
+					processUserDataReady();
+				}
+			});
+		} else {
+			processUserDataReady();
+		}
+
+	}
+
+	private void processUserDataReady() {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "StartActivity.processUserDataReady");
 
 		// Start the receipt list activity
 		Intent intent = new Intent(getApplicationContext(),
@@ -158,7 +187,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	public void onConnected(Bundle connectionHint) {
 		final boolean db = true;
 		if (db)
-			pr("\n\n" + stackTrace() + " connectionHint " + connectionHint);
+			pr(hey() + " onConnected, connectionHint " + connectionHint);
 		processGoogleApiConnected();
 	}
 
