@@ -23,12 +23,18 @@ import static com.google.android.gms.drive.Drive.DriveApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import static js.basic.Tools.*;
 
 public class UserData {
+
+	/*
+	 * TODO We may want to allow calls to read/write files from other threads by
+	 * passing in a Handler object to execute the callback within, other than
+	 * the default one which is tied to the UI thread.
+	 */
 
 	private static final String PREFERENCES_NAME = "RBuddy";
 	private static final String PREFERENCE_KEY_ROOTFOLDER = "UserData root folder";
@@ -48,15 +54,12 @@ public class UserData {
 		HandlerThread ht = new HandlerThread("BgndHandler");
 		ht.start();
 		this.backgroundHandler = new Handler(ht.getLooper());
-
-		this.handler = new Handler(new Callback() {
+		this.uiThreadHandler = new Handler(Looper.getMainLooper()) {
 			@Override
-			public boolean handleMessage(Message m) {
-				warning("UserData handler not handling message: " + m);
-				return false;
+			public void handleMessage(Message m) {
+				warning("ignoring message: " + m);
 			}
-		});
-
+		};
 	}
 
 	/**
@@ -202,7 +205,7 @@ public class UserData {
 			if (db)
 				pr("NOW calling the callback...");
 		}
-		handler.post(callback);
+		uiThreadHandler.post(callback);
 	}
 
 	private void findTagsFile() {
@@ -384,27 +387,6 @@ public class UserData {
 			String contents) {
 		return createBinaryFile(parentFolder, filename, "text/plain",
 				contents.getBytes());
-		//
-		// DriveFile ret = null;
-		//
-		// MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-		// .setTitle(filename).setMimeType("text/plain").build();
-		// Contents c = buildContents();
-		//
-		// try {
-		// OutputStream s = c.getOutputStream();
-		// s.write(contents.getBytes());
-		// s.close();
-		// DriveFolder.DriveFileResult result = parentFolder.createFile(
-		// apiClient, changeSet, c).await();
-		//
-		// if (success(result))
-		// ret = result.getDriveFile();
-		// } catch (IOException e) {
-		// throw new RuntimeException(e);
-		// }
-		//
-		// return ret;
 	}
 
 	private DriveFile createBinaryFile(DriveFolder parentFolder,
@@ -484,7 +466,7 @@ public class UserData {
 						die("problem committing and closing");
 				}
 				if (arg.getCallback() != null)
-					handler.post(arg.getCallback());
+					uiThreadHandler.post(arg.getCallback());
 			}
 		});
 
@@ -496,7 +478,6 @@ public class UserData {
 	}
 
 	public void readBinaryFile(FileArguments args) {
-		unimp("If we're calling it from the background thread already, just do synchronously");
 
 		RBuddyApp.assertUIThread();
 		final FileArguments arg = args;
@@ -504,7 +485,7 @@ public class UserData {
 			public void run() {
 				arg.setData(blockingReadBinaryFile(arg.getFile(apiClient)));
 				if (arg.getCallback() != null)
-					handler.post(arg.getCallback());
+					uiThreadHandler.post(arg.getCallback());
 			}
 		});
 	}
@@ -531,26 +512,8 @@ public class UserData {
 		return bytes;
 	}
 
-	public String blockingReadTextFile(DriveFile driveFile) {
-		if (db)
-			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
-
-		DriveApi.ContentsResult cr = driveFile.openContents(apiClient,
-				DriveFile.MODE_READ_ONLY, null).await();
-		if (!success(cr))
-			die("can't get results");
-		Contents c = cr.getContents();
-
-		String text = null;
-		try {
-			text = Files.readTextFile(c.getInputStream());
-		} catch (IOException e) {
-			die("Failed to read text file", e);
-		}
-		driveFile.discardContents(apiClient, c);
-		if (db)
-			pr(" returning file contents: " + text);
-		return text;
+	private String blockingReadTextFile(DriveFile driveFile) {
+		return new String(blockingReadBinaryFile(driveFile));
 	}
 
 	public IReceiptFile getReceiptFile() {
@@ -575,7 +538,7 @@ public class UserData {
 
 	private RBuddyApp app;
 	private GoogleApiClient apiClient;
-	private Handler handler;
+	private Handler uiThreadHandler;
 	private Handler backgroundHandler;
 	private DriveFolder userDataFolder;
 	private IReceiptFile receiptFile;
