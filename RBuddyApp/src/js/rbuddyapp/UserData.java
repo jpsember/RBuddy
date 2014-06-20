@@ -172,16 +172,14 @@ public class UserData {
 	private void findReceiptFile() {
 		DriveId receiptFileId = lookForDriveResource(userDataFolder,
 				DriveReceiptFile.RECEIPTFILE_NAME, false);
-
-		if (receiptFileId == null) {
-			DriveFile receiptFile = createTextFile(userDataFolder,
+		DriveFile rf = null;
+		if (receiptFileId != null)
+			rf = fileWithId(receiptFileId);
+		else {
+			rf = createTextFile(userDataFolder,
 					DriveReceiptFile.RECEIPTFILE_NAME,
 					DriveReceiptFile.EMPTY_FILE_CONTENTS);
-			receiptFileId = receiptFile.getDriveId();
 		}
-
-		DriveFile rf = fileWithId(receiptFileId);
-
 		String contents = blockingReadTextFile(rf);
 
 		this.receiptFile = new DriveReceiptFile(this, rf, contents);
@@ -210,23 +208,20 @@ public class UserData {
 	private void findTagsFile() {
 		DriveId tagsFileId = lookForDriveResource(userDataFolder,
 				DriveReceiptFile.TAGSFILE_NAME, false);
-
-		if (tagsFileId == null) {
+		DriveFile tagsDriveFile = null;
+		if (tagsFileId != null)
+			tagsDriveFile = fileWithId(tagsFileId);
+		else {
 			TagSetFile tf = new TagSetFile();
 			String initialTextContents = JSONEncoder.toJSON(tf);
-			DriveFile tagsFile = createTextFile(userDataFolder,
-					DriveReceiptFile.TAGSFILE_NAME,
-					initialTextContents);
-			tagsFileId = tagsFile.getDriveId();
+			tagsDriveFile = createTextFile(userDataFolder,
+					DriveReceiptFile.TAGSFILE_NAME, initialTextContents);
 		}
-
-		this.tagSetDriveFile = fileWithId(tagsFileId);
+		this.tagSetDriveFile = tagsDriveFile;
 
 		String content = blockingReadTextFile(tagSetDriveFile);
-		TagSetFile tfFile = (TagSetFile) JSONParser.parse(content,
+		this.tagSetFile = (TagSetFile) JSONParser.parse(content,
 				TagSetFile.JSON_PARSER);
-		this.tagSetFile = tfFile;
-
 	}
 
 	private void findPhotosFolder() {
@@ -301,8 +296,7 @@ public class UserData {
 	}
 
 	/**
-	 * In the case where no user root folder was stored in the preferences, look
-	 * in the drive to find one
+	 * Look for a particular file or folder within a parent folder
 	 * 
 	 * @return DriveId if found, else null
 	 */
@@ -460,21 +454,16 @@ public class UserData {
 				if (db)
 					pr("UserData.writeBinaryFile " + arg);
 
-				// DriveId resultDriveId = arg.driveId;
-				DriveFile driveFile = null;
-				if (arg.getFileId() != null) {
-					driveFile = fileWithId(arg.getFileId());
-					// TODO what if file has been deleted?
-				}
+				DriveFile driveFile = arg.getFile(apiClient);
 
+				// TODO what if file has been deleted?
 				if (driveFile == null) {
-					arg.setFileId(createBinaryFile(arg.getParentFolder(),
-							arg.getFilename(), arg.getMimeType(), arg.getData())
-							.getDriveId());
+					arg.setFile(createBinaryFile(arg.getParentFolder(),
+							arg.getFilename(), arg.getMimeType(), arg.getData()));
 				} else {
-					driveFile = fileWithId(arg.getFileId());
+					driveFile = arg.getFile(apiClient);
 					if (driveFile == null)
-						die("could not find DriveFile " + arg.getFileId());
+						die("could not find DriveFile " + arg);
 
 					ContentsResult cr = driveFile.openContents(apiClient,
 							DriveFile.MODE_WRITE_ONLY, null).await();
@@ -506,14 +495,14 @@ public class UserData {
 		writeBinaryFile(args);
 	}
 
-
 	public void readBinaryFile(FileArguments args) {
+		unimp("If we're calling it from the background thread already, just do synchronously");
+
 		RBuddyApp.assertUIThread();
-		// args.returnValue = null;
 		final FileArguments arg = args;
 		this.backgroundHandler.post(new Runnable() {
 			public void run() {
-				arg.setData(blockingReadBinaryFile(fileWithId(arg.getFileId())));
+				arg.setData(blockingReadBinaryFile(arg.getFile(apiClient)));
 				if (arg.getCallback() != null)
 					handler.post(arg.getCallback());
 			}
@@ -580,7 +569,7 @@ public class UserData {
 		return photoStore;
 	}
 
-	public DriveFile fileWithId(DriveId id) {
+	private DriveFile fileWithId(DriveId id) {
 		return DriveApi.getFile(apiClient, id);
 	}
 

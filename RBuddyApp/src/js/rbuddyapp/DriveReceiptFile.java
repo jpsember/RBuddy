@@ -77,7 +77,7 @@ public class DriveReceiptFile implements IReceiptFile {
 				pr(" writing text file " + text + "\n to "
 						+ UserData.dbPrefix(driveFile));
 			FileArguments args = new FileArguments(RECEIPTFILE_NAME);
-			args.setFileId(driveFile.getDriveId());
+			args.setFile(driveFile);
 			userData.writeTextFile(args, text);
 		}
 		flushTagSet();
@@ -93,7 +93,7 @@ public class DriveReceiptFile implements IReceiptFile {
 			String json = JSONEncoder.toJSON(tf);
 			FileArguments args = new FileArguments(TAGSFILE_NAME);
 
-			args.setFileId(userData.getTagSetDriveFile().getDriveId());
+			args.setFile(userData.getTagSetDriveFile());
 			userData.writeTextFile(args, json);
 			if (db)
 				pr("  wrote json " + json);

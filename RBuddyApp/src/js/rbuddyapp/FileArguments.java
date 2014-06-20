@@ -1,7 +1,11 @@
 package js.rbuddyapp;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveId;
+
 import static js.basic.Tools.*;
 
 public class FileArguments {
@@ -30,26 +34,36 @@ public class FileArguments {
 
 	public void setFileId(String fileIdString) {
 		this.fileIdString = fileIdString;
-		this.fileId = null;
+		this.file = null;
 	}
 
-	public DriveId getFileId() {
-		ASSERT(RBuddyApp.useGoogleAPI);
-		if (fileId == null && fileIdString != null)
-			fileId = DriveId.decodeFromString(fileIdString);
-		return fileId;
-	}
-
-	public void setFileId(DriveId fileId) {
-		ASSERT(RBuddyApp.useGoogleAPI);
-		this.fileId = fileId;
-		this.fileIdString = null;
+	/**
+	 * Get DriveFile, using file id if DriveFile not already known
+	 * 
+	 * @param apiClient
+	 *            GoogleApiClient to use if conversion from file id is necessary
+	 * @return
+	 */
+	public DriveFile getFile(GoogleApiClient apiClient) {
+		if (file != null)
+			return file;
+		if (fileIdString != null) {
+			DriveId fileId = DriveId.decodeFromString(fileIdString);
+			setFile(Drive.DriveApi.getFile(apiClient, fileId));
+		}
+		return file;
 	}
 
 	public String getFileIdString() {
-		if (fileIdString == null && fileId != null)
-			fileIdString = fileId.encodeToString();
+		if (fileIdString == null && file != null)
+			fileIdString = file.getDriveId().encodeToString();
 		return fileIdString;
+	}
+
+	public void setFile(DriveFile file) {
+		ASSERT(RBuddyApp.useGoogleAPI);
+		this.file = file;
+		this.fileIdString = null;
 	}
 
 	public String getFilename() {
@@ -117,9 +131,9 @@ public class FileArguments {
 	 * Id of file to be accessed (lazy-initialized as required to support simple
 	 * & google drive versions)
 	 */
-	private DriveId fileId;
-
 	private String fileIdString;
+
+	private DriveFile file;
 
 	private DriveFolder parentFolder;
 
