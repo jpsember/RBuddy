@@ -117,7 +117,8 @@ public class EditReceiptActivity extends Activity {
 		receipt.setCost(new Cost(form.getValue("cost"), true));
 		receipt.setDate(JSDate.parse(form.getValue("date"), true));
 
-		String newTagSetString = form.getValue("tags");
+		String origTagSetString = JSONEncoder.toJSON(receipt.getTags());
+
 		receipt.setTags(TagSet.parse(form.getValue("tags"), new TagSet()));
 
 		String newJSON = JSONEncoder.toJSON(receipt);
@@ -129,7 +130,13 @@ public class EditReceiptActivity extends Activity {
 			if (db)
 				pr(" changed, marking receipt as modified");
 			app.receiptFile().setModified(receipt);
-			if (!newTagSetString.equals(receipt.getTags().toString())) {
+
+			String newTagSetString = JSONEncoder.toJSON(receipt.getTags());
+			if (db)
+				pr(" orig tags: " + origTagSetString + "\n  new tags: "
+						+ newTagSetString);
+
+			if (!origTagSetString.equals(newTagSetString)) {
 				if (db)
 					pr("  moving tags to front of queue");
 				receipt.getTags().moveTagsToFrontOfQueue(app.tagSetFile());

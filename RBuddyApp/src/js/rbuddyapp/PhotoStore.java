@@ -17,7 +17,6 @@ public class PhotoStore implements IPhotoStore {
 
 	@Override
 	public String storePhoto(String photoId, byte[] jpeg) throws IOException {
-		// final boolean db = true;
 		if (db)
 			pr("\n\n" + stackTrace() + "  storePhoto id=" + photoId
 					+ " length=" + jpeg.length);
@@ -38,7 +37,6 @@ public class PhotoStore implements IPhotoStore {
 
 	@Override
 	public byte[] readPhoto(String photoId) throws IOException {
-		// final boolean db = true;
 		if (db)
 			pr("\n\n\nreadPhoto id=" + photoId);
 		if (photoId == null)

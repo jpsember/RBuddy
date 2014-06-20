@@ -32,7 +32,6 @@ public class TagSetFile implements IJSONEncoder {
 	}
 
 	public boolean addTag(String name) {
-		final boolean db = SHOW_FILE_ACTIVITY;
 		TagEntry entry = tagMap.get(name);
 		boolean tagExists = (entry != null);
 
@@ -41,6 +40,8 @@ public class TagSetFile implements IJSONEncoder {
 			// If tag is already at front, do nothing
 
 			if (entry != headEntry) {
+				setChanged(true);
+
 				// Move tag to the front
 
 				// Make this entry the container for its successor's value
@@ -74,6 +75,7 @@ public class TagSetFile implements IJSONEncoder {
 				if (tagNamesList != null)
 					pr("  invalidating existing names list: " + tagNamesList);
 			}
+			setChanged(true);
 
 			// Invalidate any existing tags list
 			this.tagNamesList = null;
@@ -177,6 +179,7 @@ public class TagSetFile implements IJSONEncoder {
 			while (json.hasNext())
 				tf.addTag(json.nextString());
 			json.exit();
+			tf.setChanged(false);
 			return tf;
 		}
 	};
@@ -187,6 +190,15 @@ public class TagSetFile implements IJSONEncoder {
 				+ JSONEncoder.toJSON(this);
 	}
 
+	public boolean isChanged() {
+		return changes;
+	}
+
+	public void setChanged(boolean f) {
+		changes = f;
+	}
+
+	private boolean changes;
 	private TagEntry headEntry, tailEntry;
 	private int maxTags;
 	private TreeMap<String, TagEntry> tagMap;

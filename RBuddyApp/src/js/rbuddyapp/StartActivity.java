@@ -47,7 +47,8 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	@Override
 	protected void onPause() {
 		super.onPause();
-		app.receiptFile().flush();
+		if (userFilesPrepared)
+		  app.receiptFile().flush();
 	}
 
 	@Override
@@ -80,7 +81,6 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 		if (!RBuddyApp.useGoogleAPI) {
 			processGoogleApiConnected();
 		} else {
-			final boolean db = true;
 			if (db)
 				pr("\n\n" + stackTrace()
 						+ " attempting to connect to Google Drive API...");
@@ -111,15 +111,8 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	private void processGoogleApiConnected() {
 
-		final boolean db = true;
-
 		if (db)
 			pr(hey() + "processGoogleAPIConnected");
-		{
-			SimpleReceiptFile s = new SimpleReceiptFile();
-			IPhotoStore ps = new PhotoStore();
-			app.setUserData(s, s.readTagSetFile(), ps);
-		}
 
 		if (RBuddyApp.useGoogleAPI) {
 			if (db)
@@ -134,15 +127,28 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 				}
 			});
 		} else {
+
 			processUserDataReady();
 		}
 
 	}
 
+	private boolean userFilesPrepared;
 	private void processUserDataReady() {
-		final boolean db = true;
 		if (db)
 			pr(hey() + "StartActivity.processUserDataReady");
+
+		if (!userFilesPrepared) {
+			if (RBuddyApp.useGoogleAPI) {
+				app.setUserData(userData.getReceiptFile(),
+						userData.getTagSetFile(), new PhotoStore());
+			} else {
+				SimpleReceiptFile s = new SimpleReceiptFile();
+				IPhotoStore ps = new PhotoStore();
+				app.setUserData(s, s.readTagSetFile(), ps);
+			}
+			userFilesPrepared = true;
+		}
 
 		// Start the receipt list activity
 		Intent intent = new Intent(getApplicationContext(),
@@ -159,7 +165,6 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		final boolean db = true;
 		if (db)
 			pr("\n\n" + stackTrace() + " result=" + result);
 		// Called whenever the API client fails to connect.
@@ -185,7 +190,6 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		final boolean db = true;
 		if (db)
 			pr(hey() + " onConnected, connectionHint " + connectionHint);
 		processGoogleApiConnected();
@@ -193,7 +197,6 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	@Override
 	public void onConnectionSuspended(int cause) {
-		final boolean db = true;
 		if (db)
 			pr("\n\n" + stackTrace() + " cause " + cause);
 	}

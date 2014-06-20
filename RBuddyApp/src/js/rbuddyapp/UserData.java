@@ -1,17 +1,32 @@
 package js.rbuddyapp;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+
+import js.basic.Files;
+//import js.basic.Tools;
+import js.json.JSONEncoder;
+import js.json.JSONParser;
+import js.rbuddy.IReceiptFile;
+import js.rbuddy.TagSetFile;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.drive.*;
+import com.google.android.gms.drive.DriveApi.ContentsResult;
 import com.google.android.gms.drive.DriveApi.MetadataBufferResult;
 import com.google.android.gms.drive.DriveFolder.DriveFolderResult;
+import com.google.android.gms.drive.DriveResource.MetadataResult;
+import com.google.android.gms.common.api.Status;
 
+import static com.google.android.gms.drive.Drive.DriveApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Handler.Callback;
+import android.os.HandlerThread;
 import android.os.Message;
 import static js.basic.Tools.*;
 
@@ -20,6 +35,8 @@ public class UserData {
 	private static final String PREFERENCES_NAME = "RBuddy";
 	private static final String PREFERENCE_KEY_ROOTFOLDER = "UserData root folder";
 	private static final String USER_ROOTFOLDER_NAME = "RBuddy User Data";
+	private static final String RECEIPTFILE_NAME = "Receipts.json";
+	private static final String TAGSFILE_NAME = "Tags.json";
 
 	/**
 	 * Constructor
@@ -29,11 +46,16 @@ public class UserData {
 	public UserData(RBuddyApp app) {
 		RBuddyApp.assertUIThread();
 		this.app = app;
-		this.driveClient = app.getGoogleApiClient();
-		this.handler = new Handler(new Callback() {
+		this.apiClient = app.getGoogleApiClient();
+
+		HandlerThread ht = new HandlerThread("BgndHandler");
+		ht.start();
+		this.backgroundHandler = new Handler(ht.getLooper());
+		
+    this.handler = new Handler(new Callback() {
 			@Override
 			public boolean handleMessage(Message m) {
-				warning("not handling message: " + m);
+				warning("UserData handler not handling message: " + m);
 				return false;
 			}
 		});
@@ -82,88 +104,146 @@ public class UserData {
 		return false;
 	}
 
+	private MetadataResult inspectFolder(String folderIdString) {
+		DriveId folderId = DriveId.decodeFromString(folderIdString);
+		DriveFolder folder = DriveApi.getFolder(apiClient, folderId);
+		return folder.getMetadata(apiClient).await();
+	}
+
+	// Package visibility to get rid of unused warning
+	MetadataResult inspectFile(String fileIdString) {
+		DriveId fileId = DriveId.decodeFromString(fileIdString);
+		DriveFile file = DriveApi.getFile(apiClient, fileId);
+		return file.getMetadata(apiClient).await();
+	}
+
+	private void findUserDataFolder() {
+		if (db)
+			pr("UserData.findUserDataFolder");
+		RBuddyApp.assertNotUIThread();
+		String storedFolderIdString = getPreferenceString(
+				PREFERENCE_KEY_ROOTFOLDER, "");
+		String rootFolderIdString = storedFolderIdString;
+		if (db)
+			pr(" id of user folder, read from preferences: "
+					+ rootFolderIdString);
+
+		if (rootFolderIdString.isEmpty()) {
+			if (db)
+				pr(" looking for user root folder");
+			rootFolderIdString = lookForUserRootFolder();
+			if (db)
+				pr(" looking for user root folder produced: "
+						+ rootFolderIdString);
+		}
+
+		if (rootFolderIdString != null) {
+			if (db)
+				pr(" verifying that root folder id is valid");
+			MetadataResult result = inspectFolder(rootFolderIdString);
+			if (!success(result)
+					|| !doesMetadataMatchHealthyUserRoot(result.getMetadata()))
+				rootFolderIdString = null;
+		}
+
+		if (rootFolderIdString == null) {
+			if (db)
+				pr(" folder id is null, creating one");
+			rootFolderIdString = createUserRootFolder();
+		}
+
+		if (rootFolderIdString == null) {
+			throw new RuntimeException(
+					"unable to create Google Drive RBuddy root folder");
+		}
+
+		userDataFolder = DriveApi.getFolder(apiClient,
+				DriveId.decodeFromString(rootFolderIdString));
+
+		if (db)
+			pr(" userDataFolder=" + dbPrefix(userDataFolder));
+
+		if (!storedFolderIdString.equals(rootFolderIdString)) {
+			storedFolderIdString = rootFolderIdString;
+			setPreferenceString(PREFERENCE_KEY_ROOTFOLDER, storedFolderIdString);
+			if (db)
+				pr(" wrote new folder id string " + storedFolderIdString);
+		}
+	}
+
+	private void findReceiptFile() {
+		DriveId receiptFileId = lookForDriveResource(userDataFolder,
+				RECEIPTFILE_NAME, false);
+
+		if (receiptFileId == null) {
+			DriveFile receiptFile = createTextFile(userDataFolder,
+					RECEIPTFILE_NAME, DriveReceiptFile.EMPTY_FILE_CONTENTS);
+			receiptFileId = receiptFile.getDriveId();
+		}
+
+		DriveFile rf = DriveApi.getFile(apiClient, receiptFileId);
+		this.receiptFile = new DriveReceiptFile(this, rf);
+	}
+
 	/**
-	 * Prepare user data for use. Looks for user's data in his Google Drive; if
-	 * successful, executes callback. Must only be called from UI thread.
+	 * Work associated with open() that runs in separate background thread
+	 * 
+	 * @param callback
+	 */
+	private void open_bgndThread(Runnable callback) {
+		findUserDataFolder();
+		findReceiptFile();
+		findTagsFile();
+		findPhotosFolder();
+
+		if (db) {
+			pr("delaying a bit before calling the callback...");
+			sleepFor(1500);
+			if (db)
+				pr("NOW calling the callback...");
+		}
+		handler.post(callback);
+	}
+
+	private void findTagsFile() {
+		DriveId tagsFileId = lookForDriveResource(userDataFolder,
+				TAGSFILE_NAME, false);
+
+		if (tagsFileId == null) {
+			TagSetFile tf = new TagSetFile();
+			String initialTextContents = JSONEncoder.toJSON(tf);
+			DriveFile tagsFile = createTextFile(userDataFolder, TAGSFILE_NAME,
+					initialTextContents);
+			tagsFileId = tagsFile.getDriveId();
+		}
+
+		this.tagSetDriveFile = DriveApi.getFile(apiClient, tagsFileId);
+
+		String content = blockingReadTextFile(tagSetDriveFile);
+		TagSetFile tfFile = (TagSetFile) JSONParser.parse(content,
+				TagSetFile.JSON_PARSER);
+		this.tagSetFile = tfFile;
+
+	}
+
+	private void findPhotosFolder() {
+		unimp("not yet storing photos in Drive");
+	}
+
+	/**
+	 * Prepare user data for use. Looks for user's data in his Google Drive,
+	 * executes callback when done
 	 * 
 	 * @param callback
 	 * @throws RuntimeException
 	 *             if unable to create user data folder
 	 */
-	public void open(Runnable callback) {
-		RBuddyApp.assertUIThread();
-		if (db)
-			pr(hey() + "UserData.open");
-
-		final Runnable theCallback = callback;
-
-		// Fire up a thread to do this potentially time consuming stuff in the
-		// background.
-		new Thread(new Runnable() {
-			@Override
+	public void open(final Runnable callback) {
+		this.backgroundHandler.post(new Runnable() {
 			public void run() {
-				if (db)
-					pr(hey() + "UserData.open, performing run() method");
-
-				String storedFolderIdString = getPreferenceString(
-						PREFERENCE_KEY_ROOTFOLDER, "");
-				String rootFolderIdString = storedFolderIdString;
-
-				if (rootFolderIdString.isEmpty()) {
-					rootFolderIdString = lookForUserRootFolder();
-				}
-
-				if (rootFolderIdString == null) {
-					if (db)
-						pr(" no stored default exists; creating user root folder");
-					rootFolderIdString = createUserRootFolder();
-				} else {
-					if (db)
-						pr(" stored default = "
-								+ rootFolderIdString
-								+ ";\n  verifying that this folder exists and is good to go");
-
-					// Make sure the root folder exists; if not, clear id
-					DriveId folderId = DriveId
-							.decodeFromString(rootFolderIdString);
-					DriveFolder folder = Drive.DriveApi.getFolder(driveClient,
-							folderId);
-					DriveResource.MetadataResult result = folder.getMetadata(
-							driveClient).await();
-
-					boolean found = false;
-					do {
-						if (!success(result))
-							break;
-						Metadata metadata = result.getMetadata();
-						if (!doesMetadataMatchHealthyUserRoot(metadata))
-							break;
-						found = true;
-					} while (false);
-					if (!found)
-						rootFolderIdString = createUserRootFolder();
-				}
-
-				if (rootFolderIdString == null) {
-					throw new RuntimeException(
-							"unable to create Google Drive RBuddy root folder");
-				}
-
-				if (!storedFolderIdString.equals(rootFolderIdString)) {
-					storedFolderIdString = rootFolderIdString;
-					setPreferenceString(PREFERENCE_KEY_ROOTFOLDER,
-							storedFolderIdString);
-				}
-
-				if (db) {
-					pr("delaying a bit before calling the callback...");
-					sleepFor(1500);
-					if (db)
-						pr("NOW calling the callback...");
-				}
-				handler.post(theCallback);
+				open_bgndThread(callback);
 			}
-		}).start();
+		});
 	}
 
 	/**
@@ -176,8 +256,8 @@ public class UserData {
 		if (db)
 			pr(hey() + "looking for user root folder");
 
-		DriveFolder rootFolder = Drive.DriveApi.getRootFolder(driveClient);
-		MetadataBufferResult result = rootFolder.listChildren(driveClient)
+		DriveFolder rootFolder = DriveApi.getRootFolder(apiClient);
+		MetadataBufferResult result = rootFolder.listChildren(apiClient)
 				.await();
 		if (!success(result)) {
 			return null;
@@ -197,6 +277,37 @@ public class UserData {
 			if (db)
 				pr(" ................. we found it!");
 			foundId = m.getDriveId().encodeToString();
+		}
+		buffer.close();
+		return foundId;
+	}
+
+	/**
+	 * In the case where no user root folder was stored in the preferences, look
+	 * in the drive to find one
+	 * 
+	 * @return DriveId if found, else null
+	 */
+	private DriveId lookForDriveResource(DriveFolder parentFolder,
+			String resourceName, boolean resourceIsFolder) {
+
+		MetadataBufferResult result = parentFolder.listChildren(apiClient)
+				.await();
+		if (!success(result))
+			return null;
+		MetadataBuffer buffer = result.getMetadataBuffer();
+		Iterator<Metadata> iter = buffer.iterator();
+		DriveId foundId = null;
+		while (iter.hasNext()) {
+			Metadata m = iter.next();
+			if (m.isTrashed())
+				continue;
+			if (m.isFolder() != resourceIsFolder)
+				continue;
+			if (!(m.getTitle().equals(resourceName)))
+				continue;
+			foundId = m.getDriveId();
+			break;
 		}
 		buffer.close();
 		return foundId;
@@ -228,11 +339,11 @@ public class UserData {
 		if (db)
 			pr(hey() + "attempting to createUserRootFolder");
 
-		DriveFolder rootFolder = Drive.DriveApi.getRootFolder(driveClient);
+		DriveFolder rootFolder = DriveApi.getRootFolder(apiClient);
 		MetadataChangeSet changeSet = new MetadataChangeSet.Builder().setTitle(
 				USER_ROOTFOLDER_NAME).build();
-		DriveFolderResult result = rootFolder.createFolder(driveClient,
-				changeSet).await();
+		DriveFolderResult result = rootFolder
+				.createFolder(apiClient, changeSet).await();
 		if (!success(result))
 			return null;
 
@@ -242,7 +353,163 @@ public class UserData {
 		return folder.getDriveId().encodeToString();
 	}
 
+	private Contents buildContents() {
+		DriveApi.ContentsResult r = DriveApi.newContents(apiClient).await();
+		if (!success(r))
+			die("can't get results");
+		return r.getContents();
+	}
+
+	/**
+	 * @param parentFolder
+	 * @param filename
+	 * @param contents
+	 * @return
+	 * @throws RuntimeException
+	 *             if failed to create text file
+	 */
+	private DriveFile createTextFile(DriveFolder parentFolder, String filename,
+			String contents) {
+		DriveFile ret = null;
+
+		MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+				.setTitle(filename).setMimeType("text/plain").build();
+		Contents c = buildContents();
+
+		try {
+			OutputStream s = c.getOutputStream();
+			s.write(contents.getBytes());
+			s.close();
+			DriveFolder.DriveFileResult result = parentFolder.createFile(
+					apiClient, changeSet, c).await();
+
+			if (success(result))
+				ret = result.getDriveFile();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return ret;
+	}
+
+	public static String dbPrefix(DriveResource d) {
+		final boolean db = false;
+		if (db)
+			pr("dbPrefix for " + d + " class=" + d.getClass().getSimpleName()
+					+ " driveId=" + d.getDriveId() + " encoded="
+					+ d.getDriveId().encodeToString());
+
+		if (d == null)
+			return "<null>";
+		String str = d.getDriveId().encodeToString();
+		String prefix = str.substring(0, 16);
+		return prefix;
+	}
+
+	/**
+	 * @param driveFile
+	 * @param text
+	 * @param callback
+	 *            if not null, calls this when task complete
+	 */
+	public void writeTextFile(final DriveFile driveFile, final String text,
+			final Runnable callback) {
+
+		final boolean db = true;
+
+		RBuddyApp.assertUIThread();
+		this.backgroundHandler.post(new Runnable() {
+			public void run() {
+				if (db)
+					pr("UserData.writeTextFile " + dbPrefix(driveFile));
+				ContentsResult cr = driveFile.openContents(apiClient,
+						DriveFile.MODE_WRITE_ONLY, null).await();
+				if (!success(cr))
+					die("failed to get contents");
+				Contents c = cr.getContents();
+				try {
+					OutputStream s = c.getOutputStream();
+					s.write(text.getBytes());
+					s.close();
+					if (db)
+						pr(" wrote text " + text);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				Status r = driveFile.commitAndCloseContents(apiClient, c)
+						.await();
+				if (!success(r))
+					die("problem committing and closing");
+				if (callback != null)
+					handler.post(callback);
+			}
+		});
+	}
+
+	/**
+	 * Read text file asynchronously
+	 * 
+	 * @param driveFile
+	 *            file containing text file
+	 * @param callback
+	 *            run() method called when read is complete
+	 * @param output
+	 *            contents of text file stored here
+	 */
+	public void readTextFile(final DriveFile driveFile,
+			final Runnable callback, final ArrayList output) {
+		RBuddyApp.assertUIThread();
+		output.clear();
+		this.backgroundHandler.post(new Runnable() {
+			public void run() {
+				String text = blockingReadTextFile(driveFile);
+				output.add(text);
+				handler.post(callback);
+			}
+		});
+	}
+
+	public String blockingReadTextFile(DriveFile driveFile) {
+		final boolean db = true;
+		if (db)
+			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
+
+		DriveApi.ContentsResult cr = driveFile.openContents(apiClient,
+				DriveFile.MODE_READ_ONLY, null).await();
+		if (!success(cr))
+			die("can't get results");
+		Contents c = cr.getContents();
+
+		String text = null;
+		try {
+			text = Files.readTextFile(c.getInputStream());
+		} catch (IOException e) {
+			die("Failed to read text file", e);
+		}
+		driveFile.discardContents(apiClient, c);
+		if (db)
+			pr(" returning file contents: " + text);
+		return text;
+	}
+
+	public IReceiptFile getReceiptFile() {
+		return receiptFile;
+	}
+
+	public TagSetFile getTagSetFile() {
+		return tagSetFile;
+	}
+
+	public DriveFile getTagSetDriveFile() {
+		return tagSetDriveFile;
+	}
+
 	private RBuddyApp app;
-	private GoogleApiClient driveClient;
+	private GoogleApiClient apiClient;
 	private Handler handler;
+	private Handler backgroundHandler;
+	private DriveFolder userDataFolder;
+	private IReceiptFile receiptFile;
+	private DriveFile tagSetDriveFile;
+	private TagSetFile tagSetFile;
 }

@@ -65,6 +65,12 @@ public class RBuddyApp {
 		}
 	}
 
+	public static void assertNotUIThread() {
+		if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+			die("unexpectedly running within UI thread");
+		}
+	}
+
 	public void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
 			IPhotoStore photoStore) {
 		this.receiptFile = receiptFile;
@@ -236,10 +242,6 @@ public class RBuddyApp {
 		mGoogleApiClient = c;
 	}
 
-	// public void setPhotoStore(IPhotoStore ps) {
-	// this.photoStore = ps;
-	// }
-
 	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();
 	private SharedPreferences preferences;
@@ -248,4 +250,5 @@ public class RBuddyApp {
 	private IPhotoStore photoStore;
 	private IReceiptFile receiptFile;
 	private TagSetFile tagSetFile;
+
 }
