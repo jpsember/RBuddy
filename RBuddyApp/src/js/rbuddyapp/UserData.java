@@ -2,11 +2,9 @@ package js.rbuddyapp;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import js.basic.Files;
-//import js.basic.Tools;
 import js.json.JSONEncoder;
 import js.json.JSONParser;
 import js.rbuddy.IReceiptFile;
@@ -35,8 +33,6 @@ public class UserData {
 	private static final String PREFERENCES_NAME = "RBuddy";
 	private static final String PREFERENCE_KEY_ROOTFOLDER = "UserData root folder";
 	private static final String USER_ROOTFOLDER_NAME = "RBuddy User Data";
-	private static final String RECEIPTFILE_NAME = "Receipts.json";
-	private static final String TAGSFILE_NAME = "Tags.json";
 	private static final String PHOTOSFOLDER_NAME = "Photos";
 
 	/**
@@ -175,16 +171,20 @@ public class UserData {
 
 	private void findReceiptFile() {
 		DriveId receiptFileId = lookForDriveResource(userDataFolder,
-				RECEIPTFILE_NAME, false);
+				DriveReceiptFile.RECEIPTFILE_NAME, false);
 
 		if (receiptFileId == null) {
 			DriveFile receiptFile = createTextFile(userDataFolder,
-					RECEIPTFILE_NAME, DriveReceiptFile.EMPTY_FILE_CONTENTS);
+					DriveReceiptFile.RECEIPTFILE_NAME,
+					DriveReceiptFile.EMPTY_FILE_CONTENTS);
 			receiptFileId = receiptFile.getDriveId();
 		}
 
 		DriveFile rf = fileWithId(receiptFileId);
-		this.receiptFile = new DriveReceiptFile(this, rf);
+
+		String contents = blockingReadTextFile(rf);
+
+		this.receiptFile = new DriveReceiptFile(this, rf, contents);
 	}
 
 	/**
@@ -209,12 +209,13 @@ public class UserData {
 
 	private void findTagsFile() {
 		DriveId tagsFileId = lookForDriveResource(userDataFolder,
-				TAGSFILE_NAME, false);
+				DriveReceiptFile.TAGSFILE_NAME, false);
 
 		if (tagsFileId == null) {
 			TagSetFile tf = new TagSetFile();
 			String initialTextContents = JSONEncoder.toJSON(tf);
-			DriveFile tagsFile = createTextFile(userDataFolder, TAGSFILE_NAME,
+			DriveFile tagsFile = createTextFile(userDataFolder,
+					DriveReceiptFile.TAGSFILE_NAME,
 					initialTextContents);
 			tagsFileId = tagsFile.getDriveId();
 		}
@@ -500,69 +501,11 @@ public class UserData {
 
 	}
 
-	/**
-	 * @param driveFile
-	 * @param text
-	 * @param callback
-	 *            if not null, calls this when task complete
-	 */
-	public void writeTextFile(final DriveFile driveFile, final String text,
-			final Runnable callback) {
-
-		unimp("we can just call WriteBinaryFile with appropriate parameters; also use new FileArguments object instead");
-
-		RBuddyApp.assertUIThread();
-		this.backgroundHandler.post(new Runnable() {
-			public void run() {
-				if (db)
-					pr("UserData.writeTextFile " + dbPrefix(driveFile));
-				ContentsResult cr = driveFile.openContents(apiClient,
-						DriveFile.MODE_WRITE_ONLY, null).await();
-				if (!success(cr))
-					die("failed to get contents");
-				Contents c = cr.getContents();
-				try {
-					OutputStream s = c.getOutputStream();
-					s.write(text.getBytes());
-					s.close();
-					if (db)
-						pr(" wrote text " + text);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				Status r = driveFile.commitAndCloseContents(apiClient, c)
-						.await();
-				if (!success(r))
-					die("problem committing and closing");
-				if (callback != null)
-					handler.post(callback);
-			}
-		});
+	public void writeTextFile(FileArguments args, String text) {
+		args.setData(text.getBytes());
+		writeBinaryFile(args);
 	}
 
-	/**
-	 * Read text file asynchronously
-	 * 
-	 * @param driveFile
-	 *            file containing text file
-	 * @param callback
-	 *            run() method called when read is complete
-	 * @param output
-	 *            contents of text file stored here
-	 */
-	public void readTextFile(final DriveFile driveFile,
-			final Runnable callback, final ArrayList output) {
-		warning("use new FileArguments object instead");
-		RBuddyApp.assertUIThread();
-		output.clear();
-		this.backgroundHandler.post(new Runnable() {
-			public void run() {
-				String text = blockingReadTextFile(driveFile);
-				output.add(text);
-				handler.post(callback);
-			}
-		});
-	}
 
 	public void readBinaryFile(FileArguments args) {
 		RBuddyApp.assertUIThread();
@@ -577,8 +520,7 @@ public class UserData {
 		});
 	}
 
-
-	public byte[] blockingReadBinaryFile(DriveFile driveFile) {
+	private byte[] blockingReadBinaryFile(DriveFile driveFile) {
 		if (db)
 			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
 

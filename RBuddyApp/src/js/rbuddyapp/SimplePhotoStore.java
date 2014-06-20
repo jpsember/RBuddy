@@ -18,8 +18,6 @@ public class SimplePhotoStore implements IPhotoStore {
 	private static final Random random = new Random(System.currentTimeMillis());
 
 	public SimplePhotoStore() {
-		warning("clean up relationship between photo id and filename; they're kind of ambiguous here");
-
 		ASSERT(!RBuddyApp.useGoogleAPI);
 		HandlerThread ht = new HandlerThread("SimplePhotoStore BgndHandler");
 		ht.start();
@@ -32,7 +30,6 @@ public class SimplePhotoStore implements IPhotoStore {
 				return false;
 			}
 		});
-
 	}
 
 	@Override

@@ -17,24 +17,21 @@ import js.rbuddy.TagSetFile;
 public class DriveReceiptFile implements IReceiptFile {
 
 	public static String EMPTY_FILE_CONTENTS = "[]";
+	public static final String RECEIPTFILE_NAME = "Receipts.json";
+	public static final String TAGSFILE_NAME = "Tags.json";
 
 	/**
 	 * This constructor may be called from other than the UI thread!
 	 * 
 	 * @param driveFile
 	 */
-	public DriveReceiptFile(UserData userData, DriveFile driveFile) {
+	public DriveReceiptFile(UserData userData, DriveFile driveFile,
+			String contents) {
 		if (db)
 			pr("DriveReceiptFile constructor; " + UserData.dbPrefix(driveFile));
 		this.userData = userData;
 		this.driveFile = driveFile;
 		this.map = new HashMap();
-
-		if (db)
-			pr(" attempting to read file");
-		String contents = userData.blockingReadTextFile(driveFile);
-		if (db)
-			pr(" read contents: " + contents);
 
 		{
 			JSONParser json = new JSONParser(contents);
@@ -79,7 +76,9 @@ public class DriveReceiptFile implements IReceiptFile {
 			if (db)
 				pr(" writing text file " + text + "\n to "
 						+ UserData.dbPrefix(driveFile));
-			userData.writeTextFile(driveFile, text, null);
+			FileArguments args = new FileArguments(RECEIPTFILE_NAME);
+			args.setFileId(driveFile.getDriveId());
+			userData.writeTextFile(args, text);
 		}
 		flushTagSet();
 	}
@@ -92,7 +91,10 @@ public class DriveReceiptFile implements IReceiptFile {
 			pr(" file " + tf + ", isChanged=" + tf.isChanged());
 		if (tf.isChanged()) {
 			String json = JSONEncoder.toJSON(tf);
-			userData.writeTextFile(userData.getTagSetDriveFile(), json, null);
+			FileArguments args = new FileArguments(TAGSFILE_NAME);
+
+			args.setFileId(userData.getTagSetDriveFile().getDriveId());
+			userData.writeTextFile(args, json);
 			if (db)
 				pr("  wrote json " + json);
 			tf.setChanged(false);

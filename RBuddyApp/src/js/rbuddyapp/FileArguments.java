@@ -6,10 +6,11 @@ import static js.basic.Tools.*;
 
 public class FileArguments {
 
-	public FileArguments() {
+	public FileArguments(String filename) {
+		ASSERT(filename != null);
+		this.filename = filename;
 		this.data = EMPTY_DATA;
 		this.mimeType = "application/octet-stream";
-
 	}
 
 	/**
@@ -117,6 +118,7 @@ public class FileArguments {
 	 * & google drive versions)
 	 */
 	private DriveId fileId;
+
 	private String fileIdString;
 
 	private DriveFolder parentFolder;

@@ -139,10 +139,9 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
 
 		try {
-			FileArguments args = new FileArguments();
+			FileArguments args = new FileArguments(
+					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
 			args.setData(Files.readBinaryFile(workFile));
-			args.setFilename(BitmapUtil.constructReceiptImageFilename(receipt
-					.getId()));
 			args.setFileId(receipt.getPhotoId());
 
 			final FileArguments arg = args;
@@ -177,10 +176,9 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 			String photoId = receipt.getPhotoId();
 			if (photoId == null)
 				break;
-
-			final FileArguments args = new FileArguments();
+			final FileArguments args = new FileArguments(
+					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
 			args.setFileId(photoId);
-
 			args.setCallback(new Runnable() {
 				@Override
 				public void run() {
