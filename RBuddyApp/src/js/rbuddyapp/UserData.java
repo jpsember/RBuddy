@@ -37,6 +37,7 @@ public class UserData {
 	private static final String USER_ROOTFOLDER_NAME = "RBuddy User Data";
 	private static final String RECEIPTFILE_NAME = "Receipts.json";
 	private static final String TAGSFILE_NAME = "Tags.json";
+	private static final String PHOTOSFOLDER_NAME = "Photos";
 
 	/**
 	 * Constructor
@@ -51,14 +52,15 @@ public class UserData {
 		HandlerThread ht = new HandlerThread("BgndHandler");
 		ht.start();
 		this.backgroundHandler = new Handler(ht.getLooper());
-		
-    this.handler = new Handler(new Callback() {
+
+		this.handler = new Handler(new Callback() {
 			@Override
 			public boolean handleMessage(Message m) {
 				warning("UserData handler not handling message: " + m);
 				return false;
 			}
 		});
+
 	}
 
 	/**
@@ -113,7 +115,7 @@ public class UserData {
 	// Package visibility to get rid of unused warning
 	MetadataResult inspectFile(String fileIdString) {
 		DriveId fileId = DriveId.decodeFromString(fileIdString);
-		DriveFile file = DriveApi.getFile(apiClient, fileId);
+		DriveFile file = fileWithId(fileId);
 		return file.getMetadata(apiClient).await();
 	}
 
@@ -181,7 +183,7 @@ public class UserData {
 			receiptFileId = receiptFile.getDriveId();
 		}
 
-		DriveFile rf = DriveApi.getFile(apiClient, receiptFileId);
+		DriveFile rf = fileWithId(receiptFileId);
 		this.receiptFile = new DriveReceiptFile(this, rf);
 	}
 
@@ -217,7 +219,7 @@ public class UserData {
 			tagsFileId = tagsFile.getDriveId();
 		}
 
-		this.tagSetDriveFile = DriveApi.getFile(apiClient, tagsFileId);
+		this.tagSetDriveFile = fileWithId(tagsFileId);
 
 		String content = blockingReadTextFile(tagSetDriveFile);
 		TagSetFile tfFile = (TagSetFile) JSONParser.parse(content,
@@ -227,7 +229,22 @@ public class UserData {
 	}
 
 	private void findPhotosFolder() {
-		unimp("not yet storing photos in Drive");
+		unimp("maybe store drive ids in preferences so we don't need to look");
+		DriveId photosFolderId = lookForDriveResource(userDataFolder,
+				PHOTOSFOLDER_NAME, true);
+		if (photosFolderId == null) {
+			// DriveFolder rootFolder = DriveApi.getRootFolder(apiClient);
+			MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+					.setTitle(PHOTOSFOLDER_NAME).build();
+			DriveFolderResult result = userDataFolder.createFolder(apiClient,
+					changeSet).await();
+			if (!success(result))
+				die("failed to create photos folder");
+
+			photosFolderId = result.getDriveFolder().getDriveId();
+		}
+		this.photoStore = new DrivePhotoStore(this, DriveApi.getFolder(
+				apiClient, photosFolderId));
 	}
 
 	/**
@@ -370,40 +387,179 @@ public class UserData {
 	 */
 	private DriveFile createTextFile(DriveFolder parentFolder, String filename,
 			String contents) {
-		DriveFile ret = null;
+		return createBinaryFile(parentFolder, filename, "text/plain",
+				contents.getBytes());
+		//
+		// DriveFile ret = null;
+		//
+		// MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+		// .setTitle(filename).setMimeType("text/plain").build();
+		// Contents c = buildContents();
+		//
+		// try {
+		// OutputStream s = c.getOutputStream();
+		// s.write(contents.getBytes());
+		// s.close();
+		// DriveFolder.DriveFileResult result = parentFolder.createFile(
+		// apiClient, changeSet, c).await();
+		//
+		// if (success(result))
+		// ret = result.getDriveFile();
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+		//
+		// return ret;
+	}
 
+	private DriveFile createBinaryFile(DriveFolder parentFolder,
+			String filename, String mimeType, byte[] contents) {
 		MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-				.setTitle(filename).setMimeType("text/plain").build();
+				.setTitle(filename).setMimeType(mimeType).build();
 		Contents c = buildContents();
 
+		DriveFile ret = null;
 		try {
 			OutputStream s = c.getOutputStream();
-			s.write(contents.getBytes());
+			s.write(contents);
 			s.close();
 			DriveFolder.DriveFileResult result = parentFolder.createFile(
 					apiClient, changeSet, c).await();
-
 			if (success(result))
 				ret = result.getDriveFile();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
 		return ret;
 	}
 
-	public static String dbPrefix(DriveResource d) {
-		final boolean db = false;
-		if (db)
-			pr("dbPrefix for " + d + " class=" + d.getClass().getSimpleName()
-					+ " driveId=" + d.getDriveId() + " encoded="
-					+ d.getDriveId().encodeToString());
-
+	public static String dbPrefix(DriveId d) {
 		if (d == null)
 			return "<null>";
-		String str = d.getDriveId().encodeToString();
+		String str = d.encodeToString();
 		String prefix = str.substring(0, 16);
 		return prefix;
+	}
+
+	public static String dbPrefix(DriveResource d) {
+		if (d == null)
+			return "<null>";
+		return dbPrefix(d.getDriveId());
+	}
+
+	public void writeBinaryFile(FileArguments args) {
+
+		final FileArguments arg = args;
+		RBuddyApp.assertUIThread();
+
+		this.backgroundHandler.post(new Runnable() {
+			public void run() {
+				if (db)
+					pr("UserData.writeBinaryFile " + arg);
+
+				// DriveId resultDriveId = arg.driveId;
+				DriveFile driveFile = null;
+				if (arg.getFileId() != null) {
+					driveFile = fileWithId(arg.getFileId());
+					// TODO what if file has been deleted?
+				}
+
+				if (driveFile == null) {
+					arg.setFileId(createBinaryFile(arg.getParentFolder(),
+							arg.filename, arg.mimeType, arg.data).getDriveId());
+				} else {
+					driveFile = fileWithId(arg.getFileId());
+					if (driveFile == null)
+						die("could not find DriveFile " + arg.getFileId());
+
+					ContentsResult cr = driveFile.openContents(apiClient,
+							DriveFile.MODE_WRITE_ONLY, null).await();
+					if (!success(cr))
+						die("failed to get contents");
+					Contents c = cr.getContents();
+					try {
+						OutputStream s = c.getOutputStream();
+						byte[] data = arg.data;
+						if (data == null)
+							data = new byte[0];
+						s.write(data);
+						s.close();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					Status r = driveFile.commitAndCloseContents(apiClient, c)
+							.await();
+					if (!success(r))
+						die("problem committing and closing");
+				}
+				// arg.returnValue = arg.fileId.encodeToString();
+				if (db)
+					pr(" done writing binary file, calling callback="
+							+ arg.callback + ", handler=" + handler);
+				if (arg.callback != null)
+					handler.post(arg.callback);
+			}
+		});
+
+	}
+
+	@Deprecated
+	public void writeBinaryFile(final DriveFolder parentFolder,
+			final DriveId driveId, final String filename, final byte[] bytes,
+			final String mimeType, final Runnable callback,
+			final ArrayList returnValue) {
+
+		RBuddyApp.assertUIThread();
+
+		this.backgroundHandler.post(new Runnable() {
+			public void run() {
+				returnValue.clear();
+				if (db)
+					pr("UserData.writeBinaryFile mimeType " + mimeType
+							+ " length=" + bytes.length + " driveId="
+							+ dbPrefix(driveId));
+
+				DriveId resultDriveId = driveId;
+				DriveFile driveFile = null;
+				if (resultDriveId != null) {
+					driveFile = fileWithId(resultDriveId);
+					// TODO what if file has been deleted?
+				}
+
+				if (driveFile == null) {
+					resultDriveId = createBinaryFile(parentFolder, filename,
+							mimeType, bytes).getDriveId();
+				} else {
+					driveFile = fileWithId(resultDriveId);
+					if (driveFile == null)
+						die("could not find DriveFile " + resultDriveId);
+
+					ContentsResult cr = driveFile.openContents(apiClient,
+							DriveFile.MODE_WRITE_ONLY, null).await();
+					if (!success(cr))
+						die("failed to get contents");
+					Contents c = cr.getContents();
+					try {
+						OutputStream s = c.getOutputStream();
+						s.write(bytes);
+						s.close();
+						if (db)
+							pr(" wrote bytes of length " + bytes.length);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					Status r = driveFile.commitAndCloseContents(apiClient, c)
+							.await();
+					if (!success(r))
+						die("problem committing and closing");
+				}
+				returnValue.add(resultDriveId.encodeToString());
+
+				if (callback != null)
+					handler.post(callback);
+			}
+		});
+
 	}
 
 	/**
@@ -415,7 +571,7 @@ public class UserData {
 	public void writeTextFile(final DriveFile driveFile, final String text,
 			final Runnable callback) {
 
-		final boolean db = true;
+		unimp("we can just call WriteBinaryFile with appropriate parameters");
 
 		RBuddyApp.assertUIThread();
 		this.backgroundHandler.post(new Runnable() {
@@ -469,8 +625,61 @@ public class UserData {
 		});
 	}
 
+	public void readBinaryFile(FileArguments args) {
+		RBuddyApp.assertUIThread();
+		// args.returnValue = null;
+		final FileArguments arg = args;
+		this.backgroundHandler.post(new Runnable() {
+			public void run() {
+				arg.data = blockingReadBinaryFile(fileWithId(arg.getFileId()));
+				if (arg.callback != null)
+					handler.post(arg.callback);
+			}
+		});
+	}
+
+	/**
+	 * @deprecated
+	 * @param driveFile
+	 * @param callback
+	 * @param output
+	 */
+	public void readBinaryFile(final DriveFile driveFile,
+			final Runnable callback, final ArrayList output) {
+		RBuddyApp.assertUIThread();
+		output.clear();
+		this.backgroundHandler.post(new Runnable() {
+			public void run() {
+				byte[] bytes = blockingReadBinaryFile(driveFile);
+				output.add(bytes);
+				handler.post(callback);
+			}
+		});
+	}
+
+	public byte[] blockingReadBinaryFile(DriveFile driveFile) {
+		if (db)
+			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
+
+		DriveApi.ContentsResult cr = driveFile.openContents(apiClient,
+				DriveFile.MODE_READ_ONLY, null).await();
+		if (!success(cr))
+			die("can't get results");
+		Contents c = cr.getContents();
+
+		byte[] bytes = null;
+		try {
+			bytes = Files.readBytes(c.getInputStream());
+		} catch (IOException e) {
+			die("Failed to read binary file", e);
+		}
+		driveFile.discardContents(apiClient, c);
+		if (db)
+			pr(" returning " + bytes.length + " bytes");
+		return bytes;
+	}
+
 	public String blockingReadTextFile(DriveFile driveFile) {
-		final boolean db = true;
 		if (db)
 			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
 
@@ -504,6 +713,77 @@ public class UserData {
 		return tagSetDriveFile;
 	}
 
+	public IPhotoStore getPhotoStore() {
+		return photoStore;
+	}
+
+	public DriveFile fileWithId(DriveId id) {
+		return DriveApi.getFile(apiClient, id);
+	}
+
+	// public static class FileArguments {
+	// public String toString() {
+	// StringBuilder sb = new StringBuilder("Args[");
+	// sb.append(" fileId:" + dbPrefix(fileId));
+	// if (filename != null)
+	// sb.append(" filename:" + filename);
+	// sb.append(" length:" + data.length);
+	// if (!mimeType.equals("application/octet-stream"))
+	// sb.append(" mimeType:" + mimeType);
+	// if (returnValue != null)
+	// sb.append(" returnValue:" + describe(returnValue));
+	// return sb.toString();
+	// }
+	//
+	// public void setDriveId(String fileIdString) {
+	// fileId = null;
+	// if (fileIdString != null)
+	// fileId = DriveId.decodeFromString(fileIdString);
+	// }
+	//
+	// public void setDriveId(DriveId fileId) {
+	// this.fileId = fileId;
+	// }
+	//
+	// /**
+	// * Id of file to be accessed (if null, a new file is created)
+	// */
+	// public DriveId fileId;
+	//
+	// /**
+	// * For write operations only; this is its containing folder, and is used
+	// * to generate new one
+	// */
+	// public DriveFolder parentFolder;
+	//
+	// /**
+	// * If not null, and a new file is created, this is stored in its
+	// * metadata
+	// */
+	// public String filename;
+	//
+	// /**
+	// * This is the data to be written to the file
+	// */
+	// public byte[] data = new byte[0];
+	//
+	// /**
+	// * Type of data
+	// */
+	// public String mimeType = "application/octet-stream";
+	//
+	// /**
+	// * If not null, this callback's run() method will be executed, on the
+	// * caller's thread, when the operation completes
+	// */
+	// public Runnable callback;
+	//
+	// /**
+	// * This is where the return value, if any, will be found
+	// */
+	// public Object returnValue;
+	// }
+
 	private RBuddyApp app;
 	private GoogleApiClient apiClient;
 	private Handler handler;
@@ -512,4 +792,5 @@ public class UserData {
 	private IReceiptFile receiptFile;
 	private DriveFile tagSetDriveFile;
 	private TagSetFile tagSetFile;
+	private IPhotoStore photoStore;
 }

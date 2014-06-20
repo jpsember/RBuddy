@@ -1,6 +1,6 @@
 package js.rbuddyapp;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 public interface IPhotoStore {
 
@@ -11,18 +11,34 @@ public interface IPhotoStore {
 	 *            id to store JPEG as; if null, allocates new one
 	 * @param jpeg
 	 *            JPEG
-	 * @return the id it was stored as
-	 * @throws IOException
+	 * @param callback
+	 *            if not null, callback occurs when complete
+	 * @param returnValue
+	 *            the (String) id that the photo was stored as is returned here
+	 *            as the first element
+	 * @deprecated
 	 */
-	public String storePhoto(String photoId, byte[] jpeg) throws IOException;
+	public void storePhoto(String photoId, byte[] jpeg, Runnable callback,
+			ArrayList returnValue);
+
+	/**
+	 * Store a JPEG
+	 * 
+	 */
+	public void storePhoto(FileArguments args);
 
 	/**
 	 * Read JPEG
 	 * 
 	 * @param photoId
-	 * @return JPEG byte array
-	 * @throws IOException
+	 * @param callback
+	 *            if not null, callback occurs when complete
+	 * @param returnValue
+	 *            the JPEG byte array is returned as the first element
+	 * @deprecated
 	 */
-	public byte[] readPhoto(String photoId) throws IOException;
+	public void readPhoto(String photoId, Runnable callback,
+			ArrayList returnValue);
 
+	public void readPhoto(FileArguments args);
 }

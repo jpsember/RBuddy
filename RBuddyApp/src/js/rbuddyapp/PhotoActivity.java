@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import js.basic.Files;
 import js.form.Form;
+import js.form.FormImageWidget;
 import js.form.IDrawableProvider;
 import js.rbuddy.R;
 import js.rbuddy.Receipt;
@@ -98,7 +99,8 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 				startImageCaptureIntent();
 			}
 		});
-		form.getField("photo").setDrawableProvider(this);
+		imageWidget = (FormImageWidget) form.getField("photo");
+		imageWidget.setDrawableProvider(this);
 
 		ScrollView scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -148,18 +150,39 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 
 		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
 
-		byte[] jpeg = null;
 		try {
-			jpeg = Files.readBinaryFile(workFile);
+			FileArguments args = new FileArguments();
+			args.data = Files.readBinaryFile(workFile);
+			args.filename = "" + receipt.getId() + BitmapUtil.JPEG_EXTENSION;
+
+			args.setFileId(receipt.getPhotoId());
+			final FileArguments arg = args;
+			final Receipt theReceipt = receipt;
+			args.callback = new Runnable() {
+				@Override
+				public void run() {
+					photoIdHasArrived(theReceipt, arg.getFileIdAsString(),
+							arg.data);
+				}
+			};
 			IPhotoStore ps = app.photoStore();
-			String photoId = ps.storePhoto(receipt.getPhotoId(), jpeg);
-			receipt.setPhotoId(photoId);
-			app.receiptFile().setModified(receipt);
+			ps.storePhoto(args);
+
+			// args.waitForUser();
+			receipt.setPhotoId(args.getFileIdAsString());
 		} catch (IOException e) {
 			// TODO display popup message to user, and don't update receipt's
 			// photo id
 			die(e);
 		}
+	}
+
+	private void photoIdHasArrived(Receipt receipt, String fileIdString,
+			byte[] jpeg) {
+		receipt.setPhotoId(fileIdString);
+		app.receiptFile().setModified(receipt);
+
+		warning("is this safe?  What if user exits activity before id arrives?");
 	}
 
 	@Override
@@ -169,21 +192,33 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 			String photoId = receipt.getPhotoId();
 			if (photoId == null)
 				break;
-			byte[] jpeg = null;
-			try {
-				jpeg = app.photoStore().readPhoto(photoId);
-			} catch (IOException e) {
-				warning("unable to read photo from store: " + e);
+
+			final FileArguments args = new FileArguments();
+			if (RBuddyApp.useGoogleAPI) {
+				args.setFileId(photoId);
+			} else {
+				args.filename = photoId;
 			}
-			if (jpeg == null)
-				break;
-			Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-			d = new BitmapDrawable(this.getResources(), bmp);
+
+			args.callback = new Runnable() {
+				@Override
+				public void run() {
+					processBitmapLoaded(args.data);
+				}
+			};
+			app.photoStore().readPhoto(args);
 		} while (false);
 		return d;
+	}
+
+	private void processBitmapLoaded(byte[] jpeg) {
+		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
+		Drawable d = new BitmapDrawable(this.getResources(), bmp);
+		imageWidget.drawableArrived(d);
 	}
 
 	private Receipt receipt;
 	private RBuddyApp app;
 	private Form form;
+	private FormImageWidget imageWidget;
 }
