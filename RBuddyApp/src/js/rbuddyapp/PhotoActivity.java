@@ -45,7 +45,6 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
-
 		layoutElements();
 
 		// If no photo is defined for this receipt, jump right into the take
@@ -130,20 +129,9 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 	}
 
 	private void processPhotoResult(Intent intent) {
-		if (db)
-			pr("\n\nprocessPhotoResult intent " + intent);
-
 		unimp("handle various problem situations in ways other than just 'die'");
-		if (db)
-			pr("processPhotoResult intent=" + intent);
-
-		if (intent != null) {
-			warning("did not expect intent to be non-null: " + intent);
-		}
 
 		File workFile = getWorkPhotoFile();
-		if (db)
-			pr(" pathOfTakenPhoto " + workFile);
 		if (!workFile.isFile()) {
 			die("no work file found: " + workFile);
 		}
@@ -152,24 +140,22 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 
 		try {
 			FileArguments args = new FileArguments();
-			args.data = Files.readBinaryFile(workFile);
-			args.filename = "" + receipt.getId() + BitmapUtil.JPEG_EXTENSION;
-
+			args.setData(Files.readBinaryFile(workFile));
+			args.setFilename(BitmapUtil.constructReceiptImageFilename(receipt
+					.getId()));
 			args.setFileId(receipt.getPhotoId());
+
 			final FileArguments arg = args;
 			final Receipt theReceipt = receipt;
-			args.callback = new Runnable() {
+			args.setCallback(new Runnable() {
 				@Override
 				public void run() {
-					photoIdHasArrived(theReceipt, arg.getFileIdAsString(),
-							arg.data);
+					photoIdHasArrived(theReceipt, arg.getFileIdString(),
+							arg.getData());
 				}
-			};
+			});
 			IPhotoStore ps = app.photoStore();
 			ps.storePhoto(args);
-
-			// args.waitForUser();
-			receipt.setPhotoId(args.getFileIdAsString());
 		} catch (IOException e) {
 			// TODO display popup message to user, and don't update receipt's
 			// photo id
@@ -181,8 +167,7 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 			byte[] jpeg) {
 		receipt.setPhotoId(fileIdString);
 		app.receiptFile().setModified(receipt);
-
-		warning("is this safe?  What if user exits activity before id arrives?");
+		processBitmapLoaded(jpeg);
 	}
 
 	@Override
@@ -194,18 +179,14 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 				break;
 
 			final FileArguments args = new FileArguments();
-			if (RBuddyApp.useGoogleAPI) {
-				args.setFileId(photoId);
-			} else {
-				args.filename = photoId;
-			}
+			args.setFileId(photoId);
 
-			args.callback = new Runnable() {
+			args.setCallback(new Runnable() {
 				@Override
 				public void run() {
-					processBitmapLoaded(args.data);
+					processBitmapLoaded(args.getData());
 				}
-			};
+			});
 			app.photoStore().readPhoto(args);
 		} while (false);
 		return d;

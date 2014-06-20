@@ -9,8 +9,8 @@ public class Receipt implements IJSONEncoder {
 
 	// Version number. If JSON format of Receipt changes, we increment this.
 	// We incorporate the version number into the receipt filename (at least in
-	// the 'simple' receipt file implementation) to ensure older, invalid 
-  // files are not used.
+	// the 'simple' receipt file implementation) to ensure older, invalid
+	// files are not used.
 	public static final int VERSION = 3;
 
 	/**
@@ -208,4 +208,5 @@ public class Receipt implements IJSONEncoder {
 	private String photoId;
 	private int id;
 	private Cost cost;
+
 }

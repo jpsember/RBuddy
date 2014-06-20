@@ -18,6 +18,16 @@ public class BitmapUtil {
 	public static final int JPEG_QUALITY_DEFAULT = 80;
 	public static final String JPEG_EXTENSION = ".jpg";
 
+	/**
+	 * Construct a filename for a receipt's photo. This is derived from the
+	 * receipt's id, and has no path component
+	 * 
+	 * @return filename
+	 */
+	public static String constructReceiptImageFilename(int receiptId) {
+		return receiptId + BitmapUtil.JPEG_EXTENSION;
+	}
+
 	public static void writeJPEG(Bitmap bitmap, File destinationFile)
 			throws IOException {
 		writeJPEG(bitmap, destinationFile, JPEG_QUALITY_DEFAULT);
@@ -139,10 +149,8 @@ public class BitmapUtil {
 	public static File constructExternalImageFile(String name) {
 		File storageDir = Environment
 				.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-		File imageFile = new File(storageDir, "JS_" + name
- + JPEG_EXTENSION);
+		File imageFile = new File(storageDir, "JS_" + name + JPEG_EXTENSION);
 		imageFile = imageFile.getAbsoluteFile();
-//		imageFile.delete();
 		return imageFile;
 	}
 
@@ -176,6 +184,17 @@ public class BitmapUtil {
 
 	public static String dump(Bitmap b) {
 		return "bitmap " + b.getWidth() + " x " + b.getHeight();
+	}
+
+	public static String dumpJPEG(byte[] jpeg) {
+		StringBuilder sb = new StringBuilder("jpeg ");
+		if (jpeg == null) {
+			sb.append("<null>");
+		} else {
+			sb.append("length=" + jpeg.length);
+		}
+		return sb.toString();
+
 	}
 
 }

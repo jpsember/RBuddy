@@ -450,6 +450,8 @@ public class UserData {
 	public void writeBinaryFile(FileArguments args) {
 
 		final FileArguments arg = args;
+		ASSERT(args.getFilename() != null);
+
 		RBuddyApp.assertUIThread();
 
 		this.backgroundHandler.post(new Runnable() {
@@ -466,7 +468,8 @@ public class UserData {
 
 				if (driveFile == null) {
 					arg.setFileId(createBinaryFile(arg.getParentFolder(),
-							arg.filename, arg.mimeType, arg.data).getDriveId());
+							arg.getFilename(), arg.getMimeType(), arg.getData())
+							.getDriveId());
 				} else {
 					driveFile = fileWithId(arg.getFileId());
 					if (driveFile == null)
@@ -479,9 +482,7 @@ public class UserData {
 					Contents c = cr.getContents();
 					try {
 						OutputStream s = c.getOutputStream();
-						byte[] data = arg.data;
-						if (data == null)
-							data = new byte[0];
+						byte[] data = arg.getData();
 						s.write(data);
 						s.close();
 					} catch (IOException e) {
@@ -492,71 +493,8 @@ public class UserData {
 					if (!success(r))
 						die("problem committing and closing");
 				}
-				// arg.returnValue = arg.fileId.encodeToString();
-				if (db)
-					pr(" done writing binary file, calling callback="
-							+ arg.callback + ", handler=" + handler);
-				if (arg.callback != null)
-					handler.post(arg.callback);
-			}
-		});
-
-	}
-
-	@Deprecated
-	public void writeBinaryFile(final DriveFolder parentFolder,
-			final DriveId driveId, final String filename, final byte[] bytes,
-			final String mimeType, final Runnable callback,
-			final ArrayList returnValue) {
-
-		RBuddyApp.assertUIThread();
-
-		this.backgroundHandler.post(new Runnable() {
-			public void run() {
-				returnValue.clear();
-				if (db)
-					pr("UserData.writeBinaryFile mimeType " + mimeType
-							+ " length=" + bytes.length + " driveId="
-							+ dbPrefix(driveId));
-
-				DriveId resultDriveId = driveId;
-				DriveFile driveFile = null;
-				if (resultDriveId != null) {
-					driveFile = fileWithId(resultDriveId);
-					// TODO what if file has been deleted?
-				}
-
-				if (driveFile == null) {
-					resultDriveId = createBinaryFile(parentFolder, filename,
-							mimeType, bytes).getDriveId();
-				} else {
-					driveFile = fileWithId(resultDriveId);
-					if (driveFile == null)
-						die("could not find DriveFile " + resultDriveId);
-
-					ContentsResult cr = driveFile.openContents(apiClient,
-							DriveFile.MODE_WRITE_ONLY, null).await();
-					if (!success(cr))
-						die("failed to get contents");
-					Contents c = cr.getContents();
-					try {
-						OutputStream s = c.getOutputStream();
-						s.write(bytes);
-						s.close();
-						if (db)
-							pr(" wrote bytes of length " + bytes.length);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-					Status r = driveFile.commitAndCloseContents(apiClient, c)
-							.await();
-					if (!success(r))
-						die("problem committing and closing");
-				}
-				returnValue.add(resultDriveId.encodeToString());
-
-				if (callback != null)
-					handler.post(callback);
+				if (arg.getCallback() != null)
+					handler.post(arg.getCallback());
 			}
 		});
 
@@ -571,7 +509,7 @@ public class UserData {
 	public void writeTextFile(final DriveFile driveFile, final String text,
 			final Runnable callback) {
 
-		unimp("we can just call WriteBinaryFile with appropriate parameters");
+		unimp("we can just call WriteBinaryFile with appropriate parameters; also use new FileArguments object instead");
 
 		RBuddyApp.assertUIThread();
 		this.backgroundHandler.post(new Runnable() {
@@ -614,6 +552,7 @@ public class UserData {
 	 */
 	public void readTextFile(final DriveFile driveFile,
 			final Runnable callback, final ArrayList output) {
+		warning("use new FileArguments object instead");
 		RBuddyApp.assertUIThread();
 		output.clear();
 		this.backgroundHandler.post(new Runnable() {
@@ -631,31 +570,13 @@ public class UserData {
 		final FileArguments arg = args;
 		this.backgroundHandler.post(new Runnable() {
 			public void run() {
-				arg.data = blockingReadBinaryFile(fileWithId(arg.getFileId()));
-				if (arg.callback != null)
-					handler.post(arg.callback);
+				arg.setData(blockingReadBinaryFile(fileWithId(arg.getFileId())));
+				if (arg.getCallback() != null)
+					handler.post(arg.getCallback());
 			}
 		});
 	}
 
-	/**
-	 * @deprecated
-	 * @param driveFile
-	 * @param callback
-	 * @param output
-	 */
-	public void readBinaryFile(final DriveFile driveFile,
-			final Runnable callback, final ArrayList output) {
-		RBuddyApp.assertUIThread();
-		output.clear();
-		this.backgroundHandler.post(new Runnable() {
-			public void run() {
-				byte[] bytes = blockingReadBinaryFile(driveFile);
-				output.add(bytes);
-				handler.post(callback);
-			}
-		});
-	}
 
 	public byte[] blockingReadBinaryFile(DriveFile driveFile) {
 		if (db)
@@ -720,69 +641,6 @@ public class UserData {
 	public DriveFile fileWithId(DriveId id) {
 		return DriveApi.getFile(apiClient, id);
 	}
-
-	// public static class FileArguments {
-	// public String toString() {
-	// StringBuilder sb = new StringBuilder("Args[");
-	// sb.append(" fileId:" + dbPrefix(fileId));
-	// if (filename != null)
-	// sb.append(" filename:" + filename);
-	// sb.append(" length:" + data.length);
-	// if (!mimeType.equals("application/octet-stream"))
-	// sb.append(" mimeType:" + mimeType);
-	// if (returnValue != null)
-	// sb.append(" returnValue:" + describe(returnValue));
-	// return sb.toString();
-	// }
-	//
-	// public void setDriveId(String fileIdString) {
-	// fileId = null;
-	// if (fileIdString != null)
-	// fileId = DriveId.decodeFromString(fileIdString);
-	// }
-	//
-	// public void setDriveId(DriveId fileId) {
-	// this.fileId = fileId;
-	// }
-	//
-	// /**
-	// * Id of file to be accessed (if null, a new file is created)
-	// */
-	// public DriveId fileId;
-	//
-	// /**
-	// * For write operations only; this is its containing folder, and is used
-	// * to generate new one
-	// */
-	// public DriveFolder parentFolder;
-	//
-	// /**
-	// * If not null, and a new file is created, this is stored in its
-	// * metadata
-	// */
-	// public String filename;
-	//
-	// /**
-	// * This is the data to be written to the file
-	// */
-	// public byte[] data = new byte[0];
-	//
-	// /**
-	// * Type of data
-	// */
-	// public String mimeType = "application/octet-stream";
-	//
-	// /**
-	// * If not null, this callback's run() method will be executed, on the
-	// * caller's thread, when the operation completes
-	// */
-	// public Runnable callback;
-	//
-	// /**
-	// * This is where the return value, if any, will be found
-	// */
-	// public Object returnValue;
-	// }
 
 	private RBuddyApp app;
 	private GoogleApiClient apiClient;
