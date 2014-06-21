@@ -64,6 +64,13 @@ public interface IReceiptFile {
 	public void clear();
 
 	/**
+	 * Get an id guaranteed to be unique from any other in the set
+	 * 
+	 * @return positive integer
+	 */
+	public int allocateUniqueId();
+
+	/**
 	 * Get an iterator over the receipts
 	 * 
 	 * @return

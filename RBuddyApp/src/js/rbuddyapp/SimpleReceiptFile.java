@@ -18,7 +18,7 @@ import static js.basic.Tools.*;
 public class SimpleReceiptFile implements IReceiptFile {
 
 	public static final boolean SHOW_FILE_ACTIVITY = TagSetFile.SHOW_FILE_ACTIVITY;
-	
+
 	public SimpleReceiptFile() {
 		this(null, null);
 	}
@@ -47,7 +47,6 @@ public class SimpleReceiptFile implements IReceiptFile {
 					tf = (TagSetFile) JSONParser.parse(
 							Files.readTextFile(tagSetStorageFile),
 							TagSetFile.JSON_PARSER);
-					if (db) pr("readTagSetFile: "+tf);
 				} catch (IOException e) {
 					warning("caught " + e + ", starting with empty tag file");
 				}
@@ -65,7 +64,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 		if (tagSetFile != null) {
 			File file = fileForBaseName(tagSetFileBaseName);
 			try {
-				if (db) pr("\nflushTagSetFile, writing "+file+": "+tagSetFile);
+				if (db)
+					pr("\nflushTagSetFile, writing " + file + ": " + tagSetFile);
 				String json = JSONEncoder.toJSON(tagSetFile);
 				Files.writeTextFile(file, json);
 			} catch (IOException e) {
@@ -110,7 +110,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 	public void flush() {
 		if (changes) {
 			final boolean db = SHOW_FILE_ACTIVITY;
-			if (db) pr("SimpleReceiptFile flush; called from "+stackTrace(1,1));
+			if (db)
+				pr("SimpleReceiptFile flush; called from " + stackTrace(1, 1));
 			changes = false;
 			String text;
 			{
@@ -144,6 +145,13 @@ public class SimpleReceiptFile implements IReceiptFile {
 		getReceiptFromMap(r.getId(), false);
 		map.put(r.getId(), r);
 		setModified(r);
+		updateUniqueIdentifier(r.getId());
+
+	}
+
+	private void updateUniqueIdentifier(int receiptId) {
+		if (highestId < receiptId)
+			highestId = receiptId;
 	}
 
 	@Override
@@ -163,13 +171,19 @@ public class SimpleReceiptFile implements IReceiptFile {
 		return map.values().iterator();
 	}
 
-	/**
-	 * Remove all receipts from file
-	 */
+	@Override
+	public int allocateUniqueId() {
+		int id = 1 + highestId;
+		highestId = id;
+		return id;
+	}
+
+	@Override
 	public void clear() {
 		if (!map.isEmpty()) {
 			map.clear();
 			setChanges();
+			this.highestId = 0;
 		}
 	}
 
@@ -208,8 +222,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 			while (json.hasNext()) {
 				Receipt r = (Receipt) Receipt.JSON_PARSER.parse(json);
 				map.put(r.getId(), r);
-				if (db)
-					pr(" read receipt: " + r);
+				updateUniqueIdentifier(r.getId());
 			}
 			json.exit();
 		} catch (IOException e) {
@@ -228,4 +241,5 @@ public class SimpleReceiptFile implements IReceiptFile {
 	private String tagSetFileBaseName;
 	private boolean changes;
 	private Map map;
+	private int highestId;
 }

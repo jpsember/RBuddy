@@ -109,8 +109,7 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processAddReceipt() {
-		unimp("use receipt file itself to determine next unique identifier");
-		Receipt r = new Receipt(AppPreferences.getUniqueIdentifier("receiptId"));
+		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
 		this.receiptList.add(r);
 

@@ -27,8 +27,6 @@ public class DriveReceiptFile implements IReceiptFile {
 	 */
 	public DriveReceiptFile(UserData userData, DriveFile driveFile,
 			String contents) {
-		if (db)
-			pr("DriveReceiptFile constructor; " + UserData.dbPrefix(driveFile));
 		this.userData = userData;
 		this.driveFile = driveFile;
 		this.map = new HashMap();
@@ -39,6 +37,7 @@ public class DriveReceiptFile implements IReceiptFile {
 			while (json.hasNext()) {
 				Receipt r = (Receipt) Receipt.JSON_PARSER.parse(json);
 				map.put(r.getId(), r);
+				updateUniqueIdentifier(r.getId());
 			}
 			json.exit();
 		}
@@ -105,6 +104,7 @@ public class DriveReceiptFile implements IReceiptFile {
 	public void add(Receipt r) {
 		getReceiptFromMap(r.getId(), false);
 		map.put(r.getId(), r);
+		updateUniqueIdentifier(r.getId());
 		setModified(r);
 	}
 
@@ -142,22 +142,34 @@ public class DriveReceiptFile implements IReceiptFile {
 		return r;
 	}
 
-	/**
-	 * Remove all receipts from file
-	 */
+	@Override
 	public void clear() {
 		if (!map.isEmpty()) {
 			map.clear();
+			highestId = 0;
 			setChanges();
 		}
+	}
+
+	@Override
+	public int allocateUniqueId() {
+		int id = 1 + highestId;
+		highestId = id;
+		return id;
 	}
 
 	private void setChanges() {
 		changes = true;
 	}
 
+	private void updateUniqueIdentifier(int receiptId) {
+		if (highestId < receiptId)
+			highestId = receiptId;
+	}
+
 	private boolean changes;
 	private DriveFile driveFile;
 	private UserData userData;
 	private Map map;
+	private int highestId;
 }
