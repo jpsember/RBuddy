@@ -14,7 +14,6 @@ import js.rbuddy.TagSetFile;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
 
@@ -29,7 +28,6 @@ public class RBuddyApp {
 	public static final boolean useGoogleAPI = true;
 
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
-	private static final String KEY_UNIQUE_IDENTIFIER = "unique_id";
 
 	public static void prepare(Context context) {
 		if (sharedInstance == null) {
@@ -101,21 +99,6 @@ public class RBuddyApp {
 		return photoStore;
 	}
 
-	public int getUniqueIdentifier() {
-		int value;
-		synchronized (this) {
-			value = preferences.getInt(KEY_UNIQUE_IDENTIFIER, 1000);
-			SharedPreferences.Editor editor = preferences.edit();
-			editor.putInt(KEY_UNIQUE_IDENTIFIER, 1 + value);
-			editor.commit();
-		}
-		return value;
-	}
-
-	public SharedPreferences getPreferences() {
-		return preferences;
-	}
-
 	public Context context() {
 		return this.context;
 	}
@@ -133,13 +116,8 @@ public class RBuddyApp {
 
 	private RBuddyApp(Context context) {
 		this.context = context;
-		if (context instanceof Activity) {
-			this.preferences = ((Activity) context)
-					.getPreferences(Context.MODE_PRIVATE);
-		} else {
-			this.preferences = context.getSharedPreferences(
-					"__RBuddyApp_test_", Context.MODE_PRIVATE);
-		}
+		AppPreferences.prepare(this.context);
+
 		if (!testing()) {
 			AndroidSystemOutFilter.install();
 
@@ -252,7 +230,6 @@ public class RBuddyApp {
 
 	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();
-	private SharedPreferences preferences;
 	private static RBuddyApp sharedInstance;
 	private Context context;
 	private IPhotoStore photoStore;

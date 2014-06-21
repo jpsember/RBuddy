@@ -20,8 +20,6 @@ import com.google.android.gms.drive.DriveResource.MetadataResult;
 import com.google.android.gms.common.api.Status;
 
 import static com.google.android.gms.drive.Drive.DriveApi;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -36,7 +34,6 @@ public class UserData {
 	 * the default one which is tied to the UI thread.
 	 */
 
-	private static final String PREFERENCES_NAME = "RBuddy";
 	private static final String PREFERENCE_KEY_ROOTFOLDER = "UserData root folder";
 	private static final String USER_ROOTFOLDER_NAME = "RBuddy User Data";
 	private static final String PHOTOSFOLDER_NAME = "Photos";
@@ -48,7 +45,6 @@ public class UserData {
 	 */
 	public UserData(RBuddyApp app) {
 		RBuddyApp.assertUIThread();
-		this.app = app;
 		this.apiClient = app.getGoogleApiClient();
 
 		HandlerThread ht = new HandlerThread("BgndHandler");
@@ -60,35 +56,6 @@ public class UserData {
 				warning("ignoring message: " + m);
 			}
 		};
-	}
-
-	/**
-	 * Read string from app preferences (we'll probably move this to some other
-	 * class later)
-	 * 
-	 * @param key
-	 * @param defaultValue
-	 * @return
-	 */
-	private String getPreferenceString(String key, String defaultValue) {
-		SharedPreferences preferences = app.context().getSharedPreferences(
-				PREFERENCES_NAME, Context.MODE_PRIVATE);
-		return preferences.getString(key, defaultValue);
-	}
-
-	/**
-	 * Store string in app preferences (we'll probably move this to some other
-	 * class later)
-	 * 
-	 * @param key
-	 * @param value
-	 */
-	private void setPreferenceString(String key, String value) {
-		SharedPreferences preferences = app.context().getSharedPreferences(
-				PREFERENCES_NAME, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = preferences.edit();
-		editor.putString(key, value);
-		editor.commit();
 	}
 
 	/**
@@ -122,7 +89,7 @@ public class UserData {
 		if (db)
 			pr("UserData.findUserDataFolder");
 		RBuddyApp.assertNotUIThread();
-		String storedFolderIdString = getPreferenceString(
+		String storedFolderIdString = AppPreferences.getString(
 				PREFERENCE_KEY_ROOTFOLDER, "");
 		String rootFolderIdString = storedFolderIdString;
 		if (db)
@@ -166,7 +133,8 @@ public class UserData {
 
 		if (!storedFolderIdString.equals(rootFolderIdString)) {
 			storedFolderIdString = rootFolderIdString;
-			setPreferenceString(PREFERENCE_KEY_ROOTFOLDER, storedFolderIdString);
+			AppPreferences.putString(PREFERENCE_KEY_ROOTFOLDER,
+					storedFolderIdString);
 			if (db)
 				pr(" wrote new folder id string " + storedFolderIdString);
 		}
@@ -536,7 +504,6 @@ public class UserData {
 		return DriveApi.getFile(apiClient, id);
 	}
 
-	private RBuddyApp app;
 	private GoogleApiClient apiClient;
 	private Handler uiThreadHandler;
 	private Handler backgroundHandler;
