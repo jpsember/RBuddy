@@ -2,6 +2,8 @@ package js.json;
 
 public class JSONTools {
 
+	public static final String JSON_MIME_TYPE = "application/json";
+
 	/**
 	 * Utility method that exchanges single and double quotes, to allow easier
 	 * embedding of JSON strings within Java source.

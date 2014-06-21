@@ -5,8 +5,8 @@ import java.io.OutputStream;
 import java.util.Iterator;
 
 import js.basic.Files;
-import js.json.JSONEncoder;
 import js.json.JSONParser;
+import js.json.JSONTools;
 import js.rbuddy.IReceiptFile;
 import js.rbuddy.TagSetFile;
 
@@ -33,11 +33,14 @@ public class UserData {
 	 * the default one which is tied to the UI thread.
 	 */
 
-	private static final String PREFERENCE_KEY_ROOTFOLDER = "UserData root folder";
-	private static final String PREFERENCE_KEY_PHOTOFOLDER = "UserData photos folder";
+	private static final String FILENAME_USER_ROOT_FOLDER = "RBuddy User Data";
+	private static final String FILENAME_RECEIPTS = "Receipts";
+	public static final String FILENAME_TAGS = "Tags";
+	private static final String FILENAME_PHOTOS_FOLDER = "Photos";
 
-	private static final String USER_ROOTFOLDER_NAME = "RBuddy User Data";
-	private static final String PHOTOSFOLDER_NAME = "Photos";
+	// This prefix is combined with the above filenames to produce corresponding
+	// keys for the stored preferences
+	private static final String PREFERENCE_KEY_PREFIX = "DriveId_";
 
 	/**
 	 * Constructor
@@ -73,47 +76,41 @@ public class UserData {
 		return false;
 	}
 
-	// // Package visibility to get rid of unused warning
-	// MetadataResult inspectFile(String fileIdString) {
-	// DriveId fileId = DriveId.decodeFromString(fileIdString);
-	// DriveFile file = fileWithId(fileId);
-	// return file.getMetadata(apiClient).await();
-	// }
-
 	private void findUserDataFolder() {
-		final boolean db = true;
-
-		if (db)
-			pr("UserData.findUserDataFolder");
-
-		LocateFolderResult r = locateFolder(PREFERENCE_KEY_ROOTFOLDER,
-				DriveApi.getRootFolder(apiClient), USER_ROOTFOLDER_NAME);
-
+		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
+				+ FILENAME_USER_ROOT_FOLDER, DriveApi.getRootFolder(apiClient),
+				FILENAME_USER_ROOT_FOLDER);
 		userDataFolder = r.folder;
 		if (r.wasCreated) {
-			// We must remove any stored
-			AppPreferences.removeKey(PREFERENCE_KEY_PHOTOFOLDER);
-			unimp("remove other file's keys as well");
+			// We must remove any stored keys associated with files/folders
+			// lying within the old user data folder, since we couldn't find it
+			// and should abandon these other resources as well (otherwise it
+			// may succeed at finding them, which is kind of messed up since
+			// they will not lie within the new parent folder)
+			AppPreferences.removeKey(PREFERENCE_KEY_PREFIX
+					+ FILENAME_PHOTOS_FOLDER);
+			AppPreferences.removeKey(PREFERENCE_KEY_PREFIX + FILENAME_TAGS);
+			AppPreferences.removeKey(PREFERENCE_KEY_PREFIX + FILENAME_RECEIPTS);
 		}
-
 	}
 
 	private void findReceiptFile() {
-		unimp("use similar utility method to look for receipt file, etc");
+		LocateResult r = locateFile(PREFERENCE_KEY_PREFIX + FILENAME_RECEIPTS,
+				userDataFolder, FILENAME_RECEIPTS, DriveReceiptFile.MIME_TYPE,
+				DriveReceiptFile.INITIAL_CONTENTS.getBytes());
+		String contents = blockingReadTextFile(r.file);
+		this.receiptFile = new DriveReceiptFile(this, r.file,
+				FILENAME_RECEIPTS, contents);
+	}
 
-		DriveId receiptFileId = lookForDriveResource(userDataFolder,
-				DriveReceiptFile.RECEIPTFILE_NAME, false);
-		DriveFile rf = null;
-		if (receiptFileId != null)
-			rf = fileWithId(receiptFileId);
-		else {
-			rf = createTextFile(userDataFolder,
-					DriveReceiptFile.RECEIPTFILE_NAME,
-					DriveReceiptFile.EMPTY_FILE_CONTENTS);
-		}
-		String contents = blockingReadTextFile(rf);
-
-		this.receiptFile = new DriveReceiptFile(this, rf, contents);
+	private void findTagsFile() {
+		LocateResult r = locateFile(PREFERENCE_KEY_PREFIX + FILENAME_TAGS,
+				userDataFolder, FILENAME_TAGS, JSONTools.JSON_MIME_TYPE,
+				TagSetFile.INITIAL_JSON_CONTENTS.getBytes());
+		this.tagSetDriveFile = r.file;
+		String contents = blockingReadTextFile(r.file);
+		this.tagSetFile = (TagSetFile) JSONParser.parse(contents,
+				TagSetFile.JSON_PARSER);
 	}
 
 	/**
@@ -130,44 +127,117 @@ public class UserData {
 		if (db) {
 			pr("delaying a bit before calling the callback...");
 			sleepFor(1500);
-			if (db)
-				pr("NOW calling the callback...");
+			pr("NOW calling the callback...");
 		}
 		uiThreadHandler.post(callback);
 	}
 
-	private void findTagsFile() {
-		DriveId tagsFileId = lookForDriveResource(userDataFolder,
-				DriveReceiptFile.TAGSFILE_NAME, false);
-		DriveFile tagsDriveFile = null;
-		if (tagsFileId != null)
-			tagsDriveFile = fileWithId(tagsFileId);
-		else {
-			TagSetFile tf = new TagSetFile();
-			String initialTextContents = JSONEncoder.toJSON(tf);
-			tagsDriveFile = createTextFile(userDataFolder,
-					DriveReceiptFile.TAGSFILE_NAME, initialTextContents);
-		}
-		this.tagSetDriveFile = tagsDriveFile;
-
-		String content = blockingReadTextFile(tagSetDriveFile);
-		this.tagSetFile = (TagSetFile) JSONParser.parse(content,
-				TagSetFile.JSON_PARSER);
-	}
-
-	// States for getFolder()
+	// States for locateFile/Folder
 	private enum State {
 		CHECK_PREFERENCES, //
 		SEARCH_PARENT_FOLDER, //
-		VERIFY_FOLDER_EXISTS, //
-		FOUND_FOLDER, //
-		CREATE_NEW_FOLDER, //
-		STORE_FOLDER_IN_PREFERENCES, //
+		VERIFY_EXISTS, //
+		CREATE_NEW, //
+		STORE_ID_IN_PREFERENCES, //
+		FOUND, //
 	};
 
-	public static class LocateFolderResult {
+	public static class LocateResult {
 		public DriveFolder folder;
+		public DriveFile file;
 		public boolean wasCreated;
+	}
+
+	/**
+	 * Locate DriveFile, by looking in preferences. If not found, 1) look for it
+	 * in the filesystem and create it if necessary; and 2) store its new id
+	 * within the preferences
+	 * 
+	 * @param preferencesKey
+	 *            key where this file's DriveId is stored in the app preferences
+	 * @param parent
+	 *            the parent folder, if it needs to be constructed
+	 * @param filename
+	 *            the name of to give the new file, if it needs to be
+	 *            constructed
+	 * @param contents
+	 *            initial contents of file, if it needs to be created; if null,
+	 *            leaves it empty
+	 * @return LocateResult
+	 */
+	private LocateResult locateFile(String preferencesKey, DriveFolder parent,
+			String filename, String mimeType, byte[] contents) {
+		LocateResult ret = new LocateResult();
+		String fileIdString = null;
+
+		State state = State.CHECK_PREFERENCES;
+		if (db)
+			pr("\nUserData.locateFile name=" + filename + " key="
+					+ preferencesKey);
+
+		while (true) {
+			if (db)
+				pr("locateFile, state=" + state);
+			State nextState = null;
+			switch (state) {
+			case CHECK_PREFERENCES: {
+				fileIdString = AppPreferences.getString(preferencesKey, null);
+				if (fileIdString == null)
+					nextState = State.SEARCH_PARENT_FOLDER;
+				else
+					nextState = State.VERIFY_EXISTS;
+			}
+				break;
+
+			case VERIFY_EXISTS: {
+				try {
+					DriveId fileId = DriveId.decodeFromString(fileIdString);
+					ret.file = DriveApi.getFile(apiClient, fileId);
+					nextState = State.FOUND;
+				} catch (Throwable e) {
+					warning("problem decoding/locating file: " + e);
+					AppPreferences.removeKey(preferencesKey);
+					nextState = State.SEARCH_PARENT_FOLDER;
+				}
+			}
+				break;
+
+			case SEARCH_PARENT_FOLDER: {
+				DriveId driveFileId = lookForDriveResource(parent, filename,
+						false);
+				if (driveFileId == null) {
+					nextState = State.CREATE_NEW;
+				} else {
+					ret.file = DriveApi.getFile(apiClient, driveFileId);
+					nextState = State.STORE_ID_IN_PREFERENCES;
+				}
+			}
+				break;
+
+			case CREATE_NEW: {
+				if (contents == null)
+					contents = new byte[0];
+
+				ret.file = createBinaryFile(parent, filename, mimeType,
+						contents);
+				ret.wasCreated = true;
+				nextState = State.STORE_ID_IN_PREFERENCES;
+			}
+				break;
+
+			case STORE_ID_IN_PREFERENCES: {
+				AppPreferences.putString(preferencesKey, ret.file.getDriveId()
+						.encodeToString());
+				nextState = State.FOUND;
+			}
+				break;
+
+			case FOUND:
+				return ret;
+			}
+			ASSERT(nextState != null);
+			state = nextState;
+		}
 	}
 
 	/**
@@ -184,21 +254,20 @@ public class UserData {
 	 *            the name of the folder, if it needs to be constructed
 	 * @return folder
 	 */
-	private LocateFolderResult locateFolder(String preferencesKey,
+	private LocateResult locateFolder(String preferencesKey,
 			DriveFolder parent, String folderName) {
 
-		LocateFolderResult ret = new LocateFolderResult();
+		LocateResult ret = new LocateResult();
 		String folderIdString = null;
 
 		State state = State.CHECK_PREFERENCES;
-		final boolean db = true;
 		if (db)
-			pr("\nUserData.getFolder name=" + folderName + " key="
+			pr("\nUserData.locateFolder name=" + folderName + " key="
 					+ preferencesKey);
 
 		while (true) {
 			if (db)
-				pr("getFolder, state=" + state);
+				pr("locateFolder, state=" + state);
 			State nextState = null;
 			switch (state) {
 			case CHECK_PREFERENCES: {
@@ -206,15 +275,15 @@ public class UserData {
 				if (folderIdString == null)
 					nextState = State.SEARCH_PARENT_FOLDER;
 				else
-					nextState = State.VERIFY_FOLDER_EXISTS;
+					nextState = State.VERIFY_EXISTS;
 			}
 				break;
 
-			case VERIFY_FOLDER_EXISTS: {
+			case VERIFY_EXISTS: {
 				try {
 					DriveId folderId = DriveId.decodeFromString(folderIdString);
 					ret.folder = DriveApi.getFolder(apiClient, folderId);
-					nextState = State.FOUND_FOLDER;
+					nextState = State.FOUND;
 				} catch (Throwable e) {
 					warning("problem decoding/locating folder: " + e);
 					AppPreferences.removeKey(preferencesKey);
@@ -227,35 +296,35 @@ public class UserData {
 				DriveId driveFolderId = lookForDriveResource(parent,
 						folderName, true);
 				if (driveFolderId == null) {
-					nextState = State.CREATE_NEW_FOLDER;
+					nextState = State.CREATE_NEW;
 				} else {
 					ret.folder = DriveApi.getFolder(apiClient, driveFolderId);
-					nextState = State.STORE_FOLDER_IN_PREFERENCES;
+					nextState = State.STORE_ID_IN_PREFERENCES;
 				}
 			}
 				break;
 
-			case CREATE_NEW_FOLDER: {
+			case CREATE_NEW: {
 				MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
 						.setTitle(folderName).build();
-				DriveFolderResult result = parent.createFolder(
-						apiClient, changeSet).await();
+				DriveFolderResult result = parent.createFolder(apiClient,
+						changeSet).await();
 				if (!success(result))
 					die("failed to create folder: " + folderName);
 				ret.folder = result.getDriveFolder();
 				ret.wasCreated = true;
-				nextState = State.STORE_FOLDER_IN_PREFERENCES;
+				nextState = State.STORE_ID_IN_PREFERENCES;
 			}
 				break;
 
-			case STORE_FOLDER_IN_PREFERENCES: {
+			case STORE_ID_IN_PREFERENCES: {
 				AppPreferences.putString(preferencesKey, ret.folder
 						.getDriveId().encodeToString());
-				nextState = State.FOUND_FOLDER;
+				nextState = State.FOUND;
 			}
 				break;
 
-			case FOUND_FOLDER:
+			case FOUND:
 				return ret;
 			}
 			ASSERT(nextState != null);
@@ -264,8 +333,9 @@ public class UserData {
 	}
 
 	private void findPhotosFolder() {
-		LocateFolderResult r = locateFolder(PREFERENCE_KEY_PHOTOFOLDER,
-				userDataFolder, PHOTOSFOLDER_NAME);
+		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
+				+ FILENAME_PHOTOS_FOLDER, userDataFolder,
+				FILENAME_PHOTOS_FOLDER);
 		this.photoStore = new DrivePhotoStore(this, r.folder);
 	}
 
@@ -315,35 +385,17 @@ public class UserData {
 		return foundId;
 	}
 
-	private Contents buildContents() {
-		DriveApi.ContentsResult r = DriveApi.newContents(apiClient).await();
-		if (!success(r))
-			die("can't get results");
-		return r.getContents();
-	}
-
-	/**
-	 * @param parentFolder
-	 * @param filename
-	 * @param contents
-	 * @return
-	 * @throws RuntimeException
-	 *             if failed to create text file
-	 */
-	private DriveFile createTextFile(DriveFolder parentFolder, String filename,
-			String contents) {
-		return createBinaryFile(parentFolder, filename, "text/plain",
-				contents.getBytes());
-	}
-
 	private DriveFile createBinaryFile(DriveFolder parentFolder,
 			String filename, String mimeType, byte[] contents) {
 		MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
 				.setTitle(filename).setMimeType(mimeType).build();
-		Contents c = buildContents();
 
 		DriveFile ret = null;
 		try {
+			DriveApi.ContentsResult r = DriveApi.newContents(apiClient).await();
+			if (!success(r))
+				die("can't get results");
+			Contents c = r.getContents();
 			OutputStream s = c.getOutputStream();
 			s.write(contents);
 			s.close();
@@ -477,10 +529,6 @@ public class UserData {
 
 	public IPhotoStore getPhotoStore() {
 		return photoStore;
-	}
-
-	private DriveFile fileWithId(DriveId id) {
-		return DriveApi.getFile(apiClient, id);
 	}
 
 	private GoogleApiClient apiClient;

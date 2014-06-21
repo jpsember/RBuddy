@@ -16,9 +16,8 @@ import js.rbuddy.TagSetFile;
 
 public class DriveReceiptFile implements IReceiptFile {
 
-	public static String EMPTY_FILE_CONTENTS = "[]";
-	public static final String RECEIPTFILE_NAME = "Receipts.json";
-	public static final String TAGSFILE_NAME = "Tags.json";
+	public static final String MIME_TYPE = "application/json";
+	public static final String INITIAL_CONTENTS = "[]";
 
 	/**
 	 * This constructor may be called from other than the UI thread!
@@ -26,10 +25,12 @@ public class DriveReceiptFile implements IReceiptFile {
 	 * @param driveFile
 	 */
 	public DriveReceiptFile(UserData userData, DriveFile driveFile,
+			String filename,
 			String contents) {
 		this.userData = userData;
 		this.driveFile = driveFile;
 		this.map = new HashMap();
+		this.filename = filename;
 
 		{
 			JSONParser json = new JSONParser(contents);
@@ -75,7 +76,7 @@ public class DriveReceiptFile implements IReceiptFile {
 			if (db)
 				pr(" writing text file " + text + "\n to "
 						+ UserData.dbPrefix(driveFile));
-			FileArguments args = new FileArguments(RECEIPTFILE_NAME);
+			FileArguments args = new FileArguments(filename);
 			args.setFile(driveFile);
 			userData.writeTextFile(args, text);
 		}
@@ -90,7 +91,7 @@ public class DriveReceiptFile implements IReceiptFile {
 			pr(" file " + tf + ", isChanged=" + tf.isChanged());
 		if (tf.isChanged()) {
 			String json = JSONEncoder.toJSON(tf);
-			FileArguments args = new FileArguments(TAGSFILE_NAME);
+			FileArguments args = new FileArguments(UserData.FILENAME_TAGS);
 
 			args.setFile(userData.getTagSetDriveFile());
 			userData.writeTextFile(args, json);
@@ -169,6 +170,7 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	private boolean changes;
 	private DriveFile driveFile;
+	private String filename;
 	private UserData userData;
 	private Map map;
 	private int highestId;

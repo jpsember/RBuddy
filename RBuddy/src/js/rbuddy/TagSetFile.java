@@ -12,6 +12,7 @@ import static js.basic.Tools.*;
 public class TagSetFile implements IJSONEncoder {
 
 	public static final boolean SHOW_FILE_ACTIVITY = false;
+	public static final String INITIAL_JSON_CONTENTS = "[]";
 
 	public TagSetFile(int maxTags) {
 		this.maxTags = maxTags;

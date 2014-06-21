@@ -69,14 +69,6 @@ public class RBuddyApp {
 		}
 	}
 
-	public void setUserData(UserData data) {
-		this.userData = data;
-	}
-
-	public UserData getUserData() {
-		return this.userData;
-	}
-
 	public void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
 			IPhotoStore photoStore) {
 		this.receiptFile = receiptFile;
@@ -235,6 +227,4 @@ public class RBuddyApp {
 	private IPhotoStore photoStore;
 	private IReceiptFile receiptFile;
 	private TagSetFile tagSetFile;
-	private UserData userData;
-
 }

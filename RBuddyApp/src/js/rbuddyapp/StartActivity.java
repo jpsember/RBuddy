@@ -140,8 +140,6 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 		if (!userFilesPrepared) {
 			if (RBuddyApp.useGoogleAPI) {
-				app.setUserData(userData);
-				unimp("we don't need individual calls to userdata fields below");
 				app.setUserData(userData.getReceiptFile(),
 						userData.getTagSetFile(), userData.getPhotoStore());
 			} else {
