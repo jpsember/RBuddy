@@ -83,5 +83,10 @@ public class AppPreferences {
 		editor.commit();
 	}
 
+	public static void removeKey(String preferencesKey) {
+		preferences.edit().remove(preferencesKey).commit();
+	}
+
 	private static SharedPreferences preferences;
+
 }

@@ -16,7 +16,6 @@ import com.google.android.gms.drive.*;
 import com.google.android.gms.drive.DriveApi.ContentsResult;
 import com.google.android.gms.drive.DriveApi.MetadataBufferResult;
 import com.google.android.gms.drive.DriveFolder.DriveFolderResult;
-import com.google.android.gms.drive.DriveResource.MetadataResult;
 import com.google.android.gms.common.api.Status;
 
 import static com.google.android.gms.drive.Drive.DriveApi;
@@ -35,6 +34,8 @@ public class UserData {
 	 */
 
 	private static final String PREFERENCE_KEY_ROOTFOLDER = "UserData root folder";
+	private static final String PREFERENCE_KEY_PHOTOFOLDER = "UserData photos folder";
+
 	private static final String USER_ROOTFOLDER_NAME = "RBuddy User Data";
 	private static final String PHOTOSFOLDER_NAME = "Photos";
 
@@ -72,75 +73,34 @@ public class UserData {
 		return false;
 	}
 
-	private MetadataResult inspectFolder(String folderIdString) {
-		DriveId folderId = DriveId.decodeFromString(folderIdString);
-		DriveFolder folder = DriveApi.getFolder(apiClient, folderId);
-		return folder.getMetadata(apiClient).await();
-	}
-
-	// Package visibility to get rid of unused warning
-	MetadataResult inspectFile(String fileIdString) {
-		DriveId fileId = DriveId.decodeFromString(fileIdString);
-		DriveFile file = fileWithId(fileId);
-		return file.getMetadata(apiClient).await();
-	}
+	// // Package visibility to get rid of unused warning
+	// MetadataResult inspectFile(String fileIdString) {
+	// DriveId fileId = DriveId.decodeFromString(fileIdString);
+	// DriveFile file = fileWithId(fileId);
+	// return file.getMetadata(apiClient).await();
+	// }
 
 	private void findUserDataFolder() {
+		final boolean db = true;
+
 		if (db)
 			pr("UserData.findUserDataFolder");
-		RBuddyApp.assertNotUIThread();
-		String storedFolderIdString = AppPreferences.getString(
-				PREFERENCE_KEY_ROOTFOLDER, "");
-		String rootFolderIdString = storedFolderIdString;
-		if (db)
-			pr(" id of user folder, read from preferences: "
-					+ rootFolderIdString);
 
-		if (rootFolderIdString.isEmpty()) {
-			if (db)
-				pr(" looking for user root folder");
-			rootFolderIdString = lookForUserRootFolder();
-			if (db)
-				pr(" looking for user root folder produced: "
-						+ rootFolderIdString);
+		LocateFolderResult r = locateFolder(PREFERENCE_KEY_ROOTFOLDER,
+				DriveApi.getRootFolder(apiClient), USER_ROOTFOLDER_NAME);
+
+		userDataFolder = r.folder;
+		if (r.wasCreated) {
+			// We must remove any stored
+			AppPreferences.removeKey(PREFERENCE_KEY_PHOTOFOLDER);
+			unimp("remove other file's keys as well");
 		}
 
-		if (rootFolderIdString != null) {
-			if (db)
-				pr(" verifying that root folder id is valid");
-			MetadataResult result = inspectFolder(rootFolderIdString);
-			if (!success(result)
-					|| !doesMetadataMatchHealthyUserRoot(result.getMetadata()))
-				rootFolderIdString = null;
-		}
-
-		if (rootFolderIdString == null) {
-			if (db)
-				pr(" folder id is null, creating one");
-			rootFolderIdString = createUserRootFolder();
-		}
-
-		if (rootFolderIdString == null) {
-			throw new RuntimeException(
-					"unable to create Google Drive RBuddy root folder");
-		}
-
-		userDataFolder = DriveApi.getFolder(apiClient,
-				DriveId.decodeFromString(rootFolderIdString));
-
-		if (db)
-			pr(" userDataFolder=" + dbPrefix(userDataFolder));
-
-		if (!storedFolderIdString.equals(rootFolderIdString)) {
-			storedFolderIdString = rootFolderIdString;
-			AppPreferences.putString(PREFERENCE_KEY_ROOTFOLDER,
-					storedFolderIdString);
-			if (db)
-				pr(" wrote new folder id string " + storedFolderIdString);
-		}
 	}
 
 	private void findReceiptFile() {
+		unimp("use similar utility method to look for receipt file, etc");
+
 		DriveId receiptFileId = lookForDriveResource(userDataFolder,
 				DriveReceiptFile.RECEIPTFILE_NAME, false);
 		DriveFile rf = null;
@@ -195,23 +155,118 @@ public class UserData {
 				TagSetFile.JSON_PARSER);
 	}
 
-	private void findPhotosFolder() {
-		unimp("maybe store drive ids in preferences so we don't need to look");
-		DriveId photosFolderId = lookForDriveResource(userDataFolder,
-				PHOTOSFOLDER_NAME, true);
-		if (photosFolderId == null) {
-			// DriveFolder rootFolder = DriveApi.getRootFolder(apiClient);
-			MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-					.setTitle(PHOTOSFOLDER_NAME).build();
-			DriveFolderResult result = userDataFolder.createFolder(apiClient,
-					changeSet).await();
-			if (!success(result))
-				die("failed to create photos folder");
+	// States for getFolder()
+	private enum State {
+		CHECK_PREFERENCES, //
+		SEARCH_PARENT_FOLDER, //
+		VERIFY_FOLDER_EXISTS, //
+		FOUND_FOLDER, //
+		CREATE_NEW_FOLDER, //
+		STORE_FOLDER_IN_PREFERENCES, //
+	};
 
-			photosFolderId = result.getDriveFolder().getDriveId();
+	public static class LocateFolderResult {
+		public DriveFolder folder;
+		public boolean wasCreated;
+	}
+
+	/**
+	 * Determine drive folder, by looking in preferences. If not found, 1) look
+	 * for it in the filesystem and create it if necessary; and 2) store its new
+	 * id within the preferences
+	 * 
+	 * @param preferencesKey
+	 *            key where this folder's DriveId is stored in the app
+	 *            preferences
+	 * @param parent
+	 *            the parent folder, if it needs to be constructed
+	 * @param folderName
+	 *            the name of the folder, if it needs to be constructed
+	 * @return folder
+	 */
+	private LocateFolderResult locateFolder(String preferencesKey,
+			DriveFolder parent, String folderName) {
+
+		LocateFolderResult ret = new LocateFolderResult();
+		String folderIdString = null;
+
+		State state = State.CHECK_PREFERENCES;
+		final boolean db = true;
+		if (db)
+			pr("\nUserData.getFolder name=" + folderName + " key="
+					+ preferencesKey);
+
+		while (true) {
+			if (db)
+				pr("getFolder, state=" + state);
+			State nextState = null;
+			switch (state) {
+			case CHECK_PREFERENCES: {
+				folderIdString = AppPreferences.getString(preferencesKey, null);
+				if (folderIdString == null)
+					nextState = State.SEARCH_PARENT_FOLDER;
+				else
+					nextState = State.VERIFY_FOLDER_EXISTS;
+			}
+				break;
+
+			case VERIFY_FOLDER_EXISTS: {
+				try {
+					DriveId folderId = DriveId.decodeFromString(folderIdString);
+					ret.folder = DriveApi.getFolder(apiClient, folderId);
+					nextState = State.FOUND_FOLDER;
+				} catch (Throwable e) {
+					warning("problem decoding/locating folder: " + e);
+					AppPreferences.removeKey(preferencesKey);
+					nextState = State.SEARCH_PARENT_FOLDER;
+				}
+			}
+				break;
+
+			case SEARCH_PARENT_FOLDER: {
+				DriveId driveFolderId = lookForDriveResource(parent,
+						folderName, true);
+				if (driveFolderId == null) {
+					nextState = State.CREATE_NEW_FOLDER;
+				} else {
+					ret.folder = DriveApi.getFolder(apiClient, driveFolderId);
+					nextState = State.STORE_FOLDER_IN_PREFERENCES;
+				}
+			}
+				break;
+
+			case CREATE_NEW_FOLDER: {
+				MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+						.setTitle(folderName).build();
+				DriveFolderResult result = parent.createFolder(
+						apiClient, changeSet).await();
+				if (!success(result))
+					die("failed to create folder: " + folderName);
+				ret.folder = result.getDriveFolder();
+				ret.wasCreated = true;
+				nextState = State.STORE_FOLDER_IN_PREFERENCES;
+			}
+				break;
+
+			case STORE_FOLDER_IN_PREFERENCES: {
+				AppPreferences.putString(preferencesKey, ret.folder
+						.getDriveId().encodeToString());
+				nextState = State.FOUND_FOLDER;
+			}
+				break;
+
+			case FOUND_FOLDER:
+				return ret;
+			}
+			ASSERT(nextState != null);
+			state = nextState;
 		}
-		this.photoStore = new DrivePhotoStore(this, DriveApi.getFolder(
-				apiClient, photosFolderId));
+	}
+
+	private void findPhotosFolder() {
+		LocateFolderResult r = locateFolder(PREFERENCE_KEY_PHOTOFOLDER,
+				userDataFolder, PHOTOSFOLDER_NAME);
+		this.photoStore = new DrivePhotoStore(this, r.folder);
 	}
 
 	/**
@@ -228,42 +283,6 @@ public class UserData {
 				open_bgndThread(callback);
 			}
 		});
-	}
-
-	/**
-	 * In the case where no user root folder was stored in the preferences, look
-	 * in the drive to find one
-	 * 
-	 * @return encoded DriveId if found, else null
-	 */
-	private String lookForUserRootFolder() {
-		if (db)
-			pr(hey() + "looking for user root folder");
-
-		DriveFolder rootFolder = DriveApi.getRootFolder(apiClient);
-		MetadataBufferResult result = rootFolder.listChildren(apiClient)
-				.await();
-		if (!success(result)) {
-			return null;
-		}
-
-		MetadataBuffer buffer = result.getMetadataBuffer();
-		Iterator<Metadata> iter = buffer.iterator();
-		String foundId = null;
-		while (iter.hasNext()) {
-			Metadata m = iter.next();
-			if (db)
-				pr(" iterating; title=" + m.getTitle() + " mimetype="
-						+ m.getMimeType() + " trashed=" + m.isTrashed()
-						+ " folder=" + m.isFolder());
-			if (!doesMetadataMatchHealthyUserRoot(m))
-				continue;
-			if (db)
-				pr(" ................. we found it!");
-			foundId = m.getDriveId().encodeToString();
-		}
-		buffer.close();
-		return foundId;
 	}
 
 	/**
@@ -294,46 +313,6 @@ public class UserData {
 		}
 		buffer.close();
 		return foundId;
-	}
-
-	/**
-	 * See if the file or folder described by metadata matches a 'healthy' user
-	 * data folder
-	 * 
-	 * @param m
-	 * @return true if so
-	 */
-	private boolean doesMetadataMatchHealthyUserRoot(Metadata m) {
-		if (!m.isFolder())
-			return false;
-		if (m.isTrashed())
-			return false;
-		if (!(m.getTitle().equals(USER_ROOTFOLDER_NAME)))
-			return false;
-		return true;
-	}
-
-	/**
-	 * Create a user data folder
-	 * 
-	 * @return encoded DriveId of the folder, if successful; else null
-	 */
-	private String createUserRootFolder() {
-		if (db)
-			pr(hey() + "attempting to createUserRootFolder");
-
-		DriveFolder rootFolder = DriveApi.getRootFolder(apiClient);
-		MetadataChangeSet changeSet = new MetadataChangeSet.Builder().setTitle(
-				USER_ROOTFOLDER_NAME).build();
-		DriveFolderResult result = rootFolder
-				.createFolder(apiClient, changeSet).await();
-		if (!success(result))
-			return null;
-
-		DriveFolder folder = result.getDriveFolder();
-		if (db)
-			pr(" getDriveFolder returned " + folder);
-		return folder.getDriveId().encodeToString();
 	}
 
 	private Contents buildContents() {

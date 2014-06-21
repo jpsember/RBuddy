@@ -38,7 +38,6 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	public TagSetFile readTagSetFile() {
-		final boolean db = SHOW_FILE_ACTIVITY;
 		if (tagSetFile == null) {
 			tagSetStorageFile = fileForBaseName(tagSetFileBaseName);
 			TagSetFile tf = null;
