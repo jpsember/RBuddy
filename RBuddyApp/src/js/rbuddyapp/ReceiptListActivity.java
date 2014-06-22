@@ -131,6 +131,12 @@ public class ReceiptListActivity extends Activity {
 	private void doSearchActivity() {
 		Intent intent = new Intent(getApplicationContext(),
 				SearchActivity.class);
+		if (false) {
+			warning("trying out experimental activity instead");
+			intent = new Intent(getApplicationContext(),
+					ExperimentalActivity.class);
+		}
+
 		startActivity(intent);
 	}
 

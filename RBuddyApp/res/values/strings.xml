@@ -3,8 +3,7 @@
     <string name="app_name">RBuddy</string>
     <string name="action_settings">Settings</string>
     
-    <!-- some Esperanto translations -->
-    <string name="summary">Resuma</string>
+    <string name="summary">Details</string>
     
     <string name="action_search">Search</string>
     <string name="action_add">Add</string>

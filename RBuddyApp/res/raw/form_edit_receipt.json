@@ -1,7 +1,8 @@
 [
   {
     "id": "date",
-    "type": "date"
+    "type": "date",
+    "label":"Date",
   },
   {
     "id": "cost",

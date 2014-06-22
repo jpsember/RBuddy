@@ -62,6 +62,12 @@
             android:parentActivityName="js.rbuddyapp.EditReceiptActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
+        <activity
+            android:name="js.rbuddyapp.ExperimentalActivity"
+            android:parentActivityName="js.rbuddyapp.ExperimentalActivity"
+            android:windowSoftInputMode="stateUnchanged" >
+        </activity>
+       
     </application>
 
 </manifest>
