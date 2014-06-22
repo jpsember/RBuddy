@@ -1,6 +1,7 @@
 package js.rbuddyapp;
 
 import com.google.android.gms.drive.DriveFolder;
+import static js.basic.Tools.*;
 
 public class DrivePhotoStore implements IPhotoStore {
 
@@ -25,6 +26,11 @@ public class DrivePhotoStore implements IPhotoStore {
 	public void readPhoto(FileArguments args) {
 		args.setParentPhoto(photosFolder); // though not used for reading
 		userData.readBinaryFile(args);
+	}
+
+	@Override
+	public void deletePhoto(FileArguments args) {
+		warning("Google Drive api doesn't support delete yet (I think)");
 	}
 
 	private UserData userData;

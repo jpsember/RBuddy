@@ -41,7 +41,8 @@ public class EditReceiptActivity extends Activity {
 		if (db) {
 			app.dumpIntent(this);
 		}
-		int receiptId = this.getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
+		int receiptId = this.getIntent().getIntExtra(
+				RBuddyApp.EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 
@@ -67,7 +68,8 @@ public class EditReceiptActivity extends Activity {
 				@Override
 				public void run() {
 					deleteReceipt();
-				}});
+				}
+			});
 			return true;
 		case android.R.id.home:
 			Intent intent = new Intent(this, ReceiptListActivity.class);
@@ -82,9 +84,13 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void deleteReceipt() {
-		unimp("photoStore delete() ability");
-		// String photoIdString = receipt.getPhotoId();
-		// app.photoStore().delete(photoIdString);
+		String photoIdString = receipt.getPhotoId();
+		if (photoIdString != null) {
+			final FileArguments args = new FileArguments(
+					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
+			args.setFileId(photoIdString);
+			app.photoStore().deletePhoto(args);
+		}
 		app.receiptFile().delete(this.receipt);
 		RBuddyApp.setReceiptListValid(false);
 		finish();

@@ -91,6 +91,28 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	}
 
+	@Override
+	public void deletePhoto(FileArguments arg2) {
+		final FileArguments args = arg2;
+		backgroundHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				String photoId = args.getFileIdString();
+				if (photoId == null)
+					throw new IllegalArgumentException(
+							"expected photoId to be non-null");
+				File f = getFileForPhotoId(photoId);
+				boolean deleted = f.delete();
+				if (!deleted)
+					warning("failed to delete file: " + f);
+				if (args.getCallback() != null) {
+					handler.post(args.getCallback());
+				}
+			}
+		});
+	}
+
 	private File getFileForPhotoId(String photoId) {
 		return new File(RBuddyApp.sharedInstance().context()
 				.getExternalFilesDir(null), "photo_" + photoId
