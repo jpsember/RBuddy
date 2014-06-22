@@ -1,5 +1,7 @@
 package js.rbuddy;
 
+import static js.basic.Tools.rnd;
+
 import java.text.NumberFormat;
 
 public class Cost {
@@ -134,6 +136,16 @@ public class Cost {
 
 	public double getValue() {
 		return value;
+	}
+
+	/**
+	 * Generate a random cost for test purposes
+	 * 
+	 * @return
+	 */
+	public static Cost buildRandom() {
+		return new Cost(rnd.nextDouble() * rnd.nextDouble() * rnd.nextDouble()
+				* 1000);
 	}
 
 	private double value;

@@ -6,8 +6,10 @@ import java.util.List;
 
 import js.rbuddy.Receipt;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,28 +53,35 @@ public class ReceiptListAdapter extends ArrayAdapter {
 
 			{
 				TextView tv = new TextView(this.getContext());
+				tv.setMinEms(5);
 				tv.setTag("date");
 				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-						150, LIST_ITEM_HEIGHT, 0.0f);
+						LayoutParams.WRAP_CONTENT, LIST_ITEM_HEIGHT, 0.1f);
 				tv.setLayoutParams(lp);
 				view.addView(tv);
+				tv.setPadding(10, 5, 10, 5);
 			}
 			{
 				TextView tv = new TextView(this.getContext());
 				tv.setTag("cost");
+				tv.setMinEms(4);
+				tv.setGravity(Gravity.RIGHT);
 				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-						120, LIST_ITEM_HEIGHT, 0.0f);
+						LayoutParams.WRAP_CONTENT, LIST_ITEM_HEIGHT, 0.1f);
 				tv.setLayoutParams(lp);
+				tv.setPadding(10, 5, 10, 5);
 				view.addView(tv);
 			}
 
 			{
 				TextView tv = new TextView(this.getContext());
 				tv.setTag("summary");
+
 				// Give this view any extra pixels by setting its weight nonzero
 				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,
-						LIST_ITEM_HEIGHT, 1.0f);
+						LIST_ITEM_HEIGHT, .8f);
 				tv.setLayoutParams(lp);
+				tv.setPadding(10, 5, 10, 5);
 				view.addView(tv);
 			}
 		}

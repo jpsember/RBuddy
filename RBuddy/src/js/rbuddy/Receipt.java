@@ -127,6 +127,7 @@ public class Receipt implements IJSONEncoder {
 		Receipt r = new Receipt(id);
 		r.setDate(JSDate.buildRandom());
 		r.setSummary(StringUtil.randomString(30));
+		r.setCost(Cost.buildRandom());
 		return r;
 	}
 
