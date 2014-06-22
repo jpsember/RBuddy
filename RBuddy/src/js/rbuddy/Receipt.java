@@ -1,5 +1,6 @@
 package js.rbuddy;
 
+import java.util.Comparator;
 import java.util.Iterator;
 
 import js.json.*;
@@ -199,6 +200,20 @@ public class Receipt implements IJSONEncoder {
 
 			return r;
 
+		}
+	};
+
+	/**
+	 * Comparator for sorting receipts by date; ties are broken using ids
+	 */
+	public static final Comparator<Receipt> COMPARATOR_SORT_BY_DATE = new Comparator<Receipt>() {
+		@Override
+		public int compare(Receipt r0, Receipt r1) {
+			int result = r0.getDate().toString()
+					.compareTo(r1.getDate().toString());
+			if (result == 0)
+				result = r0.getId() - r1.getId();
+			return result;
 		}
 	};
 

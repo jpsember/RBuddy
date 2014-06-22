@@ -116,6 +116,7 @@ public class ReceiptListActivity extends Activity {
 		list.clear();
 		for (Iterator it = app.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
+		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);
 	}
 
 	// Construct a view to be used for the list items
