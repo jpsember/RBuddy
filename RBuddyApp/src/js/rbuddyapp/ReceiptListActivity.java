@@ -24,8 +24,6 @@ public class ReceiptListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		RBuddyApp.prepare(this);
-
 		app = RBuddyApp.sharedInstance();
 
 		LinearLayout layout = new LinearLayout(this);
@@ -59,11 +57,15 @@ public class ReceiptListActivity extends Activity {
 		case R.id.action_settings:
 			unimp("settings");
 			return true;
-
 		case R.id.action_add:
 			processAddReceipt();
 			return true;
-
+		case R.id.action_testonly_generate:
+			processGenerate();
+			return true;
+		case R.id.action_testonly_zap:
+			processZap();
+			return true;
 		case R.id.action_search:
 			doSearchActivity();
 			return true;
@@ -72,11 +74,48 @@ public class ReceiptListActivity extends Activity {
 		}
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (RBuddyApp.useGoogleAPI) {
+			menu.removeItem(R.id.action_testonly_generate);
+			menu.removeItem(R.id.action_testonly_zap);
+		}
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	private void processGenerate() {
+		for (int i = 0; i < 30; i++) {
+			int id = app.receiptFile().allocateUniqueId();
+			Receipt r = Receipt.buildRandom(id);
+			app.receiptFile().add(r);
+		}
+		rebuildReceiptList(receiptList);
+		receiptListAdapter.notifyDataSetChanged();
+	}
+
+	private void processZap() {
+		if (!RBuddyApp.useGoogleAPI)
+			RBuddyApp.confirmOperation(this, "Delete all receipts?",
+					new Runnable() {
+						@Override
+						public void run() {
+							app.receiptFile().clear();
+							rebuildReceiptList(receiptList);
+							receiptListAdapter.notifyDataSetChanged();
+						}
+					});
+	}
+
 	private List buildListOfReceipts() {
 		ArrayList list = new ArrayList();
+		rebuildReceiptList(list);
+		return list;
+	}
+
+	private void rebuildReceiptList(List list) {
+		list.clear();
 		for (Iterator it = app.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
-		return list;
 	}
 
 	// Construct a view to be used for the list items
@@ -84,7 +123,7 @@ public class ReceiptListActivity extends Activity {
 
 		ListView listView = new ListView(this);
 
-		List receiptList = buildListOfReceipts(); // app.receiptList();
+		List receiptList = buildListOfReceipts();
 		ArrayAdapter arrayAdapter = new ReceiptListAdapter(this, receiptList);
 		listView.setAdapter(arrayAdapter);
 
@@ -92,8 +131,6 @@ public class ReceiptListActivity extends Activity {
 		// to make responding to selection actions more convenient.
 		this.receiptListAdapter = arrayAdapter;
 		this.receiptList = receiptList;
-		if (db)
-			pr("adapter=" + this.receiptListAdapter);
 
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView aView, View v, int position,

@@ -12,7 +12,9 @@ import js.rbuddy.IReceiptFile;
 import js.rbuddy.JSDate;
 import js.rbuddy.TagSetFile;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
@@ -218,6 +220,26 @@ public class RBuddyApp {
 		ASSERT(useGoogleAPI);
 		ASSERT(mGoogleApiClient == null);
 		mGoogleApiClient = c;
+	}
+
+	public static void confirmOperation(Activity activity,
+			String warningMessage, final Runnable operation) {
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which) {
+				case DialogInterface.BUTTON_POSITIVE:
+					operation.run();
+					break;
+				}
+			}
+		};
+		Context c = activity.getWindow().getDecorView().getRootView()
+				.getContext();
+		AlertDialog.Builder builder = new AlertDialog.Builder(c);
+		builder.setMessage(warningMessage)
+				.setPositiveButton("Yes", dialogClickListener)
+				.setNegativeButton("No", dialogClickListener).show();
 	}
 
 	private GoogleApiClient mGoogleApiClient;
