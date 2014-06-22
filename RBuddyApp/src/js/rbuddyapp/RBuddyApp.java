@@ -245,6 +245,19 @@ public class RBuddyApp {
 	private GoogleApiClient mGoogleApiClient;
 	private Map<String, Integer> resourceMap = new HashMap();
 	private static RBuddyApp sharedInstance;
+
+	// This is a pretty grim way of achieving this...
+
+	public static boolean isReceiptListValid() {
+		return receiptListValid;
+	}
+
+	public static void setReceiptListValid(boolean f) {
+		receiptListValid = f;
+	}
+
+	private static boolean receiptListValid;
+
 	private Context context;
 	private IPhotoStore photoStore;
 	private IReceiptFile receiptFile;

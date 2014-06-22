@@ -6,6 +6,7 @@
     <string name="summary">Details</string>
     <string name="action_search">Search</string>
     <string name="action_add">Add</string>
+    <string name="action_delete_receipt">Delete Receipt</string>
     <string name="action_testonly_generate">Generate Random Receipts</string>
     <string name="action_testonly_zap">Delete All Receipts</string>
 

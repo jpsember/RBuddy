@@ -36,7 +36,9 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		receiptListAdapter.notifyDataSetChanged();
+		if (!RBuddyApp.isReceiptListValid()) {
+			rebuildReceiptList(this.receiptList);
+		}
 	}
 
 	@Override
@@ -101,7 +103,6 @@ public class ReceiptListActivity extends Activity {
 						public void run() {
 							app.receiptFile().clear();
 							rebuildReceiptList(receiptList);
-							receiptListAdapter.notifyDataSetChanged();
 						}
 					});
 	}
@@ -117,6 +118,10 @@ public class ReceiptListActivity extends Activity {
 		for (Iterator it = app.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
 		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);
+		RBuddyApp.setReceiptListValid(true);
+
+		if (receiptListAdapter != null)
+			receiptListAdapter.notifyDataSetChanged();
 	}
 
 	// Construct a view to be used for the list items
@@ -149,7 +154,7 @@ public class ReceiptListActivity extends Activity {
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
-		this.receiptList.add(r);
+		RBuddyApp.setReceiptListValid(false);
 
 		// Start the edit receipt activity
 		Intent intent = new Intent(getApplicationContext(),
