@@ -15,14 +15,12 @@
   <dirname property="antfile.dir" file="${ant.file}"/>
 
   <!-- For simplicity, we add every path we require on the classpath to this
-  single set of paths, except for the unit tests themselves which will
-  appear in the individual calls to junit -->
+  single set of paths, except for the unit tests themselves -->
 
   <path id="classpath.base">
     <pathelement location="${antfile.dir}/../junit3/junit.jar" />
     <pathelement location="${antfile.dir}/Basic/bin" />
     <pathelement location="${antfile.dir}/JSTestUtils/bin" />
-    <pathelement location="${antfile.dir}/RBuddy/bin" />
   </path>
 
   <!-- Create a directory to contain the test reports (if it doesn't already exist),
@@ -39,43 +37,45 @@
   </target>
 
 
-  <!-- Run the JUnit Tests for all of the projects -->
+  <macrodef name="run_junit">
+
+    <attribute name="project"/>
+    <attribute name="includes" default="**/*Test.java"/>
+
+    <!-- This defines the body of the macrodef -->
+    <sequential>
+
+      <!-- The project's test directory is xxxxTest -->
+      <property name="project_test" value="@{project}Test"/>
+
+      <!-- We need to run the tests in separate VMs, in order to have them run from different directories -->
+      <junit fork="true" haltonfailure="true" dir="${antfile.dir}/${project_test}">
+
+        <!-- Include all the elements in our standard classpath, plus this project's main and test directories -->
+        <classpath refid="classpath.base" />
+        <classpath>
+          <pathelement location="${antfile.dir}/@{project}/bin"/>
+          <pathelement location="${antfile.dir}/${project_test}/bin"/>
+        </classpath>
+
+        <formatter type="plain"/>
+
+        <batchtest todir="${test.report.dir}">
+          <fileset dir="${project_test}/src" includes="@{includes}"/>
+        </batchtest>
+
+      </junit>
+
+    </sequential>
+  </macrodef>
+
+
+  <!-- Run the JUnit Tests for all of the projects.  Here is where you add an entry for each additional project. -->
 
   <target name="test_all_projects" depends="create_test_dir">
-
-    <!-- I was hoping we could use macrodef to reduce all this boilerplate to one line each,
-    but it doesn't seem to be compatible with the junit task; and in fact I can't seem to define
-    properties inside the junit task to reduce the number of edits required to copy and paste a new
-    project... -->
-
-    <junit printsummary="off" fork="true" haltonfailure="yes">
-      <jvmarg value="-Duser.dir=${antfile.dir}/BasicTest"/>
-      <classpath refid="classpath.base" />
-      <classpath>
-        <pathelement location="${antfile.dir}/BasicTest/bin"/>
-      </classpath>
-      <formatter type="plain" />
-      <batchtest fork="true" todir="${test.report.dir}">
-        <fileset dir="${antfile.dir}/BasicTest/src">
-          <include name="**/*Test*.java" />
-        </fileset>
-      </batchtest>
-    </junit>
-
-    <junit printsummary="off" fork="true" haltonfailure="yes">
-      <jvmarg value="-Duser.dir=${antfile.dir}/RBuddyTest"/>
-      <classpath refid="classpath.base" />
-      <classpath>
-        <pathelement location="${antfile.dir}/RBuddyTest/bin"/>
-      </classpath>
-      <formatter type="plain" />
-      <batchtest fork="true" todir="${test.report.dir}">
-        <fileset dir="${antfile.dir}/RBuddyTest/src">
-          <include name="**/*Test*.java" />
-        </fileset>
-      </batchtest>
-    </junit>
-
+    <run_junit project="Basic"/>
+    <run_junit project="RBuddy"/>
   </target>
+
 
 </project>
