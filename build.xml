@@ -1,0 +1,81 @@
+<!--
+  You must create, within the android_development directory, a symbolic link named 'junit3'
+  that points to the directory containing junit.jar.  On my machine, this is:
+
+  junit3 -> /Applications/eclipse 32 bit/plugins/org.junit_3.8.2.v3_8_2_v20100427-1100
+
+  You must also have Apache ant installed.
+  Use Homebrew for this if necessary, e.g., 'brew install ant'.
+
+-->
+
+
+<project name="android_base tests" default="test_all_projects" basedir=".">
+
+  <dirname property="antfile.dir" file="${ant.file}"/>
+
+  <!-- For simplicity, we add every path we require on the classpath to this
+  single set of paths, except for the unit tests themselves which will
+  appear in the individual calls to junit -->
+
+  <path id="classpath.base">
+    <pathelement location="${antfile.dir}/../junit3/junit.jar" />
+    <pathelement location="${antfile.dir}/Basic/bin" />
+    <pathelement location="${antfile.dir}/JSTestUtils/bin" />
+    <pathelement location="${antfile.dir}/RBuddy/bin" />
+  </path>
+
+  <!-- Create a directory to contain the test reports (if it doesn't already exist),
+  and delete any old reports that it contains -->
+
+  <target name="create_test_dir">
+    <property name="test.report.dir" location="${antfile.dir}/unit_test_reports" />
+    <mkdir dir="${test.report.dir}" />
+    <delete>
+      <fileset dir="${test.report.dir}">
+        <include name="TEST-*.txt"/>
+      </fileset>
+    </delete>
+  </target>
+
+
+  <!-- Run the JUnit Tests for all of the projects -->
+
+  <target name="test_all_projects" depends="create_test_dir">
+
+    <!-- I was hoping we could use macrodef to reduce all this boilerplate to one line each,
+    but it doesn't seem to be compatible with the junit task; and in fact I can't seem to define
+    properties inside the junit task to reduce the number of edits required to copy and paste a new
+    project... -->
+
+    <junit printsummary="off" fork="true" haltonfailure="yes">
+      <jvmarg value="-Duser.dir=${antfile.dir}/BasicTest"/>
+      <classpath refid="classpath.base" />
+      <classpath>
+        <pathelement location="${antfile.dir}/BasicTest/bin"/>
+      </classpath>
+      <formatter type="plain" />
+      <batchtest fork="true" todir="${test.report.dir}">
+        <fileset dir="${antfile.dir}/BasicTest/src">
+          <include name="**/*Test*.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <junit printsummary="off" fork="true" haltonfailure="yes">
+      <jvmarg value="-Duser.dir=${antfile.dir}/RBuddyTest"/>
+      <classpath refid="classpath.base" />
+      <classpath>
+        <pathelement location="${antfile.dir}/RBuddyTest/bin"/>
+      </classpath>
+      <formatter type="plain" />
+      <batchtest fork="true" todir="${test.report.dir}">
+        <fileset dir="${antfile.dir}/RBuddyTest/src">
+          <include name="**/*Test*.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+  </target>
+
+</project>
