@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -60,6 +61,16 @@ public class RBuddyApp {
 	}
 
 	public static void assertUIThread() {
+		final boolean db = true;
+		if (db)
+ {
+			Log.e("Fuck", "assertUIThread, testing=" + testing());
+
+			pr("RBuddyApp.assertUIThread");
+		}
+		if (db)
+			pr(" testing=" + testing());
+
 		if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
 			die("not running within UI thread");
 		}

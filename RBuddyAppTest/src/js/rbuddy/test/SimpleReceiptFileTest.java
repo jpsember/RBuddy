@@ -70,6 +70,10 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 		close();
 	}
 
+	public void testAlwaysFails() {
+//		assertEquals(1, 2);
+	}
+
 	public void testUpdatesTags() {
 		constructFile();
 		TagSetFile tf = rf.readTagSetFile();
