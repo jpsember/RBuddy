@@ -70,10 +70,6 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 		close();
 	}
 
-	public void testAlwaysFails() {
-//		assertEquals(1, 2);
-	}
-
 	public void testUpdatesTags() {
 		constructFile();
 		TagSetFile tf = rf.readTagSetFile();
@@ -88,8 +84,11 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 		for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
 			assertTrue(tf.tags().contains(iter.next()));
 		}
+//   assertTrue(false); // This should cause a test failure
 	}
 	
+//  ham // This should cause a compile error ('ant debug' stage)
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
