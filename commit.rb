@@ -9,6 +9,7 @@ class Commit
 
 
   ANDROID_PROJECTS = "RBuddyApp"
+  GIT_STATE_FILENAME = ".commit_state"
 
   def initialize
     @options = nil
@@ -19,20 +20,54 @@ class Commit
     @options = parse_arguments(argv)
     @detail = @options[:detail]
     @verbose = @options[:verbose] || @detail
-
+    @current_git_state = nil
+    @previous_git_state = nil
     @saved_directory = Dir.pwd
 
     begin
-      run_java_tests if @options[:java]
-      run_android_tests if @options[:android]
 
-      # ...to do: commit stuff
+      read_old_git_state
+      determine_current_git_state
+
+      passed_tests = false
+
+      puts "...comparing current to previous states" if @verbose
+
+      if @current_git_state != @previous_git_state
+
+        puts "...states differ, running unit tests" if @verbose
+
+        run_java_tests if @options[:java]
+        run_android_tests if @options[:android]
+
+        # Only update the state if it passed all tests
+        update_old_git_state
+        passed_tests = true
+
+        update_old_git_state
+      else
+        passed_tests = true
+      end
 
     ensure
       Dir.chdir(@saved_directory)
     end
   end
 
+  def read_old_git_state
+    if @options[:clean]
+      File.delete(GIT_STATE_FILENAME) if File.exist?(GIT_STATE_FILENAME)
+    end
+    @previous_git_state = FileUtils.read_text_file(GIT_STATE_FILENAME,"")
+  end
+
+  def determine_current_git_state
+    @current_git_state,_ = scall("git diff -p")
+  end
+
+  def update_old_git_state
+    FileUtils.write_text_file(GIT_STATE_FILENAME,@current_git_state)
+  end
 
   def parse_arguments(argv)
     p = Trollop::Parser.new do
@@ -52,6 +87,8 @@ class Commit
   end
 
   def run_android_tests
+    warning "Not running android tests"
+    return if true
     ANDROID_PROJECTS.split.each do |project_root|
       proj_main = File.join(@saved_directory,project_root)
       proj_test = proj_main + "Test"
@@ -68,7 +105,6 @@ class Commit
 
     end
   end
-
 
   def run_java_tests
     runcmd("ant test_all_projects","...running Java project tests")
