@@ -27,7 +27,7 @@ proguard/
 # Log Files
 *.log
 #
-# Build script commit state
+# Build script hidden files
 #
-.commit_state
+.commit_*
 
