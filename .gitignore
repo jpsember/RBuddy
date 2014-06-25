@@ -33,4 +33,10 @@ proguard/
 
 # Sublime workspaces should not be included (unlike projects)
 *.sublime-workspace
+ 
+
+# Eclipse launch profiles (these may be created for individual tests, and
+# are thus too numerous to put under source code control)
+#
+*.launch
 
