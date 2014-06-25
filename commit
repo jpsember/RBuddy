@@ -180,6 +180,7 @@ Issue #
 
     # This seems to help with the Eclipse ADT / android cmd line conflict.
     #
+    remove_dir("../adt/sdk/extras/google/google_play_services/libproject/google-play-services_lib/bin/res/crunch")
     remove_dir("RBuddyApp/bin/res/crunch")
     remove_dir("RBuddyAppTest/bin/res/crunch")
 
