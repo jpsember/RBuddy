@@ -15,11 +15,19 @@ class Commit
 
 
   COMMIT_MESSAGE_TEMPLATE=<<-EOS
-
 Issue #
 
-# Enter a commit message above, including an issue number on its own line
+# Enter a commit message above, including at least one issue number prefixed with '#'.
+# You can have GitHub close the issue automatically by referring to the issue with
+# one of these (case-insensitive) forms:
 #
+#  'fixes #123', 'resolves #123', 'closes #123'.
+#
+#
+# --------------------------------------------------------------------------
+# Git repository status:
+# --------------------------------------------------------------------------
+
   EOS
 
   def initialize
@@ -106,6 +114,15 @@ Issue #
     FileUtils.write_text_file(GIT_STATE_FILENAME,@current_git_state)
   end
 
+
+  def strip_comments_from_string(m)
+    m = m.strip
+    lines = m.split("\n").collect{|x| x.rstrip}
+    lines = lines.keep_if{|x| !x.start_with?('#')}
+    lines.join('\n')
+  end
+
+
   def edit_commit_message
     if !File.exist?(COMMIT_MESSAGE_FILENAME)
       status,_ = scall("git status")
@@ -116,26 +133,9 @@ Issue #
     TextEditor.new(COMMIT_MESSAGE_FILENAME).edit
 
     m = FileUtils.read_text_file(COMMIT_MESSAGE_FILENAME)
-    m = m.strip
-    lines = m.split("\n").collect{|x| x.strip}
-    lines2 = []
-    prev_blank = false
-
-    lines.each do |x|
-      next if x.start_with?('#')
-      if x.empty?
-        prev_blank = true
-      else
-        if prev_blank
-          lines2 << "\n"
-          prev_blank = false
-        end
-        lines2 << x
-      end
-    end
-    lines = lines2
-    return nil if lines.empty?
-    lines.join("\n")
+    m = strip_comments_from_string(m)
+    return nil if m.empty?
+    m
   end
 
 
@@ -143,8 +143,8 @@ Issue #
     m = edit_commit_message
     raise(ProgramException,"Commit message empty") if !m
 
-    if !(m =~ /\n\nIssue #\d+(\n|$|\w*:)/)
-      raise(ProgramException,"No 'Issue #' found in commit message: [#{m}]")
+    if !(m =~ /#\d+/)
+      raise(ProgramException,"No issue numbers found in commit message")
     end
 
     FileUtils.write_text_file(GIT_MESSAGE_FILENAME,m)

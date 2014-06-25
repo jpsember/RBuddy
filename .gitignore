@@ -31,3 +31,6 @@ proguard/
 #
 .commit_*
 
+# Sublime workspaces should not be included (unlike projects)
+*.sublime-workspace
+
