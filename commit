@@ -12,12 +12,13 @@ class Commit
   GIT_STATE_FILENAME = ".commit_state"
   GIT_MESSAGE_FILENAME = ".commit_git_message"
   COMMIT_MESSAGE_FILENAME = ".commit_editor_message"
+
+
   COMMIT_MESSAGE_TEMPLATE=<<-EOS
 
 Issue #
 
-# Enter a commit message above, including an issue number on its own line (e.g., Issue #42)
-#
+# Enter a commit message above, including an issue number on its own line
 #
   EOS
 
@@ -41,13 +42,16 @@ Issue #
 
       passed_tests = false
 
-      # puts "...comparing current to previous states" if @verbose
-
-      # puts "equal=",(@current_git_state.eql?(@previous_git_state))
-      # puts "equal=",(@current_git_state.strip ==@previous_git_state.strip)
+      perform_tests = false
 
       if @current_git_state != @previous_git_state
         puts "...states differ, running unit tests" if @verbose
+        perform_tests = true
+      end
+
+      perform_tests ||= @options[:testonly]
+
+      if perform_tests
 
         run_java_tests if @options[:java]
         run_android_tests if @options[:android]
@@ -61,7 +65,7 @@ Issue #
         passed_tests = true
       end
 
-      if commit_required
+      if !@options[:testonly] && commit_required
         perform_commit
       end
 
@@ -164,6 +168,7 @@ Issue #
       opt :verbose, "display progress"
       opt :java,   "include Java projects", :default=>true
       opt :android,"include Android projects",:default=>true
+      opt :testonly,"perform unit tests only, without generating commit"
     end
 
     Trollop::with_standard_exception_handling p do
