@@ -1,6 +1,9 @@
 package js.rbuddy;
 
-public class ReceiptFilter {
+import js.json.IJSONEncoder;
+import js.json.JSONEncoder;
+
+public class ReceiptFilter implements IJSONEncoder {
 
 	private boolean minDateActive;
 	private JSDate minDate;
@@ -114,6 +117,11 @@ public class ReceiptFilter {
 
 	public void setExclusiveTags(TagSet exclusiveTags) {
 		this.exclusiveTags = exclusiveTags;
+	}
+
+	@Override
+	public void encode(JSONEncoder encoder) {
+		throw new UnsupportedOperationException("uinimplemented");
 	}
 
 }
