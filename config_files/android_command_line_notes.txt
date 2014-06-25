@@ -1,0 +1,15 @@
+To generate command-line build files, from android_base/RBuddyApp directory, type:
+
+android update project --name RBuddyApp --target 1 --subprojects --path .
+
+And from the RBuddyAppTest directory:
+
+android update project --name RBuddyAppTest --target 1 --subprojects --path .
+
+From the ~/android_development/adt/sdk/extras/google/google_play_services/libproject/google-play-services_lib folder, type
+
+android update project --target 1 --subprojects --path .
+
+(I suspect the '--name' argument in the other calls are not necessary either, and are inferred from existing files...)
+
+
