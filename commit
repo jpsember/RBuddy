@@ -114,7 +114,22 @@ Issue #
     m = FileUtils.read_text_file(COMMIT_MESSAGE_FILENAME)
     m = m.strip
     lines = m.split("\n").collect{|x| x.strip}
-    lines = lines.keep_if{|x| !(x.empty? ||  x.start_with?('#'))}
+    lines2 = []
+    prev_blank = false
+
+    lines.each do |x|
+      next if x.start_with?('#')
+      if x.empty?
+        prev_blank = true
+      else
+        if prev_blank
+          lines2 << "\n"
+          prev_blank = false
+        end
+        lines2 << x
+      end
+    end
+    lines = lines2
     return nil if lines.empty?
     lines.join("\n")
   end
@@ -124,15 +139,18 @@ Issue #
     m = edit_commit_message
     raise(ProgramException,"Commit message empty") if !m
 
-    if !(m =~ /Issue #\d+(\n|$|\w*:)/)
+    if !(m =~ /\n\nIssue #\d+(\n|$|\w*:)/)
       raise(ProgramException,"No 'Issue #' found in commit message: [#{m}]")
     end
 
     FileUtils.write_text_file(GIT_MESSAGE_FILENAME,m)
+
     if system("git commit -a --file=#{GIT_MESSAGE_FILENAME}")
       FileUtils.rm(COMMIT_MESSAGE_FILENAME)
+      FileUtils.rm(GIT_MESSAGE_FILENAME)
+      FileUtils.rm(GIT_STATE_FILENAME)
     else
-       raise(ProgramException,"Commit aborted")
+      raise(ProgramException,"Git commit failed; error #{$?}")
     end
   end
 
@@ -154,8 +172,6 @@ Issue #
   end
 
   def run_android_tests
-    warning "Not running android tests"
-    return if true
     ANDROID_PROJECTS.split.each do |project_root|
       proj_main = File.join(@saved_directory,project_root)
       proj_test = proj_main + "Test"
@@ -169,7 +185,6 @@ Issue #
       runcmd("ant test","...testing")
 
       Dir.chdir(@saved_directory)
-
     end
   end
 
