@@ -79,7 +79,7 @@ Issue #
 
   def read_old_git_state
     if @options[:clean]
-      FileUtils.rm(GIT_STATE_FILENAME)
+      remove(GIT_STATE_FILENAME)
     end
     @previous_git_state = FileUtils.read_text_file(GIT_STATE_FILENAME,"")
   end
@@ -146,9 +146,9 @@ Issue #
     FileUtils.write_text_file(GIT_MESSAGE_FILENAME,m)
 
     if system("git commit -a --file=#{GIT_MESSAGE_FILENAME}")
-      FileUtils.rm(COMMIT_MESSAGE_FILENAME)
-      FileUtils.rm(GIT_MESSAGE_FILENAME)
-      FileUtils.rm(GIT_STATE_FILENAME)
+      remove(COMMIT_MESSAGE_FILENAME)
+      remove(GIT_MESSAGE_FILENAME)
+      remove(GIT_STATE_FILENAME)
     else
       raise(ProgramException,"Git commit failed; error #{$?}")
     end
@@ -215,6 +215,10 @@ Issue #
 
   def echo(msg)
     puts msg
+  end
+
+  def remove(file)
+     FileUtils.rm(file) if File.exist?(file)
   end
 
 end
