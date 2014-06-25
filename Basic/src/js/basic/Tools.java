@@ -1065,7 +1065,6 @@ public final class Tools {
 			try {
 				Class.forName("js.testUtils.MyTest");
 				testing = true;
-				warning("successfully detected test mode");
 			} catch (ClassNotFoundException e) {
 			}
 			testingKnown = true;

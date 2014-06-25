@@ -177,6 +177,12 @@ Issue #
   end
 
   def run_android_tests
+
+    # This seems to help with the Eclipse ADT / android cmd line conflict.
+    #
+    remove_dir("RBuddyApp/bin/res/crunch")
+    remove_dir("RBuddyAppTest/bin/res/crunch")
+
     ANDROID_PROJECTS.split.each do |project_root|
       proj_main = File.join(@saved_directory,project_root)
       proj_test = proj_main + "Test"
@@ -223,7 +229,11 @@ Issue #
   end
 
   def remove(file)
-     FileUtils.rm(file) if File.exist?(file)
+    FileUtils.rm(file) if File.exist?(file)
+  end
+
+  def remove_dir(dir)
+    FileUtils.rm_rf(dir) if File.directory?(dir)
   end
 
 end
