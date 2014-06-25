@@ -147,3 +147,9 @@ Install some other tools
 [] VLC (google 'videolan osx')
 
 
+I think these are necessary for Android development:
+[] brew install ant
+[] copy junit3.jar to a directory named junit3 within the ~/android_development directory
+
+
+
