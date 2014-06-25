@@ -78,7 +78,7 @@ public class ReceiptListActivity extends Activity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (RBuddyApp.useGoogleAPI) {
+		if (app.useGoogleAPI()) {
 			menu.removeItem(R.id.action_testonly_generate);
 			menu.removeItem(R.id.action_testonly_zap);
 		}
@@ -96,7 +96,7 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processZap() {
-		if (!RBuddyApp.useGoogleAPI)
+		if (!app.useGoogleAPI())
 			RBuddyApp.confirmOperation(this, "Delete all receipts?",
 					new Runnable() {
 						@Override

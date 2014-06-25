@@ -61,7 +61,6 @@ public class FileArguments {
 	}
 
 	public void setFile(DriveFile file) {
-		ASSERT(RBuddyApp.useGoogleAPI);
 		this.file = file;
 		this.fileIdString = null;
 	}
@@ -100,7 +99,6 @@ public class FileArguments {
 	}
 
 	public DriveFolder getParentFolder() {
-		ASSERT(RBuddyApp.useGoogleAPI);
 		return this.parentFolder;
 	}
 
@@ -108,7 +106,6 @@ public class FileArguments {
 	 * For write operations only; set new file's containing folder
 	 */
 	public void setParentPhoto(DriveFolder f) {
-		ASSERT(RBuddyApp.useGoogleAPI);
 		this.parentFolder = f;
 	}
 

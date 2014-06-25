@@ -18,7 +18,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	private static final Random random = new Random(System.currentTimeMillis());
 
 	public SimplePhotoStore() {
-		ASSERT(!RBuddyApp.useGoogleAPI);
+		ASSERT(!RBuddyApp.sharedInstance().useGoogleAPI());
 		HandlerThread ht = new HandlerThread("SimplePhotoStore BgndHandler");
 		ht.start();
 		this.backgroundHandler = new Handler(ht.getLooper());

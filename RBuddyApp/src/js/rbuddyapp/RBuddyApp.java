@@ -27,7 +27,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
  */
 public class RBuddyApp {
 
-	public static final boolean useGoogleAPI = true;
+	// This can be turned off for development/test purposes only.
+	// The Google API is never used, in any case, during unit tests.
+	private static final boolean useGoogleAPI = true;
 
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 
@@ -36,10 +38,6 @@ public class RBuddyApp {
 			if (!testing())
 				assertUIThread();
 			sharedInstance = new RBuddyApp(context);
-			if (db)
-				pr("RBuddyApp.prepare, prepared sharedInstance "
-						+ sharedInstance);
-			warning("some tests fail if useGoogleAPI is true");
 		}
 	}
 
@@ -111,6 +109,7 @@ public class RBuddyApp {
 
 	private RBuddyApp(Context context) {
 		this.context = context;
+
 		AppPreferences.prepare(this.context);
 
 		if (!testing()) {
@@ -136,6 +135,8 @@ public class RBuddyApp {
 
 			addResourceMappings();
 		}
+		useGoogleAPI();
+
 		JSDate.setFactory(AndroidDate.androidDateFactory);
 	}
 
@@ -255,6 +256,15 @@ public class RBuddyApp {
 
 	public static void setReceiptListValid(boolean f) {
 		receiptListValid = f;
+	}
+
+	private Boolean useGoogleAPIFlag;
+
+	public boolean useGoogleAPI() {
+		if (useGoogleAPIFlag == null) {
+			useGoogleAPIFlag = Boolean.valueOf(useGoogleAPI && !testing());
+		}
+		return useGoogleAPIFlag.booleanValue();
 	}
 
 	private static boolean receiptListValid;

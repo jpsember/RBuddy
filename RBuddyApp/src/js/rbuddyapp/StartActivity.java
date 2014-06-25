@@ -78,7 +78,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	private RBuddyApp app;
 
 	private void connectToGoogleDrive() {
-		if (!RBuddyApp.useGoogleAPI) {
+		if (!app.useGoogleAPI()) {
 			processGoogleApiConnected();
 		} else {
 			if (db)
@@ -114,7 +114,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 		if (db)
 			pr(hey() + "processGoogleAPIConnected");
 
-		if (RBuddyApp.useGoogleAPI) {
+		if (app.useGoogleAPI()) {
 			if (db)
 				pr("constructing UserData");
 			userData = new UserData(app);
@@ -139,7 +139,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 			pr(hey() + "StartActivity.processUserDataReady");
 
 		if (!userFilesPrepared) {
-			if (RBuddyApp.useGoogleAPI) {
+			if (app.useGoogleAPI()) {
 				app.setUserData(userData.getReceiptFile(),
 						userData.getTagSetFile(), userData.getPhotoStore());
 			} else {

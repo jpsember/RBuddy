@@ -84,7 +84,7 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 		for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
 			assertTrue(tf.tags().contains(iter.next()));
 		}
-		assertTrue(false); // This should cause a test failure
+		// assertTrue(false); // This should cause a test failure
 	}
 	
 //  ham // This should cause a compile error ('ant debug' stage)

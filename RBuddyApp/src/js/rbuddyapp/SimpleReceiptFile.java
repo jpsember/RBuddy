@@ -24,7 +24,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	public SimpleReceiptFile(String receiptsBaseName, String tagsBaseName) {
-		ASSERT(!RBuddyApp.useGoogleAPI);
+		ASSERT(!RBuddyApp.sharedInstance().useGoogleAPI());
 		if (receiptsBaseName == null)
 			receiptsBaseName = "receipts_json_v" + Receipt.VERSION + ".txt";
 		this.receiptsBaseName = receiptsBaseName;
