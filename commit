@@ -119,7 +119,7 @@ Issue #
     m = m.strip
     lines = m.split("\n").collect{|x| x.rstrip}
     lines = lines.keep_if{|x| !x.start_with?('#')}
-    lines.join('\n')
+    lines.join("\n")
   end
 
 
