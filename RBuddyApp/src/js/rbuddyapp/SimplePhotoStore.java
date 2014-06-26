@@ -130,7 +130,9 @@ public class SimplePhotoStore implements IPhotoStore {
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
-		listenersMap.remove(receiptId);
+		listeners.remove(listener);
+		if (listeners.isEmpty())
+			listenersMap.remove(receiptId);
 		if (db)
 			pr(dumpListeners(listenersMap));
 	}
