@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
-import android.widget.Toast;
 
 public class SearchActivity extends Activity {
 
@@ -63,11 +62,9 @@ public class SearchActivity extends Activity {
 	}
 	
 	private void performSearch() {
-		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(app.context(), "Search isn't yet implemented.", duration);
-		toast.show();
+		app.toast("Search isn't yet implemented.");
 	}
-	
-	private RBuddyApp app;
+
 	private Form form;
+	private RBuddyApp app;
 }

@@ -68,6 +68,16 @@ public class ReceiptListActivity extends Activity {
 		case R.id.action_testonly_zap:
 			processZap();
 			return true;
+		case R.id.action_testonly_enable_google_drive:
+			AppPreferences.putBoolean(
+					RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
+			showGoogleDriveState();
+			return true;
+		case R.id.action_testonly_disable_google_drive:
+			AppPreferences.putBoolean(
+					RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, false);
+			showGoogleDriveState();
+			return true;
 		case R.id.action_search:
 			doSearchActivity();
 			return true;
@@ -76,9 +86,18 @@ public class ReceiptListActivity extends Activity {
 		}
 	}
 
+	private void showGoogleDriveState() {
+		app.toast("Google Drive is "
+				+ (app.useGoogleAPI() ? "active" : "inactive")
+				+ ", and will be "
+				+ (AppPreferences.getBoolean(
+						RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true) ? "active"
+						: "inactive") + " when app restarts.");
+	}
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (app.useGoogleAPI()) {
+		if (false /* app.useGoogleAPI() */) {
 			menu.removeItem(R.id.action_testonly_generate);
 			menu.removeItem(R.id.action_testonly_zap);
 		}

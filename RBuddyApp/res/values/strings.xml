@@ -9,5 +9,7 @@
     <string name="action_delete_receipt">Delete Receipt</string>
     <string name="action_testonly_generate">Generate Random Receipts</string>
     <string name="action_testonly_zap">Delete All Receipts</string>
+    <string name="action_testonly_enable_google_drive">Enable Google Drive</string>
+    <string name="action_testonly_disable_google_drive">Disable Google Drive</string>
 
 </resources>

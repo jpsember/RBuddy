@@ -69,6 +69,27 @@ public class AppPreferences {
 	}
 
 	/**
+	 * Read boolean from app preferences
+	 * 
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
+	public static boolean getBoolean(String key, boolean defaultValue) {
+		return preferences.getBoolean(key, defaultValue);
+	}
+
+	/**
+	 * Store boolean
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public static void putBoolean(String key, boolean value) {
+		preferences.edit().putBoolean(key, value).commit();
+	}
+
+	/**
 	 * Store a series of string values (an optimization to allow a single commit
 	 * at the end)
 	 * 

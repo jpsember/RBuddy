@@ -25,5 +25,13 @@
         android:id="@+id/action_testonly_zap"
         android:showAsAction="never"
         android:title="@string/action_testonly_zap"/>
+    <item
+        android:id="@+id/action_testonly_enable_google_drive"
+        android:showAsAction="never"
+        android:title="@string/action_testonly_enable_google_drive"/>
+    <item
+        android:id="@+id/action_testonly_disable_google_drive"
+        android:showAsAction="never"
+        android:title="@string/action_testonly_disable_google_drive"/>
 
 </menu>

@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -27,9 +28,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
  */
 public class RBuddyApp {
 
-	// This can be turned off for development/test purposes only.
-	// The Google API is never used, in any case, during unit tests.
-	private static final boolean useGoogleAPI = true;
+	public static final String PREFERENCE_KEY_USE_GOOGLE_DRIVE_API = "use_google_drive_api";
 
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 
@@ -213,13 +212,13 @@ public class RBuddyApp {
 	}
 
 	public GoogleApiClient getGoogleApiClient() {
-		ASSERT(useGoogleAPI);
+		ASSERT(useGoogleAPI());
 		// TODO Is GoogleApiClient thread-safe? This code isn't.
 		return mGoogleApiClient;
 	}
 
 	public void setGoogleApiClient(GoogleApiClient c) {
-		ASSERT(useGoogleAPI);
+		ASSERT(useGoogleAPI());
 		ASSERT(mGoogleApiClient == null);
 		mGoogleApiClient = c;
 	}
@@ -262,9 +261,21 @@ public class RBuddyApp {
 
 	public boolean useGoogleAPI() {
 		if (useGoogleAPIFlag == null) {
-			useGoogleAPIFlag = Boolean.valueOf(useGoogleAPI && !testing());
+			if (testing())
+				useGoogleAPIFlag = false;
+			else {
+				useGoogleAPIFlag = AppPreferences.getBoolean(
+						PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
+			}
 		}
 		return useGoogleAPIFlag.booleanValue();
+	}
+
+	public void toast(String message) {
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context(), message,
+				duration);
+		toast.show();
 	}
 
 	private static boolean receiptListValid;
