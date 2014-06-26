@@ -300,9 +300,6 @@ public abstract class FormWidget {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setDrawableProvider(IDrawableProvider p) {
-		throw new UnsupportedOperationException();
-	}
 
 	// For lack of a better place
 	public static View horizontalSeparator() {

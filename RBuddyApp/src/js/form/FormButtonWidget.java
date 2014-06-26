@@ -1,8 +1,11 @@
 package js.form;
 
-//import static js.basic.Tools.*;
+import static js.basic.Tools.*;
+
 import java.util.Map;
 
+import js.rbuddyapp.IPhotoListener;
+import js.rbuddyapp.IPhotoStore;
 import js.rbuddyapp.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
@@ -14,10 +17,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-public class FormButtonWidget extends FormWidget implements IDrawableListener {
+public class FormButtonWidget extends FormWidget implements IPhotoListener {
 
 	public FormButtonWidget(Form owner, Map attributes) {
-		super(owner,attributes);
+		super(owner, attributes);
 		String button_icon = strAttr("icon", "");
 		String button_label = strAttr("label", "");
 		this.withImage = boolAttr("hasimage", false);
@@ -94,17 +97,37 @@ public class FormButtonWidget extends FormWidget implements IDrawableListener {
 		button.setOnClickListener(listener);
 	}
 
-	@Override
-	public void setDrawableProvider(IDrawableProvider p) {
-		if (drawableProvider != p) {
-			this.drawableProvider = p;
+	public void displayPhoto(String fileIdString) {
+		final boolean db = true;
+		if (db)
+			pr(this + ".displayPhoto fileId=" + fileIdString + ", previous "
+					+ listeningForPhotoId);
+		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
+		if (fileIdString == null) {
+			if (listeningForPhotoId != null) {
+				photoStore.removePhotoListener(listeningForPhotoId, this);
+				listeningForPhotoId = null;
+			}
+		} else {
+			if (listeningForPhotoId != null
+					&& !fileIdString.equals(listeningForPhotoId)) {
+				photoStore.removePhotoListener(listeningForPhotoId, this);
+			}
 
-			updatePhotoView();
+			listeningForPhotoId = fileIdString;
+			unimp("add parameter and support for thumbnails");
+			photoStore.addPhotoListener(listeningForPhotoId, this);
+
+			// Have the PhotoStore load the image
+			photoStore.readPhoto(listeningForPhotoId);
 		}
 	}
 
 	@Override
-	public void drawableArrived(Drawable d) {
+	public void drawableAvailable(Drawable d, String fileIdString) {
+		if (db)
+			pr("FormImageWidget.drawableAvailable, id " + fileIdString
+					+ " drawable " + d);
 		if (d == null) {
 			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()
@@ -113,14 +136,9 @@ public class FormButtonWidget extends FormWidget implements IDrawableListener {
 		imageView.setImageDrawable(d);
 	}
 
-	private void updatePhotoView() {
-		Drawable d = null;
-		if (drawableProvider != null)
-			d = drawableProvider.getDrawable();
-		drawableArrived(d);
-	}
+	private String listeningForPhotoId;
 
-	private IDrawableProvider drawableProvider;
+	// private IDrawableProvider drawableProvider;
 
 	// Protected to avoid warnings for the moment
 	protected boolean hasIcon;

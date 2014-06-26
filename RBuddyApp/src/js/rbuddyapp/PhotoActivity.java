@@ -8,15 +8,10 @@ import java.io.IOException;
 import js.basic.Files;
 import js.form.Form;
 import js.form.FormImageWidget;
-import js.form.IDrawableProvider;
 import js.rbuddy.R;
 import js.rbuddy.Receipt;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -27,20 +22,33 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
-public class PhotoActivity extends Activity implements IDrawableProvider {
+public class PhotoActivity extends Activity {
 
 	// Identifiers for the intents that we may spawn
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		final boolean db = true;
+		if (db) pr(hey()+" telling imageWidget to display photo "+receipt.getPhotoId());
+		imageWidget.displayPhoto(this.receipt.getPhotoId());
+	}
+
+	@Override
 	public void onPause() {
 		super.onPause();
+		final boolean db = true;
+		if (db) pr(hey()+" telling imageWidget to display null");
+	imageWidget.displayPhoto(null);
 		app.receiptFile().flush();
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		final boolean db = true;
+		if (db) pr(hey()+" onCreate");
+	super.onCreate(savedInstanceState);
 		app = RBuddyApp.sharedInstance();
 		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
@@ -49,8 +57,10 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 
 		// If no photo is defined for this receipt, jump right into the take
 		// photo intent
-		if (receipt.getPhotoId() == null)
+		if (receipt.getPhotoId() == null) {
+			if (db) pr("  jumping right into image capture intent");
 			startImageCaptureIntent();
+		}
 	}
 
 	@Override
@@ -80,10 +90,14 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		final boolean db = true;
 		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+			if (db) pr(hey()+" processing photo result");
+		
 			processPhotoResult(data);
 			// Now that user has presumably selected a photo, exit out to the
 			// EditReceipt activity.
+			if (db) pr(" calling finish()\n");
 			finish();
 		}
 	}
@@ -99,7 +113,6 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 			}
 		});
 		imageWidget = (FormImageWidget) form.getField("photo");
-		imageWidget.setDrawableProvider(this);
 
 		ScrollView scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -110,17 +123,24 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 	}
 
 	private void startImageCaptureIntent() {
+		final boolean db = true;
+		if (db)
+			pr(hey());
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 		if (intent.resolveActivity(getPackageManager()) == null) {
 			return;
 		}
 
 		File workFile = getWorkPhotoFile();
+		// Issue #46: is deletion required? If not, omit
+		if (db)
+			pr(" workFile=" + workFile + ", deleting");
 		workFile.delete();
 
 		Uri uri = Uri.fromFile(workFile);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-
+		if (db)
+			pr(" starting activity REQUEST_IMAGE_CAPTURE");
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
@@ -129,10 +149,16 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 	}
 
 	private void processPhotoResult(Intent intent) {
+		final boolean db = true;
+		if (db)
+			pr("\n\n\n" + hey());
 		unimp("handle various problem situations in ways other than just 'die'");
 
 		File workFile = getWorkPhotoFile();
+		if (db)
+			pr(" workFile=" + workFile + ", isFile=" + workFile.isFile());
 		if (!workFile.isFile()) {
+			if (db) pr(" no work file found! "+workFile);
 			die("no work file found: " + workFile);
 		}
 
@@ -141,16 +167,23 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 		try {
 			FileArguments args = new FileArguments(
 					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
+
 			args.setData(Files.readBinaryFile(workFile));
 			args.setFileId(receipt.getPhotoId());
 
 			final FileArguments arg = args;
-			final Receipt theReceipt = receipt;
+
+			// We have to wait until the photo has been processed, and a photoId
+			// assigned; then store this assignment in the receipt, and update
+			// the
+			// photo's widget
 			args.setCallback(new Runnable() {
 				@Override
 				public void run() {
-					photoIdHasArrived(theReceipt, arg.getFileIdString(),
-							arg.getData());
+					if (db) pr("storePhoto.callback, setting photo id to "+arg.getFileIdString());
+					receipt.setPhotoId(arg.getFileIdString());
+					if (db) pr(" displaying photo");
+					imageWidget.displayPhoto(receipt.getPhotoId());
 				}
 			});
 			IPhotoStore ps = app.photoStore();
@@ -160,40 +193,6 @@ public class PhotoActivity extends Activity implements IDrawableProvider {
 			// photo id
 			die(e);
 		}
-	}
-
-	private void photoIdHasArrived(Receipt receipt, String fileIdString,
-			byte[] jpeg) {
-		receipt.setPhotoId(fileIdString);
-		app.receiptFile().setModified(receipt);
-		processBitmapLoaded(jpeg);
-	}
-
-	@Override
-	public Drawable getDrawable() {
-		Drawable d = null;
-		do {
-			String photoId = receipt.getPhotoId();
-			if (photoId == null)
-				break;
-			final FileArguments args = new FileArguments(
-					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
-			args.setFileId(photoId);
-			args.setCallback(new Runnable() {
-				@Override
-				public void run() {
-					processBitmapLoaded(args.getData());
-				}
-			});
-			app.photoStore().readPhoto(args);
-		} while (false);
-		return d;
-	}
-
-	private void processBitmapLoaded(byte[] jpeg) {
-		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-		Drawable d = new BitmapDrawable(this.getResources(), bmp);
-		imageWidget.drawableArrived(d);
 	}
 
 	private Receipt receipt;

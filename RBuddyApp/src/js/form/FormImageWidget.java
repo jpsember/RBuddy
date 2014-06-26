@@ -2,11 +2,14 @@ package js.form;
 
 import java.util.Map;
 
+import js.rbuddyapp.IPhotoListener;
+import js.rbuddyapp.IPhotoStore;
 import js.rbuddyapp.RBuddyApp;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import static js.basic.Tools.*;
 
-public class FormImageWidget extends FormWidget implements IDrawableListener {
+public class FormImageWidget extends FormWidget implements IPhotoListener {
 
 	public FormImageWidget(Form owner, Map attributes) {
 		super(owner, attributes);
@@ -15,29 +18,42 @@ public class FormImageWidget extends FormWidget implements IDrawableListener {
 		imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 		imageView.setAdjustViewBounds(true);
 
-		updatePhotoView();
-
 		constructLabel();
 		getWidgetContainer().addView(imageView);
 	}
 
-	private void updatePhotoView() {
-		Drawable d = null;
-		if (drawableProvider != null)
-			d = drawableProvider.getDrawable();
-		drawableArrived(d);
-	}
+	public void displayPhoto(String fileIdString) {
+		final boolean db = true;
+		if (db)
+			pr(this + ".displayPhoto fileId=" + fileIdString + ", previous "
+					+ listeningForPhotoId);
+		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
+		if (fileIdString == null) {
+			if (listeningForPhotoId != null) {
+				photoStore.removePhotoListener(listeningForPhotoId, this);
+				listeningForPhotoId = null;
+			}
+		} else {
+			if (listeningForPhotoId != null) {
+				if (listeningForPhotoId.equals(fileIdString))
+					return;
+				photoStore.removePhotoListener(listeningForPhotoId, this);
+			}
 
-	@Override
-	public void setDrawableProvider(IDrawableProvider p) {
-		if (drawableProvider != p) {
-			this.drawableProvider = p;
-			updatePhotoView();
+			listeningForPhotoId = fileIdString;
+			unimp("add parameter and support for thumbnails");
+			photoStore.addPhotoListener(listeningForPhotoId, this);
+
+			// Have the PhotoStore load the image
+			photoStore.readPhoto(listeningForPhotoId);
 		}
 	}
 
 	@Override
-	public void drawableArrived(Drawable d) {
+	public void drawableAvailable(Drawable d, String fileIdString) {
+		if (db)
+			pr("FormImageWidget.drawableAvailable, id " + fileIdString
+					+ " drawable " + d);
 		if (d == null) {
 			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()
@@ -46,6 +62,6 @@ public class FormImageWidget extends FormWidget implements IDrawableListener {
 		imageView.setImageDrawable(d);
 	}
 
-	private IDrawableProvider drawableProvider;
 	private ImageView imageView;
+	private String listeningForPhotoId;
 }
