@@ -4,6 +4,7 @@ import static js.basic.Tools.*;
 
 import java.util.*;
 
+import js.form.FormWidget;
 import js.rbuddy.R;
 import js.rbuddy.Receipt;
 import android.app.Activity;
@@ -27,6 +28,8 @@ public class ReceiptListActivity extends Activity {
 		app = RBuddyApp.sharedInstance();
 
 		LinearLayout layout = new LinearLayout(this);
+		FormWidget.setDebugBgnd(layout, app.useGoogleAPI() ? "#000030"
+				: "#004000");
 		layout.setOrientation(LinearLayout.VERTICAL);
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
@@ -80,6 +83,9 @@ public class ReceiptListActivity extends Activity {
 			return true;
 		case R.id.action_search:
 			doSearchActivity();
+			return true;
+		case R.id.action_testonly_exit:
+			finish();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

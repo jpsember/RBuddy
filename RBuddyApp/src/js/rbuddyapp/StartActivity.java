@@ -1,6 +1,7 @@
 package js.rbuddyapp;
 
 import static js.basic.Tools.*;
+import js.form.FormWidget;
 import js.rbuddy.R;
 import android.app.Activity;
 import android.content.Intent;
@@ -70,8 +71,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	private View constructStartView() {
 		View v = new View(app.context());
-		v.setBackgroundColor(Color.BLUE);
-
+		FormWidget.setDebugBgnd(v, app.useGoogleAPI() ? "blue" : "green");
 		return v;
 	}
 

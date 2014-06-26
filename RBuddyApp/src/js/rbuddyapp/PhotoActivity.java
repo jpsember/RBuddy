@@ -119,11 +119,6 @@ public class PhotoActivity extends Activity {
 		}
 
 		File workFile = getWorkPhotoFile();
-		// Issue #46: is deletion required? If not, omit
-		if (db)
-			pr(" workFile=" + workFile + ", deleting");
-		workFile.delete();
-
 		Uri uri = Uri.fromFile(workFile);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 		if (db)
