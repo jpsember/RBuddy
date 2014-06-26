@@ -28,11 +28,30 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	private static final Random random = new Random(System.currentTimeMillis());
 
-	public SimplePhotoStore() {
+	/**
+	 * Factory constructor
+	 * 
+	 * @return
+	 */
+	public static SimplePhotoStore build() {
 		ASSERT(!RBuddyApp.sharedInstance().useGoogleAPI());
+		SimplePhotoStore s = new SimplePhotoStore();
+		s.build_aux();
+		return s;
+	}
 
+	/**
+	 * This constructor should only be accessed by this class or its subclasses.
+	 * To construct a SimplePhotoStore, other classes should use build().
+	 */
+	protected SimplePhotoStore() {
 		listenersMap = new HashMap();
+	}
 
+	/**
+	 * Helper for constructing SimplePhotoStore (and not one of its subclasses)
+	 */
+	private void build_aux() {
 		HandlerThread ht = new HandlerThread("SimplePhotoStore BgndHandler");
 		ht.start();
 		this.backgroundHandler = new Handler(ht.getLooper());
@@ -118,7 +137,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		}
 		listeners.add(listener);
 		if (db)
-			pr(dumpListeners(listenersMap));
+			pr(dumpListeners());
 	}
 
 	@Override
@@ -134,7 +153,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		if (listeners.isEmpty())
 			listenersMap.remove(receiptId);
 		if (db)
-			pr(dumpListeners(listenersMap));
+			pr(dumpListeners());
 	}
 
 	@Override
@@ -171,7 +190,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		});
 	}
 
-	private void notifyListenersOfDrawable(int receiptId, String photoId,
+	protected void notifyListenersOfDrawable(int receiptId, String photoId,
 			Drawable d) {
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
@@ -188,10 +207,10 @@ public class SimplePhotoStore implements IPhotoStore {
 				+ BitmapUtil.JPEG_EXTENSION);
 	}
 
-	public static String dumpListeners(
-			Map<Integer, Set<IPhotoListener>> listenersMap) {
+	public String dumpListeners() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("------\n SimplePhotoStore listeners:\n");
+		sb.append("------\n " + this.getClass().getSimpleName()
+				+ " listeners:\n");
 		for (int receiptId : listenersMap.keySet()) {
 			Set<IPhotoListener> set = listenersMap.get(receiptId);
 			sb.append("  id " + receiptId + " : ");
@@ -205,9 +224,6 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private Map<Integer, Set<IPhotoListener>> listenersMap;
-
 	private Handler handler;
-
 	private Handler backgroundHandler;
-
 }

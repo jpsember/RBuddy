@@ -1,10 +1,5 @@
 package js.rbuddyapp;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,7 +9,7 @@ import com.google.android.gms.drive.DriveFolder;
 
 import static js.basic.Tools.*;
 
-public class DrivePhotoStore implements IPhotoStore {
+public class DrivePhotoStore extends SimplePhotoStore {
 
 	/**
 	 * This constructor may be called from other than the UI thread!
@@ -24,7 +19,6 @@ public class DrivePhotoStore implements IPhotoStore {
 	public DrivePhotoStore(UserData userData, DriveFolder photosFolder) {
 		this.userData = userData;
 		this.photosFolder = photosFolder;
-		this.listenersMap = new HashMap();
 	}
 
 	@Override
@@ -37,26 +31,6 @@ public class DrivePhotoStore implements IPhotoStore {
 	@Override
 	public void deletePhoto(FileArguments args) {
 		warning("Google Drive api doesn't support delete yet (I think)");
-	}
-
-	@Override
-	public void addPhotoListener(int receiptId, IPhotoListener listener) {
-		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
-		if (listeners == null) {
-			listeners = new HashSet<IPhotoListener>();
-			listenersMap.put(receiptId, listeners);
-		}
-		listeners.add(listener);
-	}
-
-	@Override
-	public void removePhotoListener(int receiptId, IPhotoListener listener) {
-		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
-		if (listeners == null)
-			return;
-		listeners.remove(listener);
-		if (listeners.isEmpty())
-			listenersMap.remove(receiptId);
 	}
 
 	@Override
@@ -87,17 +61,6 @@ public class DrivePhotoStore implements IPhotoStore {
 		notifyListenersOfDrawable(receiptId, args.getFileIdString(), d);
 	}
 
-	private void notifyListenersOfDrawable(int receiptId, String photoIdString,
-			Drawable d) {
-		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
-		if (listeners == null)
-			return;
-		for (IPhotoListener listener : listeners) {
-			listener.drawableAvailable(d, receiptId, photoIdString);
-		}
-	}
-
-	private Map<Integer, Set<IPhotoListener>> listenersMap;
 	private UserData userData;
 	private DriveFolder photosFolder;
 }

@@ -144,7 +144,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 						userData.getTagSetFile(), userData.getPhotoStore());
 			} else {
 				SimpleReceiptFile s = new SimpleReceiptFile();
-				IPhotoStore ps = new SimplePhotoStore();
+				IPhotoStore ps = SimplePhotoStore.build();
 				app.setUserData(s, s.readTagSetFile(), ps);
 			}
 			userFilesPrepared = true;
