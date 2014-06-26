@@ -1,8 +1,5 @@
 package js.rbuddyapp;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.google.android.gms.drive.DriveFolder;
@@ -42,23 +39,23 @@ public class DrivePhotoStore extends SimplePhotoStore {
 		ASSERT(fileIdString != null, "expected non-null fileIdString");
 		args.setFileId(fileIdString);
 
+		// Specify code to run on UI thread when Drive API finishes reading:
 		args.setCallback(new Runnable() {
-			@Override
 			public void run() {
-				readPhotoCallback(receiptId, args);
+				// Run some code in the background thread to convert the JPEG to
+				// a Drawable
+				backgroundHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						sleep();
+						final Drawable d = convertJPEGToDrawable(args.getData());
+						notifyListenersOfDrawable(receiptId,
+								args.getFileIdString(), d);
+					}
+				});
 			}
 		});
-
 		userData.readBinaryFile(args);
-	}
-
-	private void readPhotoCallback(int receiptId, FileArguments args) {
-		warning("we should be doing this in a background thread");
-		byte[] jpeg = args.getData();
-		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-		final Drawable d = new BitmapDrawable(RBuddyApp.sharedInstance()
-				.context().getResources(), bmp);
-		notifyListenersOfDrawable(receiptId, args.getFileIdString(), d);
 	}
 
 	private UserData userData;

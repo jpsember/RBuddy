@@ -340,8 +340,13 @@ public final class Tools {
 	public static String describe(Object obj) {
 		if (obj == null)
 			return "<null>";
-		return d(obj.toString(), "80et") + " ("
-				+ obj.getClass().getSimpleName() + ")";
+		return d(obj.toString(), "80et") + " (" + nameOf(obj) + ")";
+	}
+
+	public static String nameOf(Object obj) {
+		if (obj == null)
+			return "<null>";
+		return obj.getClass().getSimpleName();
 	}
 
 	public static String d(Map m) {

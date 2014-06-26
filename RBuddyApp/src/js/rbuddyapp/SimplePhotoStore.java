@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import android.graphics.Bitmap;
@@ -16,98 +15,89 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Message;
-import android.os.Handler.Callback;
+import android.os.Looper;
 import js.basic.Files;
-import js.basic.Tools;
 
 public class SimplePhotoStore implements IPhotoStore {
 
-	// Simulate a network or other delay?
-	private static final boolean SIMULATE_DELAY = true;
-
-	private static final Random random = new Random(System.currentTimeMillis());
-
-	/**
-	 * Factory constructor
-	 * 
-	 * @return
-	 */
-	public static SimplePhotoStore build() {
-		ASSERT(!RBuddyApp.sharedInstance().useGoogleAPI());
-		SimplePhotoStore s = new SimplePhotoStore();
-		s.build_aux();
-		return s;
-	}
-
-	/**
-	 * This constructor should only be accessed by this class or its subclasses.
-	 * To construct a SimplePhotoStore, other classes should use build().
-	 */
-	protected SimplePhotoStore() {
+	public SimplePhotoStore() {
 		listenersMap = new HashMap();
+
+		// Construct ui and background task handlers
+		this.uiHandler = new Handler(Looper.getMainLooper());
+
+		HandlerThread handlerThread = new HandlerThread(
+				"PhotoStore bgndHandler");
+		handlerThread.start();
+		this.backgroundHandler = new Handler(handlerThread.getLooper());
+
+		this.simulateDelay = true;
 	}
 
-	/**
-	 * Helper for constructing SimplePhotoStore (and not one of its subclasses)
-	 */
-	private void build_aux() {
-		HandlerThread ht = new HandlerThread("SimplePhotoStore BgndHandler");
-		ht.start();
-		this.backgroundHandler = new Handler(ht.getLooper());
-
-		this.handler = new Handler(new Callback() {
-			@Override
-			public boolean handleMessage(Message m) {
-				warning("SimplePhotoStore handler not handling message: " + m);
-				return false;
+	@Override
+	public void readPhoto(final int receiptId, final String fileIdString) {
+		backgroundHandler.post(new Runnable() {
+			public void run() {
+				sleep();
+				String photoId = fileIdString;
+				if (photoId == null)
+					throw new IllegalArgumentException(
+							"expected photoId to be non-null");
+				File f = getFileForPhotoId(photoId);
+				byte[] jpeg = null;
+				try {
+					jpeg = Files.readBinaryFile(f);
+				} catch (IOException e) {
+					die(e);
+				}
+				sleep();
+				final Drawable d = convertJPEGToDrawable(jpeg);
+				notifyListenersOfDrawable(receiptId, fileIdString, d);
 			}
 		});
 	}
 
 	@Override
-	public void storePhoto(FileArguments args) {
+	public void storePhoto(final FileArguments args) {
 		ASSERT(args.getFilename() != null);
-		String photoId = args.getFileIdString();
+		backgroundHandler.post(new Runnable() {
+			public void run() {
+				String photoId = args.getFileIdString();
+				byte[] jpeg = args.getData();
+				if (photoId == null) {
+					// This of course is not guaranteed to produce unique
+					// values, but it's good enough for test purposes
+					photoId = "RND_" + Math.abs(rnd.nextInt());
+				}
 
-		byte[] jpeg = args.getData();
-
-		if (photoId == null) {
-			// This of course is not guaranteed to produce unique values, but
-			// it's good enough for test purposes
-			photoId = "RND_" + Math.abs(random.nextInt());
-		}
-
-		try {
-			File f = getFileForPhotoId(photoId);
-			Files.writeBinaryFile(f, jpeg);
-			if (db)
-				pr(" wrote to file " + f);
-		} catch (IOException e) {
-			die(e);
-		}
-		args.setFileId(photoId);
-		if (args.getCallback() != null)
-			args.getCallback().run();
+				try {
+					File f = getFileForPhotoId(photoId);
+					Files.writeBinaryFile(f, jpeg);
+				} catch (IOException e) {
+					die(e);
+				}
+				args.setFileId(photoId);
+				runOnUIThread(args.getCallback());
+			}
+		});
 	}
 
-	private static void sleep() {
-		// final boolean db = true;
-		if (SIMULATE_DELAY) {
-			if (db)
-				pr("...simulating delay...");
-			Tools.sleepFor((Tools.rnd.nextInt(800) + 350) / 2);
-			if (db)
-				pr("...done delay");
+	protected void runOnUIThread(Runnable r) {
+		if (r == null)
+			return;
+		uiHandler.post(r);
+	}
+
+	protected void sleep() {
+		if (simulateDelay) {
+			warning("adding simulated delays");
+			sleepFor((rnd.nextInt(800) + 350));
 		}
 	}
 
 	@Override
-	public void deletePhoto(FileArguments arg2) {
-		final FileArguments args = arg2;
+	public void deletePhoto(final FileArguments args) {
 		backgroundHandler.post(new Runnable() {
-
-			@Override
 			public void run() {
 				String photoId = args.getFileIdString();
 				if (photoId == null)
@@ -117,16 +107,13 @@ public class SimplePhotoStore implements IPhotoStore {
 				boolean deleted = f.delete();
 				if (!deleted)
 					warning("failed to delete file: " + f);
-				if (args.getCallback() != null) {
-					handler.post(args.getCallback());
-				}
+				runOnUIThread(args.getCallback());
 			}
 		});
 	}
 
 	@Override
 	public void addPhotoListener(int receiptId, IPhotoListener listener) {
-		final boolean db = true;
 		if (db)
 			pr("addPhotoListener receiptId " + receiptId + ", listener "
 					+ listener);
@@ -142,10 +129,6 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	@Override
 	public void removePhotoListener(int receiptId, IPhotoListener listener) {
-		final boolean db = true;
-		if (db)
-			pr("\nremovePhotoListener receiptId " + receiptId + ", listener "
-					+ listener);
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
@@ -156,49 +139,27 @@ public class SimplePhotoStore implements IPhotoStore {
 			pr(dumpListeners());
 	}
 
-	@Override
-	public void readPhoto(final int receiptId, final String fileIdString) {
-		backgroundHandler.post(new Runnable() {
-			@Override
+	/**
+	 * This can be called from any thread. It notifies listeners, on the UI
+	 * thread, that a drawable is available
+	 * 
+	 * @param receiptId
+	 * @param photoId
+	 * @param d
+	 */
+	protected void notifyListenersOfDrawable(final int receiptId,
+			final String photoId, final Drawable d) {
+		runOnUIThread(new Runnable() {
 			public void run() {
-				sleep();
-
-				String photoId = fileIdString;
-				if (photoId == null)
-					throw new IllegalArgumentException(
-							"expected photoId to be non-null");
-				File f = getFileForPhotoId(photoId);
-				byte[] jpeg = null;
-				try {
-					jpeg = Files.readBinaryFile(f);
-				} catch (IOException e) {
-					die(e);
+				Set<IPhotoListener> listeners = listenersMap.get(receiptId);
+				if (listeners == null)
+					return;
+				for (IPhotoListener listener : listeners) {
+					sleep();
+					listener.drawableAvailable(d, receiptId, photoId);
 				}
-				sleep();
-				Bitmap bmp = BitmapFactory
-						.decodeByteArray(jpeg, 0, jpeg.length);
-				final Drawable d = new BitmapDrawable(RBuddyApp
-						.sharedInstance().context().getResources(), bmp);
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						notifyListenersOfDrawable(receiptId, fileIdString, d);
-					}
-				});
-
 			}
 		});
-	}
-
-	protected void notifyListenersOfDrawable(int receiptId, String photoId,
-			Drawable d) {
-		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
-		if (listeners == null)
-			return;
-		for (IPhotoListener listener : listeners) {
-			sleep();
-			listener.drawableAvailable(d, receiptId, photoId);
-		}
 	}
 
 	private File getFileForPhotoId(String photoId) {
@@ -209,8 +170,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	public String dumpListeners() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("------\n " + this.getClass().getSimpleName()
-				+ " listeners:\n");
+		sb.append("------\n " + nameOf(this) + " listeners:\n");
 		for (int receiptId : listenersMap.keySet()) {
 			Set<IPhotoListener> set = listenersMap.get(receiptId);
 			sb.append("  id " + receiptId + " : ");
@@ -223,7 +183,19 @@ public class SimplePhotoStore implements IPhotoStore {
 		return sb.toString();
 	}
 
+	public static Drawable convertJPEGToDrawable(byte[] jpeg) {
+		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
+		return new BitmapDrawable(RBuddyApp.sharedInstance().context()
+				.getResources(), bmp);
+	}
+
 	private Map<Integer, Set<IPhotoListener>> listenersMap;
-	private Handler handler;
-	private Handler backgroundHandler;
+
+	// Handler for executing tasks serially on the UI thread
+	private Handler uiHandler;
+
+	// Handler for executing tasks in the background
+	protected Handler backgroundHandler;
+
+	protected boolean simulateDelay;
 }

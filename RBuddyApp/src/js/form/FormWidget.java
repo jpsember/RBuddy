@@ -329,7 +329,7 @@ public abstract class FormWidget {
 	 * Utility method for diagnosing focus problems
 	 */
 	static String focusInfo(View v) {
-		return v.getClass().getSimpleName()
+		return nameOf(v)
 				+ (v.isEnabled() ? "" : " DISABLED")
 				+ (v.isFocusable() ? " FOCUSABLE" : "")
 				+ (v.isFocusableInTouchMode() ? " FOCUSINTOUCH" : "")

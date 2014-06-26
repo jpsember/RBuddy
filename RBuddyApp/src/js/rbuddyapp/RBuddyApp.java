@@ -205,7 +205,7 @@ public class RBuddyApp {
 	public void dumpIntent(Activity activity) {
 		Intent intent = activity.getIntent();
 		Bundle bundle = intent.getExtras();
-		pr(activity.getClass().getSimpleName() + " Intent:");
+		pr(nameOf(activity) + " Intent:");
 		for (String key : bundle.keySet()) {
 			Object value = bundle.get(key);
 			pr("  " + key + " : " + describe(value));
