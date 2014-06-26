@@ -340,7 +340,8 @@ public final class Tools {
 	public static String describe(Object obj) {
 		if (obj == null)
 			return "<null>";
-		return d(obj.toString(),"80et") + " (" + obj.getClass().getSimpleName() + ")";
+		return d(obj.toString(), "80et") + " ("
+				+ obj.getClass().getSimpleName() + ")";
 	}
 
 	public static String d(Map m) {
@@ -741,6 +742,13 @@ public final class Tools {
 			sb.append(s);
 		}
 		return sb;
+	}
+
+	/**
+	 * This do-nothing method can be called by classes to suppress the 'unused
+	 * js.basic.Tools import' warning
+	 */
+	public static void suppressWarning() {
 	}
 
 	public static void pr(Object obj) {

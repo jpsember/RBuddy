@@ -19,6 +19,10 @@ import android.widget.LinearLayout;
 
 public class FormButtonWidget extends FormWidget implements IPhotoListener {
 
+	static {
+		suppressWarning();
+	}
+
 	public FormButtonWidget(Form owner, Map attributes) {
 		super(owner, attributes);
 		String button_icon = strAttr("icon", "");
@@ -29,12 +33,10 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 				// Use id as fallback
 				button_label = getId();
 			}
-			hasLabel = true;
 			Button b = new Button(context());
 			b.setText(button_label);
 			button = b;
 		} else {
-			hasIcon = true;
 			int resourceId = RBuddyApp.sharedInstance()
 					.getResource(button_icon);
 			Drawable img = context().getResources().getDrawable(resourceId);
@@ -49,7 +51,6 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 				b.setCompoundDrawablesWithIntrinsicBounds(img, null, null, null);
 
 				button = b;
-				hasLabel = true;
 			}
 		}
 
@@ -97,37 +98,36 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 		button.setOnClickListener(listener);
 	}
 
-	public void displayPhoto(String fileIdString) {
-		final boolean db = true;
-		if (db)
-			pr(this + ".displayPhoto fileId=" + fileIdString + ", previous "
-					+ listeningForPhotoId);
+	public void displayPhoto(int receiptId, String fileIdString) {
 		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
-		if (fileIdString == null) {
-			if (listeningForPhotoId != null) {
+		if (receiptId == 0) {
+			if (listeningForPhotoId != 0) {
 				photoStore.removePhotoListener(listeningForPhotoId, this);
-				listeningForPhotoId = null;
+				listeningForPhotoId = 0;
 			}
 		} else {
-			if (listeningForPhotoId != null
-					&& !fileIdString.equals(listeningForPhotoId)) {
+			if (listeningForPhotoId != 0 && listeningForPhotoId != receiptId) {
 				photoStore.removePhotoListener(listeningForPhotoId, this);
 			}
 
-			listeningForPhotoId = fileIdString;
-			unimp("add parameter and support for thumbnails");
-			photoStore.addPhotoListener(listeningForPhotoId, this);
+			listeningForPhotoId = receiptId;
 
-			// Have the PhotoStore load the image
-			photoStore.readPhoto(listeningForPhotoId);
+			// Issue #28: add parameter and support for thumbnails; basically
+			// an extra argument should be passed by the listener to indicate
+			// what
+			// kind of images it's interested in
+			photoStore.addPhotoListener(receiptId, this);
+
+			if (fileIdString != null) {
+				// Have the PhotoStore load the image, and it will notify any
+				// listeners (including us) when it has arrived
+				photoStore.readPhoto(receiptId, fileIdString);
+			}
 		}
 	}
 
 	@Override
-	public void drawableAvailable(Drawable d, String fileIdString) {
-		if (db)
-			pr("FormImageWidget.drawableAvailable, id " + fileIdString
-					+ " drawable " + d);
+	public void drawableAvailable(Drawable d, int receiptId, String fileIdString) {
 		if (d == null) {
 			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()
@@ -136,13 +136,8 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 		imageView.setImageDrawable(d);
 	}
 
-	private String listeningForPhotoId;
+	private int listeningForPhotoId;
 
-	// private IDrawableProvider drawableProvider;
-
-	// Protected to avoid warnings for the moment
-	protected boolean hasIcon;
-	protected boolean hasLabel;
 	private boolean withImage;
 	private View button;
 	private ImageView imageView;

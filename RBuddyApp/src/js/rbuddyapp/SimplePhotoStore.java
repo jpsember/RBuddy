@@ -106,15 +106,15 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void addPhotoListener(String fileIdString, IPhotoListener listener) {
+	public void addPhotoListener(int receiptId, IPhotoListener listener) {
 		final boolean db = true;
 		if (db)
-			pr("addPhotoListener fileId " + fileIdString + ", listener "
+			pr("addPhotoListener receiptId " + receiptId + ", listener "
 					+ listener);
-		Set<IPhotoListener> listeners = listenersMap.get(fileIdString);
+		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null) {
 			listeners = new HashSet<IPhotoListener>();
-			listenersMap.put(fileIdString, listeners);
+			listenersMap.put(receiptId, listeners);
 		}
 		listeners.add(listener);
 		if (db)
@@ -122,21 +122,21 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void removePhotoListener(String fileIdString, IPhotoListener listener) {
+	public void removePhotoListener(int receiptId, IPhotoListener listener) {
 		final boolean db = true;
 		if (db)
-			pr("\nremovePhotoListener fileId " + fileIdString + ", listener "
+			pr("\nremovePhotoListener receiptId " + receiptId + ", listener "
 					+ listener);
-		Set<IPhotoListener> listeners = listenersMap.get(fileIdString);
+		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
-		listenersMap.remove(fileIdString);
+		listenersMap.remove(receiptId);
 		if (db)
 			pr(dumpListeners(listenersMap));
 	}
 
 	@Override
-	public void readPhoto(final String fileIdString) {
+	public void readPhoto(final int receiptId, final String fileIdString) {
 		backgroundHandler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -161,7 +161,7 @@ public class SimplePhotoStore implements IPhotoStore {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						notifyListenersOfDrawable(fileIdString, d);
+						notifyListenersOfDrawable(receiptId, fileIdString, d);
 					}
 				});
 
@@ -169,18 +169,14 @@ public class SimplePhotoStore implements IPhotoStore {
 		});
 	}
 
-	private void notifyListenersOfDrawable(String photoIdString, Drawable d) {
-		if (db)
-			pr("SimplePhotoStore.notifyListenersOfDrawable, photoId "
-					+ photoIdString);
-		Set<IPhotoListener> listeners = listenersMap.get(photoIdString);
+	private void notifyListenersOfDrawable(int receiptId, String photoId,
+			Drawable d) {
+		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
 		for (IPhotoListener listener : listeners) {
 			sleep();
-			if (db)
-				pr(" notifying listener " + listener);
-			listener.drawableAvailable(d, photoIdString);
+			listener.drawableAvailable(d, receiptId, photoId);
 		}
 	}
 
@@ -191,12 +187,12 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	public static String dumpListeners(
-			Map<String, Set<IPhotoListener>> listenersMap) {
+			Map<Integer, Set<IPhotoListener>> listenersMap) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------\n SimplePhotoStore listeners:\n");
-		for (String photoId : listenersMap.keySet()) {
-			Set<IPhotoListener> set = listenersMap.get(photoId);
-			sb.append("  id " + photoId + " : ");
+		for (int receiptId : listenersMap.keySet()) {
+			Set<IPhotoListener> set = listenersMap.get(receiptId);
+			sb.append("  id " + receiptId + " : ");
 			for (IPhotoListener x : set) {
 				sb.append(x + " ");
 			}
@@ -206,7 +202,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		return sb.toString();
 	}
 
-	private Map<String, Set<IPhotoListener>> listenersMap;
+	private Map<Integer, Set<IPhotoListener>> listenersMap;
 
 	private Handler handler;
 

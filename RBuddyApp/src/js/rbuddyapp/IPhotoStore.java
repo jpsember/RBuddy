@@ -2,7 +2,7 @@ package js.rbuddyapp;
 
 public interface IPhotoStore {
 
-	public void readPhoto(String fileIdString);
+	public void readPhoto(int receiptId, String fileIdString);
 
 	public void storePhoto(FileArguments args);
 
@@ -11,19 +11,19 @@ public interface IPhotoStore {
 	/**
 	 * Register a listener for a particular photo
 	 * 
-	 * @param fileIdString
-	 *            the fileIdString of the photo being listened for
+	 * @param receiptId
+	 *            the receipt who owns the photo
 	 * @param listener
 	 *            the listener to notify when drawable is available
 	 */
-	public void addPhotoListener(String fileIdString, IPhotoListener listener);
+	public void addPhotoListener(int receiptId, IPhotoListener listener);
 
 	/**
 	 * Remove listener
 	 * 
-	 * @param fileIdString
+	 * @param receiptId
 	 * @param listener
 	 */
-	public void removePhotoListener(String fileIdString, IPhotoListener listener);
+	public void removePhotoListener(int receiptId, IPhotoListener listener);
 
 }

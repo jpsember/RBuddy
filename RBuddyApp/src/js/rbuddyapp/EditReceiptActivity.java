@@ -23,31 +23,22 @@ public class EditReceiptActivity extends Activity {
 
 	@Override
 	public void onResume() {
-		warning("\n\n\n         we're falling back to EditReceiptActivity BEFORE a new photo is assigned an id (Google Drive fileId), so it's not getting notified of the new image");
-		final boolean db = true;
-		if (db)
-			pr(hey() + " resuming");
 		super.onResume();
 		readWidgetValuesFromReceipt();
-		receiptWidget.displayPhoto(this.receipt.getPhotoId());
+		receiptWidget.displayPhoto(this.receipt.getId(),
+				this.receipt.getPhotoId());
 	}
 
 	@Override
 	public void onPause() {
-		final boolean db = true;
-		if (db)
-			pr(hey() + " pausing");
 		super.onPause();
 		updateReceiptWithWidgetValues();
 		app.receiptFile().flush();
-		receiptWidget.displayPhoto(null);
+		receiptWidget.displayPhoto(0, null);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + " creating");
 		super.onCreate(savedInstanceState);
 		app = RBuddyApp.sharedInstance();
 
@@ -87,7 +78,6 @@ public class EditReceiptActivity extends Activity {
 		case android.R.id.home:
 			Intent intent = new Intent(this, ReceiptListActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			warning("does putting receipt id here help?");
 			intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, receipt.getId());
 			startActivity(intent);
 			return true;

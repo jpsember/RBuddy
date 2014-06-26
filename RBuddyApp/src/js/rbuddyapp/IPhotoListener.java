@@ -9,8 +9,10 @@ public interface IPhotoListener {
 	 * 
 	 * @param d
 	 *            drawable, or null if no such photo exists
-	 * @param fileIdString
-	 *            id of photo being listened to
+	 * @param receiptId
+	 *            id of receipt whose photo is being observed
+	 * @param photoFileId
+	 *            file the receipt's photo is stored under
 	 */
-	public void drawableAvailable(Drawable d, String fileIdString);
+	public void drawableAvailable(Drawable d, int receiptId, String photoFileId);
 }

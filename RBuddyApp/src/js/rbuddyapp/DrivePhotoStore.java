@@ -40,33 +40,25 @@ public class DrivePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void addPhotoListener(String fileIdString, IPhotoListener listener) {
-		final boolean db = true;
-
-		Set<IPhotoListener> listeners = listenersMap.get(fileIdString);
+	public void addPhotoListener(int receiptId, IPhotoListener listener) {
+		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null) {
 			listeners = new HashSet<IPhotoListener>();
-			listenersMap.put(fileIdString, listeners);
+			listenersMap.put(receiptId, listeners);
 		}
 		listeners.add(listener);
-		if (db)
-			pr(hey() + listener + "\n"
-					+ SimplePhotoStore.dumpListeners(listenersMap));
 	}
 
 	@Override
-	public void removePhotoListener(String fileIdString, IPhotoListener listener) {
-		Set<IPhotoListener> listeners = listenersMap.get(fileIdString);
+	public void removePhotoListener(int receiptId, IPhotoListener listener) {
+		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
-		listenersMap.remove(fileIdString);
-		if (db)
-			pr(hey() + listener + "\n"
-					+ SimplePhotoStore.dumpListeners(listenersMap));
+		listenersMap.remove(receiptId);
 	}
 
 	@Override
-	public void readPhoto(final String fileIdString) {
+	public void readPhoto(final int receiptId, final String fileIdString) {
 		// We don't need the filename for this, just the file id
 		unimp("allow passing null filename, null parent folder");
 		final FileArguments args = new FileArguments("...unknown filename...");
@@ -77,43 +69,33 @@ public class DrivePhotoStore implements IPhotoStore {
 		args.setCallback(new Runnable() {
 			@Override
 			public void run() {
-				readPhotoCallback(args);
+				readPhotoCallback(receiptId, args);
 			}
 		});
 
 		userData.readBinaryFile(args);
 	}
 
-	private void readPhotoCallback(FileArguments args) {
-		final boolean db = true;
+	private void readPhotoCallback(int receiptId, FileArguments args) {
 		warning("we should be doing this in a background thread");
 		byte[] jpeg = args.getData();
-		if (db)
-			pr(hey() + " jpeg=" + jpeg);
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
 		final Drawable d = new BitmapDrawable(RBuddyApp.sharedInstance()
 				.context().getResources(), bmp);
-		if (db)
-			pr(" drawable=" + d);
-		notifyListenersOfDrawable(args.getFileIdString(), d);
+		notifyListenersOfDrawable(receiptId, args.getFileIdString(), d);
 	}
 
-	private void notifyListenersOfDrawable(String photoIdString, Drawable d) {
-		if (db)
-			pr("DrivePhotoStore.notifyListenersOfDrawable, photoId "
-					+ photoIdString);
-		Set<IPhotoListener> listeners = listenersMap.get(photoIdString);
+	private void notifyListenersOfDrawable(int receiptId, String photoIdString,
+			Drawable d) {
+		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
 		for (IPhotoListener listener : listeners) {
-			if (db)
-				pr(" notifying listener " + listener);
-			listener.drawableAvailable(d, photoIdString);
+			listener.drawableAvailable(d, receiptId, photoIdString);
 		}
 	}
 
-	private Map<String, Set<IPhotoListener>> listenersMap;
-
+	private Map<Integer, Set<IPhotoListener>> listenersMap;
 	private UserData userData;
 	private DriveFolder photosFolder;
 }

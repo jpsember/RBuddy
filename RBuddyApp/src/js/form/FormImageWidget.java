@@ -22,38 +22,32 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 		getWidgetContainer().addView(imageView);
 	}
 
-	public void displayPhoto(String fileIdString) {
-		final boolean db = true;
-		if (db)
-			pr(this + ".displayPhoto fileId=" + fileIdString + ", previous "
-					+ listeningForPhotoId);
+	public void displayPhoto(int receiptId, String fileIdString) {
 		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
-		if (fileIdString == null) {
-			if (listeningForPhotoId != null) {
-				photoStore.removePhotoListener(listeningForPhotoId, this);
-				listeningForPhotoId = null;
+		if (receiptId == 0) {
+			if (listeningForReceiptId != 0) {
+				photoStore.removePhotoListener(listeningForReceiptId, this);
+				listeningForReceiptId = 0;
 			}
 		} else {
-			if (listeningForPhotoId != null) {
-				if (listeningForPhotoId.equals(fileIdString))
-					return;
-				photoStore.removePhotoListener(listeningForPhotoId, this);
+			if (listeningForReceiptId != 0) {
+				photoStore.removePhotoListener(listeningForReceiptId, this);
 			}
 
-			listeningForPhotoId = fileIdString;
+			listeningForReceiptId = receiptId;
 			unimp("add parameter and support for thumbnails");
-			photoStore.addPhotoListener(listeningForPhotoId, this);
+			photoStore.addPhotoListener(listeningForReceiptId, this);
 
-			// Have the PhotoStore load the image
-			photoStore.readPhoto(listeningForPhotoId);
+			if (fileIdString != null) {
+				// Have the PhotoStore load the image, and it will notify any
+				// listeners (including us) when it has arrived
+				photoStore.readPhoto(listeningForReceiptId, fileIdString);
+			}
 		}
 	}
 
 	@Override
-	public void drawableAvailable(Drawable d, String fileIdString) {
-		if (db)
-			pr("FormImageWidget.drawableAvailable, id " + fileIdString
-					+ " drawable " + d);
+	public void drawableAvailable(Drawable d, int receiptId, String fileIdString) {
 		if (d == null) {
 			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()
@@ -63,5 +57,5 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 	}
 
 	private ImageView imageView;
-	private String listeningForPhotoId;
+	private int listeningForReceiptId;
 }
