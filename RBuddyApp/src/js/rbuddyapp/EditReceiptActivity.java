@@ -2,6 +2,8 @@ package js.rbuddyapp;
 
 import static js.basic.Tools.*;
 import js.form.Form;
+import js.form.FormButtonWidget;
+import js.form.IDrawableProvider;
 import js.json.*;
 import js.rbuddy.Cost;
 import js.rbuddy.JSDate;
@@ -10,6 +12,10 @@ import js.rbuddy.Receipt;
 import js.rbuddy.TagSet;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +24,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
-public class EditReceiptActivity extends Activity {
+public class EditReceiptActivity extends Activity implements IDrawableProvider {
 
 	@Override
 	public void onResume() {
@@ -100,12 +106,15 @@ public class EditReceiptActivity extends Activity {
 		String jsonString = RBuddyApp.sharedInstance().readTextFileResource(
 				R.raw.form_edit_receipt);
 		this.form = Form.parse(this, jsonString);
-		this.form.getField("receipt").setOnClickListener(new OnClickListener() {
+		receiptWidget = (FormButtonWidget) form
+				.getField("receipt");
+		receiptWidget.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				processPhotoButtonPress();
 			}
 		});
+		receiptWidget.setDrawableProvider(this);
 
 		ScrollView scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -166,7 +175,36 @@ public class EditReceiptActivity extends Activity {
 		}
 	}
 
+	@Override
+	public Drawable getDrawable() {
+		Drawable d = null;
+		do {
+			String photoId = receipt.getPhotoId();
+			if (photoId == null)
+				break;
+			final FileArguments args = new FileArguments(
+					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
+			args.setFileId(photoId);
+			args.setCallback(new Runnable() {
+				@Override
+				public void run() {
+					processBitmapLoaded(args.getData());
+				}
+			});
+			app.photoStore().readPhoto(args);
+		} while (false);
+		return d;
+	}
+
+	private void processBitmapLoaded(byte[] jpeg) {
+		warning("there's a lot of duplicated code with this and PhotoActivity");
+		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
+		Drawable d = new BitmapDrawable(this.getResources(), bmp);
+		receiptWidget.drawableArrived(d);
+	}
+
 	private RBuddyApp app;
 	private Receipt receipt;
 	private Form form;
+	private FormButtonWidget receiptWidget;
 }

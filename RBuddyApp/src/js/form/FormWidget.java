@@ -82,6 +82,10 @@ public abstract class FormWidget {
 		return (String) attr(key, defaultValue);
 	}
 
+	protected boolean boolAttr(String key, boolean defaultValue) {
+		return (Boolean) attr(key, defaultValue);
+	}
+
 	private Object attr(String key, Object defaultValue) {
 		Object value = attributes.get(key);
 		if (value == null)

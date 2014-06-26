@@ -29,7 +29,7 @@ public class RBuddyApp {
 
 	// This can be turned off for development/test purposes only.
 	// The Google API is never used, in any case, during unit tests.
-	private static final boolean useGoogleAPI = true;
+	private static final boolean useGoogleAPI = false;
 
 	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 
