@@ -138,6 +138,8 @@ We're not storing Eclipse workspaces in the repo (only the projects), so some of
 steps are necessary:
 [] import general/preferences from android_base/config_files/jeff.epf; you may have to fix
   some paths that refer to my home directory.
+[] in Preferences / Java / Editor / Templates, import config_files/templates.xml
+
 [] import existing projects into workspace; choose all of them
 [] show the view Android/LogCat, and choose the System.out filter
 [] In Package Explorer, create a filter; check 'Name filter patterns' and
