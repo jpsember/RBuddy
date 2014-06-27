@@ -5,6 +5,7 @@ public interface IPhotoStore {
 	// TODO Issue #31
 	public static final int THUMBNAIL_HEIGHT = 150;
 	public static final int FULLSIZE_HEIGHT = 800;
+	public static final String PREFERENCE_KEY_PHOTO_DELAY = "photo_delays";
 
 	public void readPhoto(int receiptId, String fileIdString, boolean thumbnail);
 

@@ -108,6 +108,12 @@ public class AppPreferences {
 		preferences.edit().remove(preferencesKey).commit();
 	}
 
+	public static boolean toggle(String preferencesKey) {
+		boolean val = !getBoolean(preferencesKey, false);
+		putBoolean(preferencesKey, val);
+		return val;
+	}
+
 	private static SharedPreferences preferences;
 
 }

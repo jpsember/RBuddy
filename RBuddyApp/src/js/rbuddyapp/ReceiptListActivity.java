@@ -71,6 +71,9 @@ public class ReceiptListActivity extends Activity {
 		case R.id.action_testonly_zap:
 			processZap();
 			return true;
+		case R.id.action_testonly_toggle_photo_delay:
+			AppPreferences.toggle(IPhotoStore.PREFERENCE_KEY_PHOTO_DELAY);
+			return true;
 		case R.id.action_testonly_enable_google_drive:
 			AppPreferences.putBoolean(
 					RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
@@ -107,6 +110,7 @@ public class ReceiptListActivity extends Activity {
 			menu.removeItem(R.id.action_testonly_generate);
 			menu.removeItem(R.id.action_testonly_zap);
 		}
+		unimp("it would be nice to be able to programmatically change labels, e.g., to indicate current value of togglable preference");
 		return super.onPrepareOptionsMenu(menu);
 	}
 

@@ -37,5 +37,8 @@
         android:id="@+id/action_testonly_disable_google_drive"
         android:showAsAction="never"
         android:title="@string/action_testonly_disable_google_drive"/>
-
+  <item
+        android:id="@+id/action_testonly_toggle_photo_delay"
+        android:showAsAction="never"
+        android:title="@string/action_testonly_toggle_photo_delay"/>
 </menu>

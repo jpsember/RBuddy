@@ -12,5 +12,6 @@
     <string name="action_testonly_zap">Delete All Receipts</string>
     <string name="action_testonly_enable_google_drive">Enable Google Drive</string>
     <string name="action_testonly_disable_google_drive">Disable Google Drive</string>
+    <string name="action_testonly_toggle_photo_delay">Toggle photo delay</string>
 
 </resources>

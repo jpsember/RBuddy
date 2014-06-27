@@ -31,8 +31,6 @@ public class SimplePhotoStore implements IPhotoStore {
 		handlerThread.start();
 		this.backgroundHandler = new Handler(handlerThread.getLooper());
 
-		this.simulateDelay = true;
-
 		this.thumbnailCache = new PhotoCache();
 		this.regularCache = new PhotoCache();
 	}
@@ -209,8 +207,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	protected void sleep() {
-		if (simulateDelay) {
-			warning("adding simulated delays");
+		if (AppPreferences.getBoolean(PREFERENCE_KEY_PHOTO_DELAY, false)) {
 			sleepFor((rnd.nextInt(800) + 350));
 		}
 	}
@@ -316,8 +313,6 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	// Handler for executing tasks in the background
 	protected Handler backgroundHandler;
-
-	protected boolean simulateDelay;
 
 	private PhotoCache regularCache;
 	private PhotoCache thumbnailCache;
