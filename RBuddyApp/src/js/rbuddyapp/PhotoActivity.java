@@ -138,7 +138,8 @@ public class PhotoActivity extends Activity {
 			die("no work file found: " + workFile);
 		}
 
-		BitmapUtil.orientAndScaleBitmap(workFile, 800, true);
+		BitmapUtil.orientAndScaleBitmap(workFile, IPhotoStore.FULLSIZE_HEIGHT,
+				true);
 
 		try {
 			FileArguments args = new FileArguments(

@@ -83,9 +83,8 @@ public class SimplePhotoStore implements IPhotoStore {
 					public void run() {
 						sleep();
 						BitmapDrawable bd = (BitmapDrawable) dFull;
-						// TODO thumbnail size
 						Bitmap scaledBitmap = BitmapUtil.scaleBitmap(
-								bd.getBitmap(), 60, false);
+								bd.getBitmap(), THUMBNAIL_HEIGHT, false);
 						final BitmapDrawable dThumb = new BitmapDrawable(
 								RBuddyApp.sharedInstance().context()
 										.getResources(), scaledBitmap);
@@ -113,12 +112,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	@Override
 	public void readPhoto(final int receiptId, final String fileIdString,
 			final boolean thumbnail) {
-		if (db)
-			pr(hey() + "receiptId " + receiptId + " thumb:" + thumbnail);
-
 		if (readPhotoWithinCache(receiptId, fileIdString, thumbnail)) {
-			if (db)
-				pr("...found it in cache");
 			return;
 		}
 
@@ -154,7 +148,6 @@ public class SimplePhotoStore implements IPhotoStore {
 				readPhoto(receiptId, fileIdString, thumbnail);
 			}
 		});
-
 	}
 
 	/**
@@ -201,9 +194,6 @@ public class SimplePhotoStore implements IPhotoStore {
 
 				runOnUIThread(new Runnable() {
 					public void run() {
-						unimp("we need to pass in the receiptId to associate it with the cache");
-						// thumbnailCache.deletePhoto(receiptId);
-
 						if (args.getCallback() != null)
 							args.getCallback().run();
 					}

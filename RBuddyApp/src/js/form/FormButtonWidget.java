@@ -73,12 +73,10 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 			imageView.setAdjustViewBounds(true);
 
-			// TODO Issue #31
-			int THUMBNAIL_HEIGHT = 150;
-			int THUMBNAIL_WIDTH = (int) (THUMBNAIL_HEIGHT * 1.0);
+			int THUMBNAIL_WIDTH = (int) (IPhotoStore.THUMBNAIL_HEIGHT * 1.0);
 
 			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
-					THUMBNAIL_HEIGHT, 0.2f);
+					IPhotoStore.THUMBNAIL_HEIGHT, 0.2f);
 			parentView.addView(imageView, p);
 		} else {
 			getWidgetContainer().addView(button);

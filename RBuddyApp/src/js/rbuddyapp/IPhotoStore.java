@@ -2,6 +2,10 @@ package js.rbuddyapp;
 
 public interface IPhotoStore {
 
+	// TODO Issue #31
+	public static final int THUMBNAIL_HEIGHT = 150;
+	public static final int FULLSIZE_HEIGHT = 800;
+
 	public void readPhoto(int receiptId, String fileIdString, boolean thumbnail);
 
 	/**
