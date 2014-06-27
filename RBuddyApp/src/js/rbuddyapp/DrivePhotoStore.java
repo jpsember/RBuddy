@@ -31,7 +31,8 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	}
 
 	@Override
-	public void readPhoto(final int receiptId, final String fileIdString) {
+	public void readPhoto(final int receiptId, final String fileIdString,
+			boolean thumbnail) {
 		// We don't need the filename for this, just the file id
 		unimp("allow passing null filename, null parent folder");
 		final FileArguments args = new FileArguments("...unknown filename...");

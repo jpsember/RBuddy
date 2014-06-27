@@ -41,7 +41,8 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 			if (fileIdString != null) {
 				// Have the PhotoStore load the image, and it will notify any
 				// listeners (including us) when it has arrived
-				photoStore.readPhoto(listeningForReceiptId, fileIdString);
+				photoStore
+						.readPhoto(listeningForReceiptId, fileIdString, false);
 			}
 		}
 	}

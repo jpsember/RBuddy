@@ -2,7 +2,7 @@ package js.rbuddyapp;
 
 public interface IPhotoStore {
 
-	public void readPhoto(int receiptId, String fileIdString);
+	public void readPhoto(int receiptId, String fileIdString, boolean thumbnail);
 
 	public void storePhoto(FileArguments args);
 

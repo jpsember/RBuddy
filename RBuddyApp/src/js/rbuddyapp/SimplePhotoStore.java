@@ -35,7 +35,8 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void readPhoto(final int receiptId, final String fileIdString) {
+	public void readPhoto(final int receiptId, final String fileIdString,
+			boolean thumbnail) {
 		backgroundHandler.post(new Runnable() {
 			public void run() {
 				sleep();

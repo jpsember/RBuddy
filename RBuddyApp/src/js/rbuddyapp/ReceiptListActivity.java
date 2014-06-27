@@ -85,7 +85,7 @@ public class ReceiptListActivity extends Activity {
 			doSearchActivity();
 			return true;
 		case R.id.action_testonly_exit:
-			finish();
+			android.os.Process.killProcess(android.os.Process.myPid());
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -111,25 +111,30 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processGenerate() {
-		for (int i = 0; i < 30; i++) {
-			int id = app.receiptFile().allocateUniqueId();
-			Receipt r = Receipt.buildRandom(id);
-			app.receiptFile().add(r);
-		}
-		rebuildReceiptList(receiptList);
-		receiptListAdapter.notifyDataSetChanged();
+		RBuddyApp.confirmOperation(this, "Generate some random receipts?",
+				new Runnable() {
+					@Override
+					public void run() {
+						for (int i = 0; i < 30; i++) {
+							int id = app.receiptFile().allocateUniqueId();
+							Receipt r = Receipt.buildRandom(id);
+							app.receiptFile().add(r);
+						}
+						rebuildReceiptList(receiptList);
+						receiptListAdapter.notifyDataSetChanged();
+					}
+				});
 	}
 
 	private void processZap() {
-		if (!app.useGoogleAPI())
-			RBuddyApp.confirmOperation(this, "Delete all receipts?",
-					new Runnable() {
-						@Override
-						public void run() {
-							app.receiptFile().clear();
-							rebuildReceiptList(receiptList);
-						}
-					});
+		RBuddyApp.confirmOperation(this, "Delete all receipts?",
+				new Runnable() {
+					@Override
+					public void run() {
+						app.receiptFile().clear();
+						rebuildReceiptList(receiptList);
+					}
+				});
 	}
 
 	private List buildListOfReceipts() {
