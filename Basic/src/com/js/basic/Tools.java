@@ -1018,7 +1018,7 @@ public final class Tools {
 		warning("Tools.main executing.");
 	}
 
-	public static Random rnd = new Random(1965);
+	public static Random rnd = new Random(System.currentTimeMillis());
 
 	/**
 	 * Construct a new timer
