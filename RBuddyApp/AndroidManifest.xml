@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="js.rbuddy"
+    package="com.js.rbuddy"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -26,7 +26,7 @@
         android:label="@string/app_name" >
         
         <activity
-            android:name="js.rbuddyapp.StartActivity"
+            android:name="com.js.rbuddyapp.StartActivity"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name="js.rbuddyapp.ReceiptListActivity" >
+        <activity android:name="com.js.rbuddyapp.ReceiptListActivity" >
             <!--
          <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,23 +48,23 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="js.rbuddyapp.SearchActivity"
-            android:parentActivityName="js.rbuddyapp.ReceiptListActivity"
+            android:name="com.js.rbuddyapp.SearchActivity"
+            android:parentActivityName="com.js.rbuddyapp.ReceiptListActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity
-            android:name="js.rbuddyapp.EditReceiptActivity"
-            android:parentActivityName="js.rbuddyapp.ReceiptListActivity"
+            android:name="com.js.rbuddyapp.EditReceiptActivity"
+            android:parentActivityName="com.js.rbuddyapp.ReceiptListActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity
-            android:name="js.rbuddyapp.PhotoActivity"
-            android:parentActivityName="js.rbuddyapp.EditReceiptActivity"
+            android:name="com.js.rbuddyapp.PhotoActivity"
+            android:parentActivityName="com.js.rbuddyapp.EditReceiptActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity
-            android:name="js.rbuddyapp.ExperimentalActivity"
-            android:parentActivityName="js.rbuddyapp.ExperimentalActivity"
+            android:name="com.js.rbuddyapp.ExperimentalActivity"
+            android:parentActivityName="com.js.rbuddyapp.ExperimentalActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
        
