@@ -247,16 +247,6 @@ public class RBuddyApp {
 	private Map<String, Integer> resourceMap = new HashMap();
 	private static RBuddyApp sharedInstance;
 
-	// This is a pretty grim way of achieving this...
-
-	public static boolean isReceiptListValid() {
-		return receiptListValid;
-	}
-
-	public static void setReceiptListValid(boolean f) {
-		receiptListValid = f;
-	}
-
 	private Boolean useGoogleAPIFlag;
 
 	public boolean useGoogleAPI() {
@@ -277,8 +267,6 @@ public class RBuddyApp {
 				duration);
 		toast.show();
 	}
-
-	private static boolean receiptListValid;
 
 	private Context context;
 	private IPhotoStore photoStore;

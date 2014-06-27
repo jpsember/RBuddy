@@ -23,6 +23,8 @@ public class SimplePhotoStore implements IPhotoStore {
 	public SimplePhotoStore() {
 		listenersMap = new HashMap();
 
+		this.app = RBuddyApp.sharedInstance();
+
 		// Construct ui and background task handlers
 		this.uiHandler = new Handler(Looper.getMainLooper());
 
@@ -31,8 +33,14 @@ public class SimplePhotoStore implements IPhotoStore {
 		handlerThread.start();
 		this.backgroundHandler = new Handler(handlerThread.getLooper());
 
-		this.thumbnailCache = new PhotoCache();
-		this.regularCache = new PhotoCache();
+		if (!app.useGoogleAPI()) {
+			warning("constructing PhotoCaches with reduced capacity");
+			this.thumbnailCache = new PhotoCache(200000, 5);
+			this.regularCache = new PhotoCache(5000000, 5);
+		} else {
+			this.thumbnailCache = new PhotoCache();
+			this.regularCache = new PhotoCache();
+		}
 	}
 
 	protected PhotoCache cacheFor(boolean thumbnail) {
@@ -83,9 +91,8 @@ public class SimplePhotoStore implements IPhotoStore {
 						BitmapDrawable bd = (BitmapDrawable) dFull;
 						Bitmap scaledBitmap = BitmapUtil.scaleBitmap(
 								bd.getBitmap(), THUMBNAIL_HEIGHT, false);
-						final BitmapDrawable dThumb = new BitmapDrawable(
-								RBuddyApp.sharedInstance().context()
-										.getResources(), scaledBitmap);
+						final BitmapDrawable dThumb = new BitmapDrawable(app
+								.context().getResources(), scaledBitmap);
 						if (db)
 							pr(" scaled to size "
 									+ dThumb.getBitmap().getByteCount());
@@ -101,9 +108,8 @@ public class SimplePhotoStore implements IPhotoStore {
 				return true;
 			}
 		}
-		RBuddyApp.sharedInstance().toast(
-				"readPhoto " + receiptId + " (thumb " + thumbnail
-						+ ") wasn't in cache: " + cacheFor(thumbnail));
+		app.toast("readPhoto " + receiptId + " (thumb " + thumbnail
+				+ ") wasn't in cache: " + cacheFor(thumbnail));
 		return false;
 	}
 
@@ -280,9 +286,8 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private File getFileForPhotoId(String photoId) {
-		return new File(RBuddyApp.sharedInstance().context()
-				.getExternalFilesDir(null), "photo_" + photoId
-				+ BitmapUtil.JPEG_EXTENSION);
+		return new File(app.context().getExternalFilesDir(null), "photo_"
+				+ photoId + BitmapUtil.JPEG_EXTENSION);
 	}
 
 	public String dumpListeners() {
@@ -300,11 +305,12 @@ public class SimplePhotoStore implements IPhotoStore {
 		return sb.toString();
 	}
 
-	public static BitmapDrawable convertJPEGToDrawable(byte[] jpeg) {
+	protected BitmapDrawable convertJPEGToDrawable(byte[] jpeg) {
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-		return new BitmapDrawable(RBuddyApp.sharedInstance().context()
-				.getResources(), bmp);
+		return new BitmapDrawable(app.context().getResources(), bmp);
 	}
+
+	private RBuddyApp app;
 
 	private Map<Integer, Set<IPhotoListener>> listenersMap;
 

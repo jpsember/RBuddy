@@ -95,7 +95,6 @@ public class EditReceiptActivity extends Activity {
 			app.photoStore().deletePhoto(args);
 		}
 		app.receiptFile().delete(this.receipt);
-		RBuddyApp.setReceiptListValid(false);
 		finish();
 	}
 

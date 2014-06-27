@@ -39,9 +39,16 @@ public class ReceiptListActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (!RBuddyApp.isReceiptListValid()) {
-			rebuildReceiptList(this.receiptList);
+
+		if (editReceipt != null) {
+			if (!app.receiptFile().exists(editReceipt.getId())) {
+				invalidateReceiptList();
+			}
 		}
+		if (!receiptListValid)
+			rebuildReceiptList(this.receiptList);
+
+		refreshEditedReceipt();
 	}
 
 	@Override
@@ -147,12 +154,17 @@ public class ReceiptListActivity extends Activity {
 		return list;
 	}
 
+	private void invalidateReceiptList() {
+		receiptListValid = false;
+		refreshReceiptAtPosition = null;
+	}
+
 	private void rebuildReceiptList(List list) {
 		list.clear();
 		for (Iterator it = app.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
 		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);
-		RBuddyApp.setReceiptListValid(true);
+		receiptListValid = true;
 
 		if (receiptListAdapter != null)
 			receiptListAdapter.notifyDataSetChanged();
@@ -171,6 +183,7 @@ public class ReceiptListActivity extends Activity {
 		// to make responding to selection actions more convenient.
 		this.receiptListAdapter = arrayAdapter;
 		this.receiptList = receiptList;
+		this.receiptListView = listView;
 
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView aView, View v, int position,
@@ -188,21 +201,45 @@ public class ReceiptListActivity extends Activity {
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
-		RBuddyApp.setReceiptListValid(false);
+		invalidateReceiptList();
+		doEditReceipt(r);
+	}
 
-		// Start the edit receipt activity
+	private void doEditReceipt(Receipt receipt) {
+		this.editReceipt = receipt;
 		Intent intent = new Intent(getApplicationContext(),
 				EditReceiptActivity.class);
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
+		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, editReceipt.getId());
 		startActivity(intent);
 	}
 
+	/**
+	 * Process user selecting receipt from receipt list
+	 * 
+	 * @param position
+	 */
 	private void processReceiptSelection(int position) {
-		Receipt r = (Receipt) receiptListAdapter.getItem(position);
-		Intent intent = new Intent(getApplicationContext(),
-				EditReceiptActivity.class);
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, r.getId());
-		startActivity(intent);
+		// We will need to refresh this item when returning from the edit
+		// activity in case its contents have changed
+		refreshReceiptAtPosition = position;
+		doEditReceipt(receiptListAdapter.getItem(position));
+	}
+
+	private void refreshEditedReceipt() {
+		if (refreshReceiptAtPosition == null)
+			return;
+		int receiptPosition = refreshReceiptAtPosition;
+		refreshReceiptAtPosition = null;
+
+		int visiblePosition = receiptListView.getFirstVisiblePosition();
+		View view = receiptListView.getChildAt(receiptPosition
+				- visiblePosition);
+		if (view == null)
+			return;
+
+		// This apparently updates the view's fields, which induces its update
+		// on the screen
+		receiptListAdapter.getView(receiptPosition, view, receiptListView);
 	}
 
 	private void doSearchActivity() {
@@ -217,7 +254,19 @@ public class ReceiptListActivity extends Activity {
 		startActivity(intent);
 	}
 
-	private ArrayAdapter receiptListAdapter;
+	// If false, we assume the current receipt list (if one exists) is invalid,
+	// and a new one needs to be built
+	private boolean receiptListValid;
+
+	// If non-null, we refresh the receipt at this position in the list when
+	// resuming the activity
+	private Integer refreshReceiptAtPosition;
+
+	// If non-null, this receipt was just edited
+	private Receipt editReceipt;
+
+	private ArrayAdapter<Receipt> receiptListAdapter;
 	private List receiptList;
 	private RBuddyApp app;
+	private ListView receiptListView;
 }

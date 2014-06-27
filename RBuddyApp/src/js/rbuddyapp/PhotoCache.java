@@ -17,11 +17,6 @@ public class PhotoCache {
 	}
 
 	public PhotoCache(long capacityBytesUsed, int capacityCardinality) {
-		if (true) {
-			warning("setting capacity low");
-			capacityBytesUsed = 5000000;
-			capacityCardinality = 5;
-		}
 		this.capacityBytesUsed = capacityBytesUsed;
 		this.capacityCardinality = capacityCardinality;
 
