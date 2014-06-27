@@ -32,11 +32,100 @@ public class SimplePhotoStore implements IPhotoStore {
 		this.backgroundHandler = new Handler(handlerThread.getLooper());
 
 		this.simulateDelay = true;
+
+		this.thumbnailCache = new PhotoCache();
+		this.regularCache = new PhotoCache();
+	}
+
+	protected PhotoCache cacheFor(boolean thumbnail) {
+		return thumbnail ? thumbnailCache : regularCache;
+	}
+
+	/**
+	 * Determine if the appropriate cache holds the photo, and notify its
+	 * listeners if so
+	 * 
+	 * @param receiptId
+	 *            id of photo
+	 * @param fileIdString
+	 * @param thumbnail
+	 *            true if seeking thumbnail
+	 * @return true if photo was found in cache
+	 */
+	protected boolean readPhotoWithinCache(final int receiptId,
+			final String fileIdString, boolean thumbnail) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + " receipt " + receiptId + " thumb " + thumbnail);
+
+		PhotoCache cache = cacheFor(thumbnail);
+		Drawable d = cache.readPhoto(receiptId);
+
+		if (d != null) {
+			if (db)
+				pr("  found in cache: " + d);
+			notifyListenersOfDrawable(receiptId, fileIdString, d);
+			return true;
+		}
+
+		// If we didn't find the photo in the cache, and we were looking for the
+		// thumbnail, see if it exists in the fullsize cache, and if so,
+		// construct a thumbnail from it
+
+		if (thumbnail) {
+			final Drawable dFull = regularCache.readPhoto(receiptId);
+			if (db)
+				pr("looking in regular cache; got " + dFull);
+
+			if (dFull != null) {
+				if (db)
+					pr("  found in regular : " + dFull);
+				backgroundHandler.post(new Runnable() {
+					public void run() {
+						sleep();
+						BitmapDrawable bd = (BitmapDrawable) dFull;
+						// TODO thumbnail size
+						Bitmap scaledBitmap = BitmapUtil.scaleBitmap(
+								bd.getBitmap(), 60, false);
+						final BitmapDrawable dThumb = new BitmapDrawable(
+								RBuddyApp.sharedInstance().context()
+										.getResources(), scaledBitmap);
+						if (db)
+							pr(" scaled to size "
+									+ dThumb.getBitmap().getByteCount());
+
+						uiHandler.post(new Runnable() {
+							public void run() {
+								thumbnailCache.storePhoto(receiptId, dThumb);
+							}
+						});
+						notifyListenersOfDrawable(receiptId, fileIdString,
+								dThumb);
+					}
+				});
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public void readPhoto(final int receiptId, final String fileIdString,
-			boolean thumbnail) {
+			final boolean thumbnail) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "receiptId " + receiptId + " thumb:" + thumbnail);
+
+		if (readPhotoWithinCache(receiptId, fileIdString, thumbnail)) {
+			if (db)
+				pr("...found it in cache");
+			return;
+		}
+
+		RBuddyApp.sharedInstance().toast(
+				"readPhoto " + receiptId + " (thumb " + thumbnail
+						+ ") wasn't in cache: " + cacheFor(thumbnail));
+
 		backgroundHandler.post(new Runnable() {
 			public void run() {
 				sleep();
@@ -51,9 +140,38 @@ public class SimplePhotoStore implements IPhotoStore {
 				} catch (IOException e) {
 					die(e);
 				}
-				sleep();
-				final Drawable d = convertJPEGToDrawable(jpeg);
-				notifyListenersOfDrawable(receiptId, fileIdString, d);
+				convertJPEGAndCache(jpeg, receiptId, fileIdString, thumbnail);
+			}
+		});
+	}
+
+	protected void convertJPEGAndCache(byte[] jpeg, final int receiptId,
+			final String fileIdString, final boolean thumbnail) {
+		sleep();
+		final BitmapDrawable d = convertJPEGToDrawable(jpeg);
+		postAddFullSizeDrawableToCache(receiptId, d);
+
+		// Request image again, now that it's guaranteed to be in the
+		// cache
+		uiHandler.post(new Runnable() {
+			public void run() {
+				readPhoto(receiptId, fileIdString, thumbnail);
+			}
+		});
+
+	}
+
+	/**
+	 * Add (full size) drawable to cache
+	 * 
+	 * @param receiptId
+	 * @param drawable
+	 */
+	protected void postAddFullSizeDrawableToCache(final int receiptId,
+			final BitmapDrawable drawable) {
+		uiHandler.post(new Runnable() {
+			public void run() {
+				regularCache.storePhoto(receiptId, drawable);
 			}
 		});
 	}
@@ -78,7 +196,16 @@ public class SimplePhotoStore implements IPhotoStore {
 					die(e);
 				}
 				args.setFileId(photoId);
-				runOnUIThread(args.getCallback());
+
+				runOnUIThread(new Runnable() {
+					public void run() {
+						unimp("we need to pass in the receiptId to associate it with the cache");
+						// thumbnailCache.deletePhoto(receiptId);
+
+						if (args.getCallback() != null)
+							args.getCallback().run();
+					}
+				});
 			}
 		});
 	}
@@ -184,7 +311,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		return sb.toString();
 	}
 
-	public static Drawable convertJPEGToDrawable(byte[] jpeg) {
+	public static BitmapDrawable convertJPEGToDrawable(byte[] jpeg) {
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
 		return new BitmapDrawable(RBuddyApp.sharedInstance().context()
 				.getResources(), bmp);
@@ -193,10 +320,13 @@ public class SimplePhotoStore implements IPhotoStore {
 	private Map<Integer, Set<IPhotoListener>> listenersMap;
 
 	// Handler for executing tasks serially on the UI thread
-	private Handler uiHandler;
+	protected Handler uiHandler;
 
 	// Handler for executing tasks in the background
 	protected Handler backgroundHandler;
 
 	protected boolean simulateDelay;
+
+	private PhotoCache regularCache;
+	private PhotoCache thumbnailCache;
 }

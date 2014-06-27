@@ -1,7 +1,5 @@
 package js.rbuddyapp;
 
-import android.graphics.drawable.Drawable;
-
 import com.google.android.gms.drive.DriveFolder;
 
 import static js.basic.Tools.*;
@@ -32,7 +30,10 @@ public class DrivePhotoStore extends SimplePhotoStore {
 
 	@Override
 	public void readPhoto(final int receiptId, final String fileIdString,
-			boolean thumbnail) {
+			final boolean thumbnail) {
+		if (readPhotoWithinCache(receiptId, fileIdString, thumbnail))
+			return;
+
 		// We don't need the filename for this, just the file id
 		unimp("allow passing null filename, null parent folder");
 		final FileArguments args = new FileArguments("...unknown filename...");
@@ -48,10 +49,8 @@ public class DrivePhotoStore extends SimplePhotoStore {
 				backgroundHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						sleep();
-						final Drawable d = convertJPEGToDrawable(args.getData());
-						notifyListenersOfDrawable(receiptId,
-								args.getFileIdString(), d);
+						convertJPEGAndCache(args.getData(), receiptId,
+								fileIdString, thumbnail);
 					}
 				});
 			}

@@ -4,6 +4,11 @@ public interface IPhotoStore {
 
 	public void readPhoto(int receiptId, String fileIdString, boolean thumbnail);
 
+	/**
+	 * Stored photos are assumed to be full size (not thumbnails)
+	 * 
+	 * @param args
+	 */
 	public void storePhoto(FileArguments args);
 
 	public void deletePhoto(FileArguments args);
