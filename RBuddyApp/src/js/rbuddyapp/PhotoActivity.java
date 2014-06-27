@@ -151,23 +151,16 @@ public class PhotoActivity extends Activity {
 
 			// We have to wait until the photo has been processed, and a photoId
 			// assigned; then store this assignment in the receipt, and update
-			// the
-			// photo's widget
+			// the photo's widget
 			args.setCallback(new Runnable() {
-				@Override
 				public void run() {
-					if (db)
-						pr("storePhoto.callback, setting photo id to "
-								+ arg.getFileIdString());
 					receipt.setPhotoId(arg.getFileIdString());
-					if (db)
-						pr(" displaying photo");
 					imageWidget.displayPhoto(receipt.getId(),
 							receipt.getPhotoId());
 				}
 			});
 			IPhotoStore ps = app.photoStore();
-			ps.storePhoto(args);
+			ps.storePhoto(receipt.getId(), args);
 		} catch (IOException e) {
 			// TODO display popup message to user, and don't update receipt's
 			// photo id

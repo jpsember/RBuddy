@@ -80,8 +80,6 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
 					THUMBNAIL_HEIGHT, 0.2f);
 			parentView.addView(imageView, p);
-			// setDebugBgnd(imageView, "#004400");
-
 		} else {
 			getWidgetContainer().addView(button);
 		}
@@ -127,7 +125,11 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 	}
 
 	@Override
-	public void drawableAvailable(Drawable d, int receiptId) {
+	public void drawableAvailable(Drawable d, int receiptId, boolean thumbnail) {
+		// We're only interested in thumbnails
+		if (!thumbnail)
+			return;
+
 		if (d == null) {
 			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()

@@ -9,7 +9,7 @@ public interface IPhotoStore {
 	 * 
 	 * @param args
 	 */
-	public void storePhoto(FileArguments args);
+	public void storePhoto(int receiptId, FileArguments args);
 
 	public void deletePhoto(FileArguments args);
 

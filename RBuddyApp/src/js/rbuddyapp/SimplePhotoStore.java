@@ -54,7 +54,6 @@ public class SimplePhotoStore implements IPhotoStore {
 	 */
 	protected boolean readPhotoWithinCache(final int receiptId,
 			final String fileIdString, boolean thumbnail) {
-		final boolean db = true;
 		if (db)
 			pr(hey() + " receipt " + receiptId + " thumb " + thumbnail);
 
@@ -64,7 +63,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		if (d != null) {
 			if (db)
 				pr("  found in cache: " + d);
-			notifyListenersOfDrawable(receiptId, d);
+			notifyListenersOfDrawable(receiptId, d, thumbnail);
 			return true;
 		}
 
@@ -99,19 +98,21 @@ public class SimplePhotoStore implements IPhotoStore {
 								thumbnailCache.storePhoto(receiptId, dThumb);
 							}
 						});
-						notifyListenersOfDrawable(receiptId, dThumb);
+						notifyListenersOfDrawable(receiptId, dThumb, true);
 					}
 				});
 				return true;
 			}
 		}
+		RBuddyApp.sharedInstance().toast(
+				"readPhoto " + receiptId + " (thumb " + thumbnail
+						+ ") wasn't in cache: " + cacheFor(thumbnail));
 		return false;
 	}
 
 	@Override
 	public void readPhoto(final int receiptId, final String fileIdString,
 			final boolean thumbnail) {
-		final boolean db = true;
 		if (db)
 			pr(hey() + "receiptId " + receiptId + " thumb:" + thumbnail);
 
@@ -120,10 +121,6 @@ public class SimplePhotoStore implements IPhotoStore {
 				pr("...found it in cache");
 			return;
 		}
-
-		RBuddyApp.sharedInstance().toast(
-				"readPhoto " + receiptId + " (thumb " + thumbnail
-						+ ") wasn't in cache: " + cacheFor(thumbnail));
 
 		backgroundHandler.post(new Runnable() {
 			public void run() {
@@ -175,9 +172,15 @@ public class SimplePhotoStore implements IPhotoStore {
 		});
 	}
 
+	protected void removeCachedVersions(int receiptId) {
+		regularCache.removePhoto(receiptId);
+		thumbnailCache.removePhoto(receiptId);
+	}
+
 	@Override
-	public void storePhoto(final FileArguments args) {
+	public void storePhoto(int receiptId, final FileArguments args) {
 		ASSERT(args.getFilename() != null);
+		removeCachedVersions(receiptId);
 		backgroundHandler.post(new Runnable() {
 			public void run() {
 				String photoId = args.getFileIdString();
@@ -274,7 +277,8 @@ public class SimplePhotoStore implements IPhotoStore {
 	 * @param photoId
 	 * @param d
 	 */
-	private void notifyListenersOfDrawable(final int receiptId, final Drawable d) {
+	private void notifyListenersOfDrawable(final int receiptId,
+			final Drawable d, final boolean thumbnail) {
 		runOnUIThread(new Runnable() {
 			public void run() {
 				Set<IPhotoListener> listeners = listenersMap.get(receiptId);
@@ -282,7 +286,7 @@ public class SimplePhotoStore implements IPhotoStore {
 					return;
 				for (IPhotoListener listener : listeners) {
 					sleep();
-					listener.drawableAvailable(d, receiptId);
+					listener.drawableAvailable(d, receiptId, thumbnail);
 				}
 			}
 		});

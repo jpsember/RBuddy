@@ -17,7 +17,8 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	}
 
 	@Override
-	public void storePhoto(FileArguments args) {
+	public void storePhoto(int receiptId, FileArguments args) {
+		removeCachedVersions(receiptId);
 		args.setParentPhoto(photosFolder);
 		args.setMimeType("image/jpeg");
 		userData.writeBinaryFile(args);

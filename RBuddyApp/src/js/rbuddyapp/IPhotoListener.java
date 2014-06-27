@@ -11,8 +11,8 @@ public interface IPhotoListener {
 	 *            drawable, or null if no such photo exists
 	 * @param receiptId
 	 *            id of receipt whose photo is being observed
-	 * @param photoFileId
-	 *            file the receipt's photo is stored under
+	 * @param thumbnail
+	 *            true if drawable represents a thumbnail (vs fullsize)
 	 */
-	public void drawableAvailable(Drawable d, int receiptId);
+	public void drawableAvailable(Drawable d, int receiptId, boolean thumbnail);
 }

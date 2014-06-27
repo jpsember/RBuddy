@@ -117,6 +117,12 @@ public class PhotoCache {
 
 	}
 
+	public void removePhoto(int receiptId) {
+		PhotoEntry entry = photoMap.get(receiptId);
+		if (entry != null)
+			removeEntry(entry);
+	}
+
 	private void removeEntry(PhotoEntry entry) {
 		photoMap.remove(entry.receiptId);
 		if (priorityQueue.remove(entry))

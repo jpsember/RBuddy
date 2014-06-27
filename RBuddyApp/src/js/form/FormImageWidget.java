@@ -48,7 +48,11 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 	}
 
 	@Override
-	public void drawableAvailable(Drawable d, int receiptId) {
+	public void drawableAvailable(Drawable d, int receiptId, boolean thumbnail) {
+		// We're not interested in thumbnails
+		if (thumbnail)
+			return;
+
 		if (d == null) {
 			RBuddyApp app = RBuddyApp.sharedInstance();
 			d = app.context().getResources()
