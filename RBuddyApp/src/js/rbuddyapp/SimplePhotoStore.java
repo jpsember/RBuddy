@@ -64,7 +64,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		if (d != null) {
 			if (db)
 				pr("  found in cache: " + d);
-			notifyListenersOfDrawable(receiptId, fileIdString, d);
+			notifyListenersOfDrawable(receiptId, d);
 			return true;
 		}
 
@@ -99,8 +99,7 @@ public class SimplePhotoStore implements IPhotoStore {
 								thumbnailCache.storePhoto(receiptId, dThumb);
 							}
 						});
-						notifyListenersOfDrawable(receiptId, fileIdString,
-								dThumb);
+						notifyListenersOfDrawable(receiptId, dThumb);
 					}
 				});
 				return true;
@@ -275,8 +274,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	 * @param photoId
 	 * @param d
 	 */
-	protected void notifyListenersOfDrawable(final int receiptId,
-			final String photoId, final Drawable d) {
+	private void notifyListenersOfDrawable(final int receiptId, final Drawable d) {
 		runOnUIThread(new Runnable() {
 			public void run() {
 				Set<IPhotoListener> listeners = listenersMap.get(receiptId);
@@ -284,7 +282,7 @@ public class SimplePhotoStore implements IPhotoStore {
 					return;
 				for (IPhotoListener listener : listeners) {
 					sleep();
-					listener.drawableAvailable(d, receiptId, photoId);
+					listener.drawableAvailable(d, receiptId);
 				}
 			}
 		});

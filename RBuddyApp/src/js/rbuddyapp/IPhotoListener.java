@@ -14,5 +14,5 @@ public interface IPhotoListener {
 	 * @param photoFileId
 	 *            file the receipt's photo is stored under
 	 */
-	public void drawableAvailable(Drawable d, int receiptId, String photoFileId);
+	public void drawableAvailable(Drawable d, int receiptId);
 }
