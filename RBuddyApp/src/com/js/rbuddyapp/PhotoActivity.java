@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
-
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -24,6 +24,19 @@ import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
 public class PhotoActivity extends Activity {
+
+	private static String EXTRA_RECEIPT_ID = "receipt_id";
+
+	/**
+	 * Construct intent for starting this activity
+	 * 
+	 * @param receiptId
+	 * @return
+	 */
+	public static Intent getStartIntent(int receiptId) {
+		return RBuddyApp.startIntentFor(PhotoActivity.class) //
+				.putExtra(EXTRA_RECEIPT_ID, receiptId);
+	}
 
 	// Identifiers for the intents that we may spawn
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -46,7 +59,7 @@ public class PhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		app = RBuddyApp.sharedInstance();
-		int receiptId = getIntent().getIntExtra(RBuddyApp.EXTRA_RECEIPT_ID, 0);
+		int receiptId = getIntent().getIntExtra(EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 		layoutElements();
@@ -73,10 +86,8 @@ public class PhotoActivity extends Activity {
 			unimp("settings");
 			return true;
 		case android.R.id.home:
-			Intent intent = new Intent(this, EditReceiptActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, receipt.getId());
-			startActivity(intent);
+			startActivity(EditReceiptActivity.getStartIntent(receipt.getId()) //
+					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

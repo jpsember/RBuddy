@@ -11,6 +11,7 @@ import com.js.basic.Files;
 import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.JSDate;
 import com.js.rbuddy.TagSetFile;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -29,8 +30,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 public class RBuddyApp {
 
 	public static final String PREFERENCE_KEY_USE_GOOGLE_DRIVE_API = "use_google_drive_api";
-
-	public static final String EXTRA_RECEIPT_ID = "receipt_id";
 
 	public static void prepare(Context context) {
 		if (sharedInstance == null) {
@@ -263,9 +262,19 @@ public class RBuddyApp {
 
 	public void toast(String message) {
 		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(context(), message,
-				duration);
+		Toast toast = Toast.makeText(context(), message, duration);
 		toast.show();
+	}
+
+	/**
+	 * Construct an Intent for starting an activity, using this app's context
+	 * 
+	 * @param klass
+	 *            the activity's class
+	 * @return intent
+	 */
+	public static Intent startIntentFor(Class klass) {
+		return new Intent(sharedInstance().context(), klass);
 	}
 
 	private Context context;

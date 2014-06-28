@@ -5,9 +5,9 @@ import static com.js.basic.Tools.*;
 import java.util.*;
 
 import com.js.form.FormWidget;
-
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +21,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 public class ReceiptListActivity extends Activity {
+
+	public static Intent getStartIntent() {
+		return RBuddyApp.startIntentFor(ReceiptListActivity.class);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -208,10 +212,7 @@ public class ReceiptListActivity extends Activity {
 
 	private void doEditReceipt(Receipt receipt) {
 		this.editReceipt = receipt;
-		Intent intent = new Intent(getApplicationContext(),
-				EditReceiptActivity.class);
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, editReceipt.getId());
-		startActivity(intent);
+		startActivity(EditReceiptActivity.getStartIntent(receipt.getId()));
 	}
 
 	/**
@@ -244,12 +245,10 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void doSearchActivity() {
-		Intent intent = new Intent(getApplicationContext(),
-				SearchActivity.class);
+		Intent intent = SearchActivity.getStartIntent();
 		if (false) {
 			warning("trying out experimental activity instead");
-			intent = new Intent(getApplicationContext(),
-					ExperimentalActivity.class);
+			intent = ExperimentalActivity.getStartIntent();
 		}
 
 		startActivity(intent);

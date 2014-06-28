@@ -1,13 +1,20 @@
 package com.js.rbuddyapp;
 
-
 import com.js.rbuddy.R;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import static com.js.basic.Tools.*;
 
 public class ExperimentalActivity extends Activity {
+
+	public static Intent getStartIntent() {
+		Intent intent = RBuddyApp
+				.startIntentFor(ExperimentalActivity.class);
+		return intent;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

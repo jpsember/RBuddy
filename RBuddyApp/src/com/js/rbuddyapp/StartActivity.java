@@ -48,7 +48,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	protected void onPause() {
 		super.onPause();
 		if (userFilesPrepared)
-		  app.receiptFile().flush();
+			app.receiptFile().flush();
 	}
 
 	@Override
@@ -131,10 +131,8 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	}
 
 	private boolean userFilesPrepared;
-	private void processUserDataReady() {
-		if (db)
-			pr(hey() + "StartActivity.processUserDataReady");
 
+	private void processUserDataReady() {
 		if (!userFilesPrepared) {
 			if (app.useGoogleAPI()) {
 				app.setUserData(userData.getReceiptFile(),
@@ -147,13 +145,10 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 			userFilesPrepared = true;
 		}
 
-		// Start the receipt list activity
-		Intent intent = new Intent(getApplicationContext(),
-				ReceiptListActivity.class);
-		// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
-				| Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivity(intent);
+		startActivity(ReceiptListActivity.getStartIntent()//
+				.addFlags(
+						Intent.FLAG_ACTIVITY_CLEAR_TASK
+								| Intent.FLAG_ACTIVITY_NEW_TASK));
 	}
 
 	private static final int REQUEST_CODE_RESOLUTION = 993; // Don't think

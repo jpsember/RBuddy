@@ -3,9 +3,10 @@ package com.js.rbuddyapp;
 import static com.js.basic.Tools.*;
 
 import com.js.form.Form;
-
 import com.js.rbuddy.R;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
 public class SearchActivity extends Activity {
+
+	public static Intent getStartIntent() {
+		return RBuddyApp.startIntentFor(SearchActivity.class);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +64,9 @@ public class SearchActivity extends Activity {
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
 
-		
 		setContentView(scrollView);
 	}
-	
+
 	private void performSearch() {
 		app.toast("Search isn't yet implemented.");
 	}

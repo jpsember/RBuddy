@@ -240,10 +240,7 @@ for (int ${index} = 0; ${index} &lt; ${table}.getColumnCount(); ${index}++) {
 ${column}.setText(${word_selection}${});
 ${imp:import(org.eclipse.swt.SWT)}${cursor}</template><template autoinsert="false" context="swt-statements" deleted="false" description="new TableItem for a Table" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.swt.tableitem" name="TableItem">${type:newType(org.eclipse.swt.widgets.TableItem)} ${item:newName(org.eclipse.swt.widgets.TableItem)}= new ${type}(${parent:var(org.eclipse.swt.widgets.Table)}, SWT.NONE);
 ${item}.setText(${count:link(0, 1, 2, 3, 4, 5)}, ${word_selection}${});
-${imp:import(org.eclipse.swt.SWT)}${cursor}</template><template autoinsert="false" context="java-members" deleted="false" description="test method (JUnit 4)" enabled="true" id="org.eclipse.jdt.ui.templates.test_junit4" name="test">@${testType:newType(org.junit.Test)}
-public void ${testName}() {
-	${staticImport:importStatic('org.junit.Assert.*')}${cursor}
-}</template><template autoinsert="false" context="java-members" deleted="false" description="test method (JUnit 3)" enabled="true" id="org.eclipse.jdt.ui.templates.test" name="test3">public void test${name}() throws Exception {
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template><template autoinsert="false" context="java-members" deleted="false" description="test method (JUnit 3)" enabled="true" id="org.eclipse.jdt.ui.templates.test" name="test3">public void test${name}() throws Exception {
 	${cursor}
 }</template><template autoinsert="false" context="swt-statements" deleted="false" description="new Text" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.swt.text" name="Text">${type:newType(org.eclipse.swt.widgets.Text)} ${text:newName(org.eclipse.swt.widgets.Text)}= new ${type}(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link('SWT.SINGLE | SWT.LEAD | SWT.BORDER', 'SWT.SINGLE | SWT.LEAD | SWT.READ_ONLY | SWT.BORDER', 'SWT.SINGLE | SWT.LEAD | SWT.PASSWORD | SWT.BORDER', 'SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER', 'SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER')});
 ${text}.setLayoutData(new ${gridDataType:newType(org.eclipse.swt.layout.GridData)}(SWT.${horizontal:link(FILL, BEGINNING, CENTER, END)}, SWT.${vertical:link(CENTER, TOP, BOTTOM, FILL)}, ${hex:link(true, false)}, ${vex:link(false, true)}));

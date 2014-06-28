@@ -4,13 +4,13 @@ import static com.js.basic.Tools.*;
 
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
-
 import com.js.json.*;
 import com.js.rbuddy.Cost;
 import com.js.rbuddy.JSDate;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSet;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +22,20 @@ import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
 public class EditReceiptActivity extends Activity {
+
+	private static String EXTRA_RECEIPT_ID = "receipt_id";
+
+	/**
+	 * Construct intent for starting this activity
+	 * 
+	 * @param receiptId
+	 *            id of receipt to be edited
+	 * @return
+	 */
+	public static Intent getStartIntent(int receiptId) {
+		return RBuddyApp.startIntentFor(EditReceiptActivity.class) //
+				.putExtra(EXTRA_RECEIPT_ID, receiptId);
+	}
 
 	@Override
 	public void onResume() {
@@ -47,9 +61,7 @@ public class EditReceiptActivity extends Activity {
 		if (db) {
 			app.dumpIntent(this);
 		}
-		int receiptId = this.getIntent().getIntExtra(
-				RBuddyApp.EXTRA_RECEIPT_ID, 0);
-		ASSERT(receiptId > 0);
+		int receiptId = this.getIntent().getIntExtra(EXTRA_RECEIPT_ID, 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 
 		layoutElements();
@@ -78,9 +90,8 @@ public class EditReceiptActivity extends Activity {
 			});
 			return true;
 		case android.R.id.home:
-			Intent intent = new Intent(this, ReceiptListActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, receipt.getId());
+			Intent intent = ReceiptListActivity.getStartIntent().addFlags(
+					Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;
 		default:
@@ -121,9 +132,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void processPhotoButtonPress() {
-		Intent intent = new Intent(getApplicationContext(), PhotoActivity.class);
-		intent.putExtra(RBuddyApp.EXTRA_RECEIPT_ID, receipt.getId());
-		startActivity(intent);
+		startActivity(PhotoActivity.getStartIntent(receipt.getId()));
 	}
 
 	private void readWidgetValuesFromReceipt() {
