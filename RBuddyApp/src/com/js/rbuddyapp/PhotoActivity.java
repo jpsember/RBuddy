@@ -96,9 +96,10 @@ public class PhotoActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-			processPhotoResult(data);
-			// Now that user has presumably selected a photo, exit out to the
+		if (requestCode == REQUEST_IMAGE_CAPTURE) {
+			if (resultCode == RESULT_OK)
+				processPhotoResult(data);
+			// Whether or not the user selected a new photo, exit to the
 			// EditReceipt activity.
 			finish();
 		}
