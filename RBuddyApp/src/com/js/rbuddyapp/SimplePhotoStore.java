@@ -176,7 +176,6 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	@Override
 	public void storePhoto(int receiptId, final FileArguments args) {
-		ASSERT(args.getFilename() != null);
 		removeCachedVersions(receiptId);
 		backgroundHandler.post(new Runnable() {
 			public void run() {
@@ -219,7 +218,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void deletePhoto(final FileArguments args) {
+	public void deletePhoto(int receiptId, final FileArguments args) {
 		backgroundHandler.post(new Runnable() {
 			public void run() {
 				String photoId = args.getFileIdString();

@@ -16,7 +16,11 @@ public interface IPhotoStore {
 	 */
 	public void storePhoto(int receiptId, FileArguments args);
 
-	public void deletePhoto(FileArguments args);
+	/**
+	 * @param receiptId
+	 * @param args
+	 */
+	public void deletePhoto(int receiptId, FileArguments args);
 
 	/**
 	 * Register a listener for a particular photo

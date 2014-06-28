@@ -9,7 +9,6 @@ import com.js.json.JSONParser;
 import com.js.json.JSONTools;
 import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.TagSetFile;
-
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.drive.*;
@@ -99,8 +98,7 @@ public class UserData {
 				userDataFolder, FILENAME_RECEIPTS, DriveReceiptFile.MIME_TYPE,
 				DriveReceiptFile.INITIAL_CONTENTS.getBytes());
 		String contents = blockingReadTextFile(r.file);
-		this.receiptFile = new DriveReceiptFile(this, r.file,
-				FILENAME_RECEIPTS, contents);
+		this.receiptFile = new DriveReceiptFile(this, r.file, contents);
 	}
 
 	private void findTagsFile() {
@@ -423,11 +421,15 @@ public class UserData {
 		return dbPrefix(d.getDriveId());
 	}
 
+	/**
+	 * Write bytes to file. If file doesn't exist yet, both parent folder and
+	 * filename must be specified
+	 * 
+	 * @param args
+	 */
 	public void writeBinaryFile(FileArguments args) {
 
 		final FileArguments arg = args;
-		ASSERT(args.getFilename() != null);
-
 		RBuddyApp.assertUIThread();
 
 		this.backgroundHandler.post(new Runnable() {
@@ -439,7 +441,13 @@ public class UserData {
 
 				// TODO what if file has been deleted?
 				if (driveFile == null) {
-					arg.setFile(createBinaryFile(arg.getParentFolder(),
+					if (arg.getFilename() == null
+							|| arg.getParentFolder() == null)
+						throw new IllegalArgumentException(
+								"must not be null; filename="
+										+ arg.getFilename() + ", parentFolder:"
+										+ arg.getParentFolder());
+					arg.setFileId(createBinaryFile(arg.getParentFolder(),
 							arg.getFilename(), arg.getMimeType(), arg.getData()));
 				} else {
 					driveFile = arg.getFile(apiClient);

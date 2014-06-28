@@ -12,7 +12,7 @@ public class Receipt implements IJSONEncoder {
 	// We incorporate the version number into the receipt filename (at least in
 	// the 'simple' receipt file implementation) to ensure older, invalid
 	// files are not used.
-	public static final int VERSION = 3;
+	public static final int VERSION = 4;
 
 	/**
 	 * Constructor

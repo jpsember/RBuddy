@@ -155,9 +155,7 @@ public class PhotoActivity extends Activity {
 				true);
 
 		try {
-			FileArguments args = new FileArguments(
-					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
-
+			FileArguments args = new FileArguments();
 			args.setData(Files.readBinaryFile(workFile));
 			args.setFileId(receipt.getPhotoId());
 

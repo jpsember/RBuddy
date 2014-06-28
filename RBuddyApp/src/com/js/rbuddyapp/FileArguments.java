@@ -1,27 +1,26 @@
 package com.js.rbuddyapp;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.DriveFolder;
-import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.*;
 
 import static com.js.basic.Tools.*;
 
+/**
+ * Class for organizing parameters for file operations (whether using Google
+ * Drive API, or simple local file system)
+ * 
+ */
 public class FileArguments {
 
-	public FileArguments(String filename) {
-		ASSERT(filename != null);
-		this.filename = filename;
+	static {
+		suppressWarning();
+	}
+
+	public FileArguments() {
 		this.data = EMPTY_DATA;
 		this.mimeType = "application/octet-stream";
 	}
 
-	/**
-	 * Data to be written to file
-	 * 
-	 * @param data
-	 */
 	public void setData(byte[] data) {
 		this.data = data;
 	}
@@ -30,8 +29,23 @@ public class FileArguments {
 		return this.data;
 	}
 
-	static final byte[] EMPTY_DATA = {};
+	/**
+	 * Set id of file, given DriveFile
+	 * 
+	 * @param file
+	 *            DriveFile
+	 */
+	public void setFileId(DriveFile file) {
+		this.file = file;
+		this.fileIdString = null;
+	}
 
+	/**
+	 * Set id of file, given string; if using Google API, this string can be
+	 * converted to a DriveId from which a DriveFile can be derived; else,
+	 * 
+	 * @param fileIdString
+	 */
 	public void setFileId(String fileIdString) {
 		this.fileIdString = fileIdString;
 		this.file = null;
@@ -49,33 +63,28 @@ public class FileArguments {
 			return file;
 		if (fileIdString != null) {
 			DriveId fileId = DriveId.decodeFromString(fileIdString);
-			setFile(Drive.DriveApi.getFile(apiClient, fileId));
+			setFileId(Drive.DriveApi.getFile(apiClient, fileId));
 		}
 		return file;
 	}
 
+	/**
+	 * Get id of file, as string
+	 * 
+	 * @return
+	 */
 	public String getFileIdString() {
 		if (fileIdString == null && file != null)
 			fileIdString = file.getDriveId().encodeToString();
 		return fileIdString;
 	}
 
-	public void setFile(DriveFile file) {
-		this.file = file;
-		this.fileIdString = null;
+	public void setFilename(String f) {
+		this.filename = f;
 	}
 
 	public String getFilename() {
 		return filename;
-	}
-
-	/**
-	 * When a new file is created, this is stored in its metadata
-	 * 
-	 * @param f
-	 */
-	public void setFilename(String f) {
-		this.filename = f;
 	}
 
 	public void setMimeType(String mimeType) {
@@ -90,10 +99,6 @@ public class FileArguments {
 		return callback;
 	}
 
-	/**
-	 * If not null, this callback's run() method will be executed, on the
-	 * caller's thread, when the operation completes
-	 */
 	public void setCallback(Runnable callback) {
 		this.callback = callback;
 	}
@@ -102,15 +107,12 @@ public class FileArguments {
 		return this.parentFolder;
 	}
 
-	/**
-	 * For write operations only; set new file's containing folder
-	 */
-	public void setParentPhoto(DriveFolder f) {
+	public void setParentFolder(DriveFolder f) {
 		this.parentFolder = f;
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder("Args[\n");
+		StringBuilder sb = new StringBuilder("FileArguments[\n");
 		String s = getFileIdString();
 		if (s != null) {
 			sb.append(" fileId:" + s + "\n");
@@ -124,21 +126,13 @@ public class FileArguments {
 		return sb.toString();
 	}
 
-	/**
-	 * Id of file to be accessed (lazy-initialized as required to support simple
-	 * & google drive versions)
-	 */
-	private String fileIdString;
+	private static final byte[] EMPTY_DATA = {};
 
 	private DriveFile file;
-
+	private String fileIdString;
 	private DriveFolder parentFolder;
-
 	private String filename;
-
 	private byte[] data;
 	private String mimeType;
-
 	private Runnable callback;
-
 }

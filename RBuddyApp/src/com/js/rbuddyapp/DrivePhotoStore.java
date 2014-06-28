@@ -19,13 +19,15 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	@Override
 	public void storePhoto(int receiptId, FileArguments args) {
 		removeCachedVersions(receiptId);
-		args.setParentPhoto(photosFolder);
+    // Fill in additional fields, in case we're creating a new file
+		args.setParentFolder(photosFolder);
 		args.setMimeType("image/jpeg");
+		args.setFilename(BitmapUtil.constructReceiptImageFilename(receiptId));
 		userData.writeBinaryFile(args);
 	}
 
 	@Override
-	public void deletePhoto(FileArguments args) {
+	public void deletePhoto(int receiptId, FileArguments args) {
 		warning("Google Drive api doesn't support delete yet (I think)");
 	}
 
@@ -36,9 +38,7 @@ public class DrivePhotoStore extends SimplePhotoStore {
 			return;
 
 		// We don't need the filename for this, just the file id
-		unimp("allow passing null filename, null parent folder");
-		final FileArguments args = new FileArguments("...unknown filename...");
-		args.setParentPhoto(photosFolder); // though not used for reading
+		final FileArguments args = new FileArguments();
 		ASSERT(fileIdString != null, "expected non-null fileIdString");
 		args.setFileId(fileIdString);
 

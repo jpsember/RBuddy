@@ -25,12 +25,10 @@ public class DriveReceiptFile implements IReceiptFile {
 	 * @param driveFile
 	 */
 	public DriveReceiptFile(UserData userData, DriveFile driveFile,
-			String filename,
 			String contents) {
 		this.userData = userData;
 		this.driveFile = driveFile;
 		this.map = new HashMap();
-		this.filename = filename;
 
 		{
 			JSONParser json = new JSONParser(contents);
@@ -56,11 +54,7 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	@Override
 	public void flush() {
-		if (db)
-			pr("DriveReceiptFile.flush");
 		if (changes) {
-			if (db)
-				pr(" flush; called from " + stackTrace(1, 1));
 			changes = false;
 			String text;
 			{
@@ -73,30 +67,20 @@ public class DriveReceiptFile implements IReceiptFile {
 				json.exit();
 				text = json.toString();
 			}
-			if (db)
-				pr(" writing text file " + text + "\n to "
-						+ UserData.dbPrefix(driveFile));
-			FileArguments args = new FileArguments(filename);
-			args.setFile(driveFile);
+			FileArguments args = new FileArguments();
+			args.setFileId(driveFile);
 			userData.writeTextFile(args, text);
 		}
 		flushTagSet();
 	}
 
 	private void flushTagSet() {
-		if (db)
-			pr("DriveReceiptFile.flushTagSet, called from " + stackTrace());
 		TagSetFile tf = userData.getTagSetFile();
-		if (db)
-			pr(" file " + tf + ", isChanged=" + tf.isChanged());
 		if (tf.isChanged()) {
 			String json = JSONEncoder.toJSON(tf);
-			FileArguments args = new FileArguments(UserData.FILENAME_TAGS);
-
-			args.setFile(userData.getTagSetDriveFile());
+			FileArguments args = new FileArguments();
+			args.setFileId(userData.getTagSetDriveFile());
 			userData.writeTextFile(args, json);
-			if (db)
-				pr("  wrote json " + json);
 			tf.setChanged(false);
 		}
 	}
@@ -170,7 +154,6 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	private boolean changes;
 	private DriveFile driveFile;
-	private String filename;
 	private UserData userData;
 	private Map map;
 	private int highestId;

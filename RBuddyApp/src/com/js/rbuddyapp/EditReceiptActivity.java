@@ -102,10 +102,9 @@ public class EditReceiptActivity extends Activity {
 	private void deleteReceipt() {
 		String photoIdString = receipt.getPhotoId();
 		if (photoIdString != null) {
-			final FileArguments args = new FileArguments(
-					BitmapUtil.constructReceiptImageFilename(receipt.getId()));
+			final FileArguments args = new FileArguments();
 			args.setFileId(photoIdString);
-			app.photoStore().deletePhoto(args);
+			app.photoStore().deletePhoto(receipt.getId(), args);
 		}
 		app.receiptFile().delete(this.receipt);
 		finish();
