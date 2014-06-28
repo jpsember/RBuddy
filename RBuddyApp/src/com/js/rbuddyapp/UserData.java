@@ -34,8 +34,8 @@ public class UserData {
 	 */
 
 	private static final String FILENAME_USER_ROOT_FOLDER = "RBuddy User Data";
-	private static final String FILENAME_RECEIPTS = "Receipts";
-	public static final String FILENAME_TAGS = "Tags";
+	private static final String FILENAME_RECEIPTS = "Receipts.json";
+	public static final String FILENAME_TAGS = "Tags.json";
 	private static final String FILENAME_PHOTOS_FOLDER = "Photos";
 
 	// This prefix is combined with the above filenames to produce corresponding
