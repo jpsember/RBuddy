@@ -99,10 +99,12 @@ Issue #
   def determine_current_git_state
 
     # Use full diff to determine if previous results are still valid
-    @current_git_state,_ = scall("git diff -p")
+    current_diff_state,_ = scall("git diff -p")
 
     # Use brief status to test for untracked files and to report to user
     state,_= scall("git status -s")
+
+    @current_git_state = state + "\n" + current_diff_state
 
     if state.include?('??')
       state,_ = scall("git status")
