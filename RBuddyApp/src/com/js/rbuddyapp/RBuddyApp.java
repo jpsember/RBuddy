@@ -12,14 +12,8 @@ import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.JSDate;
 import com.js.rbuddy.TagSetFile;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import static com.js.android.Tools.*;
@@ -187,16 +181,6 @@ public class RBuddyApp {
 		return s;
 	}
 
-	public void dumpIntent(Activity activity) {
-		Intent intent = activity.getIntent();
-		Bundle bundle = intent.getExtras();
-		pr(nameOf(activity) + " Intent:");
-		for (String key : bundle.keySet()) {
-			Object value = bundle.get(key);
-			pr("  " + key + " : " + describe(value));
-		}
-	}
-
 	public GoogleApiClient getGoogleApiClient() {
 		ASSERT(useGoogleAPI());
 		// TODO Is GoogleApiClient thread-safe? This code isn't.
@@ -208,32 +192,6 @@ public class RBuddyApp {
 		ASSERT(mGoogleApiClient == null);
 		mGoogleApiClient = c;
 	}
-
-	public static void confirmOperation(Activity activity,
-			String warningMessage, final Runnable operation) {
-		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				switch (which) {
-				case DialogInterface.BUTTON_POSITIVE:
-					operation.run();
-					break;
-				}
-			}
-		};
-		Context c = activity.getWindow().getDecorView().getRootView()
-				.getContext();
-		AlertDialog.Builder builder = new AlertDialog.Builder(c);
-		builder.setMessage(warningMessage)
-				.setPositiveButton("Yes", dialogClickListener)
-				.setNegativeButton("No", dialogClickListener).show();
-	}
-
-	private GoogleApiClient mGoogleApiClient;
-	private Map<String, Integer> resourceMap = new HashMap();
-	private static RBuddyApp sharedInstance;
-
-	private Boolean useGoogleAPIFlag;
 
 	public boolean useGoogleAPI() {
 		if (useGoogleAPIFlag == null) {
@@ -247,12 +205,6 @@ public class RBuddyApp {
 		return useGoogleAPIFlag.booleanValue();
 	}
 
-	public void toast(String message) {
-		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(context, message, duration);
-		toast.show();
-	}
-
 	/**
 	 * Convert density pixels to true pixels
 	 * 
@@ -263,6 +215,10 @@ public class RBuddyApp {
 		return (int) (densityPixels * displayMetrics.density);
 	}
 
+	private GoogleApiClient mGoogleApiClient;
+	private Map<String, Integer> resourceMap = new HashMap();
+	private static RBuddyApp sharedInstance;
+	private Boolean useGoogleAPIFlag;
 	private static DisplayMetrics displayMetrics;
 	private Context context;
 	private IPhotoStore photoStore;

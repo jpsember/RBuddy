@@ -1,6 +1,6 @@
 package com.js.rbuddyapp;
 
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,7 +110,7 @@ public class SimplePhotoStore implements IPhotoStore {
 				return true;
 			}
 		}
-		app.toast("readPhoto " + receiptId + " (thumb " + thumbnail
+		toast(context, "readPhoto " + receiptId + " (thumb " + thumbnail
 				+ ") wasn't in cache: " + cacheFor(thumbnail));
 		return false;
 	}

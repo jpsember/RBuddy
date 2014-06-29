@@ -60,7 +60,7 @@ public class EditReceiptActivity extends Activity {
 		app = RBuddyApp.sharedInstance();
 
 		if (db) {
-			app.dumpIntent(this);
+			pr(dumpIntent(this));
 		}
 		int receiptId = this.getIntent().getIntExtra(EXTRA_RECEIPT_ID, 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
@@ -92,7 +92,7 @@ public class EditReceiptActivity extends Activity {
 			unimp("settings");
 			return true;
 		case R.id.action_delete_receipt:
-			RBuddyApp.confirmOperation(this, "Delete Receipt?", new Runnable() {
+			confirmOperation(this, "Delete Receipt?", new Runnable() {
 				@Override
 				public void run() {
 					deleteReceipt();

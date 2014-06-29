@@ -114,7 +114,8 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void showGoogleDriveState() {
-		app.toast("Google Drive is "
+		toast(this,
+				"Google Drive is "
 				+ (app.useGoogleAPI() ? "active" : "inactive")
 				+ ", and will be "
 				+ (AppPreferences.getBoolean(
@@ -159,7 +160,7 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processGenerate() {
-		RBuddyApp.confirmOperation(this, "Generate some random receipts?",
+		confirmOperation(this, "Generate some random receipts?",
 				new Runnable() {
 					@Override
 					public void run() {
@@ -175,14 +176,13 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void processZap() {
-		RBuddyApp.confirmOperation(this, "Delete all receipts?",
-				new Runnable() {
-					@Override
-					public void run() {
-						app.receiptFile().clear();
-						rebuildReceiptList(receiptList);
-					}
-				});
+		confirmOperation(this, "Delete all receipts?", new Runnable() {
+			@Override
+			public void run() {
+				app.receiptFile().clear();
+				rebuildReceiptList(receiptList);
+			}
+		});
 	}
 
 	private List buildListOfReceipts() {

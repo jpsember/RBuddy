@@ -25,7 +25,6 @@ public class SearchActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		app = RBuddyApp.sharedInstance();
 
 		layoutElements();
 
@@ -77,11 +76,10 @@ public class SearchActivity extends Activity {
 	}
 
 	private void performSearch() {
-		app.toast("Search isn't yet implemented.");
+		toast(this, "Search isn't yet implemented.");
 	}
 
 	private Form form;
-	private RBuddyApp app;
 	private ScrollView scrollView;
 	private ActivityState activityState;
 }
