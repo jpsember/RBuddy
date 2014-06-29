@@ -11,16 +11,13 @@
         android:icon="@android:drawable/ic_menu_search"
         android:showAsAction="always"
         android:title="@string/action_search"/>
-
-    <!-- Settings, should always be in the overflow -->
+    
+    <!--  These items should be in the overflow -->
+    
     <item
         android:id="@+id/action_settings"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
-    <item
-        android:id="@+id/action_testonly_exit"
-        android:showAsAction="never"
-        android:title="@string/action_testonly_exit"/>
     <item
         android:id="@+id/action_testonly_generate"
         android:showAsAction="never"
@@ -30,15 +27,15 @@
         android:showAsAction="never"
         android:title="@string/action_testonly_zap"/>
     <item
-        android:id="@+id/action_testonly_enable_google_drive"
+        android:id="@+id/action_testonly_toggle_google_drive"
         android:showAsAction="never"
-        android:title="@string/action_testonly_enable_google_drive"/>
+        android:title="@string/action_testonly_toggle_google_drive"/>
     <item
-        android:id="@+id/action_testonly_disable_google_drive"
-        android:showAsAction="never"
-        android:title="@string/action_testonly_disable_google_drive"/>
-  <item
         android:id="@+id/action_testonly_toggle_photo_delay"
         android:showAsAction="never"
         android:title="@string/action_testonly_toggle_photo_delay"/>
+    <item
+        android:id="@+id/action_testonly_exit"
+        android:showAsAction="never"
+        android:title="@string/action_testonly_exit"/>
 </menu>

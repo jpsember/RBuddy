@@ -1,7 +1,5 @@
 package com.js.rbuddyapp;
 
-import static com.js.basic.Tools.*;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

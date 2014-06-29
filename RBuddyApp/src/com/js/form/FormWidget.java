@@ -138,7 +138,8 @@ public abstract class FormWidget {
 			if (auxType == AUXPANEL_EMPTY) {
 				View v = new View(context());
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						AUX_WIDTH, 10);
+						RBuddyApp.truePixels(AUX_WIDTH),
+						RBuddyApp.truePixels(10));
 				p.weight = 0;
 				horizontalPanel.addView(v, p);
 			} else if (auxType == AUXPANEL_CHECKBOX) {
@@ -154,7 +155,8 @@ public abstract class FormWidget {
 					}
 				});
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						AUX_WIDTH, LayoutParams.WRAP_CONTENT);
+						RBuddyApp.truePixels(AUX_WIDTH),
+						LayoutParams.WRAP_CONTENT);
 				p.weight = 0;
 				p.gravity = Gravity.BOTTOM;
 				horizontalPanel.addView(cb, p);

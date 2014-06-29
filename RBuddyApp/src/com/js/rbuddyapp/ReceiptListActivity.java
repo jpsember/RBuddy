@@ -86,14 +86,9 @@ public class ReceiptListActivity extends Activity {
 		case R.id.action_testonly_toggle_photo_delay:
 			AppPreferences.toggle(IPhotoStore.PREFERENCE_KEY_PHOTO_DELAY);
 			return true;
-		case R.id.action_testonly_enable_google_drive:
-			AppPreferences.putBoolean(
-					RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
-			showGoogleDriveState();
-			return true;
-		case R.id.action_testonly_disable_google_drive:
-			AppPreferences.putBoolean(
-					RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, false);
+		case R.id.action_testonly_toggle_google_drive:
+			AppPreferences
+					.toggle(RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API);
 			showGoogleDriveState();
 			return true;
 		case R.id.action_search:
@@ -116,13 +111,39 @@ public class ReceiptListActivity extends Activity {
 						: "inactive") + " when app restarts.");
 	}
 
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (false /* app.useGoogleAPI() */) {
-			menu.removeItem(R.id.action_testonly_generate);
-			menu.removeItem(R.id.action_testonly_zap);
+	public static void setMenuLabel(Menu menu, int menuItemId, String label) {
+		MenuItem item = menu.findItem(menuItemId);
+		if (item != null) {
+			item.setTitle(label);
 		}
-		unimp("it would be nice to be able to programmatically change labels, e.g., to indicate current value of togglable preference");
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(final Menu menu) {
+
+		// There's a bug in the Android API which causes some items to
+		// disappear; specifically, the 'exit' item (the last one) is not
+		// appearing. Workaround seems to be to delay this code until after the
+		// onPrepareCall() completes...
+
+		receiptListView.post(new Runnable() {
+			public void run() {
+				setMenuLabel(
+						menu,
+						R.id.action_testonly_toggle_google_drive,
+						(AppPreferences.getBoolean(
+								RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
+								true) ? "Disable" : "Enable")
+								+ " Google Drive");
+				setMenuLabel(
+						menu,
+						R.id.action_testonly_toggle_photo_delay,
+						(AppPreferences.getBoolean(
+								IPhotoStore.PREFERENCE_KEY_PHOTO_DELAY, false) ? "Remove"
+								: "Add")
+								+ " simulated photo delay");
+			}
+		});
 		return super.onPrepareOptionsMenu(menu);
 	}
 

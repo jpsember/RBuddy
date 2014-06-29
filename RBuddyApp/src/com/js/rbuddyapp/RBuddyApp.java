@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -136,6 +137,8 @@ public class RBuddyApp {
 		useGoogleAPI();
 
 		JSDate.setFactory(AndroidDate.androidDateFactory);
+
+		displayMetrics = context.getResources().getDisplayMetrics();
 	}
 
 	/**
@@ -277,6 +280,17 @@ public class RBuddyApp {
 		return new Intent(sharedInstance().context(), klass);
 	}
 
+	/**
+	 * Convert density pixels to true pixels
+	 * 
+	 * @param densityPixels
+	 * @return
+	 */
+	public static int truePixels(float densityPixels) {
+		return (int) (densityPixels * displayMetrics.density);
+	}
+
+	private static DisplayMetrics displayMetrics;
 	private Context context;
 	private IPhotoStore photoStore;
 	private IReceiptFile receiptFile;

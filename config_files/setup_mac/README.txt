@@ -129,7 +129,7 @@ Install the Android SDK
  Make some symbolic links:
 [] cd ~/android_development
 [] ln -s adt-bundle-mac-XXXX/ adt
-[] ln -s adt/eclipse/plugins/org.junit_4.11.0.v201303080030/ junit4
+*** Don't do this, we're not using junit4 anymore *** [] ln -s adt/eclipse/plugins/org.junit_4.11.0.v201303080030/ junit4
 
 [] Use spotlight to run the Eclipse.app program; install the Java SE 6 runtime if it asks.
 [] set Eclipse 'keep in dock' flag

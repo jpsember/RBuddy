@@ -68,16 +68,16 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1.0f);
 			p.gravity = Gravity.BOTTOM;
 			parentView.addView(button, p);
-			// setDebugBgnd(parentView, "#220000");
 
 			imageView = new ImageView(context());
 			imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 			imageView.setAdjustViewBounds(true);
 
-			int THUMBNAIL_WIDTH = (int) (IPhotoStore.THUMBNAIL_HEIGHT * 1.0);
+			int THUMBNAIL_WIDTH = RBuddyApp
+					.truePixels(IPhotoStore.THUMBNAIL_HEIGHT * 1.0f);
 
 			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
-					IPhotoStore.THUMBNAIL_HEIGHT, 0.2f);
+					RBuddyApp.truePixels(IPhotoStore.THUMBNAIL_HEIGHT), 0.2f);
 			parentView.addView(imageView, p);
 		} else {
 			getWidgetContainer().addView(button);
