@@ -55,8 +55,7 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 			return;
 
 		if (d == null) {
-			RBuddyApp app = RBuddyApp.sharedInstance();
-			d = app.context().getResources()
+			d = getForm().context().getResources()
 					.getDrawable(android.R.drawable.ic_menu_gallery);
 		}
 		imageView.setImageDrawable(d);

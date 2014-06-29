@@ -7,7 +7,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
 
     <!--
          We add an application tag here just so that we can indicate that
@@ -27,7 +27,7 @@
     -->
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
-        android:label="Tests for js.rbuddy"
-        android:targetPackage="js.rbuddy" />
+        android:label="Tests for com.js.rbuddy"
+        android:targetPackage="com.js.rbuddy" />
 
 </manifest>

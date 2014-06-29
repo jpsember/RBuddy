@@ -16,7 +16,7 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 
 	private SimpleReceiptFile constructFile() {
 		if (rf == null) {
-			rf = new SimpleReceiptFile(BASENAME,BASENAME);
+			rf = new SimpleReceiptFile(this.getContext(), BASENAME, BASENAME);
 		}
 		return rf;
 	}
@@ -93,9 +93,11 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		File f = SimpleReceiptFile.fileForBaseName(BASENAME);
+		constructFile();
+		File f = rf.fileForBaseName(BASENAME);
 		if (f.isFile())
 			f.delete();
+		close();
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,8 +34,8 @@ public class PhotoActivity extends Activity {
 	 * @param receiptId
 	 * @return
 	 */
-	public static Intent getStartIntent(int receiptId) {
-		return RBuddyApp.startIntentFor(PhotoActivity.class) //
+	public static Intent getStartIntent(Context context, int receiptId) {
+		return RBuddyApp.startIntentFor(context, PhotoActivity.class) //
 				.putExtra(EXTRA_RECEIPT_ID, receiptId);
 	}
 
@@ -86,7 +87,8 @@ public class PhotoActivity extends Activity {
 			unimp("settings");
 			return true;
 		case android.R.id.home:
-			startActivity(EditReceiptActivity.getStartIntent(receipt.getId()) //
+			startActivity(EditReceiptActivity.getStartIntent(this,
+					receipt.getId()) //
 					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
 			return true;
 		default:

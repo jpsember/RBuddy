@@ -18,6 +18,7 @@ import com.google.android.gms.drive.DriveFolder.DriveFolderResult;
 import com.google.android.gms.common.api.Status;
 
 import static com.google.android.gms.drive.Drive.DriveApi;
+import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -46,7 +47,8 @@ public class UserData {
 	 * 
 	 * @param app
 	 */
-	public UserData(RBuddyApp app) {
+	public UserData(Context context, RBuddyApp app) {
+		this.context = context;
 		RBuddyApp.assertUIThread();
 		this.apiClient = app.getGoogleApiClient();
 
@@ -334,7 +336,7 @@ public class UserData {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
 				+ FILENAME_PHOTOS_FOLDER, userDataFolder,
 				FILENAME_PHOTOS_FOLDER);
-		this.photoStore = new DrivePhotoStore(this, r.folder);
+		this.photoStore = new DrivePhotoStore(context, this, r.folder);
 	}
 
 	/**
@@ -539,6 +541,7 @@ public class UserData {
 		return photoStore;
 	}
 
+	private Context context;
 	private GoogleApiClient apiClient;
 	private Handler uiThreadHandler;
 	private Handler backgroundHandler;

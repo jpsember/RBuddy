@@ -9,6 +9,7 @@ import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -22,8 +23,8 @@ import android.widget.ListView;
 
 public class ReceiptListActivity extends Activity {
 
-	public static Intent getStartIntent() {
-		return RBuddyApp.startIntentFor(ReceiptListActivity.class);
+	public static Intent getStartIntent(Context context) {
+		return RBuddyApp.startIntentFor(context, ReceiptListActivity.class);
 	}
 
 	@Override
@@ -243,7 +244,7 @@ public class ReceiptListActivity extends Activity {
 
 	private void doEditReceipt(Receipt receipt) {
 		this.editReceipt = receipt;
-		startActivity(EditReceiptActivity.getStartIntent(receipt.getId()));
+		startActivity(EditReceiptActivity.getStartIntent(this, receipt.getId()));
 	}
 
 	/**
@@ -276,10 +277,10 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void doSearchActivity() {
-		Intent intent = SearchActivity.getStartIntent();
+		Intent intent = SearchActivity.getStartIntent(this);
 		if (false) {
 			warning("trying out experimental activity instead");
-			intent = ExperimentalActivity.getStartIntent();
+			intent = ExperimentalActivity.getStartIntent(this);
 		}
 
 		startActivity(intent);

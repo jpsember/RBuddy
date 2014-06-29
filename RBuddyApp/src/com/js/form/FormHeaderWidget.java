@@ -15,7 +15,7 @@ public class FormHeaderWidget extends FormWidget {
 
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		getWidgetContainer().addView(horizontalSpace());
+		getWidgetContainer().addView(horizontalSpace(context()));
 
 		if (!headerText.isEmpty()) {
 			TextView label = new TextView(context());
@@ -23,7 +23,7 @@ public class FormHeaderWidget extends FormWidget {
 			getWidgetContainer().addView(label, p);
 		}
 
-		getWidgetContainer().addView(horizontalSeparator());
+		getWidgetContainer().addView(horizontalSeparator(context()));
 	}
 
 	protected String getId() {

@@ -1,5 +1,7 @@
 package com.js.rbuddyapp;
 
+import android.content.Context;
+
 import com.google.android.gms.drive.DriveFolder;
 
 import static com.js.basic.Tools.*;
@@ -11,7 +13,10 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	 * 
 	 * @param driveFile
 	 */
-	public DrivePhotoStore(UserData userData, DriveFolder photosFolder) {
+	public DrivePhotoStore(Context context, UserData userData,
+			DriveFolder photosFolder) {
+		super(context);
+		// UserData and DrivePhotoStore are mutually coupled
 		this.userData = userData;
 		this.photosFolder = photosFolder;
 	}

@@ -305,8 +305,8 @@ public abstract class FormWidget {
 
 
 	// For lack of a better place
-	public static View horizontalSeparator() {
-		View v = new View(RBuddyApp.sharedInstance().context());
+	public static View horizontalSeparator(Context context) {
+		View v = new View(context);
 		// TODO Avoid using literal constant
 		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 4));
 		// TODO Setting color like this doesn't work:
@@ -317,8 +317,8 @@ public abstract class FormWidget {
 	}
 
 	// For lack of a better place
-	public static View horizontalSpace() {
-		View v = new View(RBuddyApp.sharedInstance().context());
+	public static View horizontalSpace(Context context) {
+		View v = new View(context);
 		// TODO Avoid using literal constant
 		v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 12));
 		return v;

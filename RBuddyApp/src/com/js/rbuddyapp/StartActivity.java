@@ -69,7 +69,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	}
 
 	private View constructStartView() {
-		View v = new View(app.context());
+		View v = new View(this);
 		FormWidget.setDebugBgnd(v, app.useGoogleAPI() ? "blue" : "green");
 		return v;
 	}
@@ -115,7 +115,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 		if (app.useGoogleAPI()) {
 			if (db)
 				pr("constructing UserData");
-			userData = new UserData(app);
+			userData = new UserData(this, app);
 			if (db)
 				pr("calling open() with null callback");
 			userData.open(new Runnable() {
@@ -138,14 +138,14 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 				app.setUserData(userData.getReceiptFile(),
 						userData.getTagSetFile(), userData.getPhotoStore());
 			} else {
-				SimpleReceiptFile s = new SimpleReceiptFile();
-				IPhotoStore ps = new SimplePhotoStore();
+				SimpleReceiptFile s = new SimpleReceiptFile(this);
+				IPhotoStore ps = new SimplePhotoStore(this);
 				app.setUserData(s, s.readTagSetFile(), ps);
 			}
 			userFilesPrepared = true;
 		}
 
-		startActivity(ReceiptListActivity.getStartIntent()//
+		startActivity(ReceiptListActivity.getStartIntent(this)//
 				.addFlags(
 						Intent.FLAG_ACTIVITY_CLEAR_TASK
 								| Intent.FLAG_ACTIVITY_NEW_TASK));

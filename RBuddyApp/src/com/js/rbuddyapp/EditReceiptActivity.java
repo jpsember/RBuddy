@@ -12,6 +12,7 @@ import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSet;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -32,8 +33,8 @@ public class EditReceiptActivity extends Activity {
 	 *            id of receipt to be edited
 	 * @return
 	 */
-	public static Intent getStartIntent(int receiptId) {
-		return RBuddyApp.startIntentFor(EditReceiptActivity.class) //
+	public static Intent getStartIntent(Context context, int receiptId) {
+		return RBuddyApp.startIntentFor(context, EditReceiptActivity.class) //
 				.putExtra(EXTRA_RECEIPT_ID, receiptId);
 	}
 
@@ -99,7 +100,7 @@ public class EditReceiptActivity extends Activity {
 			});
 			return true;
 		case android.R.id.home:
-			Intent intent = ReceiptListActivity.getStartIntent().addFlags(
+			Intent intent = ReceiptListActivity.getStartIntent(this).addFlags(
 					Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;
@@ -140,7 +141,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void processPhotoButtonPress() {
-		startActivity(PhotoActivity.getStartIntent(receipt.getId()));
+		startActivity(PhotoActivity.getStartIntent(this, receipt.getId()));
 	}
 
 	private void readWidgetValuesFromReceipt() {

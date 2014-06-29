@@ -6,6 +6,7 @@ import com.js.form.Form;
 import com.js.rbuddy.R;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,8 +18,8 @@ import android.widget.ScrollView;
 
 public class SearchActivity extends Activity {
 
-	public static Intent getStartIntent() {
-		return RBuddyApp.startIntentFor(SearchActivity.class);
+	public static Intent getStartIntent(Context context) {
+		return RBuddyApp.startIntentFor(context, SearchActivity.class);
 	}
 
 	@Override

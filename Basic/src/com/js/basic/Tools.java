@@ -1076,7 +1076,7 @@ public final class Tools {
 	public static boolean testing() {
 		if (!testingKnown) {
 			try {
-				Class.forName("js.testUtils.MyTest");
+				Class.forName("com.js.testUtils.MyTest");
 				testing = true;
 			} catch (ClassNotFoundException e) {
 			}

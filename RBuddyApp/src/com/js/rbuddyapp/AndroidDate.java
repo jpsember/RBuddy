@@ -2,6 +2,7 @@ package com.js.rbuddyapp;
 
 import static com.js.basic.Tools.*;
 import android.annotation.SuppressLint;
+import android.content.Context;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,43 +19,55 @@ public class AndroidDate extends JSDate {
 	 */
 	private AndroidDate(int year, int month, int day) {
 		super(year, month, day);
+
 	}
 
+	private static JSDateFactory androidDateFactory;
+
 	@SuppressLint("SimpleDateFormat")
-	public static final JSDateFactory androidDateFactory = new JSDateFactory() {
+	public static JSDateFactory androidDateFactory(Context applicationContext) {
 
-		private SimpleDateFormat jsDateFormat = new SimpleDateFormat(
-				"yyyy-MM-dd");
+		if (androidDateFactory == null) {
+			AndroidDate.context = applicationContext;
+			androidDateFactory = new JSDateFactory() {
 
-		@Override
-		public Date convertJSDateToJavaDate(JSDate d) {
-			Date date = null;
-			try {
-				date = jsDateFormat.parse(d.toString());
-			} catch (ParseException e) {
-				die(e);
-			}
-			return date;
+				private SimpleDateFormat jsDateFormat = new SimpleDateFormat(
+						"yyyy-MM-dd");
+
+				@Override
+				public Date convertJSDateToJavaDate(JSDate d) {
+					Date date = null;
+					try {
+						date = jsDateFormat.parse(d.toString());
+					} catch (ParseException e) {
+						die(e);
+					}
+					return date;
+				}
+
+				@Override
+				public JSDate convertJavaDateToJSDate(Date d) {
+					String jsString = jsDateFormat.format(d);
+					return parse(jsString);
+				}
+
+				@Override
+				public JSDate currentDate() {
+					return convertJavaDateToJSDate(new Date());
+				}
+
+				@Override
+				public JSDate parse(String s) {
+					int[] a = parseStandardDateFromString(s);
+					return new AndroidDate(a[0], a[1], a[2]);
+				}
+			};
+
+			return androidDateFactory;
 		}
 
-		@Override
-		public JSDate convertJavaDateToJSDate(Date d) {
-			String jsString = jsDateFormat.format(d);
-			return parse(jsString);
-		}
-
-		@Override
-		public JSDate currentDate() {
-			return convertJavaDateToJSDate(new Date());
-		}
-
-		@Override
-		public JSDate parse(String s) {
-			int[] a = parseStandardDateFromString(s);
-			return new AndroidDate(a[0], a[1], a[2]);
-		}
-
-	};
+		return androidDateFactory;
+	}
 
 	private static Calendar calendar;
 
@@ -74,8 +87,10 @@ public class AndroidDate extends JSDate {
 
 	private static java.text.DateFormat userDateFormat() {
 		if (userDateFormat == null) {
+			if (context == null)
+				die("AndroidDateFactory must be constructed");
 			userDateFormat = android.text.format.DateFormat
-					.getDateFormat(RBuddyApp.sharedInstance().context());
+					.getDateFormat(context);
 		}
 		return userDateFormat;
 	}
@@ -91,4 +106,5 @@ public class AndroidDate extends JSDate {
 		return userDateFormat().format(factory().convertJSDateToJavaDate(date));
 	}
 
+	private static Context context;
 }

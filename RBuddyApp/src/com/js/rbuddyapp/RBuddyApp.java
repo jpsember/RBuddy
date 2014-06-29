@@ -91,10 +91,6 @@ public class RBuddyApp {
 		return photoStore;
 	}
 
-	public Context context() {
-		return this.context;
-	}
-
 	public String readTextFileResource(int resourceId) {
 		String str = null;
 		try {
@@ -136,7 +132,8 @@ public class RBuddyApp {
 		}
 		useGoogleAPI();
 
-		JSDate.setFactory(AndroidDate.androidDateFactory);
+		
+		JSDate.setFactory(AndroidDate.androidDateFactory(context));
 
 		displayMetrics = context.getResources().getDisplayMetrics();
 	}
@@ -265,7 +262,7 @@ public class RBuddyApp {
 
 	public void toast(String message) {
 		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(context(), message, duration);
+		Toast toast = Toast.makeText(context, message, duration);
 		toast.show();
 	}
 
@@ -276,8 +273,8 @@ public class RBuddyApp {
 	 *            the activity's class
 	 * @return intent
 	 */
-	public static Intent startIntentFor(Class klass) {
-		return new Intent(sharedInstance().context(), klass);
+	public static Intent startIntentFor(Context context, Class klass) {
+		return new Intent(context, klass);
 	}
 
 	/**

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -20,7 +21,8 @@ import com.js.basic.Files;
 
 public class SimplePhotoStore implements IPhotoStore {
 
-	public SimplePhotoStore() {
+	public SimplePhotoStore(Context context) {
+		this.context = context;
 		listenersMap = new HashMap();
 
 		this.app = RBuddyApp.sharedInstance();
@@ -91,8 +93,8 @@ public class SimplePhotoStore implements IPhotoStore {
 						BitmapDrawable bd = (BitmapDrawable) dFull;
 						Bitmap scaledBitmap = BitmapUtil.scaleBitmap(
 								bd.getBitmap(), THUMBNAIL_HEIGHT, false);
-						final BitmapDrawable dThumb = new BitmapDrawable(app
-								.context().getResources(), scaledBitmap);
+						final BitmapDrawable dThumb = new BitmapDrawable(
+								context.getResources(), scaledBitmap);
 						if (db)
 							pr(" scaled to size "
 									+ dThumb.getBitmap().getByteCount());
@@ -285,7 +287,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private File getFileForPhotoId(String photoId) {
-		return new File(app.context().getExternalFilesDir(null), "photo_"
+		return new File(context.getExternalFilesDir(null), "photo_"
 				+ photoId + BitmapUtil.JPEG_EXTENSION);
 	}
 
@@ -306,7 +308,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	protected BitmapDrawable convertJPEGToDrawable(byte[] jpeg) {
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-		return new BitmapDrawable(app.context().getResources(), bmp);
+		return new BitmapDrawable(context.getResources(), bmp);
 	}
 
 	private RBuddyApp app;
@@ -321,4 +323,5 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	private PhotoCache regularCache;
 	private PhotoCache thumbnailCache;
+	private Context context;
 }
