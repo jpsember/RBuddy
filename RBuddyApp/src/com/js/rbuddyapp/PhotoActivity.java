@@ -1,6 +1,6 @@
 package com.js.rbuddyapp;
 
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class PhotoActivity extends Activity {
 	 * @return
 	 */
 	public static Intent getStartIntent(Context context, int receiptId) {
-		return RBuddyApp.startIntentFor(context, PhotoActivity.class) //
+		return startIntentFor(context, PhotoActivity.class) //
 				.putExtra(EXTRA_RECEIPT_ID, receiptId);
 	}
 

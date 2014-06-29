@@ -1,6 +1,6 @@
 package com.js.rbuddyapp;
 
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 import java.util.*;
 
@@ -24,7 +24,7 @@ import android.widget.ListView;
 public class ReceiptListActivity extends Activity {
 
 	public static Intent getStartIntent(Context context) {
-		return RBuddyApp.startIntentFor(context, ReceiptListActivity.class);
+		return startIntentFor(context, ReceiptListActivity.class);
 	}
 
 	@Override

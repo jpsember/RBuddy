@@ -24,6 +24,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 public class UserData {
 
@@ -49,7 +50,7 @@ public class UserData {
 	 */
 	public UserData(Context context, RBuddyApp app) {
 		this.context = context;
-		RBuddyApp.assertUIThread();
+		assertUIThread();
 		this.apiClient = app.getGoogleApiClient();
 
 		HandlerThread ht = new HandlerThread("BgndHandler");
@@ -432,7 +433,7 @@ public class UserData {
 	public void writeBinaryFile(FileArguments args) {
 
 		final FileArguments arg = args;
-		RBuddyApp.assertUIThread();
+		assertUIThread();
 
 		this.backgroundHandler.post(new Runnable() {
 			public void run() {
@@ -488,7 +489,7 @@ public class UserData {
 
 	public void readBinaryFile(FileArguments args) {
 
-		RBuddyApp.assertUIThread();
+		assertUIThread();
 		final FileArguments arg = args;
 		this.backgroundHandler.post(new Runnable() {
 			public void run() {

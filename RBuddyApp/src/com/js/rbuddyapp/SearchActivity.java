@@ -1,6 +1,6 @@
 package com.js.rbuddyapp;
 
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 import com.js.form.Form;
 import com.js.rbuddy.R;
@@ -19,7 +19,7 @@ import android.widget.ScrollView;
 public class SearchActivity extends Activity {
 
 	public static Intent getStartIntent(Context context) {
-		return RBuddyApp.startIntentFor(context, SearchActivity.class);
+		return startIntentFor(context, SearchActivity.class);
 	}
 
 	@Override

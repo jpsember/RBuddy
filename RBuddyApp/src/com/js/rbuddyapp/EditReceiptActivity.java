@@ -1,6 +1,6 @@
 package com.js.rbuddyapp;
 
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
@@ -34,7 +34,7 @@ public class EditReceiptActivity extends Activity {
 	 * @return
 	 */
 	public static Intent getStartIntent(Context context, int receiptId) {
-		return RBuddyApp.startIntentFor(context, EditReceiptActivity.class) //
+		return startIntentFor(context, EditReceiptActivity.class) //
 				.putExtra(EXTRA_RECEIPT_ID, receiptId);
 	}
 

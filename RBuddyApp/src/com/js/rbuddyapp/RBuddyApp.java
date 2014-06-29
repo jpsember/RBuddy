@@ -18,11 +18,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import static com.js.android.Tools.*;
 
 /**
  * Maintains data structures and whatnot that are global to the RBuddy app, and
@@ -55,18 +55,6 @@ public class RBuddyApp {
 		}
 
 		return sharedInstance;
-	}
-
-	public static void assertUIThread() {
-		if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
-			die("not running within UI thread");
-		}
-	}
-
-	public static void assertNotUIThread() {
-		if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-			die("unexpectedly running within UI thread");
-		}
 	}
 
 	public void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
@@ -132,7 +120,6 @@ public class RBuddyApp {
 		}
 		useGoogleAPI();
 
-		
 		JSDate.setFactory(AndroidDate.androidDateFactory(context));
 
 		displayMetrics = context.getResources().getDisplayMetrics();
@@ -264,17 +251,6 @@ public class RBuddyApp {
 		int duration = Toast.LENGTH_SHORT;
 		Toast toast = Toast.makeText(context, message, duration);
 		toast.show();
-	}
-
-	/**
-	 * Construct an Intent for starting an activity, using this app's context
-	 * 
-	 * @param klass
-	 *            the activity's class
-	 * @return intent
-	 */
-	public static Intent startIntentFor(Context context, Class klass) {
-		return new Intent(context, klass);
 	}
 
 	/**

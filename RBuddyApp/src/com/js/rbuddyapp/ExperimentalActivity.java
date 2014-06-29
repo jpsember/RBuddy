@@ -7,12 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 public class ExperimentalActivity extends Activity {
 
 	public static Intent getStartIntent(Context context) {
-		Intent intent = RBuddyApp.startIntentFor(context,
+		Intent intent = startIntentFor(context,
 				ExperimentalActivity.class);
 		return intent;
 	}

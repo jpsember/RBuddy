@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class Tools {
+public class Tools {
 
 	/**
 	 * Default value for 'db' conditional compilation, in case not provided
