@@ -27,6 +27,16 @@ public class SearchActivity extends Activity {
 		app = RBuddyApp.sharedInstance();
 
 		layoutElements();
+
+		activityState = new ActivityState() //
+				.add(scrollView) //
+				.restoreStateFrom(savedInstanceState);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		activityState.saveState(outState);
 	}
 
 	@Override
@@ -38,7 +48,6 @@ public class SearchActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle presses on the action bar items
 		switch (item.getItemId()) {
 		case R.id.action_settings:
 			unimp("settings");
@@ -46,7 +55,6 @@ public class SearchActivity extends Activity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-		
 	}
 
 	private void layoutElements() {
@@ -59,7 +67,7 @@ public class SearchActivity extends Activity {
 				performSearch();
 			}
 		});
-		ScrollView scrollView = new ScrollView(this);
+		scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
@@ -73,4 +81,6 @@ public class SearchActivity extends Activity {
 
 	private Form form;
 	private RBuddyApp app;
+	private ScrollView scrollView;
+	private ActivityState activityState;
 }

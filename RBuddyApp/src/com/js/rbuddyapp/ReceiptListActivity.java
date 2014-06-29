@@ -39,6 +39,10 @@ public class ReceiptListActivity extends Activity {
 		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 		layout.addView(constructListView());
+
+		activityState = new ActivityState() //
+				.add(receiptListView) //
+				.restoreStateFrom(savedInstanceState);
 	}
 
 	@Override
@@ -54,6 +58,12 @@ public class ReceiptListActivity extends Activity {
 			rebuildReceiptList(this.receiptList);
 
 		refreshEditedReceipt();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		activityState.saveState(outState);
 	}
 
 	@Override
@@ -290,4 +300,5 @@ public class ReceiptListActivity extends Activity {
 	private List receiptList;
 	private RBuddyApp app;
 	private ListView receiptListView;
+	private ActivityState activityState;
 }

@@ -65,6 +65,15 @@ public class EditReceiptActivity extends Activity {
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 
 		layoutElements();
+		activityState = new ActivityState() //
+				.add(scrollView) //
+				.restoreStateFrom(savedInstanceState);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		activityState.saveState(outState);
 	}
 
 	@Override
@@ -122,7 +131,7 @@ public class EditReceiptActivity extends Activity {
 			}
 		});
 
-		ScrollView scrollView = new ScrollView(this);
+		scrollView = new ScrollView(this);
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
@@ -182,4 +191,6 @@ public class EditReceiptActivity extends Activity {
 	private Receipt receipt;
 	private Form form;
 	private FormButtonWidget receiptWidget;
+	private ScrollView scrollView;
+	private ActivityState activityState;
 }
