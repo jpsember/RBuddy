@@ -15,7 +15,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import static com.js.basic.Tools.*;
+import static com.js.android.Tools.*;
 
 public abstract class FormWidget {
 
@@ -282,7 +282,7 @@ public abstract class FormWidget {
 
 	public String getLabel() {
 		String labelValue = strAttr("label", getId());
-		return RBuddyApp.sharedInstance().applyStringSubstitution(labelValue);
+		return applyStringSubstitution(context(), labelValue);
 	}
 
 	/**

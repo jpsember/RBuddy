@@ -60,8 +60,7 @@ public class SearchActivity extends Activity {
 	}
 
 	private void layoutElements() {
-		String jsonString = RBuddyApp.sharedInstance().readTextFileResource(
-				R.raw.form_search);
+		String jsonString = readTextFileResource(this, R.raw.form_search);
 		this.form = Form.parse(this, jsonString);
 		form.getField("search").setOnClickListener(new OnClickListener() {
 			@Override

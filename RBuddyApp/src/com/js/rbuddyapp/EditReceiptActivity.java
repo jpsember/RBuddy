@@ -3,7 +3,6 @@ package com.js.rbuddyapp;
 import static com.js.android.Tools.*;
 
 import com.js.android.ActivityState;
-import com.js.android.App;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
 import com.js.json.*;
@@ -121,8 +120,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void layoutElements() {
-		String jsonString = App.sharedInstance().readTextFileResource(
-				R.raw.form_edit_receipt);
+		String jsonString = readTextFileResource(this, R.raw.form_edit_receipt);
 		this.form = Form.parse(this, jsonString);
 		receiptWidget = (FormButtonWidget) form.getField("receipt");
 		receiptWidget.setOnClickListener(new OnClickListener() {

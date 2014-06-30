@@ -11,7 +11,6 @@ import java.util.Map;
 import android.content.Context;
 import android.util.DisplayMetrics;
 
-import com.js.basic.Files;
 import com.js.rbuddy.JSDate;
 
 /**
@@ -50,10 +49,6 @@ public class App {
 		} catch (Throwable e) {
 			die("failed to construct app instance", e);
 		}
-		if (db)
-			pr("\n  returning sharedInstance " + describe(sharedInstance)
-					+ "\n\n\n");
-
 		return sharedInstance;
 	}
 
@@ -68,32 +63,33 @@ public class App {
 		return sharedInstance;
 	}
 
+	private void prepareSystemOut() {
+		AndroidSystemOutFilter.install();
+
+		// Print message about app starting. Print a bunch of newlines
+		// to simulate clearing the console, and for convenience,
+		// print the time of day so we can figure out if the
+		// output is current or not.
+
+		String strTime = "";
+		{
+			Calendar cal = Calendar.getInstance();
+			java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+					"h:mm:ss", Locale.CANADA);
+			strTime = sdf.format(cal.getTime());
+		}
+		pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
+				+ strTime + " -------------\n\n\n");
+
+	}
+
 	protected App(Context context) {
 		this.context = context;
 
 		AppPreferences.prepare(this.context);
 
 		if (!testing()) {
-			AndroidSystemOutFilter.install();
-
-			// Print message about app starting. Print a bunch of newlines
-			// to
-			// simulate
-			// clearing the console, and for convenience, print the time of
-			// day
-			// so we can figure out if the
-			// output is current or not.
-
-			String strTime = "";
-			{
-				Calendar cal = Calendar.getInstance();
-				java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
-						"h:mm:ss", Locale.CANADA);
-				strTime = sdf.format(cal.getTime());
-			}
-			pr("\n\n\n\n\n\n\n\n\n\n\n\n\n--------------- Start of App ----- "
-					+ strTime + " -------------\n\n\n");
-
+			prepareSystemOut();
 			addResourceMappings();
 		}
 		JSDate.setFactory(AndroidDate.androidDateFactory(context));
@@ -135,42 +131,6 @@ public class App {
 		addResource("photo", android.R.drawable.ic_menu_gallery);
 		addResource("camera", android.R.drawable.ic_menu_camera);
 		addResource("search", android.R.drawable.ic_menu_search);
-	}
-
-	public String getStringResource(String stringName) {
-		String packageName = context.getPackageName();
-		int resId = context.getResources().getIdentifier(stringName, "string",
-				packageName);
-		if (db)
-			pr("getIdentifier string='" + stringName + "' package='"
-					+ packageName + "' yields resId " + resId);
-		String str = null;
-		if (resId != 0)
-			str = context.getString(resId);
-		if (db)
-			pr(" string for id " + resId + " = " + str);
-		if (str == null)
-			throw new IllegalArgumentException("string name " + stringName
-					+ "  has resource id " + resId + ", no string found");
-		return str;
-	}
-
-	public String readTextFileResource(int resourceId) {
-		String str = null;
-		try {
-			str = Files.readTextFile(context.getResources().openRawResource(
-					resourceId));
-		} catch (Throwable e) {
-			die("problem reading resource #" + resourceId, e);
-		}
-		return str;
-	}
-
-	public String applyStringSubstitution(String s) {
-		if (s.startsWith("@")) {
-			s = getStringResource(s.substring(1));
-		}
-		return s;
 	}
 
 	/**

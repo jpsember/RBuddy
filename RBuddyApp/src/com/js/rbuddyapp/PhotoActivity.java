@@ -110,7 +110,8 @@ public class PhotoActivity extends Activity {
 	}
 
 	private void layoutElements() {
-		String jsonString = app.readTextFileResource(R.raw.form_photo_activity);
+		String jsonString = readTextFileResource(this,
+				R.raw.form_photo_activity);
 
 		this.form = Form.parse(this, jsonString);
 		form.getField("takephoto").setOnClickListener(new OnClickListener() {
