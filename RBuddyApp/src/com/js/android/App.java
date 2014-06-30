@@ -12,6 +12,7 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 
 import com.js.basic.Files;
+import com.js.rbuddy.JSDate;
 
 /**
  * Utility methods associated with an application context
@@ -95,6 +96,7 @@ public class App {
 
 			addResourceMappings();
 		}
+		JSDate.setFactory(AndroidDate.androidDateFactory(context));
 		displayMetrics = context.getResources().getDisplayMetrics();
 	}
 

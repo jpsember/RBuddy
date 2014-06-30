@@ -66,8 +66,9 @@ public class RBuddyApp extends App {
 	protected RBuddyApp(Context context) {
 		super(context);
 
+		// Determine whether Google Drive API is to be used, by reading
+		// from preferences
 		useGoogleAPI();
-		JSDate.setFactory(AndroidDate.androidDateFactory(context));
 	}
 
 	public GoogleApiClient getGoogleApiClient() {
