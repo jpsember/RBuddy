@@ -37,7 +37,8 @@ public interface IPhotoStore {
 	 * @param listener
 	 *            the listener to notify when drawable is available
 	 */
-	public void addPhotoListener(int receiptId, IPhotoListener listener);
+	public void addPhotoListener(int receiptId, boolean thumbnail,
+			IPhotoListener listener);
 
 	/**
 	 * Remove listener
@@ -45,6 +46,7 @@ public interface IPhotoStore {
 	 * @param receiptId
 	 * @param listener
 	 */
-	public void removePhotoListener(int receiptId, IPhotoListener listener);
+	public void removePhotoListener(int receiptId, boolean thumbnail,
+			IPhotoListener listener);
 
 }

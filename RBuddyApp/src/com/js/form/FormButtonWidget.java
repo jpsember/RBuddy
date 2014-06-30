@@ -99,21 +99,17 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
 		if (receiptId == 0) {
 			if (listeningForPhotoId != 0) {
-				photoStore.removePhotoListener(listeningForPhotoId, this);
+				photoStore.removePhotoListener(listeningForPhotoId, true, this);
 				listeningForPhotoId = 0;
 			}
 		} else {
 			if (listeningForPhotoId != 0 && listeningForPhotoId != receiptId) {
-				photoStore.removePhotoListener(listeningForPhotoId, this);
+				photoStore.removePhotoListener(listeningForPhotoId, true, this);
 			}
 
 			listeningForPhotoId = receiptId;
 
-			// Issue #28: add parameter and support for thumbnails; basically
-			// an extra argument should be passed by the listener to indicate
-			// what
-			// kind of images it's interested in
-			photoStore.addPhotoListener(receiptId, this);
+			photoStore.addPhotoListener(receiptId, true, this);
 
 			if (fileIdString != null) {
 				// Have the PhotoStore load the image, and it will notify any

@@ -29,7 +29,9 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	public SimplePhotoStore(Context context) {
 		this.context = context;
-		listenersMap = new HashMap();
+		listenerMaps = new Map[2];
+		for (int i = 0; i < 2; i++)
+			listenerMaps[i] = new HashMap();
 
 		// Construct ui and background task handlers
 		this.uiHandler = new Handler(Looper.getMainLooper());
@@ -240,12 +242,19 @@ public class SimplePhotoStore implements IPhotoStore {
 		});
 	}
 
+	private Map<Integer, Set<IPhotoListener>> getListenerMap(boolean thumbnail) {
+		return listenerMaps[thumbnail ? 1 : 0];
+	}
+
 	@Override
-	public void addPhotoListener(int receiptId, IPhotoListener listener) {
+	public void addPhotoListener(int receiptId, boolean thumbnail,
+			IPhotoListener listener) {
 		final boolean db = TRACE_LISTENERS;
 		if (db)
-			pr(hey() + "receiptId " + receiptId + " listener " + listener);
+			pr(hey() + "receiptId " + receiptId + " thumbnail " + thumbnail
+					+ " listener " + listener);
 
+		Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(thumbnail);
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null) {
 			listeners = new HashSet<IPhotoListener>();
@@ -257,11 +266,14 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void removePhotoListener(int receiptId, IPhotoListener listener) {
+	public void removePhotoListener(int receiptId, boolean thumbnail,
+			IPhotoListener listener) {
 		final boolean db = TRACE_LISTENERS;
 		if (db)
-			pr(hey() + "receiptId " + receiptId + " listener " + listener);
+			pr(hey() + "receiptId " + receiptId + " thumbnail " + thumbnail
+					+ " listener " + listener);
 
+		Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(thumbnail);
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
@@ -300,6 +312,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 		runOnUIThread(new Runnable() {
 			public void run() {
+				Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(thumbnail);
 				Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 				if (listeners == null)
 					return;
@@ -320,13 +333,17 @@ public class SimplePhotoStore implements IPhotoStore {
 	public String dumpListeners() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------\n " + nameOf(this) + " listeners:\n");
-		for (int receiptId : listenersMap.keySet()) {
-			Set<IPhotoListener> set = listenersMap.get(receiptId);
-			sb.append("  id " + receiptId + " : ");
-			for (IPhotoListener x : set) {
-				sb.append(x + " ");
+		for (int pass = 0; pass < 2; pass++) {
+			sb.append(pass == 0 ? "fullsize\n" : "thumbnail\n");
+			Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(pass == 1);
+			for (int receiptId : listenersMap.keySet()) {
+				Set<IPhotoListener> set = listenersMap.get(receiptId);
+				sb.append("  id " + receiptId + " : ");
+				for (IPhotoListener x : set) {
+					sb.append(x + " ");
+				}
+				sb.append("\n");
 			}
-			sb.append("\n");
 		}
 		sb.append("------\n\n");
 		return sb.toString();
@@ -337,7 +354,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		return new BitmapDrawable(context.getResources(), bmp);
 	}
 
-	private Map<Integer, Set<IPhotoListener>> listenersMap;
+	private Map<Integer, Set<IPhotoListener>>[] listenerMaps;
 
 	// Handler for executing tasks serially on the UI thread
 	protected Handler uiHandler;

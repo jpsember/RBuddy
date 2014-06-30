@@ -8,7 +8,6 @@ import com.js.rbuddyapp.RBuddyApp;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import static com.js.basic.Tools.*;
 
 public class FormImageWidget extends FormWidget implements IPhotoListener {
 
@@ -27,17 +26,18 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
 		if (receiptId == 0) {
 			if (listeningForReceiptId != 0) {
-				photoStore.removePhotoListener(listeningForReceiptId, this);
+				photoStore.removePhotoListener(listeningForReceiptId, false,
+						this);
 				listeningForReceiptId = 0;
 			}
 		} else {
 			if (listeningForReceiptId != 0) {
-				photoStore.removePhotoListener(listeningForReceiptId, this);
+				photoStore.removePhotoListener(listeningForReceiptId, false,
+						this);
 			}
 
 			listeningForReceiptId = receiptId;
-			unimp("add parameter and support for thumbnails");
-			photoStore.addPhotoListener(listeningForReceiptId, this);
+			photoStore.addPhotoListener(listeningForReceiptId, false, this);
 
 			if (fileIdString != null) {
 				// Have the PhotoStore load the image, and it will notify any
