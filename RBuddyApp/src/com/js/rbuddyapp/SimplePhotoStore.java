@@ -17,6 +17,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+
+import com.js.android.AppPreferences;
+import com.js.android.BitmapUtil;
 import com.js.basic.Files;
 
 public class SimplePhotoStore implements IPhotoStore {
@@ -24,8 +27,6 @@ public class SimplePhotoStore implements IPhotoStore {
 	public SimplePhotoStore(Context context) {
 		this.context = context;
 		listenersMap = new HashMap();
-
-		this.app = RBuddyApp.sharedInstance();
 
 		// Construct ui and background task handlers
 		this.uiHandler = new Handler(Looper.getMainLooper());
@@ -35,7 +36,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		handlerThread.start();
 		this.backgroundHandler = new Handler(handlerThread.getLooper());
 
-		if (!app.useGoogleAPI()) {
+		if (!RBuddyApp.sharedInstance().useGoogleAPI()) {
 			warning("constructing PhotoCaches with reduced capacity");
 			this.thumbnailCache = new PhotoCache(200000, 5);
 			this.regularCache = new PhotoCache(5000000, 5);
@@ -310,8 +311,6 @@ public class SimplePhotoStore implements IPhotoStore {
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
 		return new BitmapDrawable(context.getResources(), bmp);
 	}
-
-	private RBuddyApp app;
 
 	private Map<Integer, Set<IPhotoListener>> listenersMap;
 

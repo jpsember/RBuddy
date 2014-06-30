@@ -4,6 +4,7 @@ import static com.js.basic.Tools.*;
 
 import java.util.List;
 
+import com.js.android.AndroidDate;
 import com.js.rbuddy.Receipt;
 import android.content.Context;
 import android.view.Gravity;

@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import android.test.AndroidTestCase;
+
+import com.js.rbuddyapp.RBuddyApp;
 import com.js.rbuddyapp.SimpleReceiptFile;
 
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSetFile;
 
-public class SimpleReceiptFileTest extends JSAndroidTestCase {
+public class SimpleReceiptFileTest extends AndroidTestCase {
 
 	private static final String BASENAME = "__test__receipts_json.txt";
 
@@ -93,6 +96,8 @@ public class SimpleReceiptFileTest extends JSAndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		// Make sure we construct the correct type of app
+		RBuddyApp.sharedInstance(getContext());
 		constructFile();
 		File f = rf.fileForBaseName(BASENAME);
 		if (f.isFile())

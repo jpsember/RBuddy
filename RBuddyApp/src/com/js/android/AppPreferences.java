@@ -1,4 +1,4 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
 import java.util.Map;
 

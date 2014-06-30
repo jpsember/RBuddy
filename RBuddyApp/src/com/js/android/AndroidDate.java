@@ -1,4 +1,4 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
 import static com.js.basic.Tools.*;
 import android.annotation.SuppressLint;

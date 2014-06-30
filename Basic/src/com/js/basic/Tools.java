@@ -1018,7 +1018,19 @@ public class Tools {
 		warning("Tools.main executing.");
 	}
 
-	public static Random rnd = new Random(System.currentTimeMillis());
+	public static Random rnd = new Random(1965);
+
+	/**
+	 * Seed the random number generator
+	 * 
+	 * @param seed
+	 *            seed to use; if 0, uses system clock value
+	 */
+	public static void seedRandom(long seed) {
+		if (seed == 0)
+			seed = System.currentTimeMillis();
+		rnd = new Random(seed);
+	}
 
 	/**
 	 * Construct a new timer

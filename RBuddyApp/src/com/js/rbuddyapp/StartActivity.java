@@ -27,9 +27,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		RBuddyApp.prepare(this);
-
-		app = RBuddyApp.sharedInstance();
+		app = (RBuddyApp) RBuddyApp.sharedInstance(RBuddyApp.class, this);
 
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);

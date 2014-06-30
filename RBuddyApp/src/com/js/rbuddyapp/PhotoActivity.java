@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
+import com.js.android.BitmapUtil;
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
@@ -59,7 +60,7 @@ public class PhotoActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		app = RBuddyApp.sharedInstance();
+		app = RBuddyApp.sharedInstance(this);
 		int receiptId = getIntent().getIntExtra(EXTRA_RECEIPT_ID, 0);
 		ASSERT(receiptId > 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);

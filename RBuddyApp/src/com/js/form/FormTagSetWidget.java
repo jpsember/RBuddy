@@ -1,7 +1,5 @@
 package com.js.form;
 
-//import static com.js.basic.Tools.*;
-
 import java.util.Map;
 
 import com.js.rbuddyapp.RBuddyApp;

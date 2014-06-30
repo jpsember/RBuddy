@@ -2,6 +2,7 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
+import com.js.android.ActivityState;
 import com.js.form.Form;
 import com.js.rbuddy.R;
 
@@ -25,6 +26,7 @@ public class SearchActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		RBuddyApp.sharedInstance(this);
 
 		layoutElements();
 

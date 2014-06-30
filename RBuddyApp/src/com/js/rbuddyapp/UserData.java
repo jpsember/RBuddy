@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 
+import com.js.android.AppPreferences;
 import com.js.basic.Files;
 import com.js.json.JSONParser;
 import com.js.json.JSONTools;

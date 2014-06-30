@@ -4,6 +4,8 @@ import static com.js.android.Tools.*;
 
 import java.util.*;
 
+import com.js.android.ActivityState;
+import com.js.android.AppPreferences;
 import com.js.form.FormWidget;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
@@ -31,7 +33,7 @@ public class ReceiptListActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		app = RBuddyApp.sharedInstance();
+		app = RBuddyApp.sharedInstance(this);
 
 		LinearLayout layout = new LinearLayout(this);
 		FormWidget.setDebugBgnd(layout, app.useGoogleAPI() ? "#000030"
@@ -164,6 +166,8 @@ public class ReceiptListActivity extends Activity {
 				new Runnable() {
 					@Override
 					public void run() {
+						seedRandom(0);
+
 						for (int i = 0; i < 30; i++) {
 							int id = app.receiptFile().allocateUniqueId();
 							Receipt r = Receipt.buildRandom(id);

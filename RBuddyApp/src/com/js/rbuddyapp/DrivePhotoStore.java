@@ -3,6 +3,7 @@ package com.js.rbuddyapp;
 import android.content.Context;
 
 import com.google.android.gms.drive.DriveFolder;
+import com.js.android.BitmapUtil;
 
 import static com.js.basic.Tools.*;
 
