@@ -2,11 +2,9 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
-import com.js.android.AndroidDate;
 import com.js.android.App;
 import com.js.android.AppPreferences;
 import com.js.rbuddy.IReceiptFile;
-import com.js.rbuddy.JSDate;
 import com.js.rbuddy.TagSetFile;
 
 import android.content.Context;
