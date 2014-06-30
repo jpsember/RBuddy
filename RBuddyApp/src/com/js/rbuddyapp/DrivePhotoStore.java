@@ -25,7 +25,7 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	@Override
 	public void storePhoto(int receiptId, FileArguments args) {
 		removeCachedVersions(receiptId);
-    // Fill in additional fields, in case we're creating a new file
+		// Fill in additional fields, in case we're creating a new file
 		args.setParentFolder(photosFolder);
 		args.setMimeType("image/jpeg");
 		args.setFilename(BitmapUtil.constructReceiptImageFilename(receiptId));

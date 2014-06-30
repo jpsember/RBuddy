@@ -1,5 +1,7 @@
 package com.js.rbuddyapp;
 
+import com.js.rbuddy.Receipt;
+
 public interface IPhotoStore {
 
 	// TODO Issue #31
@@ -21,6 +23,11 @@ public interface IPhotoStore {
 	 * @param args
 	 */
 	public void deletePhoto(int receiptId, FileArguments args);
+
+	/**
+	 * Prepare drawables and send to listeners for a particular id
+	 */
+	public void pushPhoto(Receipt receipt);
 
 	/**
 	 * Register a listener for a particular photo

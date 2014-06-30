@@ -53,6 +53,7 @@ public class PhotoActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		unimp("we should probably pass a receipt here instead");
+		// Display nothing, so widget stops listening; else it will leak
 		imageWidget.displayPhoto(0, null);
 		app.receiptFile().flush();
 	}
@@ -165,13 +166,12 @@ public class PhotoActivity extends Activity {
 			final FileArguments arg = args;
 
 			// We have to wait until the photo has been processed, and a photoId
-			// assigned; then store this assignment in the receipt, and update
-			// the photo's widget
+			// assigned; then store this assignment in the receipt, and push new
+			// version to any listeners
 			args.setCallback(new Runnable() {
 				public void run() {
 					receipt.setPhotoId(arg.getFileIdString());
-					imageWidget.displayPhoto(receipt.getId(),
-							receipt.getPhotoId());
+					app.photoStore().pushPhoto(receipt);
 				}
 			});
 			IPhotoStore ps = app.photoStore();

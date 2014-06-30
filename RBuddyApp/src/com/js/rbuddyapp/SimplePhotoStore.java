@@ -21,8 +21,11 @@ import android.os.Looper;
 import com.js.android.AppPreferences;
 import com.js.android.BitmapUtil;
 import com.js.basic.Files;
+import com.js.rbuddy.Receipt;
 
 public class SimplePhotoStore implements IPhotoStore {
+
+	private static final boolean TRACE_LISTENERS = false;
 
 	public SimplePhotoStore(Context context) {
 		this.context = context;
@@ -239,9 +242,10 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	@Override
 	public void addPhotoListener(int receiptId, IPhotoListener listener) {
+		final boolean db = TRACE_LISTENERS;
 		if (db)
-			pr("addPhotoListener receiptId " + receiptId + ", listener "
-					+ listener);
+			pr(hey() + "receiptId " + receiptId + " listener " + listener);
+
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null) {
 			listeners = new HashSet<IPhotoListener>();
@@ -254,6 +258,10 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	@Override
 	public void removePhotoListener(int receiptId, IPhotoListener listener) {
+		final boolean db = TRACE_LISTENERS;
+		if (db)
+			pr(hey() + "receiptId " + receiptId + " listener " + listener);
+
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
@@ -262,6 +270,17 @@ public class SimplePhotoStore implements IPhotoStore {
 			listenersMap.remove(receiptId);
 		if (db)
 			pr(dumpListeners());
+	}
+
+	@Override
+	public void pushPhoto(Receipt receipt) {
+		if (receipt.getPhotoId() == null)
+			return;
+
+		// Read both full-size and thumbnail versions of the photo;
+		// the cache logic will notify any listeners
+		readPhoto(receipt.getId(), receipt.getPhotoId(), false);
+		readPhoto(receipt.getId(), receipt.getPhotoId(), true);
 	}
 
 	/**
@@ -274,13 +293,19 @@ public class SimplePhotoStore implements IPhotoStore {
 	 */
 	private void notifyListenersOfDrawable(final int receiptId,
 			final Drawable d, final boolean thumbnail) {
+		final boolean db = TRACE_LISTENERS;
+		if (db)
+			pr(hey() + "receiptId " + receiptId + " drawable " + d
+					+ " thumbnail " + thumbnail);
+
 		runOnUIThread(new Runnable() {
 			public void run() {
 				Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 				if (listeners == null)
 					return;
 				for (IPhotoListener listener : listeners) {
-					sleep();
+					if (db)
+						pr(" drawableAvailable sending to listener " + listener);
 					listener.drawableAvailable(d, receiptId, thumbnail);
 				}
 			}
@@ -288,8 +313,8 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private File getFileForPhotoId(String photoId) {
-		return new File(context.getExternalFilesDir(null), "photo_"
-				+ photoId + BitmapUtil.JPEG_EXTENSION);
+		return new File(context.getExternalFilesDir(null), "photo_" + photoId
+				+ BitmapUtil.JPEG_EXTENSION);
 	}
 
 	public String dumpListeners() {

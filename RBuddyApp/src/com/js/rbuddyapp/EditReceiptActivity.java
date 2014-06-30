@@ -53,6 +53,8 @@ public class EditReceiptActivity extends Activity {
 		super.onPause();
 		updateReceiptWithWidgetValues();
 		app.receiptFile().flush();
+		// Make widget display nothing, so it stops listening; otherwise
+		// the widget will leak
 		receiptWidget.displayPhoto(0, null);
 	}
 
@@ -60,10 +62,6 @@ public class EditReceiptActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		app = RBuddyApp.sharedInstance(this);
-
-		if (db) {
-			pr(dumpIntent(this));
-		}
 		int receiptId = this.getIntent().getIntExtra(EXTRA_RECEIPT_ID, 0);
 		this.receipt = app.receiptFile().getReceipt(receiptId);
 
