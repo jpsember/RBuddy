@@ -42,7 +42,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		this.backgroundHandler = new Handler(handlerThread.getLooper());
 
 		if (!RBuddyApp.sharedInstance().useGoogleAPI()) {
-			warning("constructing PhotoCaches with reduced capacity");
+			// Use reduced cache capacities for test purposes
 			this.thumbnailCache = new PhotoCache(200000, 5);
 			this.regularCache = new PhotoCache(5000000, 5);
 		} else {

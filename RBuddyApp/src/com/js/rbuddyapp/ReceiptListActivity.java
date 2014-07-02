@@ -4,24 +4,21 @@ import static com.js.android.Tools.*;
 
 import java.util.*;
 
-import com.js.android.ActivityState;
 import com.js.android.AppPreferences;
-import com.js.form.FormWidget;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 public class ReceiptListActivity extends Activity {
 
@@ -34,45 +31,76 @@ public class ReceiptListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		app = RBuddyApp.sharedInstance(this);
+		fragments = FragmentOrganizer.construct(this, savedInstanceState);
 
-		LinearLayout layout = new LinearLayout(this);
-		FormWidget.setDebugBgnd(layout, app.useGoogleAPI() ? "#000030"
-				: "#004000");
-		layout.setOrientation(LinearLayout.VERTICAL);
-		setContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
-		layout.addView(constructListView());
+		if (!fragments.has("ReceiptList"))
+			fragments.add(new ReceiptListFragment());
+		receiptListFragment = (ReceiptListFragment) fragments.get();
 
-		activityState = new ActivityState() //
-				.add(receiptListView) //
-				.restoreStateFrom(savedInstanceState);
+		if (!fragments.has("EditReceipt"))
+			fragments.add(new EditReceiptFragment());
+		// editReceiptFragment = (EditReceiptFragment) fragments.get();
+
+		setContentView(fragments.getView(), new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-
-		if (editReceipt != null) {
-			if (!app.receiptFile().exists(editReceipt.getId())) {
-				invalidateReceiptList();
+		receiptListHandler = new Handler(new Handler.Callback() {
+			public boolean handleMessage(Message msg) {
+				switch (msg.what) {
+				case ReceiptListFragment.MESSAGE_CODE_RECEIPT_SELECTED:
+					editReceipt((Receipt) msg.obj);
+					return true;
+				}
+				return false;
 			}
-		}
-		if (!receiptListValid)
-			rebuildReceiptList(this.receiptList);
+		});
 
-		refreshEditedReceipt();
+		receiptListFragment.addListener(receiptListHandler);
+
+		// Behaviour to incorporate into FragmentOrganizer:
+		// [] have it manipulate up to two side-by-side fragments, only visible
+		// if in landscape mode on a tablet (or other suitably large device)
+		// [] remember which fragment has focus, so if rotation occurs and one
+		// fragment disappears, the focused one remains
+		//
+		fragments.plotFragment("ReceiptList", 0);
+
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+			fragments.plotFragment("EditReceipt", 1);
+		else
+			fragments.plotFragment(null, 1);
+
+		// if (OLDWAY) {
+		// if (editReceipt != null) {
+		// if (!app.receiptFile().exists(editReceipt.getId())) {
+		// invalidateReceiptList();
+		// }
+		// }
+		// if (!receiptListValid)
+		// rebuildReceiptList(this.receiptList);
+		//
+		// refreshEditedReceipt();
+		// }
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		activityState.saveState(outState);
+		fragments.onSaveInstanceState(outState);
+		// if (OLDWAY) {
+		// activityState.saveState(outState);
+		// }
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		app.receiptFile().flush();
+		// this.editReceiptFragment = null;
 	}
 
 	@Override
@@ -118,11 +146,12 @@ public class ReceiptListActivity extends Activity {
 	private void showGoogleDriveState() {
 		toast(this,
 				"Google Drive is "
-				+ (app.useGoogleAPI() ? "active" : "inactive")
-				+ ", and will be "
-				+ (AppPreferences.getBoolean(
-						RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true) ? "active"
-						: "inactive") + " when app restarts.");
+						+ (app.useGoogleAPI() ? "active" : "inactive")
+						+ ", and will be "
+						+ (AppPreferences.getBoolean(
+								RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
+								true) ? "active" : "inactive")
+						+ " when app restarts.");
 	}
 
 	public static void setMenuLabel(Menu menu, int menuItemId, String label) {
@@ -140,7 +169,7 @@ public class ReceiptListActivity extends Activity {
 		// appearing. Workaround seems to be to delay this code until after the
 		// onPrepareCall() completes...
 
-		receiptListView.post(new Runnable() {
+		runOnUiThread(new Runnable() {
 			public void run() {
 				setMenuLabel(
 						menu,
@@ -173,8 +202,12 @@ public class ReceiptListActivity extends Activity {
 							Receipt r = Receipt.buildRandom(id);
 							app.receiptFile().add(r);
 						}
-						rebuildReceiptList(receiptList);
-						receiptListAdapter.notifyDataSetChanged();
+						unimp();
+						if (false) {
+							rebuildReceiptList(receiptList);
+							receiptListAdapter.notifyDataSetChanged();
+						}
+						app.receiptFile().flush();
 					}
 				});
 	}
@@ -184,101 +217,119 @@ public class ReceiptListActivity extends Activity {
 			@Override
 			public void run() {
 				app.receiptFile().clear();
-				rebuildReceiptList(receiptList);
+				unimp();
+				if (false) {
+					rebuildReceiptList(receiptList);
+				}
 			}
 		});
 	}
 
-	private List buildListOfReceipts() {
-		ArrayList list = new ArrayList();
-		rebuildReceiptList(list);
-		return list;
-	}
-
+	// private List buildListOfReceipts() {
+	// ArrayList list = new ArrayList();
+	// rebuildReceiptList(list);
+	// return list;
+	// }
+	//
 	private void invalidateReceiptList() {
-		receiptListValid = false;
-		refreshReceiptAtPosition = null;
+		// receiptListValid = false;
+		// refreshReceiptAtPosition = null;
 	}
 
 	private void rebuildReceiptList(List list) {
+		if (list == null) {
+			unimp();
+			return;
+		}
 		list.clear();
 		for (Iterator it = app.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
 		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);
-		receiptListValid = true;
+		// receiptListValid = true;
 
 		if (receiptListAdapter != null)
 			receiptListAdapter.notifyDataSetChanged();
 	}
 
-	// Construct a view to be used for the list items
-	private View constructListView() {
-
-		ListView listView = new ListView(this);
-
-		List receiptList = buildListOfReceipts();
-		ArrayAdapter arrayAdapter = new ReceiptListAdapter(this, receiptList);
-		listView.setAdapter(arrayAdapter);
-
-		// Store references to both the ArrayAdapter and the backing ArrayList,
-		// to make responding to selection actions more convenient.
-		this.receiptListAdapter = arrayAdapter;
-		this.receiptList = receiptList;
-		this.receiptListView = listView;
-
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			public void onItemClick(AdapterView aView, View v, int position,
-					long id) {
-				processReceiptSelection(position);
-			}
-		});
-		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		listView.setLayoutParams(layoutParam);
-
-		return listView;
-	}
+	// // Construct a view to be used for the list items
+	// private View constructListView() {
+	//
+	// ListView listView = new ListView(this);
+	//
+	// List receiptList = buildListOfReceipts();
+	// ArrayAdapter arrayAdapter = new ReceiptListAdapter(this, receiptList);
+	// listView.setAdapter(arrayAdapter);
+	//
+	// // Store references to both the ArrayAdapter and the backing ArrayList,
+	// // to make responding to selection actions more convenient.
+	// this.receiptListAdapter = arrayAdapter;
+	// this.receiptList = receiptList;
+	// this.receiptListView = listView;
+	//
+	// listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+	// public void onItemClick(AdapterView aView, View v, int position,
+	// long id) {
+	// processReceiptSelection(position);
+	// }
+	// });
+	// LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
+	// LayoutParams.WRAP_CONTENT);
+	// listView.setLayoutParams(layoutParam);
+	//
+	// return listView;
+	// }
 
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
 		invalidateReceiptList();
-		doEditReceipt(r);
+		// doEditReceipt(r);
 	}
 
-	private void doEditReceipt(Receipt receipt) {
-		this.editReceipt = receipt;
-		startActivity(EditReceiptActivity.getStartIntent(this, receipt.getId()));
+	private void editReceipt(Receipt receipt) {
+		// this.editReceipt = receipt;
+
+		// If edit receipt fragment is available, call it directly; otherwise,
+		// start activity containing it
+
+		unimp("check if editReceipt fragment is about");
+		EditReceiptFragment f = (EditReceiptFragment) fragments
+				.get("EditReceipt");
+		if (f != null) {
+			f.setReceipt(receipt);
+		} else
+			startActivity(EditReceiptActivity.getStartIntent(this,
+					receipt.getId()));
 	}
 
-	/**
-	 * Process user selecting receipt from receipt list
-	 * 
-	 * @param position
-	 */
-	private void processReceiptSelection(int position) {
-		// We will need to refresh this item when returning from the edit
-		// activity in case its contents have changed
-		refreshReceiptAtPosition = position;
-		doEditReceipt(receiptListAdapter.getItem(position));
-	}
+	// /**
+	// * Process user selecting receipt from receipt list
+	// *
+	// * @param position
+	// */
+	// private void processReceiptSelection(int position) {
+	// // We will need to refresh this item when returning from the edit
+	// // activity in case its contents have changed
+	// refreshReceiptAtPosition = position;
+	// doEditReceipt(receiptListAdapter.getItem(position));
+	// }
 
-	private void refreshEditedReceipt() {
-		if (refreshReceiptAtPosition == null)
-			return;
-		int receiptPosition = refreshReceiptAtPosition;
-		refreshReceiptAtPosition = null;
-
-		int visiblePosition = receiptListView.getFirstVisiblePosition();
-		View view = receiptListView.getChildAt(receiptPosition
-				- visiblePosition);
-		if (view == null)
-			return;
-
-		// This apparently updates the view's fields, which induces its update
-		// on the screen
-		receiptListAdapter.getView(receiptPosition, view, receiptListView);
-	}
+	// private void refreshEditedReceipt() {
+	// if (refreshReceiptAtPosition == null)
+	// return;
+	// int receiptPosition = refreshReceiptAtPosition;
+	// refreshReceiptAtPosition = null;
+	//
+	// int visiblePosition = receiptListView.getFirstVisiblePosition();
+	// View view = receiptListView.getChildAt(receiptPosition
+	// - visiblePosition);
+	// if (view == null)
+	// return;
+	//
+	// // This apparently updates the view's fields, which induces its update
+	// // on the screen
+	// receiptListAdapter.getView(receiptPosition, view, receiptListView);
+	// }
 
 	private void doSearchActivity() {
 		Intent intent = SearchActivity.getStartIntent(this);
@@ -290,20 +341,27 @@ public class ReceiptListActivity extends Activity {
 		startActivity(intent);
 	}
 
-	// If false, we assume the current receipt list (if one exists) is invalid,
-	// and a new one needs to be built
-	private boolean receiptListValid;
-
+	// // If false, we assume the current receipt list (if one exists) is
+	// invalid,
+	// // and a new one needs to be built
+	// private boolean receiptListValid;
+	//
 	// If non-null, we refresh the receipt at this position in the list when
 	// resuming the activity
-	private Integer refreshReceiptAtPosition;
+	// private Integer refreshReceiptAtPosition;
 
-	// If non-null, this receipt was just edited
-	private Receipt editReceipt;
+	// // If non-null, this receipt was just edited
+	// private Receipt editReceipt;
 
 	private ArrayAdapter<Receipt> receiptListAdapter;
 	private List receiptList;
+	private Handler receiptListHandler;
 	private RBuddyApp app;
-	private ListView receiptListView;
-	private ActivityState activityState;
+	// private ListView receiptListView;
+	// private ActivityState activityState;
+	// private ViewGroup fragmentContainer;
+
+	private ReceiptListFragment receiptListFragment;
+	// private EditReceiptFragment editReceiptFragment;
+	private FragmentOrganizer fragments;
 }

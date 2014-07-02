@@ -352,12 +352,13 @@ public class Tools {
 	public static String d(Map m) {
 		if (m == null)
 			return "null";
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder("Map[\n");
 		Iterator it = m.keySet().iterator();
 		while (it.hasNext()) {
 			Object k = it.next();
+			sb.append(" ....Key '");
 			sb.append(f(k.toString(), 50));
-			sb.append(" -> ");
+			sb.append("' -> ");
 			Object v = m.get(k);
 			String s = "";
 			if (v != null)
@@ -366,6 +367,7 @@ public class Tools {
 			sb.append(d(s));
 			sb.append("\n");
 		}
+		sb.append("]\n");
 		return sb.toString();
 	}
 
