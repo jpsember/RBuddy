@@ -4,18 +4,13 @@ import static com.js.android.Tools.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.js.android.ActivityState;
 import com.js.rbuddy.Receipt;
 
-import android.app.Fragment;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +19,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class ReceiptListFragment extends Fragment {
-
-	public static final String TAG = "ReceiptList";
+public class ReceiptListFragment extends MyFragment {
 
 	public static final int MESSAGE_CODE_RECEIPT_SELECTED = 1;
+	public static final String TAG = "ReceiptList";
+
+	public static final Factory FACTORY = new Factory() {
+
+		@Override
+		public String tag() {
+			return TAG;
+		}
+
+		@Override
+		public MyFragment construct() {
+			return new ReceiptListFragment();
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,17 +60,17 @@ public class ReceiptListFragment extends Fragment {
 		activityState.saveState(outState);
 	}
 
-	/**
-	 * Add a listener for events from this fragment. Events are sent as
-	 * Messages, with .what holding the MESSAGE_CODE, and .obj holding the
-	 * Receipt
-	 * 
-	 * @param listener
-	 *            Handler to receive messages
-	 */
-	public void addListener(Handler listener) {
-		listeners.add(listener);
-	}
+	// /**
+	// * Add a listener for events from this fragment. Events are sent as
+	// * Messages, with .what holding the MESSAGE_CODE, and .obj holding the
+	// * Receipt
+	// *
+	// * @param listener
+	// * Handler to receive messages
+	// */
+	// public void addListener(Handler listener) {
+	// listeners.add(listener);
+	// }
 
 	private List<Receipt> buildListOfReceipts() {
 		ArrayList list = new ArrayList();
@@ -121,16 +128,24 @@ public class ReceiptListFragment extends Fragment {
 	 */
 	private void processReceiptSelection(int position) {
 		Receipt r = receiptList.get(position);
-		for (Handler listener : listeners) {
-			listener.sendMessage(Message.obtain(null,
-					MESSAGE_CODE_RECEIPT_SELECTED, r));
-		}
-
-		// We will need to refresh this item when returning from the edit
-		// activity in case its contents have changed
-		refreshReceiptAtPosition = position;
-		unimp("pass selection action up to activity");
-		// doEditReceipt(receiptListAdapter.getItem(position));
+		final boolean db = true;
+		if (db)
+			pr(hey() + "position=" + position);
+		listener().receiptSelected(r);
+		//
+		// if (db)
+		// pr(hey() + "receipt=" + r);
+		// for (Handler listener : listeners) {
+		// if (db)
+		// pr(" sending message to listener " + listener);
+		// listener.sendMessage(Message.obtain(null,
+		// MESSAGE_CODE_RECEIPT_SELECTED, r));
+		// }
+		//
+		// // We will need to refresh this item when returning from the edit
+		// // activity in case its contents have changed
+		// refreshReceiptAtPosition = position;
+		// // doEditReceipt(receiptListAdapter.getItem(position));
 	}
 
 	// private ViewGroup constructReceiptListContainer() {
@@ -149,9 +164,14 @@ public class ReceiptListFragment extends Fragment {
 	// If non-null, we refresh the receipt at this position in the list when
 	// resuming the activity
 	/* private */Integer refreshReceiptAtPosition;
+
 	//
 	// // If non-null, this receipt was just edited
 	// private Receipt editReceipt;
+
+	private Listener listener() {
+		return (Listener) getActivity();
+	}
 
 	private ArrayAdapter<Receipt> receiptListAdapter;
 	private List<Receipt> receiptList;
@@ -159,5 +179,15 @@ public class ReceiptListFragment extends Fragment {
 	private ListView receiptListView;
 	private ActivityState activityState;
 
-	private Set<Handler> listeners = new HashSet();
+	// private Set<Handler> listeners = new HashSet();
+
+	// @Override
+	// protected void processMessage(Message m) {
+	// // TODO Auto-generated method stub
+	//
+	// }
+
+	public static interface Listener {
+		void receiptSelected(Receipt r);
+	}
 }

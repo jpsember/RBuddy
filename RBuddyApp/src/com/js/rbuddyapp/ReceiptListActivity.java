@@ -4,23 +4,33 @@ import static com.js.android.Tools.*;
 
 import java.util.*;
 
+//import com.js.android.ActivityState;
 import com.js.android.AppPreferences;
+//import com.js.form.FormWidget;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
+//import android.app.Fragment;
+//import android.app.FragmentManager;
+//import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
+//import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+//import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+//import android.widget.FrameLayout;
+//import android.widget.LinearLayout;
+//import android.widget.ListView;
 
-public class ReceiptListActivity extends Activity {
+public class ReceiptListActivity extends Activity implements
+		ReceiptListFragment.Listener {
+
+	// private static final boolean OLDWAY = false;
 
 	public static Intent getStartIntent(Context context) {
 		return startIntentFor(context, ReceiptListActivity.class);
@@ -31,35 +41,38 @@ public class ReceiptListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		app = RBuddyApp.sharedInstance(this);
-		fragments = FragmentOrganizer.construct(this, savedInstanceState);
 
-		if (!fragments.has("ReceiptList"))
-			fragments.add(new ReceiptListFragment());
-		receiptListFragment = (ReceiptListFragment) fragments.get();
+		fragments = new FragmentOrganizer(this, 1995);
+		fragments.register(ReceiptListFragment.FACTORY);
+		fragments.register(EditReceiptFragment.FACTORY);
 
-		if (!fragments.has("EditReceipt"))
-			fragments.add(new EditReceiptFragment());
+		fragments.restoreState(savedInstanceState);
+		// fragments = FragmentOrganizer.construct(this, savedInstanceState);
+
+		// if (!fragments.has(ReceiptListFragment.TAG))
+		// fragments.add(new ReceiptListFragment());
+		// receiptListFragment = (ReceiptListFragment) fragments.get();
+		//
+		// if (!fragments.has(EditReceiptFragment.TAG))
+		// fragments.add(new EditReceiptFragment());
 		// editReceiptFragment = (EditReceiptFragment) fragments.get();
 
 		setContentView(fragments.getView(), new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+		// if (OLDWAY) {
+		// activityState = new ActivityState() //
+		// .add(receiptListView) //
+		// .restoreStateFrom(savedInstanceState);
+		// }
 	}
 
 	@Override
 	public void onResume() {
+		final boolean db = true;
+		if (db)
+			pr(hey());
 		super.onResume();
-		receiptListHandler = new Handler(new Handler.Callback() {
-			public boolean handleMessage(Message msg) {
-				switch (msg.what) {
-				case ReceiptListFragment.MESSAGE_CODE_RECEIPT_SELECTED:
-					editReceipt((Receipt) msg.obj);
-					return true;
-				}
-				return false;
-			}
-		});
-
-		receiptListFragment.addListener(receiptListHandler);
 
 		// Behaviour to incorporate into FragmentOrganizer:
 		// [] have it manipulate up to two side-by-side fragments, only visible
@@ -67,24 +80,18 @@ public class ReceiptListActivity extends Activity {
 		// [] remember which fragment has focus, so if rotation occurs and one
 		// fragment disappears, the focused one remains
 		//
-		fragments.plotFragment("ReceiptList", 0);
-
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-			fragments.plotFragment("EditReceipt", 1);
-		else
-			fragments.plotFragment(null, 1);
-
-		// if (OLDWAY) {
-		// if (editReceipt != null) {
-		// if (!app.receiptFile().exists(editReceipt.getId())) {
-		// invalidateReceiptList();
-		// }
-		// }
-		// if (!receiptListValid)
-		// rebuildReceiptList(this.receiptList);
-		//
-		// refreshEditedReceipt();
-		// }
+		if (db)
+			pr("plotting receipt list to slot #0");
+		fragments.plot(ReceiptListFragment.TAG, 0);
+		if (fragments.supportDualFragments()) {
+			if (db)
+				pr(" plotting editReceipt to slot #1");
+			fragments.plot(EditReceiptFragment.TAG, 1);
+		} else {
+			if (db)
+				pr(" removing fragment from slot #1");
+			fragments.plot(null, 1);
+		}
 	}
 
 	@Override
@@ -287,19 +294,54 @@ public class ReceiptListActivity extends Activity {
 	}
 
 	private void editReceipt(Receipt receipt) {
-		// this.editReceipt = receipt;
+		final boolean db = true;
+		if (db)
+			pr(hey() + "receipt=" + receipt);
 
-		// If edit receipt fragment is available, call it directly; otherwise,
-		// start activity containing it
-
-		unimp("check if editReceipt fragment is about");
-		EditReceiptFragment f = (EditReceiptFragment) fragments
-				.get("EditReceipt");
-		if (f != null) {
-			f.setReceipt(receipt);
-		} else
-			startActivity(EditReceiptActivity.getStartIntent(this,
-					receipt.getId()));
+		EditReceiptFragment f = (EditReceiptFragment) fragments.open(
+				EditReceiptFragment.TAG, true);
+		f.setReceipt(receipt);
+		// // If edit receipt fragment is available, call it directly;
+		// otherwise,
+		// // start activity containing it
+		//
+		// int slot = fragments.slotContainingFragment(EditReceiptFragment.TAG,
+		// 0);
+		// if (db)
+		// pr(" slot containing frag " + slot);
+		//
+		// MyFragment f = (MyFragment) fragments.get(EditReceiptFragment.TAG);
+		// if (f == null)
+		// f = new EditReceiptFragment();
+		// fragments.plotFragment(ReceiptListFragment.TAG, f, slot);
+		// //
+		// //
+		// //
+		// // EditReceiptFragment f = (EditReceiptFragment)
+		// fragments.plotFragment(
+		// // EditReceiptFragment.TAG, slot);
+		// if (db)
+		// pr(" plotted frag");
+		//
+		// f.postMessage(Message.obtain(null,
+		// EditReceiptFragment.MESSAGE_SET_RECEIPT, receipt));
+		//
+		// // f.setReceipt(receipt);
+		// //
+		// // EditReceiptFragment f = (EditReceiptFragment)
+		// //
+		// //
+		// // fragments
+		// // .get(EditReceiptFragment.TAG);
+		// // if (f != null) {
+		// // f.setReceipt(receipt);
+		// // } else {
+		// // // Replace the existing fragment with an EditReceipt fragment
+		// // fragments.plotFragment(EditReceiptFragment.TAG, 0);
+		// //
+		// // startActivity(EditReceiptActivity.getStartIntent(this,
+		// // receipt.getId()));
+		// // }
 	}
 
 	// /**
@@ -355,13 +397,20 @@ public class ReceiptListActivity extends Activity {
 
 	private ArrayAdapter<Receipt> receiptListAdapter;
 	private List receiptList;
-	private Handler receiptListHandler;
+	// private Handler receiptListHandler;
 	private RBuddyApp app;
 	// private ListView receiptListView;
 	// private ActivityState activityState;
 	// private ViewGroup fragmentContainer;
 
-	private ReceiptListFragment receiptListFragment;
-	// private EditReceiptFragment editReceiptFragment;
+	// private ReceiptListFragment receiptListFragment;
 	private FragmentOrganizer fragments;
+
+	// -----------------------------------------------------
+	// ReceiptListFragment.Listener
+
+	@Override
+	public void receiptSelected(Receipt r) {
+		editReceipt(r);
+	}
 }

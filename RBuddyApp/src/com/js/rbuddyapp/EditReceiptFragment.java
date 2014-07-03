@@ -12,8 +12,8 @@ import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSet;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,13 +21,31 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
-public class EditReceiptFragment extends Fragment {
+public class EditReceiptFragment extends MyFragment {
+
+	// public static final String TAG = "EditReceipt";
+	public static final int MESSAGE_SET_RECEIPT = 1;
 
 	public static final String TAG = "EditReceipt";
+	public static Factory FACTORY = new Factory() {
+
+		@Override
+		public String tag() {
+			return TAG;
+		}
+
+		@Override
+		public MyFragment construct() {
+			return new EditReceiptFragment();
+		}
+	};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		// final boolean db = true;
+		if (db)
+			pr(hey());
 		app = RBuddyApp.sharedInstance();
 		layoutElements();
 		activityState = new ActivityState() //
@@ -40,7 +58,6 @@ public class EditReceiptFragment extends Fragment {
 
 	@Override
 	public void onResume() {
-		// final boolean db = true;
 		if (db)
 			pr(hey());
 		super.onResume();
@@ -66,7 +83,20 @@ public class EditReceiptFragment extends Fragment {
 		activityState.saveState(outState);
 	}
 
+	protected void processMessage(Message m) {
+		switch (m.what) {
+		case MESSAGE_SET_RECEIPT:
+			setReceipt((Receipt) m.obj);
+			break;
+		default:
+			warning("unhandled message " + m);
+		}
+	}
+
 	public void setReceipt(Receipt receipt) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "receipt=" + receipt);
 		updateReceiptWithWidgetValues();
 		this.receipt = receipt;
 		readWidgetValuesFromReceipt();
@@ -96,7 +126,7 @@ public class EditReceiptFragment extends Fragment {
 	}
 
 	private void readWidgetValuesFromReceipt() {
-		if (receipt == null)
+		if (form == null || receipt == null)
 			return;
 		form.setValue("summary", receipt.getSummary());
 		form.setValue("cost", receipt.getCost());
@@ -106,7 +136,7 @@ public class EditReceiptFragment extends Fragment {
 	}
 
 	private void updateReceiptWithWidgetValues() {
-		if (receipt == null)
+		if (form == null || receipt == null)
 			return;
 
 		// To detect if changes have actually occurred, compare JSON
