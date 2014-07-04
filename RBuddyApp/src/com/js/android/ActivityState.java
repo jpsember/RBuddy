@@ -59,7 +59,6 @@ public class ActivityState {
 			String jsonString = savedInstanceState.getString(KEY_ACTIVITYSTATE);
 			if (jsonString == null)
 				break;
-
 			JSONParser parser = new JSONParser(jsonString);
 			parser.enterList();
 
@@ -70,7 +69,8 @@ public class ActivityState {
 				}
 				if (element instanceof ListView) {
 					ListView lv = (ListView) element;
-					lv.setSelection(parser.nextInt());
+					int cursor = parser.nextInt();
+					lv.setSelection(cursor);
 				} else if (element instanceof ScrollView) {
 					ScrollView sv = (ScrollView) element;
 					sv.setScrollX(parser.nextInt());

@@ -30,7 +30,7 @@ public class EditReceiptFragment extends MyFragment {
 	public static Factory FACTORY = new Factory() {
 
 		@Override
-		public String tag() {
+		public String name() {
 			return TAG;
 		}
 
@@ -43,16 +43,11 @@ public class EditReceiptFragment extends MyFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		// final boolean db = true;
-		if (db)
-			pr(hey());
 		app = RBuddyApp.sharedInstance();
 		layoutElements();
 		activityState = new ActivityState() //
 				.add(scrollView) //
 				.restoreStateFrom(savedInstanceState);
-		if (db)
-			pr(" returning scrollView " + scrollView);
 		return scrollView;
 	}
 
@@ -66,9 +61,6 @@ public class EditReceiptFragment extends MyFragment {
 
 	@Override
 	public void onPause() {
-		// final boolean db = true;
-		if (db)
-			pr(hey());
 		super.onPause();
 		updateReceiptWithWidgetValues();
 		app.receiptFile().flush();
@@ -94,7 +86,6 @@ public class EditReceiptFragment extends MyFragment {
 	}
 
 	public void setReceipt(Receipt receipt) {
-		final boolean db = true;
 		if (db)
 			pr(hey() + "receipt=" + receipt);
 		updateReceiptWithWidgetValues();
