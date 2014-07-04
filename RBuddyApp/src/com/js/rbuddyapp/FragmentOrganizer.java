@@ -1,7 +1,5 @@
 package com.js.rbuddyapp;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +36,8 @@ import com.js.json.JSONParser;
  */
 public class FragmentOrganizer {
 
-	// private static final int MAX_SLOTS = 2;
+	private static final boolean mLogging = false;
+
 	private static final String BUNDLE_PERSISTENCE_KEY = "FragmentOrganizer";
 
 	/**
@@ -60,11 +59,9 @@ public class FragmentOrganizer {
 		desiredSlotContents = new String[numberOfSlots];
 
 		factories = new HashMap();
-		// for (MyFragment.Factory f : fragmentTypes) {
-		// register(f);
-		// }
+
 		if (false)
-			dumpManager();
+			info(null); // get rid of unreferenced warning
 	}
 
 	private void log(Object message) {
@@ -76,7 +73,6 @@ public class FragmentOrganizer {
 			sb.append(message);
 			pr(sb);
 		}
-
 	}
 
 	public void setBaseViewId(int id) {
@@ -91,44 +87,20 @@ public class FragmentOrganizer {
 	public void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 
-		// TODO also verify device is large enough
-		supportsDual = (numberOfSlots > 1) && true;
+		supportsDual = (numberOfSlots > 1)
+				&& getDeviceSize(parent) >= DEVICESIZE_LARGE;
 
 		constructContainer();
 
 		String json = null;
 		if (savedInstanceState != null) {
 			json = savedInstanceState.getString(BUNDLE_PERSISTENCE_KEY);
-			if (db)
-				pr(" restoring from JSON: " + json);
 			if (json == null) {
 				warning("JSON string was null!");
 			} else
 				restoreFromJSON(json);
 		}
 	}
-
-	// private void removeAllFragments() {
-	// FragmentManager m = parent.getFragmentManager();
-	// for (int slot = 0; slot < numberOfSlots; slot++) {
-	// MyFragment f = (MyFragment) m.findFragmentById(viewIdBase + slot);
-	// if (f != null) {
-	// if (db)
-	// pr(" removing fragment " + f + " from slot " + slot);
-	// removeFragment(f);
-	// }
-	// }
-	// m.executePendingTransactions();
-	// if (db)
-	// pr("after removing slots; " + dumpManager());
-	// }
-
-	// private void removeFragment(Fragment f) {
-	// FragmentManager m = parent.getFragmentManager();
-	// FragmentTransaction transaction = m.beginTransaction();
-	// transaction.remove(f);
-	// transaction.commit();
-	// }
 
 	private void removeFragmentsFromOldViews() {
 		FragmentManager m = parent.getFragmentManager();
@@ -140,14 +112,6 @@ public class FragmentOrganizer {
 			FragmentTransaction transaction = m.beginTransaction();
 			transaction.remove(oldFragment);
 			transaction.commit();
-			// MyFragment newFragment = get(name, true);
-			// {
-			// log(" adding fragment " + nameOf(newFragment) + " to slot "
-			// + slot + " with name " + name);
-			// FragmentTransaction transaction = m.beginTransaction();
-			// transaction.add(viewIdBase + slot, newFragment, name);
-			// transaction.commit();
-			// }
 		}
 		m.executePendingTransactions();
 	}
@@ -167,16 +131,6 @@ public class FragmentOrganizer {
 				transaction.add(viewIdBase + slot, newFragment, name);
 				transaction.commit();
 			}
-			//
-			//
-			// Fragment oldFragment = m.findFragmentById(viewIdBase + slot);
-			// if (oldFragment == null)
-			// continue;
-			//
-			//
-			// FragmentTransaction transaction = m.beginTransaction();
-			// transaction.remove(oldFragment);
-			// transaction.commit();
 		}
 		m.executePendingTransactions();
 	}
@@ -195,12 +149,6 @@ public class FragmentOrganizer {
 
 	public void onPause() {
 		log("onPause");
-		// // Remove tags from existing fragments, so when resuming we don't
-		// think they're assigned to any slots
-		// for (int slot = 0; slot < numberOfSlots; slot++) {
-		// MyFragment f = fragmentInSlot(slot);
-		// if (f == null) continue;
-		// }
 	}
 
 	/**
@@ -230,26 +178,12 @@ public class FragmentOrganizer {
 	 * @return
 	 */
 	public View getView() {
-		log("getView, returning " + describe(container));
 		return container;
 	}
 
 	private MyFragment fragmentInSlot(int slot) {
 		FragmentManager m = parent.getFragmentManager();
-		MyFragment f = (MyFragment) m.findFragmentById(viewIdBase + slot);
-
-		// We can't seem to trust what the fragmentManager says; so if there is
-		// no view in that slot,
-		// assume no fragment?
-		if (container.getChildCount() <= slot) {
-			if (f != null)
-				// die("fragment manager reporting frag " + f + " in slot " +
-				// slot
-				// + ", but no view exists there");
-				return null;
-		}
-
-		return f;
+		return (MyFragment) m.findFragmentById(viewIdBase + slot);
 	}
 
 	private static String fragmentName(Fragment f) {
@@ -264,11 +198,16 @@ public class FragmentOrganizer {
 
 	private int slotContainingFragment(String fragmentName) {
 		for (int s = 0; s < numberOfSlots; s++) {
-			MyFragment f = fragmentInSlot(s);
-			if (f == null)
-				continue;
-			if (f.getTag().equals(fragmentName))
-				return s;
+			if (!isResumed()) {
+				if (fragmentName.equals(desiredSlotContents[s]))
+					return s;
+			} else {
+				MyFragment f = fragmentInSlot(s);
+				if (f == null)
+					continue;
+				if (f.getTag().equals(fragmentName))
+					return s;
+			}
 		}
 		return -1;
 	}
@@ -286,10 +225,24 @@ public class FragmentOrganizer {
 	public MyFragment plot(String tag, boolean primary, boolean undoable) {
 		int slot = primary ? 0 : 1;
 
+		// TODO is desiredSlotContents now reliable enough to use it, instead of
+		// querying manager?
+		// TODO in any case, this code can be simplified wrt isResumed status
+
 		log("plot tag=" + tag + " slot=" + slot + " undoable=" + d(undoable));
 
 		if (slot > 0 && !supportDualFragments())
 			slot = 0;
+
+		if (tag != null) {
+			// If new fragment exists in another slot, just use that one
+			int actualSlot = slotContainingFragment(tag);
+			if (actualSlot >= 0) {
+				if (!isResumed())
+					return null;
+				return get(tag, true);
+			}
+		}
 
 		if (!isResumed()) {
 			desiredSlotContents[slot] = tag;
@@ -315,38 +268,31 @@ public class FragmentOrganizer {
 					+ "\nnewFragment: " + describe(newFragment));
 
 		if (oldFragment != newFragment) {
-			if (newName != null) {
-				// If new fragment exists in another slot, just use that one
-				int actualSlot = slotContainingFragment(newName);
-				if (actualSlot >= 0) {
-					return newFragment;
-				}
+			// if (newName != null) {
+			// // If new fragment exists in another slot, just use that one
+			// int actualSlot = slotContainingFragment(newName);
+			// if (actualSlot >= 0) {
+			// return newFragment;
+			// }
+			// }
+
+			FragmentTransaction transaction = m.beginTransaction();
+			if (oldFragment == null) {
+				if (db)
+					pr("adding " + newName + " to slot " + slot);
+				transaction.add(viewIdBase + slot, newFragment, newName);
+			} else if (newFragment == null) {
+				transaction.remove(oldFragment);
+			} else {
+				if (db)
+					pr("replacing " + oldName + " with " + newName
+							+ " in slot " + slot);
+
+				transaction.replace(viewIdBase + slot, newFragment, newName);
 			}
-
-			do {
-				FragmentTransaction transaction = m.beginTransaction();
-				if (oldFragment == null) {
-					if (db)
-						pr("adding " + newName + " to slot " + slot);
-					transaction.add(viewIdBase + slot, newFragment, newName);
-				} else if (newFragment == null) {
-					transaction.remove(oldFragment);
-				} else {
-					if (db)
-						pr("replacing " + oldName + " with " + newName
-								+ " in slot " + slot);
-
-					transaction
-							.replace(viewIdBase + slot, newFragment, newName);
-				}
-				if (undoable)
-					transaction.addToBackStack(null);
-				transaction.commit();
-
-			} while (false);
-
-			// setViewWithinSlot(getSlotView(slot), slot);
-			// buildSlotView(slot), slot);
+			if (undoable)
+				transaction.addToBackStack(null);
+			transaction.commit();
 		}
 		return newFragment;
 	}
@@ -388,16 +334,14 @@ public class FragmentOrganizer {
 	}
 
 	private void constructContainer() {
-		// Create view with two panels side by side
+		// Create view with a horizontal row of panels, one for each slot
 		LinearLayout layout = new LinearLayout(parent);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
 		FormWidget.setDebugBgnd(layout, "#602020");
 		container = layout;
-		log("set container to  " + nameOf(container));
 
 		for (int slot = 0; slot < numberOfSlots; slot++) {
 			View v = buildSlotView(slot);
-			log(" adding view " + describe(v) + " to slot " + slot);
 			container.addView(v, slot, new LinearLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1));
 		}
@@ -407,7 +351,6 @@ public class FragmentOrganizer {
 		FrameLayout f2 = new FrameLayout(parent);
 		f2.setId(viewIdBase + slot);
 		FormWidget.setDebugBgnd(f2, (slot == 0) ? "#206020" : "#202060");
-		log("built slot#" + slot + " view " + describe(f2));
 		return f2;
 	}
 
@@ -439,26 +382,7 @@ public class FragmentOrganizer {
 		return f;
 	}
 
-	private String dumpManager() {
-		FragmentManager m = parent.getFragmentManager();
-		if (false) {
-			StringWriter w = new StringWriter();
-			m.dump("Mgr:", null, new PrintWriter(w), null);
-			return w.toString();
-		}
-		StringBuilder sb = new StringBuilder();
-		sb.append("Manager fragments:");
-		for (String tag : factories.keySet()) {
-			MyFragment f = (MyFragment) m.findFragmentByTag(tag);
-			if (f == null)
-				continue;
-			sb.append("\n  " + tag + " : " + f);
-		}
-		sb.append("\n");
-		return sb.toString();
-	}
-
-	public String info(MyFragment f) {
+	private String info(MyFragment f) {
 		if (f == null)
 			return "<null>";
 		StringBuilder sb = new StringBuilder(nameOf(f));
@@ -483,6 +407,7 @@ public class FragmentOrganizer {
 
 	// Map of factories, keyed by tag
 	private Map<String, MyFragment.Factory> factories;
+
 	private Activity parent;
 	private LinearLayout container;
 	private int viewIdBase;
@@ -491,5 +416,4 @@ public class FragmentOrganizer {
 	private boolean mIsResumed;
 	private boolean supportsDual;
 	private int numberOfSlots;
-	private boolean mLogging = true;
 }

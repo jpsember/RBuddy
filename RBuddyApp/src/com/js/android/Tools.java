@@ -7,11 +7,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Looper;
 import android.widget.Toast;
 
 public class Tools extends com.js.basic.Tools {
+
+	public static final int DEVICESIZE_UNKNOWN = 0;
+	public static final int DEVICESIZE_SMALL = 1;
+	public static final int DEVICESIZE_NORMAL = 2;
+	public static final int DEVICESIZE_LARGE = 3;
+	public static final int DEVICESIZE_XLARGE = 4;
 
 	public static void assertUIThread() {
 		if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
@@ -128,4 +135,20 @@ public class Tools extends com.js.basic.Tools {
 		return s;
 	}
 
+	public static int getDeviceSize(Context context) {
+		int screenLayout = context.getResources().getConfiguration().screenLayout;
+		screenLayout &= Configuration.SCREENLAYOUT_SIZE_MASK;
+		switch (screenLayout) {
+		case Configuration.SCREENLAYOUT_SIZE_SMALL:
+			return DEVICESIZE_SMALL;
+		case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+			return DEVICESIZE_NORMAL;
+		case Configuration.SCREENLAYOUT_SIZE_LARGE:
+			return DEVICESIZE_LARGE;
+		case 4: // Configuration.SCREENLAYOUT_SIZE_XLARGE is API >= 9
+			return DEVICESIZE_XLARGE;
+		default:
+			return DEVICESIZE_UNKNOWN;
+		}
+	}
 }

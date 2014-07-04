@@ -20,7 +20,7 @@ public class ReceiptListActivity extends MyActivity implements
 		ReceiptListFragment.Listener {
 
 	public ReceiptListActivity() {
-		super(true);
+		super(false); // log lifecycle events?
 	}
 
 	public static Intent getStartIntent(Context context) {
@@ -29,29 +29,25 @@ public class ReceiptListActivity extends MyActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (db)
-			pr(hey());
 		super.onCreate(savedInstanceState);
 
 		app = RBuddyApp.sharedInstance(this);
 
-		// Set fragmentTypes = new HashSet();
-		// fragmentTypes.add(ReceiptListFragment.FACTORY);
-		// fragmentTypes.add(EditReceiptFragment.FACTORY);
-
 		fragments = new FragmentOrganizer(this);
 		fragments.register(ReceiptListFragment.FACTORY).register(
 				EditReceiptFragment.FACTORY);
-		// , fragmentTypes, 1995);
 		fragments.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
+			// No previous state (including, presumably, the fragments) was
+			// defined, so set initial fragments
+			// TODO do this if no fragment exists in the slot, in case no state
+			// was saved for some (unusual) reason
 			fragments.plot(ReceiptListFragment.TAG, true, false);
 			if (fragments.supportDualFragments()) {
 				fragments.plot(EditReceiptFragment.TAG, false, false);
 			}
 		}
-
 	}
 
 	@Override
