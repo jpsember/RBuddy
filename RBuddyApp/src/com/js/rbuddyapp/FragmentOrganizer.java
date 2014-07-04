@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import static com.js.android.Tools.*;
 
+import com.js.android.AppPreferences;
 import com.js.form.FormWidget;
 import com.js.json.JSONEncoder;
 import com.js.json.JSONParser;
@@ -52,6 +53,10 @@ public class FragmentOrganizer {
 		this.parent = parent;
 		this.viewIdBase = 1900;
 		numberOfSlots = 2;
+		if (AppPreferences.getBoolean(
+				RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false))
+			numberOfSlots = 1;
+
 		desiredSlotContents = new String[numberOfSlots];
 
 		factories = new HashMap();
@@ -86,7 +91,9 @@ public class FragmentOrganizer {
 	public void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 
+		// TODO also verify device is large enough
 		supportsDual = (numberOfSlots > 1) && true;
+
 		constructContainer();
 
 		String json = null;
@@ -176,7 +183,7 @@ public class FragmentOrganizer {
 
 	public void onResume() {
 		log("onResume");
-		isActive = true;
+		mIsResumed = true;
 
 		// Remove any fragments that the manager is reporting are already
 		// added, since they are probably added to old views and we have new
@@ -204,19 +211,16 @@ public class FragmentOrganizer {
 	public void onSaveInstanceState(Bundle bundle) {
 		log("onSaveInstanceState bundle=" + nameOf(bundle));
 		bundle.putString(BUNDLE_PERSISTENCE_KEY, encodeToJSON());
-		isActive = false;
+		mIsResumed = false;
 	}
 
 	/**
-	 * Determine if device, in its current orientation, can display two
-	 * fragments side-by-side instead of just one
+	 * Determine if device can display two fragments side-by-side instead of
+	 * just one
 	 * 
 	 * @return
 	 */
 	public boolean supportDualFragments() {
-		// TODO also verify device is large enough
-		if (!isActive)
-			throw new IllegalStateException("organizer is not in active mode");
 		return this.supportsDual;
 	}
 
@@ -275,20 +279,21 @@ public class FragmentOrganizer {
 	 * @param tag
 	 *            name of fragment, or null to clear the slot
 	 * @param slot
-	 * @return fragment displayed, or null
+	 *            preferred slot; if greater than max displayed, uses 0
+	 * @return if tag isn't null and in resumed state, the fragment displayed;
+	 *         else null
 	 */
-	public MyFragment plot(String tag, int slot, boolean undoable) {
+	public MyFragment plot(String tag, boolean primary, boolean undoable) {
+		int slot = primary ? 0 : 1;
+
 		log("plot tag=" + tag + " slot=" + slot + " undoable=" + d(undoable));
-		final boolean db = true;
-		if (db) {
-			pr(hey() + tag + " slot " + slot + " undoable=" + undoable);
-			// FragmentManager m = parent.getFragmentManager();
-			for (int s = 0; s < numberOfSlots; s++) {
-				MyFragment f = fragmentInSlot(s);
-				// int id = viewIdBase + s;
-				// MyFragment f = (MyFragment) m.findFragmentById(id);
-				pr(" fragment in slot #" + s + ": " + info(f));
-			}
+
+		if (slot > 0 && !supportDualFragments())
+			slot = 0;
+
+		if (!isResumed()) {
+			desiredSlotContents[slot] = tag;
+			return null;
 		}
 
 		String oldName = null;
@@ -344,39 +349,6 @@ public class FragmentOrganizer {
 			// buildSlotView(slot), slot);
 		}
 		return newFragment;
-	}
-
-	/**
-	 * Display a fragment, if it is not already visible, and make it the
-	 * 'current' fragment
-	 * 
-	 * @param tag
-	 *            name of fragment
-	 * @param auxilliary
-	 *            if true, and not visible, favors rightmost (lower-priority)
-	 *            slot
-	 * 
-	 * @return
-	 */
-	public MyFragment open(String tag, boolean auxilliary) {
-		log("open tag=" + tag + " auxilliary=" + d(auxilliary));
-		if (db)
-			pr(hey() + "tag=" + tag + " aux=" + auxilliary);
-
-		MyFragment f = get(tag, false);
-		if (db)
-			pr(" existing fragment=" + f);
-		if (f != null) {
-			if (f.isVisible())
-				return f;
-		}
-
-		int slot = 0;
-		if (auxilliary && supportDualFragments())
-			slot = 1;
-		if (db)
-			pr(" plotting to slot " + slot);
-		return plot(tag, slot, true);
 	}
 
 	/**
@@ -505,13 +477,18 @@ public class FragmentOrganizer {
 		return sb.toString();
 	}
 
+	private boolean isResumed() {
+		return mIsResumed;
+	}
+
 	// Map of factories, keyed by tag
 	private Map<String, MyFragment.Factory> factories;
 	private Activity parent;
 	private LinearLayout container;
 	private int viewIdBase;
 	private String[] desiredSlotContents;
-	private boolean isActive;
+
+	private boolean mIsResumed;
 	private boolean supportsDual;
 	private int numberOfSlots;
 	private boolean mLogging = true;

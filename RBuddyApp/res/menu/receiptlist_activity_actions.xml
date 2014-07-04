@@ -35,6 +35,10 @@
         android:showAsAction="never"
         android:title="@string/action_testonly_toggle_photo_delay"/>
     <item
+        android:id="@+id/action_testonly_toggle_small_device"
+        android:showAsAction="never"
+        android:title="@string/action_testonly_toggle_small_device"/>
+    <item
         android:id="@+id/action_testonly_exit"
         android:showAsAction="never"
         android:title="@string/action_testonly_exit"/>

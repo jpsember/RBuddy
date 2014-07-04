@@ -45,6 +45,13 @@ public class ReceiptListActivity extends MyActivity implements
 		// , fragmentTypes, 1995);
 		fragments.onCreate(savedInstanceState);
 
+		if (savedInstanceState == null) {
+			fragments.plot(ReceiptListFragment.TAG, true, false);
+			if (fragments.supportDualFragments()) {
+				fragments.plot(EditReceiptFragment.TAG, false, false);
+			}
+		}
+
 	}
 
 	@Override
@@ -56,18 +63,6 @@ public class ReceiptListActivity extends MyActivity implements
 
 		fragments.onResume();
 
-		// TODO do this plotting only in onCreate
-		
-		// Behaviour to incorporate into FragmentOrganizer:
-		// [] have it manipulate up to two side-by-side fragments, only visible
-		// if in landscape mode on a tablet (or other suitably large device)
-		// [] remember which fragment has focus, so if rotation occurs and one
-		// fragment disappears, the focused one remains
-		//
-		fragments.plot(ReceiptListFragment.TAG, 0, false);
-		if (fragments.supportDualFragments()) {
-			fragments.plot(EditReceiptFragment.TAG, 1, false);
-		}
 	}
 
 	@Override
@@ -111,6 +106,9 @@ public class ReceiptListActivity extends MyActivity implements
 			AppPreferences
 					.toggle(RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API);
 			showGoogleDriveState();
+			return true;
+		case R.id.action_testonly_toggle_small_device:
+			AppPreferences.toggle(RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
 			doSearchActivity();
@@ -165,6 +163,13 @@ public class ReceiptListActivity extends MyActivity implements
 								IPhotoStore.PREFERENCE_KEY_PHOTO_DELAY, false) ? "Remove"
 								: "Add")
 								+ " simulated photo delay");
+				setMenuLabel(
+						menu,
+						R.id.action_testonly_toggle_small_device,
+						(AppPreferences.getBoolean(
+								RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
+								false) ? "Disable" : "Enable")
+								+ " small device flag");
 			}
 		});
 		return super.onPrepareOptionsMenu(menu);
@@ -229,11 +234,8 @@ public class ReceiptListActivity extends MyActivity implements
 	}
 
 	private void editReceipt(Receipt receipt) {
-		if (db)
-			pr(hey() + "receipt=" + receipt);
-
-		EditReceiptFragment f = (EditReceiptFragment) fragments.open(
-				EditReceiptFragment.TAG, true);
+		EditReceiptFragment f = (EditReceiptFragment) fragments.plot(
+				EditReceiptFragment.TAG, false, true);
 		f.setReceipt(receipt);
 	}
 
