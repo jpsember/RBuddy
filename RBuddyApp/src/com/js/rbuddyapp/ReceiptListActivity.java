@@ -34,8 +34,9 @@ public class ReceiptListActivity extends MyActivity implements
 		app = RBuddyApp.sharedInstance(this);
 
 		fragments = new FragmentOrganizer(this);
-		fragments.register(ReceiptListFragment.FACTORY).register(
-				EditReceiptFragment.FACTORY);
+		fragments.register(ReceiptListFragment.FACTORY).//
+				register(EditReceiptFragment.FACTORY).//
+				register(SearchFragment.FACTORY);
 		fragments.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
@@ -236,12 +237,10 @@ public class ReceiptListActivity extends MyActivity implements
 	}
 
 	private void doSearchActivity() {
-		Intent intent = SearchActivity.getStartIntent(this);
-		if (false) {
-			warning("trying out experimental activity instead");
-			intent = ExperimentalActivity.getStartIntent(this);
-		}
-		startActivity(intent);
+		SearchFragment f = (SearchFragment) fragments.plot(SearchFragment.TAG,
+				false, true);
+		if (false)
+			pr(f);
 	}
 
 	private RBuddyApp app;

@@ -13,7 +13,6 @@ import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSet;
 
 import android.os.Bundle;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,9 +21,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
 public class EditReceiptFragment extends MyFragment {
-
-	// public static final String TAG = "EditReceipt";
-	public static final int MESSAGE_SET_RECEIPT = 1;
 
 	public static final String TAG = "EditReceipt";
 	public static Factory FACTORY = new Factory() {
@@ -73,16 +69,6 @@ public class EditReceiptFragment extends MyFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		activityState.saveState(outState);
-	}
-
-	protected void processMessage(Message m) {
-		switch (m.what) {
-		case MESSAGE_SET_RECEIPT:
-			setReceipt((Receipt) m.obj);
-			break;
-		default:
-			warning("unhandled message " + m);
-		}
 	}
 
 	public void setReceipt(Receipt receipt) {

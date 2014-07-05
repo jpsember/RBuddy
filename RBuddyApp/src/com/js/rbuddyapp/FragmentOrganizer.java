@@ -51,7 +51,10 @@ public class FragmentOrganizer {
 		log("Constructing for parent " + nameOf(parent));
 		this.mParentActivity = parent;
 		this.mSlotViewBaseId = 1900;
-		mNumberOfSlots = 2;
+
+		mSupportsDual = getDeviceSize(mParentActivity) >= DEVICESIZE_LARGE;
+		mNumberOfSlots = mSupportsDual ? 2 : 1;
+
 		if (AppPreferences.getBoolean(
 				RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false))
 			mNumberOfSlots = 1;
@@ -86,9 +89,6 @@ public class FragmentOrganizer {
 
 	public void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
-
-		mSupportsDual = (mNumberOfSlots > 1)
-				&& getDeviceSize(mParentActivity) >= DEVICESIZE_LARGE;
 
 		constructContainer();
 
@@ -223,14 +223,17 @@ public class FragmentOrganizer {
 	 * @return if in resumed state, the fragment displayed; else null
 	 */
 	public MyFragment plot(String tag, boolean primary, boolean undoable) {
+		log("plot " + tag + " primary=" + d(primary) + " undoable="
+				+ d(undoable));
+
 		ASSERT(tag != null);
-		int slot = primary ? 0 : 1;
-		if (slot > 0 && !supportDualFragments())
-			slot = 0;
+		int slot = primary ? 0 : mNumberOfSlots - 1;
+		log(" slot=" + slot);
 
 		// If new fragment exists in another slot, just use that one
 		int actualSlot = slotContainingFragment(tag);
 		if (actualSlot >= 0) {
+			log(" already found in slot " + actualSlot);
 			if (!isResumed())
 				return null;
 			return get(tag, true);
@@ -241,9 +244,10 @@ public class FragmentOrganizer {
 			return null;
 		}
 
-		String oldName = mDesiredSlotContents[slot];
+		String oldName = fragmentName(fragmentInSlot(slot));
 
 		MyFragment newFragment = get(tag, true);
+		log(" newFragment " + describe(newFragment) + " oldName=" + oldName);
 		if (tag.equals(oldName))
 			return newFragment;
 
@@ -255,6 +259,7 @@ public class FragmentOrganizer {
 
 		FragmentTransaction transaction = m.beginTransaction();
 		if (oldFragment == null) {
+			log(" doing transaction:add");
 			transaction.add(mSlotViewBaseId + slot, newFragment, tag);
 		} else {
 			// TODO try to get these working; currently says:
@@ -262,11 +267,13 @@ public class FragmentOrganizer {
 			//
 			// transaction.setCustomAnimations(R.anim.slide_in_left,
 			// R.anim.slide_out_right);
+			log(" doing transaction:replace");
 			transaction.replace(mSlotViewBaseId + slot, newFragment, tag);
 		}
 		if (undoable)
 			transaction.addToBackStack(null);
 		transaction.commit();
+		log(" returning " + newFragment);
 		return newFragment;
 	}
 
