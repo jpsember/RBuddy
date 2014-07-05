@@ -59,6 +59,7 @@ public class RBuddyActivity extends MyActivity implements
 		mReceiptListFragment = ReceiptListFragment.construct(fragments);
 		mEditReceiptFragment = EditReceiptFragment.construct(fragments);
 		mSearchFragment = SearchFragment.construct(fragments);
+		mPhotoFragment = PhotoFragment.construct(fragments);
 	}
 
 	@Override
@@ -232,9 +233,15 @@ public class RBuddyActivity extends MyActivity implements
 		mReceiptListFragment.refreshReceipt(r);
 	}
 
+	@Override
+	public void editPhoto(Receipt r) {
+		mPhotoFragment.plot(fragments, r);
+	}
+
 	private RBuddyApp app;
 	private FragmentOrganizer fragments;
 	private ReceiptListFragment mReceiptListFragment;
 	private EditReceiptFragment mEditReceiptFragment;
 	/* private */SearchFragment mSearchFragment;
+	private PhotoFragment mPhotoFragment;
 }

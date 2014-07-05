@@ -139,7 +139,7 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void processPhotoButtonPress() {
-		startActivity(PhotoActivity.getStartIntent(this, receipt.getId()));
+		// startActivity(PhotoActivity.getStartIntent(this, receipt.getId()));
 	}
 
 	private void readWidgetValuesFromReceipt() {

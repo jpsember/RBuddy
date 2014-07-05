@@ -7,44 +7,71 @@ import java.io.IOException;
 
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
+import com.js.android.ActivityState;
 import com.js.android.BitmapUtil;
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 
-public class PhotoActivity extends Activity {
+public class PhotoFragment extends MyFragment {
 
-	private static String EXTRA_RECEIPT_ID = "receipt_id";
+	public static final String TAG = "Photo";
+	public static Factory FACTORY = new Factory() {
+
+		@Override
+		public String name() {
+			return TAG;
+		}
+
+		@Override
+		public MyFragment construct() {
+			return new PhotoFragment();
+		}
+	};
 
 	/**
-	 * Construct intent for starting this activity
+	 * Construct the singleton instance of this fragment, if it hasn't already
+	 * been
 	 * 
-	 * @param receiptId
+	 * @param organizer
 	 * @return
 	 */
-	public static Intent getStartIntent(Context context, int receiptId) {
-		return startIntentFor(context, PhotoActivity.class) //
-				.putExtra(EXTRA_RECEIPT_ID, receiptId);
+	public static PhotoFragment construct(FragmentOrganizer organizer) {
+		organizer.register(FACTORY);
+		return (PhotoFragment) organizer.get(TAG, true);
 	}
 
 	// Identifiers for the intents that we may spawn
 	private static final int REQUEST_IMAGE_CAPTURE = 1;
 
 	@Override
-	protected void onResume() {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		app = RBuddyApp.sharedInstance(getActivity());
+		layoutElements();
+
+		// layoutElements();
+		activityState = new ActivityState() //
+				.add(scrollView) //
+				.restoreStateFrom(savedInstanceState);
+		return scrollView;
+	}
+
+	@Override
+	public void onResume() {
 		super.onResume();
 		imageWidget.displayPhoto(receipt.getId(), receipt.getPhotoId());
 	}
@@ -52,68 +79,39 @@ public class PhotoActivity extends Activity {
 	@Override
 	public void onPause() {
 		super.onPause();
-		unimp("we should probably pass a receipt here instead");
 		// Display nothing, so widget stops listening; else it will leak
+		unimp("we should probably pass a receipt here instead");
 		imageWidget.displayPhoto(0, null);
 		app.receiptFile().flush();
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		app = RBuddyApp.sharedInstance(this);
-		int receiptId = getIntent().getIntExtra(EXTRA_RECEIPT_ID, 0);
-		ASSERT(receiptId > 0);
-		this.receipt = app.receiptFile().getReceipt(receiptId);
-		layoutElements();
-
-		// If no photo is defined for this receipt, jump right into the take
-		// photo intent
-		if (receipt.getPhotoId() == null) {
-			startImageCaptureIntent();
-		}
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		activityState.saveState(outState);
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu items for use in the action bar
-		getMenuInflater().inflate(R.menu.photo_activity_actions, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle presses on the action bar items
-		switch (item.getItemId()) {
-		case R.id.action_settings:
-			unimp("settings");
-			return true;
-		case android.R.id.home:
-			startActivity(EditReceiptActivity.getStartIntent(this,
-					receipt.getId()) //
-					.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "requestCode " + requestCode + " result " + resultCode
+					+ " data " + data);
 		if (requestCode == REQUEST_IMAGE_CAPTURE) {
-			if (resultCode == RESULT_OK)
+			if (resultCode == Activity.RESULT_OK)
 				processPhotoResult(data);
 			// Whether or not the user selected a new photo, exit to the
 			// EditReceipt activity.
-			finish();
+			unimp("pop stack to previous activity?");
+			// finish();
 		}
 	}
 
 	private void layoutElements() {
-		String jsonString = readTextFileResource(this,
+		String jsonString = readTextFileResource(this.getActivity(),
 				R.raw.form_photo_activity);
 
-		this.form = Form.parse(this, jsonString);
+		this.form = Form.parse(this.getActivity(), jsonString);
 		form.getField("takephoto").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -122,21 +120,31 @@ public class PhotoActivity extends Activity {
 		});
 		imageWidget = (FormImageWidget) form.getField("photo");
 
-		ScrollView scrollView = new ScrollView(this);
+		scrollView = new ScrollView(getActivity());
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
 
-		setContentView(scrollView);
+		// setContentView(scrollView);
 	}
 
 	private void startImageCaptureIntent() {
+		final boolean db = true;
+		if (db)
+			pr(hey());
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		if (intent.resolveActivity(getPackageManager()) == null) {
+		if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
 			return;
 		}
 
 		File workFile = getWorkPhotoFile();
+		// Create the directories leading up to this file if necessary
+		if (!workFile.exists()) {
+			workFile.mkdirs();
+		}
+
+		if (db)
+			pr(" workFile: " + workFile);
 		Uri uri = Uri.fromFile(workFile);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 		if (db)
@@ -149,11 +157,16 @@ public class PhotoActivity extends Activity {
 	}
 
 	private void processPhotoResult(Intent intent) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "intent " + intent);
 		unimp("handle various problem situations in ways other than just 'die'");
 
 		File workFile = getWorkPhotoFile();
 		if (!workFile.isFile()) {
-			die("no work file found: " + workFile);
+			Uri uri = Uri.fromFile(workFile);
+
+			die("no work file found: " + workFile + ", uri=" + uri);
 		}
 
 		BitmapUtil.orientAndScaleBitmap(workFile, IPhotoStore.FULLSIZE_HEIGHT,
@@ -184,8 +197,28 @@ public class PhotoActivity extends Activity {
 		}
 	}
 
+	// Photo interface (non-fragment methods)
+	public void setReceipt(Receipt r) {
+		this.receipt = r;
+	}
+
+	public void plot(FragmentOrganizer fragments, Receipt r) {
+		setReceipt(r);
+		fragments.plot(TAG, false, true);
+
+		// // If no photo is defined for this receipt, jump right into the take
+		// // photo intent
+		// if (receipt.getPhotoId() == null) {
+		// startImageCaptureIntent();
+		// }
+		unimp("not yet jumping into take photo intent");
+
+	}
+
 	private Receipt receipt;
 	private RBuddyApp app;
 	private Form form;
 	private FormImageWidget imageWidget;
+	private ScrollView scrollView;
+	private ActivityState activityState;
 }

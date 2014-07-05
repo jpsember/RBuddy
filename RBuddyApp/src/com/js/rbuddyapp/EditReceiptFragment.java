@@ -117,8 +117,9 @@ public class EditReceiptFragment extends MyFragment {
 	}
 
 	private void processPhotoButtonPress() {
-		startActivity(PhotoActivity.getStartIntent(getActivity(),
-				receipt.getId()));
+		listener().editPhoto(receipt);
+		// startActivity(PhotoActivity.getStartIntent(getActivity(),
+		// receipt.getId()));
 	}
 
 	private void readWidgetValuesFromReceipt() {
@@ -172,6 +173,8 @@ public class EditReceiptFragment extends MyFragment {
 
 	public static interface Listener {
 		void receiptEdited(Receipt r);
+
+		void editPhoto(Receipt r);
 	}
 
 	private RBuddyApp app;

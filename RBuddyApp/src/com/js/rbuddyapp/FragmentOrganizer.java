@@ -53,6 +53,9 @@ public class FragmentOrganizer {
 		this.mSlotViewBaseId = 1900;
 
 		mSupportsDual = getDeviceSize(mParentActivity) >= DEVICESIZE_LARGE;
+		warning("always setting true");
+		mSupportsDual = true;
+
 		mNumberOfSlots = mSupportsDual ? 2 : 1;
 
 		if (AppPreferences.getBoolean(
