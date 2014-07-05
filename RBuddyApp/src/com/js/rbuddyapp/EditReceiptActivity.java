@@ -99,7 +99,7 @@ public class EditReceiptActivity extends Activity {
 			});
 			return true;
 		case android.R.id.home:
-			Intent intent = ReceiptListActivity.getStartIntent(this).addFlags(
+			Intent intent = RBuddyActivity.getStartIntent(this).addFlags(
 					Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;

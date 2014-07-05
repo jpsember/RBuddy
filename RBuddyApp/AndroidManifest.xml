@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name="com.js.rbuddyapp.ReceiptListActivity" >
+        <activity android:name="com.js.rbuddyapp.RBuddyActivity" >
             <!--
          <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,12 +49,12 @@
 
         <activity
             android:name="com.js.rbuddyapp.SearchActivity"
-            android:parentActivityName="com.js.rbuddyapp.ReceiptListActivity"
+            android:parentActivityName="com.js.rbuddyapp.RBuddyActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity
             android:name="com.js.rbuddyapp.EditReceiptActivity"
-            android:parentActivityName="com.js.rbuddyapp.ReceiptListActivity"
+            android:parentActivityName="com.js.rbuddyapp.RBuddyActivity"
             android:windowSoftInputMode="stateUnchanged" >
         </activity>
         <activity

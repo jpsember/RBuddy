@@ -16,15 +16,15 @@ import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 
-public class ReceiptListActivity extends MyActivity implements
+public class RBuddyActivity extends MyActivity implements
 		ReceiptListFragment.Listener {
 
-	public ReceiptListActivity() {
+	public RBuddyActivity() {
 		super(false); // log lifecycle events?
 	}
 
 	public static Intent getStartIntent(Context context) {
-		return startIntentFor(context, ReceiptListActivity.class);
+		return startIntentFor(context, RBuddyActivity.class);
 	}
 
 	@Override
@@ -237,10 +237,7 @@ public class ReceiptListActivity extends MyActivity implements
 	}
 
 	private void doSearchActivity() {
-		SearchFragment f = (SearchFragment) fragments.plot(SearchFragment.TAG,
-				false, true);
-		if (false)
-			pr(f);
+		fragments.plot(SearchFragment.TAG, false, true);
 	}
 
 	private RBuddyApp app;

@@ -143,7 +143,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 			userFilesPrepared = true;
 		}
 
-		startActivity(ReceiptListActivity.getStartIntent(this)//
+		startActivity(RBuddyActivity.getStartIntent(this)//
 				.addFlags(
 						Intent.FLAG_ACTIVITY_CLEAR_TASK
 								| Intent.FLAG_ACTIVITY_NEW_TASK));
