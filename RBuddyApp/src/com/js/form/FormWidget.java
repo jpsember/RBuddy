@@ -272,20 +272,11 @@ public abstract class FormWidget {
 			throw new IllegalArgumentException("value must not be null");
 
 		if (enabledState) {
-			final boolean db = true;
 			// Update value, and notify listeners if it has actually changed
-			// String originalUserValue = widgetValue;
-			if (db)
-				pr("setValue for " + nameOf(this) + " to: " + internalValue
-						+ " original:" + widgetValue);
 			updateUserValue(internalValue);
 			String newUserValue = parseUserValue();
 			if (notifyListeners) {
-				if (db)
-					pr(" newUserValue=" + newUserValue);
 				if (!newUserValue.equals(widgetValue)) {
-					if (db)
-						pr("  telling form values have changed");
 					form.valuesChanged();
 				}
 			}

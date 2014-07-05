@@ -30,6 +30,17 @@ public class SearchFragment extends MyFragment {
 		}
 	};
 
+	/**
+	 * Construct the singleton instance of this fragment, if it hasn't already
+	 * been
+	 * 
+	 * @param organizer
+	 * @return
+	 */
+	public static SearchFragment construct(FragmentOrganizer organizer) {
+		return (SearchFragment) organizer.get(TAG, true);
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {

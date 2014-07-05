@@ -36,6 +36,17 @@ public class EditReceiptFragment extends MyFragment {
 		}
 	};
 
+	/**
+	 * Construct the singleton instance of this fragment, if it hasn't already
+	 * been
+	 * 
+	 * @param organizer
+	 * @return
+	 */
+	public static EditReceiptFragment construct(FragmentOrganizer organizer) {
+		return (EditReceiptFragment) organizer.get(TAG, true);
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -121,9 +132,6 @@ public class EditReceiptFragment extends MyFragment {
 	}
 
 	private void updateReceiptWithWidgetValues() {
-		final boolean db = true;
-		if (db)
-			pr(hey());
 		if (form == null || receipt == null)
 			return;
 
@@ -140,23 +148,12 @@ public class EditReceiptFragment extends MyFragment {
 		receipt.setTags(TagSet.parse(form.getValue("tags"), new TagSet()));
 
 		String newJSON = JSONEncoder.toJSON(receipt);
-		if (db)
-			pr("comparing old and new JSON:\n --> " + origJSON + "\n --> "
-					+ newJSON);
 
 		if (!origJSON.equals(newJSON)) {
-			if (db)
-				pr(" changed, marking receipt as modified");
 			app.receiptFile().setModified(receipt);
 
 			String newTagSetString = JSONEncoder.toJSON(receipt.getTags());
-			if (db)
-				pr(" orig tags: " + origTagSetString + "\n  new tags: "
-						+ newTagSetString);
-
 			if (!origTagSetString.equals(newTagSetString)) {
-				if (db)
-					pr("  moving tags to front of queue");
 				receipt.getTags().moveTagsToFrontOfQueue(app.tagSetFile());
 			}
 

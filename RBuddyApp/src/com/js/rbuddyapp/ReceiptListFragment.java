@@ -36,6 +36,17 @@ public class ReceiptListFragment extends MyFragment {
 		}
 	};
 
+	/**
+	 * Construct the singleton instance of this fragment, if it hasn't already
+	 * been
+	 * 
+	 * @param organizer
+	 * @return
+	 */
+	public static ReceiptListFragment construct(FragmentOrganizer organizer) {
+		return (ReceiptListFragment) organizer.get(TAG, true);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,9 +69,17 @@ public class ReceiptListFragment extends MyFragment {
 		activityState.saveState(outState);
 	}
 
+	// Methods this fragment provides (its non-fragment-related interface)
+
 	public void refreshReceipt(Receipt r) {
 		if (receiptListAdapter != null)
 			receiptListAdapter.notifyDataSetChanged();
+	}
+
+	public void refreshList() {
+		if (receiptList == null)
+			return;
+		rebuildReceiptList(receiptList);
 	}
 
 	private List<Receipt> buildListOfReceipts() {

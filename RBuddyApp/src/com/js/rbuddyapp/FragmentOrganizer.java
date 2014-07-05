@@ -62,6 +62,7 @@ public class FragmentOrganizer {
 		mDesiredSlotContents = new String[mNumberOfSlots];
 
 		mFragmentFactories = new HashMap();
+		mFragmentMap = new HashMap();
 
 		if (false)
 			info(null); // get rid of unreferenced warning
@@ -353,14 +354,20 @@ public class FragmentOrganizer {
 	 *            if true, and no such fragment found, a new one is constructed
 	 * @return fragment, or null
 	 */
-	private MyFragment get(String tag, boolean constructIfMissing) {
+	public MyFragment get(String tag, boolean constructIfMissing) {
+		MyFragment f;
+		f = mFragmentMap.get(tag);
+		if (f != null)
+			return f;
+
 		FragmentManager m = mParentActivity.getFragmentManager();
-		MyFragment f = (MyFragment) m.findFragmentByTag(tag);
+		f = (MyFragment) m.findFragmentByTag(tag);
 		if (f == null && constructIfMissing) {
 			f = factory(tag).construct();
 			if (db)
 				pr("\n  ======================= Constructed instance of " + tag
 						+ "\n");
+			mFragmentMap.put(tag, f);
 		}
 		return f;
 	}
@@ -398,6 +405,9 @@ public class FragmentOrganizer {
 
 	// Map of factories, keyed by name
 	private Map<String, MyFragment.Factory> mFragmentFactories;
+
+	// Map of fragments that may not be known to FragmentManager
+	private Map<String, MyFragment> mFragmentMap;
 
 	private Activity mParentActivity;
 	private LinearLayout mSlotsContainer;
