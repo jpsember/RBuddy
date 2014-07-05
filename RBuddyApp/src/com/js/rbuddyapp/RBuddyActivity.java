@@ -17,7 +17,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 
 public class RBuddyActivity extends MyActivity implements
-		ReceiptListFragment.Listener {
+		ReceiptListFragment.Listener, //
+		EditReceiptFragment.Listener {
 
 	public RBuddyActivity() {
 		super(false); // log lifecycle events?
@@ -240,6 +241,10 @@ public class RBuddyActivity extends MyActivity implements
 		fragments.plot(SearchFragment.TAG, false, true);
 	}
 
+	private ReceiptListFragment receiptListFragment() {
+		return (ReceiptListFragment) fragments.get(ReceiptListFragment.TAG);
+	}
+
 	private RBuddyApp app;
 	private FragmentOrganizer fragments;
 	private ArrayAdapter<Receipt> receiptListAdapter;
@@ -249,5 +254,19 @@ public class RBuddyActivity extends MyActivity implements
 	@Override
 	public void receiptSelected(Receipt r) {
 		editReceipt(r);
+	}
+
+	// EditReceiptFragment.Listener
+	@Override
+	public void receiptEdited(Receipt r) {
+		final boolean db = true;
+		ReceiptListFragment f = receiptListFragment();
+		if (db)
+			pr("EditReceiptFragment.Listener; RBuddyActivity telling ReceiptListFragment "
+					+ f + " to refresh " + r);
+
+		// If we're shutting down the app, the fragment may no longer exist
+		if (f != null)
+			f.refreshReceipt(r);
 	}
 }

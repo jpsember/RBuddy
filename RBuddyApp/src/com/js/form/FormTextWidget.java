@@ -16,7 +16,6 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 import static com.js.basic.Tools.*;
 
-
 public class FormTextWidget extends FormWidget {
 
 	// Here is where we describe how a particular subclass of FormTextWidget
@@ -25,13 +24,13 @@ public class FormTextWidget extends FormWidget {
 	protected static final int FOCUS_RESISTANT = 1;
 	protected static final int FOCUS_NORMAL = 2;
 
-	private static String[] focusTypeStrings = {"never","resistant","normal"};
+	private static String[] focusTypeStrings = { "never", "resistant", "normal" };
 
 	public FormTextWidget(Form owner, Map attributes) {
-		super(owner,attributes);
+		super(owner, attributes);
 
 		this.focusType = getFocusType();
-		
+
 		constructInput();
 
 		input.setOnClickListener(new OnClickListener() {
@@ -85,7 +84,7 @@ public class FormTextWidget extends FormWidget {
 
 	protected int getFocusType() {
 		String ft = strAttr("focus", "normal");
-		return indexOfString(focusTypeStrings,ft);
+		return indexOfString(focusTypeStrings, ft);
 	}
 
 	protected String getAutoCompletionType() {
@@ -123,6 +122,10 @@ public class FormTextWidget extends FormWidget {
 		input.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
 				if (!hasFocus) {
+					// final boolean db = true;
+					if (db)
+						pr("FormTextWidget, setting value for new text: "
+								+ input.getText());
 					setValue(input.getText().toString());
 					if (focusType <= FOCUS_RESISTANT) {
 						input.setFocusable(false);

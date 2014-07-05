@@ -58,6 +58,11 @@ public class ReceiptListFragment extends MyFragment {
 		activityState.saveState(outState);
 	}
 
+	public void refreshReceipt(Receipt r) {
+		if (receiptListAdapter != null)
+			receiptListAdapter.notifyDataSetChanged();
+	}
+
 	private List<Receipt> buildListOfReceipts() {
 		ArrayList list = new ArrayList();
 		rebuildReceiptList(list);

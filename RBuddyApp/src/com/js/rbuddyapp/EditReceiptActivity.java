@@ -143,10 +143,10 @@ public class EditReceiptActivity extends Activity {
 	}
 
 	private void readWidgetValuesFromReceipt() {
-		form.setValue("summary", receipt.getSummary());
-		form.setValue("cost", receipt.getCost());
-		form.setValue("date", receipt.getDate());
-		form.setValue("tags", receipt.getTags());
+		form.setValue("summary", receipt.getSummary(), false);
+		form.setValue("cost", receipt.getCost(), false);
+		form.setValue("date", receipt.getDate(), false);
+		form.setValue("tags", receipt.getTags(), false);
 	}
 
 	private void updateReceiptWithWidgetValues() {

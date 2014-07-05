@@ -335,6 +335,17 @@ public class FragmentOrganizer {
 	}
 
 	/**
+	 * Get fragment
+	 * 
+	 * @param name
+	 *            name of fragment (from its factory's name() method)
+	 * @return fragment, or null if none exists
+	 */
+	public MyFragment get(String name) {
+		return get(name, false);
+	}
+
+	/**
 	 * Get fragment; construct if necessary
 	 * 
 	 * @param factory

@@ -249,17 +249,51 @@ public abstract class FormWidget {
 	}
 
 	/**
-	 * Set value as string; calls setDisplayedValue(...) which subclasses should
+	 * Set value as string; calls updateUserValue(...) which subclasses should
 	 * override to convert 'internal' string representation to user-displayable
-	 * value
+	 * value. Also notifies listeners if value has changed
 	 * 
 	 * @param internalValue
+	 *            the new internal string representation of the value
 	 */
 	public final void setValue(String internalValue) {
+		setValue(internalValue, true);
+	}
+
+	/**
+	 * Same as {@link #setValue(String)}, but with option to notify listeners
+	 * 
+	 * @param notifyListeners
+	 *            if value has changed, listeners are notified only if this is
+	 *            true
+	 */
+	final void setValue(String internalValue, boolean notifyListeners) {
 		if (internalValue == null)
 			throw new IllegalArgumentException("value must not be null");
-		widgetValue = internalValue;
-		updateUserValue(enabledState ? internalValue : "");
+
+		if (enabledState) {
+			final boolean db = true;
+			// Update value, and notify listeners if it has actually changed
+			// String originalUserValue = widgetValue;
+			if (db)
+				pr("setValue for " + nameOf(this) + " to: " + internalValue
+						+ " original:" + widgetValue);
+			updateUserValue(internalValue);
+			String newUserValue = parseUserValue();
+			if (notifyListeners) {
+				if (db)
+					pr(" newUserValue=" + newUserValue);
+				if (!newUserValue.equals(widgetValue)) {
+					if (db)
+						pr("  telling form values have changed");
+					form.valuesChanged();
+				}
+			}
+			widgetValue = newUserValue;
+		} else {
+			widgetValue = internalValue;
+			updateUserValue("");
+		}
 	}
 
 	/**
@@ -303,7 +337,6 @@ public abstract class FormWidget {
 		throw new UnsupportedOperationException();
 	}
 
-
 	// For lack of a better place
 	public static View horizontalSeparator(Context context) {
 		View v = new View(context);
@@ -332,8 +365,7 @@ public abstract class FormWidget {
 	 * Utility method for diagnosing focus problems
 	 */
 	static String focusInfo(View v) {
-		return nameOf(v)
-				+ (v.isEnabled() ? "" : " DISABLED")
+		return nameOf(v) + (v.isEnabled() ? "" : " DISABLED")
 				+ (v.isFocusable() ? " FOCUSABLE" : "")
 				+ (v.isFocusableInTouchMode() ? " FOCUSINTOUCH" : "")
 				+ (v.hasFocus() ? " HASFOCUS" : "")

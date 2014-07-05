@@ -54,7 +54,7 @@ public class FormDateWidget extends FormTextWidget {
 					int dayOfMonth) {
 				JSDate date = JSDate.buildFromValues(year, monthOfYear,
 						dayOfMonth);
-				setInputText(AndroidDate.formatUserDateFromJSDate(date));
+				setValue(date.toString());
 			}
 		};
 		JSDate date = JSDate.parse(getValue(), true);

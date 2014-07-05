@@ -74,6 +74,7 @@ public class EditReceiptFragment extends MyFragment {
 	public void setReceipt(Receipt receipt) {
 		if (db)
 			pr(hey() + "receipt=" + receipt);
+		// In case there's an existing receipt, flush its changes
 		updateReceiptWithWidgetValues();
 		this.receipt = receipt;
 		readWidgetValuesFromReceipt();
@@ -83,6 +84,13 @@ public class EditReceiptFragment extends MyFragment {
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_edit_receipt);
 		this.form = Form.parse(getActivity(), jsonString);
+		form.addListener(new Form.Listener() {
+			@Override
+			public void valuesChanged(Form form) {
+				updateReceiptWithWidgetValues();
+			}
+		});
+
 		receiptWidget = (FormButtonWidget) form.getField("receipt");
 		receiptWidget.setOnClickListener(new OnClickListener() {
 			@Override
@@ -105,14 +113,17 @@ public class EditReceiptFragment extends MyFragment {
 	private void readWidgetValuesFromReceipt() {
 		if (form == null || receipt == null)
 			return;
-		form.setValue("summary", receipt.getSummary());
-		form.setValue("cost", receipt.getCost());
-		form.setValue("date", receipt.getDate());
-		form.setValue("tags", receipt.getTags());
+		form.setValue("summary", receipt.getSummary(), false);
+		form.setValue("cost", receipt.getCost(), false);
+		form.setValue("date", receipt.getDate(), false);
+		form.setValue("tags", receipt.getTags(), false);
 		receiptWidget.displayPhoto(receipt.getId(), receipt.getPhotoId());
 	}
 
 	private void updateReceiptWithWidgetValues() {
+		final boolean db = true;
+		if (db)
+			pr(hey());
 		if (form == null || receipt == null)
 			return;
 
@@ -148,7 +159,22 @@ public class EditReceiptFragment extends MyFragment {
 					pr("  moving tags to front of queue");
 				receipt.getTags().moveTagsToFrontOfQueue(app.tagSetFile());
 			}
+
+			listener().receiptEdited(receipt);
 		}
+	}
+
+	/**
+	 * Get listener by casting parent activity
+	 * 
+	 * @return
+	 */
+	private Listener listener() {
+		return (Listener) getActivity();
+	}
+
+	public static interface Listener {
+		void receiptEdited(Receipt r);
 	}
 
 	private RBuddyApp app;
@@ -157,4 +183,5 @@ public class EditReceiptFragment extends MyFragment {
 	private FormButtonWidget receiptWidget;
 	private ScrollView scrollView;
 	private ActivityState activityState;
+
 }

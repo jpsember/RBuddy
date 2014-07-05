@@ -1,12 +1,9 @@
 package com.js.form;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-//import static com.js.basic.Tools.*;
 import com.js.json.*;
+
 import android.content.Context;
 import android.widget.LinearLayout;
 import android.view.View;
@@ -80,8 +77,8 @@ public class Form implements IJSONEncoder {
 	/**
 	 * Write value to form field
 	 */
-	public void setValue(String fieldName, Object value) {
-		getField(fieldName).setValue(value.toString());
+	public void setValue(String fieldName, Object value, boolean notifyListeners) {
+		getField(fieldName).setValue(value.toString(), notifyListeners);
 	}
 
 	public FormWidget getField(String widgetName) {
@@ -92,6 +89,28 @@ public class Form implements IJSONEncoder {
 		return field;
 	}
 
+	/**
+	 * Notify listeners that form values have changed
+	 */
+	public void valuesChanged() {
+		for (Listener listener : mListeners) {
+			listener.valuesChanged(this);
+		}
+	}
+
+	public static interface Listener {
+		void valuesChanged(Form form);
+	}
+
+	public void addListener(Listener listener) {
+		mListeners.add(listener);
+	}
+
+	public void removeListener(Listener listener) {
+		mListeners.remove(listener);
+	}
+
+	private Set<Listener> mListeners = new HashSet();
 	private List<FormWidget> fieldsList = new ArrayList();
 	private View layout;
 	private Map<String, FormWidget> itemsMap = new HashMap();
