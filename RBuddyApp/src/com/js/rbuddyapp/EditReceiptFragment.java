@@ -60,8 +60,6 @@ public class EditReceiptFragment extends MyFragment {
 
 	@Override
 	public void onResume() {
-		if (db)
-			pr(hey());
 		super.onResume();
 		readWidgetValuesFromReceipt();
 	}
@@ -77,8 +75,6 @@ public class EditReceiptFragment extends MyFragment {
 	}
 
 	public void setReceipt(Receipt receipt) {
-		if (db)
-			pr(hey() + "receipt=" + receipt);
 		// In case there's an existing receipt, flush its changes
 		updateReceiptWithWidgetValues();
 		this.mReceipt = receipt;
@@ -123,6 +119,10 @@ public class EditReceiptFragment extends MyFragment {
 		mForm.setValue("cost", mReceipt.getCost(), false);
 		mForm.setValue("date", mReceipt.getDate(), false);
 		mForm.setValue("tags", mReceipt.getTags(), false);
+		final boolean db = true;
+		if (db)
+			pr(hey() + " rid " + mReceipt.getId() + " photoId "
+					+ mReceipt.getPhotoId());
 		mReceiptWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}

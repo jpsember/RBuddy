@@ -13,7 +13,7 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 
 		@Override
 		public String getName() {
-			return "image";
+			return "imageview";
 		}
 
 		@Override

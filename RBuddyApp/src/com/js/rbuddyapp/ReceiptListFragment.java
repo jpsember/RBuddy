@@ -130,8 +130,6 @@ public class ReceiptListFragment extends MyFragment {
 	 */
 	private void processReceiptSelection(int position) {
 		Receipt r = mReceiptList.get(position);
-		if (db)
-			pr(hey() + "position=" + position);
 		listener().receiptSelected(r);
 	}
 

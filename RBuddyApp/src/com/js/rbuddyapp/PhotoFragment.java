@@ -74,10 +74,6 @@ public class PhotoFragment extends MyFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mReceipt == null) {
-			warning("mReceipt is null, must restore this from state");
-			return;
-		}
 
 		mImageWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
@@ -157,14 +153,9 @@ public class PhotoFragment extends MyFragment {
 	private void processPhotoResult(Intent intent) {
 		// TODO handle various problem situations in ways other than just 'die'
 
-		if (mReceipt == null) {
-			warning("mReceipt is null, must restore this from state");
-			return;
-		}
 		File workFile = getWorkPhotoFile();
 		if (!workFile.isFile()) {
 			Uri uri = Uri.fromFile(workFile);
-
 			die("no work file found: " + workFile + ", uri=" + uri);
 		}
 
@@ -200,43 +191,6 @@ public class PhotoFragment extends MyFragment {
 	// Photo interface (non-fragment methods)
 	public void setReceipt(Receipt r) {
 		this.mReceipt = r;
-	}
-
-	public void plot(FragmentOrganizer fragments, Receipt r) {
-		ASSERT(r != null);
-		setReceipt(r);
-		fragments.plot(TAG, false, true);
-	}
-
-	public void processPhotoResult(File workFile) {
-
-		BitmapUtil.orientAndScaleBitmap(workFile, IPhotoStore.FULLSIZE_HEIGHT,
-				true);
-
-		try {
-			FileArguments args = new FileArguments();
-			args.setData(Files.readBinaryFile(workFile));
-			args.setFileId(mReceipt.getPhotoId());
-
-			final FileArguments arg = args;
-
-			// We have to wait until the photo has been processed, and a photoId
-			// assigned; then store this assignment in the receipt, and push new
-			// version to any listeners
-			args.setCallback(new Runnable() {
-				public void run() {
-					mReceipt.setPhotoId(arg.getFileIdString());
-					mApp.photoStore().pushPhoto(mReceipt.getId(),
-							mReceipt.getPhotoId());
-				}
-			});
-			IPhotoStore ps = mApp.photoStore();
-			ps.storePhoto(mReceipt.getId(), args);
-		} catch (IOException e) {
-			// TODO display popup message to user, and don't update receipt's
-			// photo id
-			die(e);
-		}
 	}
 
 	private Receipt mReceipt;

@@ -239,6 +239,7 @@ public class RBuddyActivity extends MyActivity implements
 
 	@Override
 	public void editPhoto(Receipt r) {
+		mPhotoFragment.setReceipt(r);
 		focusOn(PhotoFragment.TAG);
 	}
 
@@ -251,5 +252,5 @@ public class RBuddyActivity extends MyActivity implements
 	private ReceiptListFragment mReceiptListFragment;
 	private EditReceiptFragment mEditReceiptFragment;
 	/* private */SearchFragment mSearchFragment;
-	/* private */PhotoFragment mPhotoFragment;
+	private PhotoFragment mPhotoFragment;
 }
