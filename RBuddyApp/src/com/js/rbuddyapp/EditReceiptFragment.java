@@ -117,6 +117,8 @@ public class EditReceiptFragment extends MyFragment {
 	}
 
 	private void processPhotoButtonPress() {
+		if (receipt == null)
+			return;
 		listener().editPhoto(receipt);
 		// startActivity(PhotoActivity.getStartIntent(getActivity(),
 		// receipt.getId()));

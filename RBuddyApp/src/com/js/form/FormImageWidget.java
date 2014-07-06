@@ -2,6 +2,7 @@ package com.js.form;
 
 import java.util.Map;
 
+import com.js.rbuddy.Receipt;
 import com.js.rbuddyapp.IPhotoListener;
 import com.js.rbuddyapp.IPhotoStore;
 import com.js.rbuddyapp.RBuddyApp;
@@ -22,9 +23,11 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 		getWidgetContainer().addView(imageView);
 	}
 
-	public void displayPhoto(int receiptId, String fileIdString) {
+	public void displayPhoto(Receipt receipt) {
+		// TODO: decouple Form widgets (such as this one) from RBuddyApp (e.g.
+		// Receipt class, PhotoStore)
 		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
-		if (receiptId == 0) {
+		if (receipt == null) {
 			if (listeningForReceiptId != 0) {
 				photoStore.removePhotoListener(listeningForReceiptId, false,
 						this);
@@ -36,9 +39,10 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 						this);
 			}
 
-			listeningForReceiptId = receiptId;
+			listeningForReceiptId = receipt.getId();
 			photoStore.addPhotoListener(listeningForReceiptId, false, this);
 
+			String fileIdString = receipt.getPhotoId();
 			if (fileIdString != null) {
 				// Have the PhotoStore load the image, and it will notify any
 				// listeners (including us) when it has arrived

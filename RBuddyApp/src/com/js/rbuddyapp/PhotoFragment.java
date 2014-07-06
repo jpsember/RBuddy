@@ -60,34 +60,40 @@ public class PhotoFragment extends MyFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		app = RBuddyApp.sharedInstance(getActivity());
+		mApp = RBuddyApp.sharedInstance(getActivity());
 		layoutElements();
 
-		activityState = new ActivityState() //
-				.add(scrollView) //
+		mActivityState = new ActivityState() //
+				.add(mScrollView) //
 				.restoreStateFrom(savedInstanceState);
-		return scrollView;
+		return mScrollView;
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		imageWidget.displayPhoto(receipt.getId(), receipt.getPhotoId());
+		mImageWidget.displayPhoto(mReceipt);
+
+		// If no photo is defined for this receipt, act as if he has pressed the
+		// camera button
+		if (mReceipt.getPhotoId() == null) {
+			startImageCaptureIntent();
+		}
+
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		// Display nothing, so widget stops listening; else it will leak
-		unimp("we should probably pass a receipt here instead");
-		imageWidget.displayPhoto(0, null);
-		app.receiptFile().flush();
+		mImageWidget.displayPhoto(null);
+		mApp.receiptFile().flush();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		activityState.saveState(outState);
+		mActivityState.saveState(outState);
 	}
 
 	@Override
@@ -104,23 +110,24 @@ public class PhotoFragment extends MyFragment {
 		String jsonString = readTextFileResource(this.getActivity(),
 				R.raw.form_photo_activity);
 
-		this.form = Form.parse(this.getActivity(), jsonString);
-		form.getField("takephoto").setOnClickListener(new OnClickListener() {
+		this.mForm = Form.parse(this.getActivity(), jsonString);
+		mForm.getField("takephoto").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				startImageCaptureIntent();
 			}
 		});
-		imageWidget = (FormImageWidget) form.getField("photo");
+		mImageWidget = (FormImageWidget) mForm.getField("photo");
 
-		scrollView = new ScrollView(getActivity());
-		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+		mScrollView = new ScrollView(getActivity());
+		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
-		scrollView.addView(form.getView());
+		mScrollView.addView(mForm.getView());
 	}
 
 	private void startImageCaptureIntent() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
 
 		if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
 			return;
@@ -161,7 +168,7 @@ public class PhotoFragment extends MyFragment {
 		try {
 			FileArguments args = new FileArguments();
 			args.setData(Files.readBinaryFile(workFile));
-			args.setFileId(receipt.getPhotoId());
+			args.setFileId(mReceipt.getPhotoId());
 
 			final FileArguments arg = args;
 
@@ -170,12 +177,12 @@ public class PhotoFragment extends MyFragment {
 			// version to any listeners
 			args.setCallback(new Runnable() {
 				public void run() {
-					receipt.setPhotoId(arg.getFileIdString());
-					app.photoStore().pushPhoto(receipt);
+					mReceipt.setPhotoId(arg.getFileIdString());
+					mApp.photoStore().pushPhoto(mReceipt);
 				}
 			});
-			IPhotoStore ps = app.photoStore();
-			ps.storePhoto(receipt.getId(), args);
+			IPhotoStore ps = mApp.photoStore();
+			ps.storePhoto(mReceipt.getId(), args);
 		} catch (IOException e) {
 			// TODO display popup message to user, and don't update receipt's
 			// photo id
@@ -185,18 +192,13 @@ public class PhotoFragment extends MyFragment {
 
 	// Photo interface (non-fragment methods)
 	public void setReceipt(Receipt r) {
-		this.receipt = r;
+		this.mReceipt = r;
 	}
 
 	public void plot(FragmentOrganizer fragments, Receipt r) {
+		ASSERT(r != null);
 		setReceipt(r);
 		fragments.plot(TAG, false, true);
-
-		// If no photo is defined for this receipt, act as if he has pressed the
-		// camera button
-		if (receipt.getPhotoId() == null) {
-			startImageCaptureIntent();
-		}
 	}
 
 	public void processPhotoResult(File workFile) {
@@ -207,7 +209,7 @@ public class PhotoFragment extends MyFragment {
 		try {
 			FileArguments args = new FileArguments();
 			args.setData(Files.readBinaryFile(workFile));
-			args.setFileId(receipt.getPhotoId());
+			args.setFileId(mReceipt.getPhotoId());
 
 			final FileArguments arg = args;
 
@@ -216,12 +218,12 @@ public class PhotoFragment extends MyFragment {
 			// version to any listeners
 			args.setCallback(new Runnable() {
 				public void run() {
-					receipt.setPhotoId(arg.getFileIdString());
-					app.photoStore().pushPhoto(receipt);
+					mReceipt.setPhotoId(arg.getFileIdString());
+					mApp.photoStore().pushPhoto(mReceipt);
 				}
 			});
-			IPhotoStore ps = app.photoStore();
-			ps.storePhoto(receipt.getId(), args);
+			IPhotoStore ps = mApp.photoStore();
+			ps.storePhoto(mReceipt.getId(), args);
 		} catch (IOException e) {
 			// TODO display popup message to user, and don't update receipt's
 			// photo id
@@ -229,10 +231,10 @@ public class PhotoFragment extends MyFragment {
 		}
 	}
 
-	private Receipt receipt;
-	private RBuddyApp app;
-	private Form form;
-	private FormImageWidget imageWidget;
-	private ScrollView scrollView;
-	private ActivityState activityState;
+	private Receipt mReceipt;
+	private RBuddyApp mApp;
+	private Form mForm;
+	private FormImageWidget mImageWidget;
+	private ScrollView mScrollView;
+	private ActivityState mActivityState;
 }
