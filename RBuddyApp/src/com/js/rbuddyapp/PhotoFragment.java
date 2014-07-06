@@ -63,7 +63,6 @@ public class PhotoFragment extends MyFragment {
 		app = RBuddyApp.sharedInstance(getActivity());
 		layoutElements();
 
-		// layoutElements();
 		activityState = new ActivityState() //
 				.add(scrollView) //
 				.restoreStateFrom(savedInstanceState);
@@ -93,17 +92,11 @@ public class PhotoFragment extends MyFragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "requestCode " + requestCode + " result " + resultCode
-					+ " data " + data);
 		if (requestCode == REQUEST_IMAGE_CAPTURE) {
 			if (resultCode == Activity.RESULT_OK)
 				processPhotoResult(data);
-			// Whether or not the user selected a new photo, exit to the
-			// EditReceipt activity.
-			unimp("pop stack to previous activity?");
-			// finish();
+			// Whether or not the user selected a new photo, pop this fragment
+			getActivity().getFragmentManager().popBackStack();
 		}
 	}
 
@@ -124,43 +117,36 @@ public class PhotoFragment extends MyFragment {
 		scrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
 		scrollView.addView(form.getView());
-
-		// setContentView(scrollView);
 	}
 
 	private void startImageCaptureIntent() {
-		final boolean db = true;
-		if (db)
-			pr(hey());
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
 		if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
 			return;
 		}
 
 		File workFile = getWorkPhotoFile();
+		File parent = workFile.getParentFile();
+
 		// Create the directories leading up to this file if necessary
-		if (!workFile.exists()) {
-			workFile.mkdirs();
+		if (!parent.exists()) {
+			boolean r = parent.mkdirs();
+			if (!r)
+				die("failed to create directory " + parent);
 		}
 
-		if (db)
-			pr(" workFile: " + workFile);
 		Uri uri = Uri.fromFile(workFile);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-		if (db)
-			pr(" starting activity REQUEST_IMAGE_CAPTURE");
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
 	private File getWorkPhotoFile() {
-		return BitmapUtil.constructExternalImageFile("RBuddy_work");
+		return BitmapUtil.constructExternalImageFile("work");
 	}
 
 	private void processPhotoResult(Intent intent) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "intent " + intent);
-		unimp("handle various problem situations in ways other than just 'die'");
+		// TODO handle various problem situations in ways other than just 'die'
 
 		File workFile = getWorkPhotoFile();
 		if (!workFile.isFile()) {
@@ -206,13 +192,41 @@ public class PhotoFragment extends MyFragment {
 		setReceipt(r);
 		fragments.plot(TAG, false, true);
 
-		// // If no photo is defined for this receipt, jump right into the take
-		// // photo intent
-		// if (receipt.getPhotoId() == null) {
-		// startImageCaptureIntent();
-		// }
-		unimp("not yet jumping into take photo intent");
+		// If no photo is defined for this receipt, act as if he has pressed the
+		// camera button
+		if (receipt.getPhotoId() == null) {
+			startImageCaptureIntent();
+		}
+	}
 
+	public void processPhotoResult(File workFile) {
+
+		BitmapUtil.orientAndScaleBitmap(workFile, IPhotoStore.FULLSIZE_HEIGHT,
+				true);
+
+		try {
+			FileArguments args = new FileArguments();
+			args.setData(Files.readBinaryFile(workFile));
+			args.setFileId(receipt.getPhotoId());
+
+			final FileArguments arg = args;
+
+			// We have to wait until the photo has been processed, and a photoId
+			// assigned; then store this assignment in the receipt, and push new
+			// version to any listeners
+			args.setCallback(new Runnable() {
+				public void run() {
+					receipt.setPhotoId(arg.getFileIdString());
+					app.photoStore().pushPhoto(receipt);
+				}
+			});
+			IPhotoStore ps = app.photoStore();
+			ps.storePhoto(receipt.getId(), args);
+		} catch (IOException e) {
+			// TODO display popup message to user, and don't update receipt's
+			// photo id
+			die(e);
+		}
 	}
 
 	private Receipt receipt;

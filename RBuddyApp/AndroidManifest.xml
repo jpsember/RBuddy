@@ -6,16 +6,16 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
 
-    <!-- we need the camera to take photos of receipts (though I suppose we could allow just existing photos) -->
+    <!-- we need the camera to take photos of receipts -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
 
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
+    <!--  This seems to be required for Samsung Galaxy S3, maybe related to my recent upgrade  -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
     <!-- not sure if this is required... -->
     <uses-permission android:name="android.permission.CAMERA" />
 
@@ -24,54 +24,22 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
-        
-        <activity
-            android:name="com.js.rbuddyapp.StartActivity"
-            >
+        <activity android:name="com.js.rbuddyapp.StartActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity android:name="com.js.rbuddyapp.RBuddyActivity" >
-            <!--
-         <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
         </activity>
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
-        <activity
-            android:name="com.js.rbuddyapp.SearchActivity"
-            android:parentActivityName="com.js.rbuddyapp.RBuddyActivity"
-            android:windowSoftInputMode="stateUnchanged" >
-        </activity>
-        <activity
-            android:name="com.js.rbuddyapp.EditReceiptActivity"
-            android:parentActivityName="com.js.rbuddyapp.RBuddyActivity"
-            android:windowSoftInputMode="stateUnchanged" >
-        </activity>
-        <activity
-            android:name="com.js.rbuddyapp.PhotoActivity"
-            android:parentActivityName="com.js.rbuddyapp.EditReceiptActivity"
-            android:windowSoftInputMode="stateUnchanged" >
-        </activity>
-        <activity
-            android:name="com.js.rbuddyapp.ExperimentalActivity"
-            android:parentActivityName="com.js.rbuddyapp.ExperimentalActivity"
-            android:windowSoftInputMode="stateUnchanged" >
-        </activity>
-       
     </application>
 
-</manifest>
-<!--
+</manifest><!--
 If proguard is used, we need to follow the directions in 
 
 http://developer.android.com/google/play-services/setup.html 

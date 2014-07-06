@@ -14,8 +14,9 @@ import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 
 public class RBuddyActivity extends MyActivity implements
-		ReceiptListFragment.Listener, //
-		EditReceiptFragment.Listener {
+		ReceiptListFragment.Listener //
+		, EditReceiptFragment.Listener //
+{
 
 	public RBuddyActivity() {
 		super(true); // log lifecycle events?

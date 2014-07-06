@@ -149,7 +149,7 @@ public class BitmapUtil {
 	public static File constructExternalImageFile(String name) {
 		File storageDir = Environment
 				.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-		File imageFile = new File(storageDir, "JS_" + name + JPEG_EXTENSION);
+		File imageFile = new File(storageDir, name + JPEG_EXTENSION);
 		imageFile = imageFile.getAbsoluteFile();
 		return imageFile;
 	}
