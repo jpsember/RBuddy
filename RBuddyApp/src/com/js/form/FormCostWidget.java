@@ -6,6 +6,19 @@ import com.js.rbuddy.Cost;
 import android.text.InputType;
 
 public class FormCostWidget extends FormTextWidget {
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "cost";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormCostWidget(owner, attributes);
+		}
+	};
+
 	public FormCostWidget(Form owner, Map attributes) {
 		super(owner,attributes);
 

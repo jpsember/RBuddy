@@ -73,7 +73,7 @@ public class EditReceiptFragment extends MyFragment {
 		mApp.receiptFile().flush();
 		// Make widget display nothing, so it stops listening; otherwise
 		// the widget will leak
-		mReceiptWidget.displayPhoto(0, null);
+		mReceiptWidget.displayPhoto(mApp.photoStore(), 0, null);
 	}
 
 	public void setReceipt(Receipt receipt) {
@@ -88,7 +88,7 @@ public class EditReceiptFragment extends MyFragment {
 	private void layoutElements() {
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_edit_receipt);
-		this.mForm = Form.parse(getActivity(), jsonString);
+		this.mForm = mApp.parseForm(getActivity(), jsonString);
 		mForm.addListener(new Form.Listener() {
 			@Override
 			public void valuesChanged(Form form) {
@@ -123,7 +123,8 @@ public class EditReceiptFragment extends MyFragment {
 		mForm.setValue("cost", mReceipt.getCost(), false);
 		mForm.setValue("date", mReceipt.getDate(), false);
 		mForm.setValue("tags", mReceipt.getTags(), false);
-		mReceiptWidget.displayPhoto(mReceipt.getId(), mReceipt.getPhotoId());
+		mReceiptWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
+				mReceipt.getPhotoId());
 	}
 
 	private void updateReceiptWithWidgetValues() {

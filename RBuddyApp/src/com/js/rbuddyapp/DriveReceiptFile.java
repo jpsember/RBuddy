@@ -11,6 +11,7 @@ import com.js.json.JSONParser;
 import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSetFile;
+import com.js.android.FileArguments;
 
 public class DriveReceiptFile implements IReceiptFile {
 

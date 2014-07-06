@@ -10,8 +10,25 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
 public class Form implements IJSONEncoder {
+	
+	private static FormWidget.Factory[] basicWidgets = {
+		FormTextWidget.FACTORY,
+		FormHeaderWidget.FACTORY,
+		FormDateWidget.FACTORY,
+		FormCostWidget.FACTORY,
+		FormButtonWidget.FACTORY,
+		FormImageWidget.FACTORY,
+		FormCheckBoxWidget.FACTORY,
+	};
+
 	private Form(Context context) {
 		this.context = context;
+		for (int i = 0; i < basicWidgets.length; i++)
+			registerWidget(basicWidgets[i]);
+	}
+
+	public void registerWidget(FormWidget.Factory factory) {
+		mWidgetFactoryMap.put(factory.getName(), factory);
 	}
 
 	private Context context;
@@ -20,14 +37,24 @@ public class Form implements IJSONEncoder {
 		return context;
 	}
 
-	public static Form parse(Context context, String jsonString) {
-		return parse(context, new JSONParser(jsonString));
+	public static Form parse(Context context, String jsonString,
+			Set<FormWidget.Factory> widgetTypes) {
+		return parse(context, new JSONParser(jsonString), widgetTypes);
 	}
 
-	public static Form parse(Context context, JSONParser json) {
+	public static Form parse(Context context, JSONParser json,
+			Set<FormWidget.Factory> widgetTypes) {
 		Form f = new Form(context);
+		if (widgetTypes != null)
+			for (FormWidget.Factory factory : widgetTypes) {
+				f.registerWidget(factory);
+			}
 		f.parse(json);
 		return f;
+	}
+
+	FormWidget.Factory getWidgetFactory(String name) {
+		return mWidgetFactoryMap.get(name);
 	}
 
 	private void parse(JSONParser json) {
@@ -110,6 +137,7 @@ public class Form implements IJSONEncoder {
 		mListeners.remove(listener);
 	}
 
+	private Map<String, FormWidget.Factory> mWidgetFactoryMap = new HashMap();
 	private Set<Listener> mListeners = new HashSet();
 	private List<FormWidget> fieldsList = new ArrayList();
 	private View layout;

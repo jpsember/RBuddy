@@ -2,6 +2,9 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.js.android.App;
 import com.js.android.AppPreferences;
 import com.js.rbuddy.IReceiptFile;
@@ -10,6 +13,9 @@ import com.js.rbuddy.TagSetFile;
 import android.content.Context;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.js.android.IPhotoStore;
+import com.js.form.Form;
+import com.js.form.FormWidget;
 
 /**
  * Maintains data structures and whatnot that are global to the RBuddy app, and
@@ -93,9 +99,19 @@ public class RBuddyApp extends App {
 		return mUseGoogleAPIFlag.booleanValue();
 	}
 
+	public Form parseForm(Context context, String json) {
+		if (mAdditionalWidgetTypes == null) {
+			mAdditionalWidgetTypes = new HashSet();
+			mAdditionalWidgetTypes.add(FormTagSetWidget.FACTORY);
+		}
+		return Form.parse(context, json, mAdditionalWidgetTypes);
+
+	}
+
 	private GoogleApiClient mGoogleApiClient;
 	private Boolean mUseGoogleAPIFlag;
 	private IPhotoStore mPhotoStore;
 	private IReceiptFile mReceiptFile;
 	private TagSetFile mTagSetFile;
+	private Set<FormWidget.Factory> mAdditionalWidgetTypes;
 }

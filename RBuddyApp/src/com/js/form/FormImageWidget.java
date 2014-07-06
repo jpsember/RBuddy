@@ -2,15 +2,25 @@ package com.js.form;
 
 import java.util.Map;
 
-import com.js.rbuddy.Receipt;
-import com.js.rbuddyapp.IPhotoListener;
-import com.js.rbuddyapp.IPhotoStore;
-import com.js.rbuddyapp.RBuddyApp;
+import com.js.android.IPhotoListener;
+import com.js.android.IPhotoStore;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 public class FormImageWidget extends FormWidget implements IPhotoListener {
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "image";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormImageWidget(owner, attributes);
+		}
+	};
 
 	public FormImageWidget(Form owner, Map attributes) {
 		super(owner, attributes);
@@ -23,11 +33,9 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 		getWidgetContainer().addView(imageView);
 	}
 
-	public void displayPhoto(Receipt receipt) {
-		// TODO: decouple Form widgets (such as this one) from RBuddyApp (e.g.
-		// Receipt class, PhotoStore)
-		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
-		if (receipt == null) {
+	public void displayPhoto(IPhotoStore photoStore, int receiptId,
+			String photoId) {
+		if (receiptId == 0) {
 			if (listeningForReceiptId != 0) {
 				photoStore.removePhotoListener(listeningForReceiptId, false,
 						this);
@@ -39,10 +47,10 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 						this);
 			}
 
-			listeningForReceiptId = receipt.getId();
+			listeningForReceiptId = receiptId;
 			photoStore.addPhotoListener(listeningForReceiptId, false, this);
 
-			String fileIdString = receipt.getPhotoId();
+			String fileIdString = photoId;
 			if (fileIdString != null) {
 				// Have the PhotoStore load the image, and it will notify any
 				// listeners (including us) when it has arrived

@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
+import com.js.android.IPhotoStore;
 
 public class RBuddyActivity extends MyActivity implements
 		ReceiptListFragment.Listener //

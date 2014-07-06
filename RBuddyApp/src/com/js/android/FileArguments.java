@@ -1,4 +1,4 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.*;

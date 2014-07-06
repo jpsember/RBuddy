@@ -26,6 +26,8 @@ import android.os.Looper;
 import android.os.Message;
 import static com.js.basic.Tools.*;
 import static com.js.android.Tools.*;
+import com.js.android.FileArguments;
+import com.js.android.IPhotoStore;
 
 public class UserData {
 

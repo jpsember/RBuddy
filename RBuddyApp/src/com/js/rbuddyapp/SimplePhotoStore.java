@@ -21,7 +21,9 @@ import android.os.Looper;
 import com.js.android.AppPreferences;
 import com.js.android.BitmapUtil;
 import com.js.basic.Files;
-import com.js.rbuddy.Receipt;
+import com.js.android.IPhotoListener;
+import com.js.android.FileArguments;
+import com.js.android.IPhotoStore;
 
 public class SimplePhotoStore implements IPhotoStore {
 
@@ -285,14 +287,14 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void pushPhoto(Receipt receipt) {
-		if (receipt.getPhotoId() == null)
+	public void pushPhoto(int ownerId, String photoId) {
+		if (photoId == null)
 			return;
 
 		// Read both full-size and thumbnail versions of the photo;
 		// the cache logic will notify any listeners
-		readPhoto(receipt.getId(), receipt.getPhotoId(), false);
-		readPhoto(receipt.getId(), receipt.getPhotoId(), true);
+		readPhoto(ownerId, photoId, false);
+		readPhoto(ownerId, photoId, true);
 	}
 
 	/**

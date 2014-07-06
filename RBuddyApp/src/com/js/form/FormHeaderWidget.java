@@ -8,6 +8,19 @@ import android.widget.TextView;
 
 public class FormHeaderWidget extends FormWidget {
 
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "header";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormHeaderWidget(owner, attributes);
+		}
+	};
+
 	public FormHeaderWidget(Form owner, Map attributes) {
 		super(owner, attributes);
 

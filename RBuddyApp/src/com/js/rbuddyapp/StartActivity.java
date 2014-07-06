@@ -19,6 +19,7 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.drive.Drive;
 import com.js.form.FormWidget;
+import com.js.android.IPhotoStore;
 
 public class StartActivity extends Activity implements ConnectionCallbacks,
 		OnConnectionFailedListener {

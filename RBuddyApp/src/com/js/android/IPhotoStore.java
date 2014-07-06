@@ -1,6 +1,6 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
-import com.js.rbuddy.Receipt;
+//import com.js.android.IPhotoListener;
 
 public interface IPhotoStore {
 
@@ -9,7 +9,7 @@ public interface IPhotoStore {
 	public static final int FULLSIZE_HEIGHT = 800;
 	public static final String PREFERENCE_KEY_PHOTO_DELAY = "photo_delays";
 
-	public void readPhoto(int receiptId, String fileIdString, boolean thumbnail);
+	public void readPhoto(int ownerId, String resourceName, boolean thumbnail);
 
 	/**
 	 * Stored photos are assumed to be full size (not thumbnails)
@@ -27,7 +27,7 @@ public interface IPhotoStore {
 	/**
 	 * Prepare drawables and send to listeners for a particular id
 	 */
-	public void pushPhoto(Receipt receipt);
+	public void pushPhoto(int ownerId, String photoId);
 
 	/**
 	 * Register a listener for a particular photo

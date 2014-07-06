@@ -1,12 +1,10 @@
 package com.js.form;
 
-import static com.js.basic.Tools.*;
-
 import java.util.Map;
 
-import com.js.rbuddyapp.IPhotoListener;
-import com.js.rbuddyapp.IPhotoStore;
-import com.js.rbuddyapp.RBuddyApp;
+import com.js.android.App;
+import com.js.android.IPhotoListener;
+import com.js.android.IPhotoStore;
 
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
@@ -20,9 +18,18 @@ import android.widget.LinearLayout;
 
 public class FormButtonWidget extends FormWidget implements IPhotoListener {
 
-	static {
-		suppressWarning();
-	}
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "button";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormButtonWidget(owner, attributes);
+		}
+	};
 
 	public FormButtonWidget(Form owner, Map attributes) {
 		super(owner, attributes);
@@ -38,8 +45,7 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			b.setText(button_label);
 			button = b;
 		} else {
-			int resourceId = RBuddyApp.sharedInstance()
-					.getResource(button_icon);
+			int resourceId = App.sharedInstance().getResource(button_icon);
 			Drawable img = context().getResources().getDrawable(resourceId);
 
 			if (button_label.isEmpty()) {
@@ -73,11 +79,11 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 			imageView.setAdjustViewBounds(true);
 
-			int THUMBNAIL_WIDTH = RBuddyApp
+			int THUMBNAIL_WIDTH = App
 					.truePixels(IPhotoStore.THUMBNAIL_HEIGHT * 1.0f);
 
 			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
-					RBuddyApp.truePixels(IPhotoStore.THUMBNAIL_HEIGHT), 0.2f);
+					App.truePixels(IPhotoStore.THUMBNAIL_HEIGHT), 0.2f);
 			parentView.addView(imageView, p);
 		} else {
 			getWidgetContainer().addView(button);
@@ -95,8 +101,8 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 		button.setOnClickListener(listener);
 	}
 
-	public void displayPhoto(int receiptId, String fileIdString) {
-		IPhotoStore photoStore = RBuddyApp.sharedInstance().photoStore();
+	public void displayPhoto(IPhotoStore photoStore, int receiptId,
+			String fileIdString) {
 		if (receiptId == 0) {
 			if (listeningForPhotoId != 0) {
 				photoStore.removePhotoListener(listeningForPhotoId, true, this);

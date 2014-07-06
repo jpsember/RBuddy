@@ -1,8 +1,6 @@
-package com.js.form;
+package com.js.rbuddyapp;
 
 import java.util.Map;
-
-import com.js.rbuddyapp.RBuddyApp;
 
 import com.js.rbuddy.TagSet;
 import com.js.rbuddy.TagSetFile;
@@ -10,9 +8,22 @@ import android.text.method.TextKeyListener;
 import android.widget.ArrayAdapter;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.Tokenizer;
+import com.js.form.*;
 
 public class FormTagSetWidget extends FormTextWidget {
-	
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "tagset";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormTagSetWidget(owner, attributes);
+		}
+	};
+
 	public FormTagSetWidget(Form owner, Map attributes) {
 		super(owner,attributes);
 	}

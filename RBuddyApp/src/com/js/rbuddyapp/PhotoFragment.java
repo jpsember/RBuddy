@@ -24,6 +24,8 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
+import com.js.android.FileArguments;
+import com.js.android.IPhotoStore;
 
 public class PhotoFragment extends MyFragment {
 
@@ -72,10 +74,17 @@ public class PhotoFragment extends MyFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		mImageWidget.displayPhoto(mReceipt);
+		if (mReceipt == null) {
+			warning("mReceipt is null, must restore this from state");
+			return;
+		}
+
+		mImageWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
+				mReceipt.getPhotoId());
 
 		// If no photo is defined for this receipt, act as if he has pressed the
 		// camera button
+
 		if (mReceipt.getPhotoId() == null) {
 			startImageCaptureIntent();
 		}
@@ -86,7 +95,7 @@ public class PhotoFragment extends MyFragment {
 	public void onPause() {
 		super.onPause();
 		// Display nothing, so widget stops listening; else it will leak
-		mImageWidget.displayPhoto(null);
+		mImageWidget.displayPhoto(mApp.photoStore(), 0, null);
 		mApp.receiptFile().flush();
 	}
 
@@ -104,7 +113,7 @@ public class PhotoFragment extends MyFragment {
 		String jsonString = readTextFileResource(this.getActivity(),
 				R.raw.form_photo_activity);
 
-		this.mForm = Form.parse(this.getActivity(), jsonString);
+		this.mForm = mApp.parseForm(getActivity(), jsonString);
 		mForm.getField("takephoto").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -121,7 +130,6 @@ public class PhotoFragment extends MyFragment {
 
 	private void startImageCaptureIntent() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
 
 		if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
 			return;
@@ -149,6 +157,10 @@ public class PhotoFragment extends MyFragment {
 	private void processPhotoResult(Intent intent) {
 		// TODO handle various problem situations in ways other than just 'die'
 
+		if (mReceipt == null) {
+			warning("mReceipt is null, must restore this from state");
+			return;
+		}
 		File workFile = getWorkPhotoFile();
 		if (!workFile.isFile()) {
 			Uri uri = Uri.fromFile(workFile);
@@ -172,7 +184,8 @@ public class PhotoFragment extends MyFragment {
 			args.setCallback(new Runnable() {
 				public void run() {
 					mReceipt.setPhotoId(arg.getFileIdString());
-					mApp.photoStore().pushPhoto(mReceipt);
+					mApp.photoStore().pushPhoto(mReceipt.getId(),
+							mReceipt.getPhotoId());
 				}
 			});
 			IPhotoStore ps = mApp.photoStore();
@@ -213,7 +226,8 @@ public class PhotoFragment extends MyFragment {
 			args.setCallback(new Runnable() {
 				public void run() {
 					mReceipt.setPhotoId(arg.getFileIdString());
-					mApp.photoStore().pushPhoto(mReceipt);
+					mApp.photoStore().pushPhoto(mReceipt.getId(),
+							mReceipt.getPhotoId());
 				}
 			});
 			IPhotoStore ps = mApp.photoStore();

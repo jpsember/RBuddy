@@ -23,6 +23,18 @@ public class FormTextWidget extends FormWidget {
 	protected static final int FOCUS_NEVER = 0;
 	protected static final int FOCUS_RESISTANT = 1;
 	protected static final int FOCUS_NORMAL = 2;
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "text";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormTextWidget(owner, attributes);
+		}
+	};
 
 	private static String[] focusTypeStrings = { "never", "resistant", "normal" };
 

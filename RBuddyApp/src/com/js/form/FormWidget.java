@@ -2,7 +2,7 @@ package com.js.form;
 
 import java.util.Map;
 
-import com.js.rbuddyapp.RBuddyApp;
+import com.js.android.App;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -42,24 +42,11 @@ public abstract class FormWidget {
 		String type = (String) attributes.get("type");
 		if (type == null)
 			throw new IllegalArgumentException("no type found");
-		if (type.equals("text")) {
-			widget = new FormTextWidget(owner, attributes);
-		} else if (type.equals("header")) {
-			widget = new FormHeaderWidget(owner, attributes);
-		} else if (type.equals("date")) {
-			widget = new FormDateWidget(owner, attributes);
-		} else if (type.equals("tagset")) {
-			widget = new FormTagSetWidget(owner, attributes);
-		} else if (type.equals("cost")) {
-			widget = new FormCostWidget(owner, attributes);
-		} else if (type.equals("button")) {
-			widget = new FormButtonWidget(owner, attributes);
-		} else if (type.equals("imageview")) {
-			widget = new FormImageWidget(owner, attributes);
-		} else if (type.equals("checkbox")) {
-			widget = new FormCheckBoxWidget(owner, attributes);
-		} else
-			throw new IllegalArgumentException("unsupported field type " + type);
+		FormWidget.Factory factory = owner.getWidgetFactory(type);
+		if (factory == null)
+			throw new IllegalArgumentException(
+					"no factory found for widget type " + type);
+		widget = factory.constructInstance(owner, attributes);
 		return widget;
 	}
 
@@ -138,8 +125,7 @@ public abstract class FormWidget {
 			if (auxType == AUXPANEL_EMPTY) {
 				View v = new View(context());
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						RBuddyApp.truePixels(AUX_WIDTH),
-						RBuddyApp.truePixels(10));
+						App.truePixels(AUX_WIDTH), App.truePixels(10));
 				p.weight = 0;
 				horizontalPanel.addView(v, p);
 			} else if (auxType == AUXPANEL_CHECKBOX) {
@@ -155,7 +141,7 @@ public abstract class FormWidget {
 					}
 				});
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						RBuddyApp.truePixels(AUX_WIDTH),
+						App.truePixels(AUX_WIDTH),
 						LayoutParams.WRAP_CONTENT);
 				p.weight = 0;
 				p.gravity = Gravity.BOTTOM;
@@ -361,6 +347,12 @@ public abstract class FormWidget {
 				+ (v.isFocusableInTouchMode() ? " FOCUSINTOUCH" : "")
 				+ (v.hasFocus() ? " HASFOCUS" : "")
 				+ (v.isClickable() ? " CLICKABLE" : "");
+	}
+
+	public static interface Factory {
+		String getName();
+
+		FormWidget constructInstance(Form owner, Map attributes);
 	}
 
 	// The form that owns this widget

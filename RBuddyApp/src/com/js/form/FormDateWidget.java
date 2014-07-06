@@ -10,6 +10,18 @@ import android.app.DatePickerDialog;
 import android.widget.DatePicker;
 
 public class FormDateWidget extends FormTextWidget {
+	public static final Factory FACTORY = new FormWidget.Factory() {
+
+		@Override
+		public String getName() {
+			return "date";
+		}
+
+		@Override
+		public FormWidget constructInstance(Form owner, Map attributes) {
+			return new FormDateWidget(owner, attributes);
+		}
+	};
 	public FormDateWidget(Form owner, Map attributes) {
 		super(owner,attributes);
 
