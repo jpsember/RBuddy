@@ -28,9 +28,6 @@ public class RBuddyActivity extends MyActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "savedInstanceState " + savedInstanceState);
 		super.onCreate(savedInstanceState);
 
 		app = RBuddyApp.sharedInstance(this);
@@ -40,9 +37,6 @@ public class RBuddyActivity extends MyActivity implements
 		fragments.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
-			if (db)
-				pr(" no prior state; support dual "
-						+ fragments.supportDualFragments());
 			// No previous state (including, presumably, the fragments) was
 			// defined, so set initial fragments
 			// TODO do this if no fragment exists in the slot, in case no state
@@ -226,7 +220,7 @@ public class RBuddyActivity extends MyActivity implements
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
 		mReceiptListFragment.refreshList();
-		mEditReceiptFragment.setReceipt(r);
+		receiptSelected(r);
 	}
 
 	// ReceiptListFragment.Listener
