@@ -19,7 +19,7 @@ public class RBuddyActivity extends MyActivity implements
 {
 
 	public RBuddyActivity() {
-		super(true); // log lifecycle events?
+		super(false); // log lifecycle events?
 	}
 
 	public static Intent getStartIntent(Context context) {
@@ -28,6 +28,9 @@ public class RBuddyActivity extends MyActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "savedInstanceState " + savedInstanceState);
 		super.onCreate(savedInstanceState);
 
 		app = RBuddyApp.sharedInstance(this);
@@ -37,11 +40,15 @@ public class RBuddyActivity extends MyActivity implements
 		fragments.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
+			if (db)
+				pr(" no prior state; support dual "
+						+ fragments.supportDualFragments());
 			// No previous state (including, presumably, the fragments) was
 			// defined, so set initial fragments
 			// TODO do this if no fragment exists in the slot, in case no state
 			// was saved for some (unusual) reason
 			fragments.plot(ReceiptListFragment.TAG, true, false);
+
 			if (fragments.supportDualFragments()) {
 				fragments.plot(EditReceiptFragment.TAG, false, false);
 			}
@@ -225,6 +232,7 @@ public class RBuddyActivity extends MyActivity implements
 	// ReceiptListFragment.Listener
 	@Override
 	public void receiptSelected(Receipt r) {
+		focusOn(EditReceiptFragment.TAG);
 		mEditReceiptFragment.setReceipt(r);
 	}
 
@@ -236,7 +244,11 @@ public class RBuddyActivity extends MyActivity implements
 
 	@Override
 	public void editPhoto(Receipt r) {
-		mPhotoFragment.plot(fragments, r);
+		focusOn(PhotoFragment.TAG);
+	}
+
+	private void focusOn(String fragmentName) {
+		fragments.plot(fragmentName, false, true);
 	}
 
 	private RBuddyApp app;
@@ -244,5 +256,5 @@ public class RBuddyActivity extends MyActivity implements
 	private ReceiptListFragment mReceiptListFragment;
 	private EditReceiptFragment mEditReceiptFragment;
 	/* private */SearchFragment mSearchFragment;
-	private PhotoFragment mPhotoFragment;
+	/* private */PhotoFragment mPhotoFragment;
 }

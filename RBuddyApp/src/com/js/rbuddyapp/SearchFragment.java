@@ -45,7 +45,7 @@ public class SearchFragment extends MyFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		layoutElements();
-		activityState = new ActivityState() //
+		mActivityState = new ActivityState() //
 				.add(scrollView) //
 				.restoreStateFrom(savedInstanceState);
 		return scrollView;
@@ -60,12 +60,6 @@ public class SearchFragment extends MyFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		activityState.saveState(outState);
 	}
 
 	private void layoutElements() {
@@ -91,5 +85,4 @@ public class SearchFragment extends MyFragment {
 
 	private Form form;
 	private ScrollView scrollView;
-	private ActivityState activityState;
 }

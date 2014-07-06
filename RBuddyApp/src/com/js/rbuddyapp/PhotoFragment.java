@@ -91,12 +91,6 @@ public class PhotoFragment extends MyFragment {
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		mActivityState.saveState(outState);
-	}
-
-	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_IMAGE_CAPTURE) {
 			if (resultCode == Activity.RESULT_OK)
@@ -236,5 +230,4 @@ public class PhotoFragment extends MyFragment {
 	private Form mForm;
 	private FormImageWidget mImageWidget;
 	private ScrollView mScrollView;
-	private ActivityState mActivityState;
 }

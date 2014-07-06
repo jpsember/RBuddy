@@ -1,6 +1,9 @@
 package com.js.rbuddyapp;
 
+import com.js.android.ActivityState;
+
 import android.app.Fragment;
+import android.os.Bundle;
 
 public abstract class MyFragment extends Fragment {
 
@@ -15,4 +18,13 @@ public abstract class MyFragment extends Fragment {
 
 		public MyFragment construct();
 	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mActivityState != null)
+			mActivityState.saveState(outState);
+	}
+
+	protected ActivityState mActivityState;
 }

@@ -52,7 +52,7 @@ public class EditReceiptFragment extends MyFragment {
 			Bundle savedInstanceState) {
 		app = RBuddyApp.sharedInstance();
 		layoutElements();
-		activityState = new ActivityState() //
+		mActivityState = new ActivityState() //
 				.add(scrollView) //
 				.restoreStateFrom(savedInstanceState);
 		return scrollView;
@@ -74,12 +74,6 @@ public class EditReceiptFragment extends MyFragment {
 		// Make widget display nothing, so it stops listening; otherwise
 		// the widget will leak
 		receiptWidget.displayPhoto(0, null);
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		activityState.saveState(outState);
 	}
 
 	public void setReceipt(Receipt receipt) {
@@ -120,8 +114,6 @@ public class EditReceiptFragment extends MyFragment {
 		if (receipt == null)
 			return;
 		listener().editPhoto(receipt);
-		// startActivity(PhotoActivity.getStartIntent(getActivity(),
-		// receipt.getId()));
 	}
 
 	private void readWidgetValuesFromReceipt() {
@@ -184,6 +176,5 @@ public class EditReceiptFragment extends MyFragment {
 	private Form form;
 	private FormButtonWidget receiptWidget;
 	private ScrollView scrollView;
-	private ActivityState activityState;
 
 }

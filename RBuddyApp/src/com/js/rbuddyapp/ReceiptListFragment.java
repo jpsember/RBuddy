@@ -57,16 +57,10 @@ public class ReceiptListFragment extends MyFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		constructListView();
-		activityState = new ActivityState() //
+		mActivityState = new ActivityState() //
 				.add(receiptListView) //
 				.restoreStateFrom(savedInstanceState);
 		return receiptListView;
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		activityState.saveState(outState);
 	}
 
 	// Methods this fragment provides (its non-fragment-related interface)
@@ -148,5 +142,4 @@ public class ReceiptListFragment extends MyFragment {
 	private List<Receipt> receiptList;
 	private RBuddyApp app;
 	private ListView receiptListView;
-	private ActivityState activityState;
 }

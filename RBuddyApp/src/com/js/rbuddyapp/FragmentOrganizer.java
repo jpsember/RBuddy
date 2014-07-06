@@ -38,7 +38,16 @@ public class FragmentOrganizer {
 
 	private static final boolean mLogging = false;
 
-	private static final String BUNDLE_PERSISTENCE_KEY = "FragmentOrganizer";
+	private static final String BUNDLE_PERSISTENCE_KEY2 = "FragmentOrganizer";
+
+	/**
+	 * Use different keys based on whether device supports dual fragments
+	 * 
+	 * @return
+	 */
+	private String getBundlePersistenceKey() {
+		return BUNDLE_PERSISTENCE_KEY2 + (mSupportsDual ? "2" : "1");
+	}
 
 	/**
 	 * Constructor
@@ -53,12 +62,12 @@ public class FragmentOrganizer {
 		this.mSlotViewBaseId = 1900;
 
 		mSupportsDual = getDeviceSize(mParentActivity) >= DEVICESIZE_LARGE;
+		if (AppPreferences.getBoolean(
+				RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false)) {
+			mSupportsDual = false;
+		}
 
 		mNumberOfSlots = mSupportsDual ? 2 : 1;
-
-		if (AppPreferences.getBoolean(
-				RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false))
-			mNumberOfSlots = 1;
 
 		mDesiredSlotContents = new String[mNumberOfSlots];
 
@@ -96,7 +105,7 @@ public class FragmentOrganizer {
 
 		String json = null;
 		if (savedInstanceState != null) {
-			json = savedInstanceState.getString(BUNDLE_PERSISTENCE_KEY);
+			json = savedInstanceState.getString(getBundlePersistenceKey());
 			if (json == null) {
 				warning("JSON string was null!");
 			} else
@@ -160,7 +169,7 @@ public class FragmentOrganizer {
 	 */
 	public void onSaveInstanceState(Bundle bundle) {
 		log("onSaveInstanceState bundle=" + nameOf(bundle));
-		bundle.putString(BUNDLE_PERSISTENCE_KEY, encodeToJSON());
+		bundle.putString(getBundlePersistenceKey(), encodeToJSON());
 		mIsResumed = false;
 	}
 
