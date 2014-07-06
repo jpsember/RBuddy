@@ -17,16 +17,16 @@ public class FileArguments {
 	}
 
 	public FileArguments() {
-		this.data = EMPTY_DATA;
-		this.mimeType = "application/octet-stream";
+		this.mData = EMPTY_DATA;
+		this.mMimeType = "application/octet-stream";
 	}
 
 	public void setData(byte[] data) {
-		this.data = data;
+		this.mData = data;
 	}
 
 	public byte[] getData() {
-		return this.data;
+		return this.mData;
 	}
 
 	/**
@@ -36,8 +36,8 @@ public class FileArguments {
 	 *            DriveFile
 	 */
 	public void setFileId(DriveFile file) {
-		this.file = file;
-		this.fileIdString = null;
+		this.mFile = file;
+		this.mFileIdString = null;
 	}
 
 	/**
@@ -47,8 +47,8 @@ public class FileArguments {
 	 * @param fileIdString
 	 */
 	public void setFileId(String fileIdString) {
-		this.fileIdString = fileIdString;
-		this.file = null;
+		this.mFileIdString = fileIdString;
+		this.mFile = null;
 	}
 
 	/**
@@ -59,13 +59,13 @@ public class FileArguments {
 	 * @return
 	 */
 	public DriveFile getFile(GoogleApiClient apiClient) {
-		if (file != null)
-			return file;
-		if (fileIdString != null) {
-			DriveId fileId = DriveId.decodeFromString(fileIdString);
+		if (mFile != null)
+			return mFile;
+		if (mFileIdString != null) {
+			DriveId fileId = DriveId.decodeFromString(mFileIdString);
 			setFileId(Drive.DriveApi.getFile(apiClient, fileId));
 		}
-		return file;
+		return mFile;
 	}
 
 	/**
@@ -74,41 +74,41 @@ public class FileArguments {
 	 * @return
 	 */
 	public String getFileIdString() {
-		if (fileIdString == null && file != null)
-			fileIdString = file.getDriveId().encodeToString();
-		return fileIdString;
+		if (mFileIdString == null && mFile != null)
+			mFileIdString = mFile.getDriveId().encodeToString();
+		return mFileIdString;
 	}
 
 	public void setFilename(String f) {
-		this.filename = f;
+		this.mFilename = f;
 	}
 
 	public String getFilename() {
-		return filename;
+		return mFilename;
 	}
 
 	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
+		this.mMimeType = mimeType;
 	}
 
 	public String getMimeType() {
-		return this.mimeType;
+		return this.mMimeType;
 	}
 
 	public Runnable getCallback() {
-		return callback;
+		return mCallback;
 	}
 
 	public void setCallback(Runnable callback) {
-		this.callback = callback;
+		this.mCallback = callback;
 	}
 
 	public DriveFolder getParentFolder() {
-		return this.parentFolder;
+		return this.mParentFolder;
 	}
 
 	public void setParentFolder(DriveFolder f) {
-		this.parentFolder = f;
+		this.mParentFolder = f;
 	}
 
 	public String toString() {
@@ -117,22 +117,22 @@ public class FileArguments {
 		if (s != null) {
 			sb.append(" fileId:" + s + "\n");
 		}
-		if (filename != null)
-			sb.append(" filename:" + filename + "\n");
-		sb.append(" length:" + data.length);
-		if (!mimeType.equals("application/octet-stream"))
-			sb.append(" mimeType:" + mimeType + "\n");
+		if (mFilename != null)
+			sb.append(" filename:" + mFilename + "\n");
+		sb.append(" length:" + mData.length);
+		if (!mMimeType.equals("application/octet-stream"))
+			sb.append(" mimeType:" + mMimeType + "\n");
 		sb.append("]");
 		return sb.toString();
 	}
 
 	private static final byte[] EMPTY_DATA = {};
 
-	private DriveFile file;
-	private String fileIdString;
-	private DriveFolder parentFolder;
-	private String filename;
-	private byte[] data;
-	private String mimeType;
-	private Runnable callback;
+	private DriveFile mFile;
+	private String mFileIdString;
+	private DriveFolder mParentFolder;
+	private String mFilename;
+	private byte[] mData;
+	private String mMimeType;
+	private Runnable mCallback;
 }

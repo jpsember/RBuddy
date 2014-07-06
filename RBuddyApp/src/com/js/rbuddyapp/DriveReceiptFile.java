@@ -24,16 +24,16 @@ public class DriveReceiptFile implements IReceiptFile {
 	 */
 	public DriveReceiptFile(UserData userData, DriveFile driveFile,
 			String contents) {
-		this.userData = userData;
-		this.driveFile = driveFile;
-		this.map = new HashMap();
+		this.mUserData = userData;
+		this.mDriveFile = driveFile;
+		this.mMap = new HashMap();
 
 		{
 			JSONParser json = new JSONParser(contents);
 			json.enterList();
 			while (json.hasNext()) {
 				Receipt r = (Receipt) Receipt.JSON_PARSER.parse(json);
-				map.put(r.getId(), r);
+				mMap.put(r.getId(), r);
 				updateUniqueIdentifier(r.getId());
 			}
 			json.exit();
@@ -42,7 +42,7 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	@Override
 	public boolean exists(int id) {
-		return map.containsKey(id);
+		return mMap.containsKey(id);
 	}
 
 	@Override
@@ -52,13 +52,13 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	@Override
 	public void flush() {
-		if (changes) {
-			changes = false;
+		if (mChanges) {
+			mChanges = false;
 			String text;
 			{
 				JSONEncoder json = new JSONEncoder();
 				json.enterList();
-				for (Iterator it = map.values().iterator(); it.hasNext();) {
+				for (Iterator it = mMap.values().iterator(); it.hasNext();) {
 					Receipt r = (Receipt) it.next();
 					r.encode(json);
 				}
@@ -66,19 +66,19 @@ public class DriveReceiptFile implements IReceiptFile {
 				text = json.toString();
 			}
 			FileArguments args = new FileArguments();
-			args.setFileId(driveFile);
-			userData.writeTextFile(args, text);
+			args.setFileId(mDriveFile);
+			mUserData.writeTextFile(args, text);
 		}
 		flushTagSet();
 	}
 
 	private void flushTagSet() {
-		TagSetFile tf = userData.getTagSetFile();
+		TagSetFile tf = mUserData.getTagSetFile();
 		if (tf.isChanged()) {
 			String json = JSONEncoder.toJSON(tf);
 			FileArguments args = new FileArguments();
-			args.setFileId(userData.getTagSetDriveFile());
-			userData.writeTextFile(args, json);
+			args.setFileId(mUserData.getTagSetDriveFile());
+			mUserData.writeTextFile(args, json);
 			tf.setChanged(false);
 		}
 	}
@@ -86,7 +86,7 @@ public class DriveReceiptFile implements IReceiptFile {
 	@Override
 	public void add(Receipt r) {
 		getReceiptFromMap(r.getId(), false);
-		map.put(r.getId(), r);
+		mMap.put(r.getId(), r);
 		updateUniqueIdentifier(r.getId());
 		setModified(r);
 	}
@@ -94,7 +94,7 @@ public class DriveReceiptFile implements IReceiptFile {
 	@Override
 	public void delete(Receipt r) {
 		getReceiptFromMap(r.getId(), true);
-		map.remove(r.getId());
+		mMap.remove(r.getId());
 		setChanges();
 	}
 
@@ -105,14 +105,14 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	@Override
 	public Iterator iterator() {
-		return map.values().iterator();
+		return mMap.values().iterator();
 	}
 
 	private Receipt getReceiptFromMap(int identifier, boolean expectedToExist) {
 		if (identifier <= 0)
 			throw new IllegalArgumentException("bad id " + identifier);
 
-		Receipt r = (Receipt) map.get(identifier);
+		Receipt r = (Receipt) mMap.get(identifier);
 		if (r == null) {
 			if (expectedToExist)
 				throw new IllegalArgumentException("no receipt found with id "
@@ -127,32 +127,32 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	@Override
 	public void clear() {
-		if (!map.isEmpty()) {
-			map.clear();
-			highestId = 0;
+		if (!mMap.isEmpty()) {
+			mMap.clear();
+			mHighestId = 0;
 			setChanges();
 		}
 	}
 
 	@Override
 	public int allocateUniqueId() {
-		int id = 1 + highestId;
-		highestId = id;
+		int id = 1 + mHighestId;
+		mHighestId = id;
 		return id;
 	}
 
 	private void setChanges() {
-		changes = true;
+		mChanges = true;
 	}
 
 	private void updateUniqueIdentifier(int receiptId) {
-		if (highestId < receiptId)
-			highestId = receiptId;
+		if (mHighestId < receiptId)
+			mHighestId = receiptId;
 	}
 
-	private boolean changes;
-	private DriveFile driveFile;
-	private UserData userData;
-	private Map map;
-	private int highestId;
+	private boolean mChanges;
+	private DriveFile mDriveFile;
+	private UserData mUserData;
+	private Map mMap;
+	private int mHighestId;
 }

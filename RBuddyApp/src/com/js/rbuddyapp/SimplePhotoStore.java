@@ -28,31 +28,31 @@ public class SimplePhotoStore implements IPhotoStore {
 	private static final boolean TRACE_LISTENERS = false;
 
 	public SimplePhotoStore(Context context) {
-		this.context = context;
-		listenerMaps = new Map[2];
+		this.mContext = context;
+		mListenerMaps = new Map[2];
 		for (int i = 0; i < 2; i++)
-			listenerMaps[i] = new HashMap();
+			mListenerMaps[i] = new HashMap();
 
 		// Construct ui and background task handlers
-		this.uiHandler = new Handler(Looper.getMainLooper());
+		this.mUiHandler = new Handler(Looper.getMainLooper());
 
 		HandlerThread handlerThread = new HandlerThread(
 				"PhotoStore bgndHandler");
 		handlerThread.start();
-		this.backgroundHandler = new Handler(handlerThread.getLooper());
+		this.mBackgroundHandler = new Handler(handlerThread.getLooper());
 
 		if (!RBuddyApp.sharedInstance().useGoogleAPI()) {
 			// Use reduced cache capacities for test purposes
-			this.thumbnailCache = new PhotoCache(200000, 5);
-			this.regularCache = new PhotoCache(5000000, 5);
+			this.mThumbnailCache = new PhotoCache(200000, 5);
+			this.mRegularCache = new PhotoCache(5000000, 5);
 		} else {
-			this.thumbnailCache = new PhotoCache();
-			this.regularCache = new PhotoCache();
+			this.mThumbnailCache = new PhotoCache();
+			this.mRegularCache = new PhotoCache();
 		}
 	}
 
 	protected PhotoCache cacheFor(boolean thumbnail) {
-		return thumbnail ? thumbnailCache : regularCache;
+		return thumbnail ? mThumbnailCache : mRegularCache;
 	}
 
 	/**
@@ -86,28 +86,28 @@ public class SimplePhotoStore implements IPhotoStore {
 		// construct a thumbnail from it
 
 		if (thumbnail) {
-			final Drawable dFull = regularCache.readPhoto(receiptId);
+			final Drawable dFull = mRegularCache.readPhoto(receiptId);
 			if (db)
 				pr("looking in regular cache; got " + dFull);
 
 			if (dFull != null) {
 				if (db)
 					pr("  found in regular : " + dFull);
-				backgroundHandler.post(new Runnable() {
+				mBackgroundHandler.post(new Runnable() {
 					public void run() {
 						sleep();
 						BitmapDrawable bd = (BitmapDrawable) dFull;
 						Bitmap scaledBitmap = BitmapUtil.scaleBitmap(
 								bd.getBitmap(), THUMBNAIL_HEIGHT, false);
 						final BitmapDrawable dThumb = new BitmapDrawable(
-								context.getResources(), scaledBitmap);
+								mContext.getResources(), scaledBitmap);
 						if (db)
 							pr(" scaled to size "
 									+ dThumb.getBitmap().getByteCount());
 
-						uiHandler.post(new Runnable() {
+						mUiHandler.post(new Runnable() {
 							public void run() {
-								thumbnailCache.storePhoto(receiptId, dThumb);
+								mThumbnailCache.storePhoto(receiptId, dThumb);
 							}
 						});
 						notifyListenersOfDrawable(receiptId, dThumb, true);
@@ -116,7 +116,7 @@ public class SimplePhotoStore implements IPhotoStore {
 				return true;
 			}
 		}
-		toast(context, "readPhoto " + receiptId + " (thumb " + thumbnail
+		toast(mContext, "readPhoto " + receiptId + " (thumb " + thumbnail
 				+ ") wasn't in cache: " + cacheFor(thumbnail));
 		return false;
 	}
@@ -128,7 +128,7 @@ public class SimplePhotoStore implements IPhotoStore {
 			return;
 		}
 
-		backgroundHandler.post(new Runnable() {
+		mBackgroundHandler.post(new Runnable() {
 			public void run() {
 				sleep();
 				String photoId = fileIdString;
@@ -155,7 +155,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 		// Request image again, now that it's guaranteed to be in the
 		// cache
-		uiHandler.post(new Runnable() {
+		mUiHandler.post(new Runnable() {
 			public void run() {
 				readPhoto(receiptId, fileIdString, thumbnail);
 			}
@@ -170,22 +170,22 @@ public class SimplePhotoStore implements IPhotoStore {
 	 */
 	protected void postAddFullSizeDrawableToCache(final int receiptId,
 			final BitmapDrawable drawable) {
-		uiHandler.post(new Runnable() {
+		mUiHandler.post(new Runnable() {
 			public void run() {
-				regularCache.storePhoto(receiptId, drawable);
+				mRegularCache.storePhoto(receiptId, drawable);
 			}
 		});
 	}
 
 	protected void removeCachedVersions(int receiptId) {
-		regularCache.removePhoto(receiptId);
-		thumbnailCache.removePhoto(receiptId);
+		mRegularCache.removePhoto(receiptId);
+		mThumbnailCache.removePhoto(receiptId);
 	}
 
 	@Override
 	public void storePhoto(int receiptId, final FileArguments args) {
 		removeCachedVersions(receiptId);
-		backgroundHandler.post(new Runnable() {
+		mBackgroundHandler.post(new Runnable() {
 			public void run() {
 				String photoId = args.getFileIdString();
 				byte[] jpeg = args.getData();
@@ -216,7 +216,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	protected void runOnUIThread(Runnable r) {
 		if (r == null)
 			return;
-		uiHandler.post(r);
+		mUiHandler.post(r);
 	}
 
 	protected void sleep() {
@@ -227,7 +227,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	@Override
 	public void deletePhoto(int receiptId, final FileArguments args) {
-		backgroundHandler.post(new Runnable() {
+		mBackgroundHandler.post(new Runnable() {
 			public void run() {
 				String photoId = args.getFileIdString();
 				if (photoId == null)
@@ -243,7 +243,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private Map<Integer, Set<IPhotoListener>> getListenerMap(boolean thumbnail) {
-		return listenerMaps[thumbnail ? 1 : 0];
+		return mListenerMaps[thumbnail ? 1 : 0];
 	}
 
 	@Override
@@ -326,7 +326,7 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private File getFileForPhotoId(String photoId) {
-		return new File(context.getExternalFilesDir(null), "photo_" + photoId
+		return new File(mContext.getExternalFilesDir(null), "photo_" + photoId
 				+ BitmapUtil.JPEG_EXTENSION);
 	}
 
@@ -351,18 +351,18 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	protected BitmapDrawable convertJPEGToDrawable(byte[] jpeg) {
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-		return new BitmapDrawable(context.getResources(), bmp);
+		return new BitmapDrawable(mContext.getResources(), bmp);
 	}
 
-	private Map<Integer, Set<IPhotoListener>>[] listenerMaps;
+	private Map<Integer, Set<IPhotoListener>>[] mListenerMaps;
 
 	// Handler for executing tasks serially on the UI thread
-	protected Handler uiHandler;
+	protected Handler mUiHandler;
 
 	// Handler for executing tasks in the background
-	protected Handler backgroundHandler;
+	protected Handler mBackgroundHandler;
 
-	private PhotoCache regularCache;
-	private PhotoCache thumbnailCache;
-	private Context context;
+	private PhotoCache mRegularCache;
+	private PhotoCache mThumbnailCache;
+	private Context mContext;
 }

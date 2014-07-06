@@ -28,27 +28,27 @@ public class SimpleReceiptFile implements IReceiptFile {
 	public SimpleReceiptFile(Context context, String receiptsBaseName,
 			String tagsBaseName) {
 		ASSERT(!RBuddyApp.sharedInstance().useGoogleAPI());
-		this.context = context;
+		this.mContext = context;
 		if (receiptsBaseName == null)
 			receiptsBaseName = "receipts_json_v" + Receipt.VERSION + ".txt";
-		this.receiptsBaseName = receiptsBaseName;
+		this.mReceiptsBaseName = receiptsBaseName;
 
 		if (tagsBaseName == null)
 			tagsBaseName = "tags_json_v" + Receipt.VERSION + ".txt";
-		this.tagSetFileBaseName = tagsBaseName;
+		this.mTagSetFileBaseName = tagsBaseName;
 
-		this.map = new HashMap();
+		this.mMap = new HashMap();
 		readAllReceipts();
 	}
 
 	public TagSetFile readTagSetFile() {
-		if (tagSetFile == null) {
-			tagSetStorageFile = fileForBaseName(tagSetFileBaseName);
+		if (mTagSetFile == null) {
+			mTagSetStorageFile = fileForBaseName(mTagSetFileBaseName);
 			TagSetFile tf = null;
-			if (tagSetStorageFile.isFile()) {
+			if (mTagSetStorageFile.isFile()) {
 				try {
 					tf = (TagSetFile) JSONParser.parse(
-							Files.readTextFile(tagSetStorageFile),
+							Files.readTextFile(mTagSetStorageFile),
 							TagSetFile.JSON_PARSER);
 				} catch (IOException e) {
 					warning("caught " + e + ", starting with empty tag file");
@@ -57,19 +57,19 @@ public class SimpleReceiptFile implements IReceiptFile {
 			if (tf == null) {
 				tf = new TagSetFile();
 			}
-			tagSetFile = tf;
+			mTagSetFile = tf;
 		}
-		return tagSetFile;
+		return mTagSetFile;
 	}
 
 	private void flushTagSetFile() {
 		final boolean db = SHOW_FILE_ACTIVITY;
-		if (tagSetFile != null) {
-			File file = fileForBaseName(tagSetFileBaseName);
+		if (mTagSetFile != null) {
+			File file = fileForBaseName(mTagSetFileBaseName);
 			try {
 				if (db)
-					pr("\nflushTagSetFile, writing " + file + ": " + tagSetFile);
-				String json = JSONEncoder.toJSON(tagSetFile);
+					pr("\nflushTagSetFile, writing " + file + ": " + mTagSetFile);
+				String json = JSONEncoder.toJSON(mTagSetFile);
 				Files.writeTextFile(file, json);
 			} catch (IOException e) {
 				warning("caught " + e + ", unable to write tag file");
@@ -78,14 +78,14 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	public File fileForBaseName(String baseName) {
-		return new File(context.getExternalFilesDir(null), baseName);
+		return new File(mContext.getExternalFilesDir(null), baseName);
 	}
 
 	private Receipt getReceiptFromMap(int identifier, boolean expectedToExist) {
 		if (identifier <= 0)
 			throw new IllegalArgumentException("bad id " + identifier);
 
-		Receipt r = (Receipt) map.get(identifier);
+		Receipt r = (Receipt) mMap.get(identifier);
 		if (r == null) {
 			if (expectedToExist)
 				throw new IllegalArgumentException("no receipt found with id "
@@ -100,7 +100,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public boolean exists(int id) {
-		return map.containsKey(id);
+		return mMap.containsKey(id);
 	}
 
 	@Override
@@ -110,16 +110,16 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public void flush() {
-		if (changes) {
+		if (mChanges) {
 			final boolean db = SHOW_FILE_ACTIVITY;
 			if (db)
 				pr("SimpleReceiptFile flush; called from " + stackTrace(1, 1));
-			changes = false;
+			mChanges = false;
 			String text;
 			{
 				JSONEncoder json = new JSONEncoder();
 				json.enterList();
-				for (Iterator it = map.values().iterator(); it.hasNext();) {
+				for (Iterator it = mMap.values().iterator(); it.hasNext();) {
 					Receipt r = (Receipt) it.next();
 					r.encode(json);
 				}
@@ -145,21 +145,21 @@ public class SimpleReceiptFile implements IReceiptFile {
 	@Override
 	public void add(Receipt r) {
 		getReceiptFromMap(r.getId(), false);
-		map.put(r.getId(), r);
+		mMap.put(r.getId(), r);
 		setModified(r);
 		updateUniqueIdentifier(r.getId());
 
 	}
 
 	private void updateUniqueIdentifier(int receiptId) {
-		if (highestId < receiptId)
-			highestId = receiptId;
+		if (mHighestId < receiptId)
+			mHighestId = receiptId;
 	}
 
 	@Override
 	public void delete(Receipt r) {
 		getReceiptFromMap(r.getId(), true);
-		map.remove(r.getId());
+		mMap.remove(r.getId());
 		setChanges();
 	}
 
@@ -170,36 +170,36 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	@Override
 	public Iterator iterator() {
-		return map.values().iterator();
+		return mMap.values().iterator();
 	}
 
 	@Override
 	public int allocateUniqueId() {
-		int id = 1 + highestId;
-		highestId = id;
+		int id = 1 + mHighestId;
+		mHighestId = id;
 		return id;
 	}
 
 	@Override
 	public void clear() {
-		if (!map.isEmpty()) {
-			map.clear();
+		if (!mMap.isEmpty()) {
+			mMap.clear();
 			setChanges();
-			this.highestId = 0;
+			this.mHighestId = 0;
 		}
 	}
 
 	public File getFile() {
-		if (receiptFile == null) {
-			receiptFile = fileForBaseName(receiptsBaseName);
+		if (mReceiptFile == null) {
+			mReceiptFile = fileForBaseName(mReceiptsBaseName);
 		}
-		return receiptFile;
+		return mReceiptFile;
 	}
 
 	private void readAllReceipts() {
 		if (db)
 			pr("\n\nSimpleReceiptFile.readAllReceipts\n");
-		ASSERT(map.isEmpty());
+		ASSERT(mMap.isEmpty());
 
 		if (!getFile().exists()) {
 			setChanges();
@@ -223,7 +223,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 			json.enterList();
 			while (json.hasNext()) {
 				Receipt r = (Receipt) Receipt.JSON_PARSER.parse(json);
-				map.put(r.getId(), r);
+				mMap.put(r.getId(), r);
 				updateUniqueIdentifier(r.getId());
 			}
 			json.exit();
@@ -233,16 +233,16 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	private void setChanges() {
-		changes = true;
+		mChanges = true;
 	}
 
-	private File receiptFile;
-	private File tagSetStorageFile;
-	private TagSetFile tagSetFile;
-	private String receiptsBaseName;
-	private String tagSetFileBaseName;
-	private boolean changes;
-	private Map map;
-	private int highestId;
-	private Context context;
+	private File mReceiptFile;
+	private File mTagSetStorageFile;
+	private TagSetFile mTagSetFile;
+	private String mReceiptsBaseName;
+	private String mTagSetFileBaseName;
+	private boolean mChanges;
+	private Map mMap;
+	private int mHighestId;
+	private Context mContext;
 }

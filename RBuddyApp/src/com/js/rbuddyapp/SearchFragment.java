@@ -46,15 +46,14 @@ public class SearchFragment extends MyFragment {
 			Bundle savedInstanceState) {
 		layoutElements();
 		mActivityState = new ActivityState() //
-				.add(scrollView) //
+				.add(mScrollView) //
 				.restoreStateFrom(savedInstanceState);
-		return scrollView;
+		return mScrollView;
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		// readWidgetValuesFromReceipt();
 	}
 
 	@Override
@@ -66,23 +65,23 @@ public class SearchFragment extends MyFragment {
 
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_search);
-		this.form = Form.parse(getActivity(), jsonString);
-		form.getField("search").setOnClickListener(new OnClickListener() {
+		this.mForm = Form.parse(getActivity(), jsonString);
+		mForm.getField("search").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				performSearch();
 			}
 		});
-		scrollView = new ScrollView(getActivity());
-		scrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+		mScrollView = new ScrollView(getActivity());
+		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
-		scrollView.addView(form.getView());
+		mScrollView.addView(mForm.getView());
 	}
 
 	private void performSearch() {
 		toast(getActivity(), "Search isn't yet implemented.");
 	}
 
-	private Form form;
-	private ScrollView scrollView;
+	private Form mForm;
+	private ScrollView mScrollView;
 }

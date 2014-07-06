@@ -50,12 +50,12 @@ public class EditReceiptFragment extends MyFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		app = RBuddyApp.sharedInstance();
+		mApp = RBuddyApp.sharedInstance();
 		layoutElements();
 		mActivityState = new ActivityState() //
-				.add(scrollView) //
+				.add(mScrollView) //
 				.restoreStateFrom(savedInstanceState);
-		return scrollView;
+		return mScrollView;
 	}
 
 	@Override
@@ -70,10 +70,10 @@ public class EditReceiptFragment extends MyFragment {
 	public void onPause() {
 		super.onPause();
 		updateReceiptWithWidgetValues();
-		app.receiptFile().flush();
+		mApp.receiptFile().flush();
 		// Make widget display nothing, so it stops listening; otherwise
 		// the widget will leak
-		receiptWidget.displayPhoto(0, null);
+		mReceiptWidget.displayPhoto(0, null);
 	}
 
 	public void setReceipt(Receipt receipt) {
@@ -81,78 +81,78 @@ public class EditReceiptFragment extends MyFragment {
 			pr(hey() + "receipt=" + receipt);
 		// In case there's an existing receipt, flush its changes
 		updateReceiptWithWidgetValues();
-		this.receipt = receipt;
+		this.mReceipt = receipt;
 		readWidgetValuesFromReceipt();
 	}
 
 	private void layoutElements() {
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_edit_receipt);
-		this.form = Form.parse(getActivity(), jsonString);
-		form.addListener(new Form.Listener() {
+		this.mForm = Form.parse(getActivity(), jsonString);
+		mForm.addListener(new Form.Listener() {
 			@Override
 			public void valuesChanged(Form form) {
 				updateReceiptWithWidgetValues();
 			}
 		});
 
-		receiptWidget = (FormButtonWidget) form.getField("receipt");
-		receiptWidget.setOnClickListener(new OnClickListener() {
+		mReceiptWidget = (FormButtonWidget) mForm.getField("receipt");
+		mReceiptWidget.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				processPhotoButtonPress();
 			}
 		});
 
-		scrollView = new ScrollView(getActivity());
-		scrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+		mScrollView = new ScrollView(getActivity());
+		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
-		scrollView.addView(form.getView());
+		mScrollView.addView(mForm.getView());
 	}
 
 	private void processPhotoButtonPress() {
-		if (receipt == null)
+		if (mReceipt == null)
 			return;
-		listener().editPhoto(receipt);
+		listener().editPhoto(mReceipt);
 	}
 
 	private void readWidgetValuesFromReceipt() {
-		if (form == null || receipt == null)
+		if (mForm == null || mReceipt == null)
 			return;
-		form.setValue("summary", receipt.getSummary(), false);
-		form.setValue("cost", receipt.getCost(), false);
-		form.setValue("date", receipt.getDate(), false);
-		form.setValue("tags", receipt.getTags(), false);
-		receiptWidget.displayPhoto(receipt.getId(), receipt.getPhotoId());
+		mForm.setValue("summary", mReceipt.getSummary(), false);
+		mForm.setValue("cost", mReceipt.getCost(), false);
+		mForm.setValue("date", mReceipt.getDate(), false);
+		mForm.setValue("tags", mReceipt.getTags(), false);
+		mReceiptWidget.displayPhoto(mReceipt.getId(), mReceipt.getPhotoId());
 	}
 
 	private void updateReceiptWithWidgetValues() {
-		if (form == null || receipt == null)
+		if (mForm == null || mReceipt == null)
 			return;
 
 		// To detect if changes have actually occurred, compare JSON
 		// representations of the receipt before and after updating the fields.
-		String origJSON = JSONEncoder.toJSON(receipt);
+		String origJSON = JSONEncoder.toJSON(mReceipt);
 
-		receipt.setSummary(form.getValue("summary"));
-		receipt.setCost(new Cost(form.getValue("cost"), true));
-		receipt.setDate(JSDate.parse(form.getValue("date"), true));
+		mReceipt.setSummary(mForm.getValue("summary"));
+		mReceipt.setCost(new Cost(mForm.getValue("cost"), true));
+		mReceipt.setDate(JSDate.parse(mForm.getValue("date"), true));
 
-		String origTagSetString = JSONEncoder.toJSON(receipt.getTags());
+		String origTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
 
-		receipt.setTags(TagSet.parse(form.getValue("tags"), new TagSet()));
+		mReceipt.setTags(TagSet.parse(mForm.getValue("tags"), new TagSet()));
 
-		String newJSON = JSONEncoder.toJSON(receipt);
+		String newJSON = JSONEncoder.toJSON(mReceipt);
 
 		if (!origJSON.equals(newJSON)) {
-			app.receiptFile().setModified(receipt);
+			mApp.receiptFile().setModified(mReceipt);
 
-			String newTagSetString = JSONEncoder.toJSON(receipt.getTags());
+			String newTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
 			if (!origTagSetString.equals(newTagSetString)) {
-				receipt.getTags().moveTagsToFrontOfQueue(app.tagSetFile());
+				mReceipt.getTags().moveTagsToFrontOfQueue(mApp.tagSetFile());
 			}
 
-			listener().receiptEdited(receipt);
+			listener().receiptEdited(mReceipt);
 		}
 	}
 
@@ -171,10 +171,10 @@ public class EditReceiptFragment extends MyFragment {
 		void editPhoto(Receipt r);
 	}
 
-	private RBuddyApp app;
-	private Receipt receipt;
-	private Form form;
-	private FormButtonWidget receiptWidget;
-	private ScrollView scrollView;
+	private RBuddyApp mApp;
+	private Receipt mReceipt;
+	private Form mForm;
+	private FormButtonWidget mReceiptWidget;
+	private ScrollView mScrollView;
 
 }

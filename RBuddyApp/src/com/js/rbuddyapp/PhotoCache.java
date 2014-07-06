@@ -17,15 +17,15 @@ public class PhotoCache {
 	}
 
 	public PhotoCache(long capacityBytesUsed, int capacityCardinality) {
-		this.capacityBytesUsed = capacityBytesUsed;
-		this.capacityCardinality = capacityCardinality;
+		this.mCapacityBytesUsed = capacityBytesUsed;
+		this.mCapacityCardinality = capacityCardinality;
 
-		priorityQueue = new TreeSet<PhotoEntry>(new Comparator<PhotoEntry>() {
+		mPriorityQueue = new TreeSet<PhotoEntry>(new Comparator<PhotoEntry>() {
 			public int compare(PhotoEntry arg0, PhotoEntry arg1) {
 				return arg0.priority - arg1.priority;
 			}
 		});
-		photoMap = new HashMap();
+		mPhotoMap = new HashMap();
 
 	}
 
@@ -39,7 +39,7 @@ public class PhotoCache {
 	public Drawable readPhoto(int receiptId) {
 		if (db)
 			pr("readPhoto id " + receiptId + " from: " + this);
-		PhotoEntry entry = photoMap.get(receiptId);
+		PhotoEntry entry = mPhotoMap.get(receiptId);
 		if (entry == null)
 			return null;
 
@@ -60,7 +60,7 @@ public class PhotoCache {
 	public void storePhoto(int receiptId, BitmapDrawable photo) {
 		if (db)
 			pr("storePhoto id " + receiptId + " into: " + this);
-		PhotoEntry entry = photoMap.get(receiptId);
+		PhotoEntry entry = mPhotoMap.get(receiptId);
 		if (entry != null) {
 			removeEntry(entry);
 		}
@@ -71,40 +71,40 @@ public class PhotoCache {
 
 	private void storePhotoAux(int receiptId, BitmapDrawable photo) {
 		PhotoEntry entry = new PhotoEntry();
-		entry.priority = nextPriority;
+		entry.priority = mNextPriority;
 		entry.receiptId = receiptId;
 		entry.drawable = photo;
-		nextPriority += 1;
+		mNextPriority += 1;
 
-		priorityQueue.add(entry);
-		photoMap.put(receiptId, entry);
+		mPriorityQueue.add(entry);
+		mPhotoMap.put(receiptId, entry);
 		adjustBytesUsed(photo, true);
 
 		while (true) {
 			boolean tooBig = false;
-			int size = priorityQueue.size();
+			int size = mPriorityQueue.size();
 
 			// We MUST allow at least one item to be in the cache, or we may end
 			// up in an infinite loop; the photo store expects an item
 			// just-added to the cache to be there (though I suppose if
 			// competing photo requests occur, throttling can result...)
 
-			if (capacityCardinality > 0 && size > capacityCardinality) {
+			if (mCapacityCardinality > 0 && size > mCapacityCardinality) {
 				if (db)
-					pr("max cardinality " + capacityCardinality + " exceeded");
+					pr("max cardinality " + mCapacityCardinality + " exceeded");
 				tooBig = true;
 			}
-			if (capacityBytesUsed > 0 && bytesUsed > capacityBytesUsed
+			if (mCapacityBytesUsed > 0 && mBytesUsed > mCapacityBytesUsed
 					&& size > 1) {
 				if (db)
-					pr("max bytes " + capacityBytesUsed
-							+ " exceeded, bytesUsed currently " + bytesUsed);
+					pr("max bytes " + mCapacityBytesUsed
+							+ " exceeded, bytesUsed currently " + mBytesUsed);
 				tooBig = true;
 			}
 			if (!tooBig)
 				break;
 
-			PhotoEntry entry2 = priorityQueue.first();
+			PhotoEntry entry2 = mPriorityQueue.first();
 			if (db)
 				pr("removing lowest-priority item " + entry2);
 			removeEntry(entry2);
@@ -113,14 +113,14 @@ public class PhotoCache {
 	}
 
 	public void removePhoto(int receiptId) {
-		PhotoEntry entry = photoMap.get(receiptId);
+		PhotoEntry entry = mPhotoMap.get(receiptId);
 		if (entry != null)
 			removeEntry(entry);
 	}
 
 	private void removeEntry(PhotoEntry entry) {
-		photoMap.remove(entry.receiptId);
-		if (priorityQueue.remove(entry))
+		mPhotoMap.remove(entry.receiptId);
+		if (mPriorityQueue.remove(entry))
 			adjustBytesUsed(entry.drawable, false);
 	}
 
@@ -128,20 +128,20 @@ public class PhotoCache {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(nameOf(this));
 		sb.append("\n priorityQueue:");
-		for (PhotoEntry ent : priorityQueue) {
+		for (PhotoEntry ent : mPriorityQueue) {
 			sb.append("\n  " + ent);
 		}
-		ASSERT(photoMap.size() == priorityQueue.size(), "photoMap size "
-				+ photoMap.size() + " disagrees with priority queue "
-				+ priorityQueue.size());
+		ASSERT(mPhotoMap.size() == mPriorityQueue.size(), "photoMap size "
+				+ mPhotoMap.size() + " disagrees with priority queue "
+				+ mPriorityQueue.size());
 		sb.append("\n");
 		return sb.toString();
 	}
 
 	private void adjustBytesUsed(BitmapDrawable drawable, boolean adding) {
 		long nBytes = drawable.getBitmap().getByteCount();
-		bytesUsed += nBytes * (adding ? 1 : -1);
-		ASSERT(bytesUsed >= 0, "bytesUsed reached " + bytesUsed);
+		mBytesUsed += nBytes * (adding ? 1 : -1);
+		ASSERT(mBytesUsed >= 0, "bytesUsed reached " + mBytesUsed);
 	}
 
 	private static class PhotoEntry {
@@ -156,10 +156,10 @@ public class PhotoCache {
 		}
 	}
 
-	private int nextPriority;
-	private TreeSet<PhotoEntry> priorityQueue;
-	private Map<Integer, PhotoEntry> photoMap;
-	private long bytesUsed;
-	private int capacityCardinality;
-	private long capacityBytesUsed;
+	private int mNextPriority;
+	private TreeSet<PhotoEntry> mPriorityQueue;
+	private Map<Integer, PhotoEntry> mPhotoMap;
+	private long mBytesUsed;
+	private int mCapacityCardinality;
+	private long mCapacityBytesUsed;
 }

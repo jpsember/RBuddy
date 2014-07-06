@@ -37,7 +37,7 @@ public class UserData {
 
 	private static final String FILENAME_USER_ROOT_FOLDER = "RBuddy User Data";
 	private static final String FILENAME_RECEIPTS = "Receipts.json";
-	public static final String FILENAME_TAGS = "Tags.json";
+	private static final String FILENAME_TAGS = "Tags.json";
 	private static final String FILENAME_PHOTOS_FOLDER = "Photos";
 
 	// This prefix is combined with the above filenames to produce corresponding
@@ -50,14 +50,14 @@ public class UserData {
 	 * @param app
 	 */
 	public UserData(Context context, RBuddyApp app) {
-		this.context = context;
+		this.mContext = context;
 		assertUIThread();
-		this.apiClient = app.getGoogleApiClient();
+		this.mApiClient = app.getGoogleApiClient();
 
 		HandlerThread ht = new HandlerThread("BgndHandler");
 		ht.start();
-		this.backgroundHandler = new Handler(ht.getLooper());
-		this.uiThreadHandler = new Handler(Looper.getMainLooper()) {
+		this.mBackgroundHandler = new Handler(ht.getLooper());
+		this.mUiThreadHandler = new Handler(Looper.getMainLooper()) {
 			@Override
 			public void handleMessage(Message m) {
 				warning("ignoring message: " + m);
@@ -81,9 +81,9 @@ public class UserData {
 
 	private void findUserDataFolder() {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
-				+ FILENAME_USER_ROOT_FOLDER, DriveApi.getRootFolder(apiClient),
+				+ FILENAME_USER_ROOT_FOLDER, DriveApi.getRootFolder(mApiClient),
 				FILENAME_USER_ROOT_FOLDER);
-		userDataFolder = r.folder;
+		mUserDataFolder = r.folder;
 		if (r.wasCreated) {
 			// We must remove any stored keys associated with files/folders
 			// lying within the old user data folder, since we couldn't find it
@@ -99,19 +99,19 @@ public class UserData {
 
 	private void findReceiptFile() {
 		LocateResult r = locateFile(PREFERENCE_KEY_PREFIX + FILENAME_RECEIPTS,
-				userDataFolder, FILENAME_RECEIPTS, DriveReceiptFile.MIME_TYPE,
+				mUserDataFolder, FILENAME_RECEIPTS, DriveReceiptFile.MIME_TYPE,
 				DriveReceiptFile.INITIAL_CONTENTS.getBytes());
 		String contents = blockingReadTextFile(r.file);
-		this.receiptFile = new DriveReceiptFile(this, r.file, contents);
+		this.mReceiptFile = new DriveReceiptFile(this, r.file, contents);
 	}
 
 	private void findTagsFile() {
 		LocateResult r = locateFile(PREFERENCE_KEY_PREFIX + FILENAME_TAGS,
-				userDataFolder, FILENAME_TAGS, JSONTools.JSON_MIME_TYPE,
+				mUserDataFolder, FILENAME_TAGS, JSONTools.JSON_MIME_TYPE,
 				TagSetFile.INITIAL_JSON_CONTENTS.getBytes());
-		this.tagSetDriveFile = r.file;
+		this.mTagSetDriveFile = r.file;
 		String contents = blockingReadTextFile(r.file);
-		this.tagSetFile = (TagSetFile) JSONParser.parse(contents,
+		this.mTagSetFile = (TagSetFile) JSONParser.parse(contents,
 				TagSetFile.JSON_PARSER);
 	}
 
@@ -131,7 +131,7 @@ public class UserData {
 			sleepFor(1500);
 			pr("NOW calling the callback...");
 		}
-		uiThreadHandler.post(callback);
+		mUiThreadHandler.post(callback);
 	}
 
 	// States for locateFile/Folder
@@ -194,7 +194,7 @@ public class UserData {
 			case VERIFY_EXISTS: {
 				try {
 					DriveId fileId = DriveId.decodeFromString(fileIdString);
-					ret.file = DriveApi.getFile(apiClient, fileId);
+					ret.file = DriveApi.getFile(mApiClient, fileId);
 					nextState = State.FOUND;
 				} catch (Throwable e) {
 					warning("problem decoding/locating file: " + e);
@@ -210,7 +210,7 @@ public class UserData {
 				if (driveFileId == null) {
 					nextState = State.CREATE_NEW;
 				} else {
-					ret.file = DriveApi.getFile(apiClient, driveFileId);
+					ret.file = DriveApi.getFile(mApiClient, driveFileId);
 					nextState = State.STORE_ID_IN_PREFERENCES;
 				}
 			}
@@ -284,7 +284,7 @@ public class UserData {
 			case VERIFY_EXISTS: {
 				try {
 					DriveId folderId = DriveId.decodeFromString(folderIdString);
-					ret.folder = DriveApi.getFolder(apiClient, folderId);
+					ret.folder = DriveApi.getFolder(mApiClient, folderId);
 					nextState = State.FOUND;
 				} catch (Throwable e) {
 					warning("problem decoding/locating folder: " + e);
@@ -300,7 +300,7 @@ public class UserData {
 				if (driveFolderId == null) {
 					nextState = State.CREATE_NEW;
 				} else {
-					ret.folder = DriveApi.getFolder(apiClient, driveFolderId);
+					ret.folder = DriveApi.getFolder(mApiClient, driveFolderId);
 					nextState = State.STORE_ID_IN_PREFERENCES;
 				}
 			}
@@ -309,7 +309,7 @@ public class UserData {
 			case CREATE_NEW: {
 				MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
 						.setTitle(folderName).build();
-				DriveFolderResult result = parent.createFolder(apiClient,
+				DriveFolderResult result = parent.createFolder(mApiClient,
 						changeSet).await();
 				if (!success(result))
 					die("failed to create folder: " + folderName);
@@ -336,9 +336,9 @@ public class UserData {
 
 	private void findPhotosFolder() {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
-				+ FILENAME_PHOTOS_FOLDER, userDataFolder,
+				+ FILENAME_PHOTOS_FOLDER, mUserDataFolder,
 				FILENAME_PHOTOS_FOLDER);
-		this.photoStore = new DrivePhotoStore(context, this, r.folder);
+		this.mPhotoStore = new DrivePhotoStore(mContext, this, r.folder);
 	}
 
 	/**
@@ -350,7 +350,7 @@ public class UserData {
 	 *             if unable to create user data folder
 	 */
 	public void open(final Runnable callback) {
-		this.backgroundHandler.post(new Runnable() {
+		this.mBackgroundHandler.post(new Runnable() {
 			public void run() {
 				open_bgndThread(callback);
 			}
@@ -365,7 +365,7 @@ public class UserData {
 	private DriveId lookForDriveResource(DriveFolder parentFolder,
 			String resourceName, boolean resourceIsFolder) {
 
-		MetadataBufferResult result = parentFolder.listChildren(apiClient)
+		MetadataBufferResult result = parentFolder.listChildren(mApiClient)
 				.await();
 		if (!success(result))
 			return null;
@@ -394,7 +394,7 @@ public class UserData {
 
 		DriveFile ret = null;
 		try {
-			DriveApi.ContentsResult r = DriveApi.newContents(apiClient).await();
+			DriveApi.ContentsResult r = DriveApi.newContents(mApiClient).await();
 			if (!success(r))
 				die("can't get results");
 			Contents c = r.getContents();
@@ -402,7 +402,7 @@ public class UserData {
 			s.write(contents);
 			s.close();
 			DriveFolder.DriveFileResult result = parentFolder.createFile(
-					apiClient, changeSet, c).await();
+					mApiClient, changeSet, c).await();
 			if (success(result))
 				ret = result.getDriveFile();
 		} catch (IOException e) {
@@ -436,12 +436,12 @@ public class UserData {
 		final FileArguments arg = args;
 		assertUIThread();
 
-		this.backgroundHandler.post(new Runnable() {
+		this.mBackgroundHandler.post(new Runnable() {
 			public void run() {
 				if (db)
 					pr("UserData.writeBinaryFile " + arg);
 
-				DriveFile driveFile = arg.getFile(apiClient);
+				DriveFile driveFile = arg.getFile(mApiClient);
 
 				// TODO what if file has been deleted?
 				if (driveFile == null) {
@@ -454,11 +454,11 @@ public class UserData {
 					arg.setFileId(createBinaryFile(arg.getParentFolder(),
 							arg.getFilename(), arg.getMimeType(), arg.getData()));
 				} else {
-					driveFile = arg.getFile(apiClient);
+					driveFile = arg.getFile(mApiClient);
 					if (driveFile == null)
 						die("could not find DriveFile " + arg);
 
-					ContentsResult cr = driveFile.openContents(apiClient,
+					ContentsResult cr = driveFile.openContents(mApiClient,
 							DriveFile.MODE_WRITE_ONLY, null).await();
 					if (!success(cr))
 						die("failed to get contents");
@@ -471,13 +471,13 @@ public class UserData {
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
-					Status r = driveFile.commitAndCloseContents(apiClient, c)
+					Status r = driveFile.commitAndCloseContents(mApiClient, c)
 							.await();
 					if (!success(r))
 						die("problem committing and closing");
 				}
 				if (arg.getCallback() != null)
-					uiThreadHandler.post(arg.getCallback());
+					mUiThreadHandler.post(arg.getCallback());
 			}
 		});
 
@@ -492,11 +492,11 @@ public class UserData {
 
 		assertUIThread();
 		final FileArguments arg = args;
-		this.backgroundHandler.post(new Runnable() {
+		this.mBackgroundHandler.post(new Runnable() {
 			public void run() {
-				arg.setData(blockingReadBinaryFile(arg.getFile(apiClient)));
+				arg.setData(blockingReadBinaryFile(arg.getFile(mApiClient)));
 				if (arg.getCallback() != null)
-					uiThreadHandler.post(arg.getCallback());
+					mUiThreadHandler.post(arg.getCallback());
 			}
 		});
 	}
@@ -505,7 +505,7 @@ public class UserData {
 		if (db)
 			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
 
-		DriveApi.ContentsResult cr = driveFile.openContents(apiClient,
+		DriveApi.ContentsResult cr = driveFile.openContents(mApiClient,
 				DriveFile.MODE_READ_ONLY, null).await();
 		if (!success(cr))
 			die("can't get results");
@@ -517,7 +517,7 @@ public class UserData {
 		} catch (IOException e) {
 			die("Failed to read binary file", e);
 		}
-		driveFile.discardContents(apiClient, c);
+		driveFile.discardContents(mApiClient, c);
 		if (db)
 			pr(" returning " + bytes.length + " bytes");
 		return bytes;
@@ -528,28 +528,28 @@ public class UserData {
 	}
 
 	public IReceiptFile getReceiptFile() {
-		return receiptFile;
+		return mReceiptFile;
 	}
 
 	public TagSetFile getTagSetFile() {
-		return tagSetFile;
+		return mTagSetFile;
 	}
 
 	public DriveFile getTagSetDriveFile() {
-		return tagSetDriveFile;
+		return mTagSetDriveFile;
 	}
 
 	public IPhotoStore getPhotoStore() {
-		return photoStore;
+		return mPhotoStore;
 	}
 
-	private Context context;
-	private GoogleApiClient apiClient;
-	private Handler uiThreadHandler;
-	private Handler backgroundHandler;
-	private DriveFolder userDataFolder;
-	private IReceiptFile receiptFile;
-	private DriveFile tagSetDriveFile;
-	private TagSetFile tagSetFile;
-	private IPhotoStore photoStore;
+	private Context mContext;
+	private GoogleApiClient mApiClient;
+	private Handler mUiThreadHandler;
+	private Handler mBackgroundHandler;
+	private DriveFolder mUserDataFolder;
+	private IReceiptFile mReceiptFile;
+	private DriveFile mTagSetDriveFile;
+	private TagSetFile mTagSetFile;
+	private IPhotoStore mPhotoStore;
 }

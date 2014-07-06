@@ -18,18 +18,18 @@ public class DrivePhotoStore extends SimplePhotoStore {
 			DriveFolder photosFolder) {
 		super(context);
 		// UserData and DrivePhotoStore are mutually coupled
-		this.userData = userData;
-		this.photosFolder = photosFolder;
+		this.mUserData = userData;
+		this.mPhotosFolder = photosFolder;
 	}
 
 	@Override
 	public void storePhoto(int receiptId, FileArguments args) {
 		removeCachedVersions(receiptId);
 		// Fill in additional fields, in case we're creating a new file
-		args.setParentFolder(photosFolder);
+		args.setParentFolder(mPhotosFolder);
 		args.setMimeType("image/jpeg");
 		args.setFilename(BitmapUtil.constructReceiptImageFilename(receiptId));
-		userData.writeBinaryFile(args);
+		mUserData.writeBinaryFile(args);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class DrivePhotoStore extends SimplePhotoStore {
 			public void run() {
 				// Run some code in the background thread to convert the JPEG to
 				// a Drawable
-				backgroundHandler.post(new Runnable() {
+				mBackgroundHandler.post(new Runnable() {
 					@Override
 					public void run() {
 						convertJPEGAndCache(args.getData(), receiptId,
@@ -62,9 +62,9 @@ public class DrivePhotoStore extends SimplePhotoStore {
 				});
 			}
 		});
-		userData.readBinaryFile(args);
+		mUserData.readBinaryFile(args);
 	}
 
-	private UserData userData;
-	private DriveFolder photosFolder;
+	private UserData mUserData;
+	private DriveFolder mPhotosFolder;
 }

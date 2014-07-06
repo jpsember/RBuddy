@@ -27,7 +27,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		app = (RBuddyApp) RBuddyApp.sharedInstance(RBuddyApp.class, this);
+		mApp = (RBuddyApp) RBuddyApp.sharedInstance(RBuddyApp.class, this);
 
 		LinearLayout layout = new LinearLayout(this);
 		layout.setOrientation(LinearLayout.VERTICAL);
@@ -46,7 +46,7 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 	protected void onPause() {
 		super.onPause();
 		if (userFilesPrepared)
-			app.receiptFile().flush();
+			mApp.receiptFile().flush();
 	}
 
 	@Override
@@ -68,19 +68,17 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	private View constructStartView() {
 		View v = new View(this);
-		FormWidget.setDebugBgnd(v, app.useGoogleAPI() ? "blue" : "green");
+		FormWidget.setDebugBgnd(v, mApp.useGoogleAPI() ? "blue" : "green");
 		return v;
 	}
 
-	private RBuddyApp app;
-
 	private void connectToGoogleDrive() {
-		if (!app.useGoogleAPI()) {
+		if (!mApp.useGoogleAPI()) {
 			processGoogleApiConnected();
 		} else {
 			if (db)
 				pr(" attempting to connect to Google Drive API...");
-			GoogleApiClient c = app.getGoogleApiClient();
+			GoogleApiClient c = mApp.getGoogleApiClient();
 			if (c == null) {
 				if (db)
 					pr(" building client");
@@ -88,12 +86,12 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 						.addScope(Drive.SCOPE_FILE)
 						.addConnectionCallbacks(this)
 						.addOnConnectionFailedListener(this).build();
-				app.setGoogleApiClient(c);
+				mApp.setGoogleApiClient(c);
 			}
 			if (!(c.isConnected() || c.isConnecting())) {
 				if (db)
 					pr(" connecting to client");
-				app.getGoogleApiClient().connect();
+				mApp.getGoogleApiClient().connect();
 			}
 			if (c.isConnected()) {
 				if (db)
@@ -103,20 +101,18 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 		}
 	}
 
-	private UserData userData;
-
 	private void processGoogleApiConnected() {
 
 		if (db)
 			pr(hey() + "processGoogleAPIConnected");
 
-		if (app.useGoogleAPI()) {
+		if (mApp.useGoogleAPI()) {
 			if (db)
 				pr("constructing UserData");
-			userData = new UserData(this, app);
+			mUserData = new UserData(this, mApp);
 			if (db)
 				pr("calling open() with null callback");
-			userData.open(new Runnable() {
+			mUserData.open(new Runnable() {
 				@Override
 				public void run() {
 					processUserDataReady();
@@ -132,13 +128,13 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 
 	private void processUserDataReady() {
 		if (!userFilesPrepared) {
-			if (app.useGoogleAPI()) {
-				app.setUserData(userData.getReceiptFile(),
-						userData.getTagSetFile(), userData.getPhotoStore());
+			if (mApp.useGoogleAPI()) {
+				mApp.setUserData(mUserData.getReceiptFile(),
+						mUserData.getTagSetFile(), mUserData.getPhotoStore());
 			} else {
 				SimpleReceiptFile s = new SimpleReceiptFile(this);
 				IPhotoStore ps = new SimplePhotoStore(this);
-				app.setUserData(s, s.readTagSetFile(), ps);
+				mApp.setUserData(s, s.readTagSetFile(), ps);
 			}
 			userFilesPrepared = true;
 		}
@@ -190,4 +186,8 @@ public class StartActivity extends Activity implements ConnectionCallbacks,
 		if (db)
 			pr("\n\n" + stackTrace() + " cause " + cause);
 	}
+
+	private RBuddyApp mApp;
+	private UserData mUserData;
+
 }

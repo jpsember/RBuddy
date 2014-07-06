@@ -42,24 +42,24 @@ public class RBuddyApp extends App {
 
 	public void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
 			IPhotoStore photoStore) {
-		this.receiptFile = receiptFile;
-		this.tagSetFile = tagSetFile;
-		this.photoStore = photoStore;
+		this.mReceiptFile = receiptFile;
+		this.mTagSetFile = tagSetFile;
+		this.mPhotoStore = photoStore;
 	}
 
 	public IReceiptFile receiptFile() {
-		ASSERT(receiptFile != null);
-		return receiptFile;
+		ASSERT(mReceiptFile != null);
+		return mReceiptFile;
 	}
 
 	public TagSetFile tagSetFile() {
-		ASSERT(tagSetFile != null);
-		return tagSetFile;
+		ASSERT(mTagSetFile != null);
+		return mTagSetFile;
 	}
 
 	public IPhotoStore photoStore() {
-		ASSERT(photoStore != null);
-		return photoStore;
+		ASSERT(mPhotoStore != null);
+		return mPhotoStore;
 	}
 
 	protected RBuddyApp(Context context) {
@@ -82,20 +82,20 @@ public class RBuddyApp extends App {
 	}
 
 	public boolean useGoogleAPI() {
-		if (useGoogleAPIFlag == null) {
+		if (mUseGoogleAPIFlag == null) {
 			if (testing())
-				useGoogleAPIFlag = false;
+				mUseGoogleAPIFlag = false;
 			else {
-				useGoogleAPIFlag = AppPreferences.getBoolean(
+				mUseGoogleAPIFlag = AppPreferences.getBoolean(
 						PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
 			}
 		}
-		return useGoogleAPIFlag.booleanValue();
+		return mUseGoogleAPIFlag.booleanValue();
 	}
 
 	private GoogleApiClient mGoogleApiClient;
-	private Boolean useGoogleAPIFlag;
-	private IPhotoStore photoStore;
-	private IReceiptFile receiptFile;
-	private TagSetFile tagSetFile;
+	private Boolean mUseGoogleAPIFlag;
+	private IPhotoStore mPhotoStore;
+	private IReceiptFile mReceiptFile;
+	private TagSetFile mTagSetFile;
 }
