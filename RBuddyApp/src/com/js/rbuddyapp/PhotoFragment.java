@@ -75,8 +75,7 @@ public class PhotoFragment extends MyFragment {
 	public void onResume() {
 		super.onResume();
 
-		mImageWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
-				mReceipt.getPhotoId());
+		displayReceiptPhoto();
 
 		// If no photo is defined for this receipt, act as if he has pressed the
 		// camera button
@@ -84,7 +83,6 @@ public class PhotoFragment extends MyFragment {
 		if (mReceipt.getPhotoId() == null) {
 			startImageCaptureIntent();
 		}
-
 	}
 
 	@Override
@@ -188,9 +186,20 @@ public class PhotoFragment extends MyFragment {
 		}
 	}
 
+	/**
+	 * Update the actual photo, if fragment is in an appropriate state
+	 */
+	private void displayReceiptPhoto() {
+		if (!isResumed())
+			return;
+		mImageWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
+				mReceipt.getPhotoId());
+	}
+
 	// Photo interface (non-fragment methods)
 	public void setReceipt(Receipt r) {
 		this.mReceipt = r;
+		displayReceiptPhoto();
 	}
 
 	private Receipt mReceipt;

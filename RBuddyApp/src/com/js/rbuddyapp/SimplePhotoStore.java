@@ -31,9 +31,9 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	public SimplePhotoStore(Context context) {
 		this.mContext = context;
-		mListenerMaps = new Map[2];
-		for (int i = 0; i < 2; i++)
-			mListenerMaps[i] = new HashMap();
+		for (Variant v : Variant.values()) {
+			mListenerMaps.put(v, new HashMap());
+		}
 
 		// Construct ui and background task handlers
 		this.mUiHandler = new Handler(Looper.getMainLooper());
@@ -43,18 +43,20 @@ public class SimplePhotoStore implements IPhotoStore {
 		handlerThread.start();
 		this.mBackgroundHandler = new Handler(handlerThread.getLooper());
 
+		mCacheMap = new HashMap();
+
 		if (!RBuddyApp.sharedInstance().useGoogleAPI()) {
 			// Use reduced cache capacities for test purposes
-			this.mThumbnailCache = new PhotoCache(200000, 5);
-			this.mRegularCache = new PhotoCache(5000000, 5);
+			mCacheMap.put(Variant.THUMBNAIL, new PhotoCache(200000, 5));
+			mCacheMap.put(Variant.FULLSIZE, new PhotoCache(5000000, 5));
 		} else {
-			this.mThumbnailCache = new PhotoCache();
-			this.mRegularCache = new PhotoCache();
+			for (Variant v : Variant.values())
+				mCacheMap.put(v, new PhotoCache());
 		}
 	}
 
-	protected PhotoCache cacheFor(boolean thumbnail) {
-		return thumbnail ? mThumbnailCache : mRegularCache;
+	protected PhotoCache cacheFor(Variant variant) {
+		return mCacheMap.get(variant);
 	}
 
 	/**
@@ -69,17 +71,15 @@ public class SimplePhotoStore implements IPhotoStore {
 	 * @return true if photo was found in cache
 	 */
 	protected boolean readPhotoWithinCache(final int receiptId,
-			final String fileIdString, boolean thumbnail) {
-		if (db)
-			pr(hey() + " receipt " + receiptId + " thumb " + thumbnail);
+			final String fileIdString, final Variant variant) {
 
-		PhotoCache cache = cacheFor(thumbnail);
+		PhotoCache cache = cacheFor(variant);
 		Drawable d = cache.readPhoto(receiptId);
 
 		if (d != null) {
 			if (db)
 				pr("  found in cache: " + d);
-			notifyListenersOfDrawable(receiptId, d, thumbnail);
+			notifyListenersOfDrawable(receiptId, d, variant);
 			return true;
 		}
 
@@ -87,8 +87,9 @@ public class SimplePhotoStore implements IPhotoStore {
 		// thumbnail, see if it exists in the fullsize cache, and if so,
 		// construct a thumbnail from it
 
-		if (thumbnail) {
-			final Drawable dFull = mRegularCache.readPhoto(receiptId);
+		if (variant == Variant.THUMBNAIL) {
+			final Drawable dFull = cacheFor(Variant.FULLSIZE).readPhoto(
+					receiptId);
 			if (db)
 				pr("looking in regular cache; got " + dFull);
 
@@ -109,24 +110,24 @@ public class SimplePhotoStore implements IPhotoStore {
 
 						mUiHandler.post(new Runnable() {
 							public void run() {
-								mThumbnailCache.storePhoto(receiptId, dThumb);
+								cacheFor(variant).storePhoto(receiptId, dThumb);
 							}
 						});
-						notifyListenersOfDrawable(receiptId, dThumb, true);
+						notifyListenersOfDrawable(receiptId, dThumb, variant);
 					}
 				});
 				return true;
 			}
 		}
-		toast(mContext, "readPhoto " + receiptId + " (thumb " + thumbnail
-				+ ") wasn't in cache: " + cacheFor(thumbnail));
+		toast(mContext, "readPhoto " + receiptId + " (variant " + variant
+				+ ") wasn't in cache: " + cacheFor(variant));
 		return false;
 	}
 
 	@Override
 	public void readPhoto(final int receiptId, final String fileIdString,
-			final boolean thumbnail) {
-		if (readPhotoWithinCache(receiptId, fileIdString, thumbnail)) {
+			final Variant variant) {
+		if (readPhotoWithinCache(receiptId, fileIdString, variant)) {
 			return;
 		}
 
@@ -144,13 +145,13 @@ public class SimplePhotoStore implements IPhotoStore {
 				} catch (IOException e) {
 					die(e);
 				}
-				convertJPEGAndCache(jpeg, receiptId, fileIdString, thumbnail);
+				convertJPEGAndCache(jpeg, receiptId, fileIdString, variant);
 			}
 		});
 	}
 
 	protected void convertJPEGAndCache(byte[] jpeg, final int receiptId,
-			final String fileIdString, final boolean thumbnail) {
+			final String fileIdString, final Variant variant) {
 		sleep();
 		final BitmapDrawable d = convertJPEGToDrawable(jpeg);
 		postAddFullSizeDrawableToCache(receiptId, d);
@@ -159,7 +160,7 @@ public class SimplePhotoStore implements IPhotoStore {
 		// cache
 		mUiHandler.post(new Runnable() {
 			public void run() {
-				readPhoto(receiptId, fileIdString, thumbnail);
+				readPhoto(receiptId, fileIdString, variant);
 			}
 		});
 	}
@@ -174,14 +175,14 @@ public class SimplePhotoStore implements IPhotoStore {
 			final BitmapDrawable drawable) {
 		mUiHandler.post(new Runnable() {
 			public void run() {
-				mRegularCache.storePhoto(receiptId, drawable);
+				cacheFor(Variant.FULLSIZE).storePhoto(receiptId, drawable);
 			}
 		});
 	}
 
 	protected void removeCachedVersions(int receiptId) {
-		mRegularCache.removePhoto(receiptId);
-		mThumbnailCache.removePhoto(receiptId);
+		for (Variant v : Variant.values())
+			cacheFor(v).removePhoto(receiptId);
 	}
 
 	@Override
@@ -244,19 +245,19 @@ public class SimplePhotoStore implements IPhotoStore {
 		});
 	}
 
-	private Map<Integer, Set<IPhotoListener>> getListenerMap(boolean thumbnail) {
-		return mListenerMaps[thumbnail ? 1 : 0];
+	private Map<Integer, Set<IPhotoListener>> getListenerMap(Variant variant) {
+		return mListenerMaps.get(variant);
 	}
 
 	@Override
-	public void addPhotoListener(int receiptId, boolean thumbnail,
+	public void addPhotoListener(int receiptId, Variant variant,
 			IPhotoListener listener) {
 		final boolean db = TRACE_LISTENERS;
 		if (db)
-			pr(hey() + "receiptId " + receiptId + " thumbnail " + thumbnail
+			pr(hey() + "receiptId " + receiptId + " variant " + variant
 					+ " listener " + listener);
 
-		Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(thumbnail);
+		Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(variant);
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null) {
 			listeners = new HashSet<IPhotoListener>();
@@ -268,14 +269,14 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	@Override
-	public void removePhotoListener(int receiptId, boolean thumbnail,
+	public void removePhotoListener(int receiptId, Variant variant,
 			IPhotoListener listener) {
 		final boolean db = TRACE_LISTENERS;
 		if (db)
-			pr(hey() + "receiptId " + receiptId + " thumbnail " + thumbnail
+			pr(hey() + "receiptId " + receiptId + " variant " + variant
 					+ " listener " + listener);
 
-		Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(thumbnail);
+		Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(variant);
 		Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 		if (listeners == null)
 			return;
@@ -293,8 +294,8 @@ public class SimplePhotoStore implements IPhotoStore {
 
 		// Read both full-size and thumbnail versions of the photo;
 		// the cache logic will notify any listeners
-		readPhoto(ownerId, photoId, false);
-		readPhoto(ownerId, photoId, true);
+		readPhoto(ownerId, photoId, Variant.FULLSIZE);
+		readPhoto(ownerId, photoId, Variant.THUMBNAIL);
 	}
 
 	/**
@@ -306,22 +307,22 @@ public class SimplePhotoStore implements IPhotoStore {
 	 * @param d
 	 */
 	private void notifyListenersOfDrawable(final int receiptId,
-			final Drawable d, final boolean thumbnail) {
+			final Drawable d, final Variant variant) {
 		final boolean db = TRACE_LISTENERS;
 		if (db)
 			pr(hey() + "receiptId " + receiptId + " drawable " + d
-					+ " thumbnail " + thumbnail);
+					+ " variant " + variant);
 
 		runOnUIThread(new Runnable() {
 			public void run() {
-				Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(thumbnail);
+				Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(variant);
 				Set<IPhotoListener> listeners = listenersMap.get(receiptId);
 				if (listeners == null)
 					return;
 				for (IPhotoListener listener : listeners) {
 					if (db)
 						pr(" drawableAvailable sending to listener " + listener);
-					listener.drawableAvailable(d, receiptId, thumbnail);
+					listener.drawableAvailable(d, receiptId, variant);
 				}
 			}
 		});
@@ -335,9 +336,9 @@ public class SimplePhotoStore implements IPhotoStore {
 	public String dumpListeners() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------\n " + nameOf(this) + " listeners:\n");
-		for (int pass = 0; pass < 2; pass++) {
-			sb.append(pass == 0 ? "fullsize\n" : "thumbnail\n");
-			Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(pass == 1);
+		for (Variant v : Variant.values()) {
+			sb.append(v.name() + "\n");
+			Map<Integer, Set<IPhotoListener>> listenersMap = getListenerMap(v);
 			for (int receiptId : listenersMap.keySet()) {
 				Set<IPhotoListener> set = listenersMap.get(receiptId);
 				sb.append("  id " + receiptId + " : ");
@@ -356,7 +357,8 @@ public class SimplePhotoStore implements IPhotoStore {
 		return new BitmapDrawable(mContext.getResources(), bmp);
 	}
 
-	private Map<Integer, Set<IPhotoListener>>[] mListenerMaps;
+  // Maps of photo listeners, keyed by variant
+	private Map<IPhotoStore.Variant, Map> mListenerMaps = new HashMap();
 
 	// Handler for executing tasks serially on the UI thread
 	protected Handler mUiHandler;
@@ -364,7 +366,6 @@ public class SimplePhotoStore implements IPhotoStore {
 	// Handler for executing tasks in the background
 	protected Handler mBackgroundHandler;
 
-	private PhotoCache mRegularCache;
-	private PhotoCache mThumbnailCache;
+	private Map<Variant, PhotoCache> mCacheMap;
 	private Context mContext;
 }

@@ -16,6 +16,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import static com.js.android.Tools.*;
+
 public class FormButtonWidget extends FormWidget implements IPhotoListener {
 
 	public static final Factory FACTORY = new FormWidget.Factory() {
@@ -35,7 +37,7 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 		super(owner, attributes);
 		String button_icon = strAttr("icon", "");
 		String button_label = strAttr("label", "");
-		this.withImage = boolAttr("hasimage", false);
+		this.mWithImage = boolAttr("hasimage", false);
 		if (button_icon.isEmpty()) {
 			if (button_label.isEmpty()) {
 				// Use id as fallback
@@ -43,7 +45,7 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			}
 			Button b = new Button(context());
 			b.setText(button_label);
-			button = b;
+			mButton = b;
 		} else {
 			int resourceId = App.sharedInstance().getResource(button_icon);
 			Drawable img = context().getResources().getDrawable(resourceId);
@@ -51,17 +53,17 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			if (button_label.isEmpty()) {
 				ImageButton ib = new ImageButton(context());
 				ib.setImageDrawable(img);
-				button = ib;
+				mButton = ib;
 			} else {
 				Button b = new Button(context());
 				b.setText(button_label);
 				b.setCompoundDrawablesWithIntrinsicBounds(img, null, null, null);
-
-				button = b;
+				mButton = b;
 			}
 		}
 
-		if (withImage) {
+		if (mWithImage) {
+			mImageVariant = Variant.THUMBNAIL;
 			LinearLayout parentView = new LinearLayout(context());
 
 			// What does 'match parent' mean for layout parameters?
@@ -73,74 +75,88 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1.0f);
 			p.gravity = Gravity.BOTTOM;
-			parentView.addView(button, p);
+			parentView.addView(mButton, p);
 
-			imageView = new ImageView(context());
-			imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-			imageView.setAdjustViewBounds(true);
+			mImageView = new ImageView(context());
+			mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+			mImageView.setAdjustViewBounds(true);
 
 			int THUMBNAIL_WIDTH = App
 					.truePixels(IPhotoStore.THUMBNAIL_HEIGHT * 1.0f);
 
 			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
 					App.truePixels(IPhotoStore.THUMBNAIL_HEIGHT), 0.2f);
-			parentView.addView(imageView, p);
+			parentView.addView(mImageView, p);
 		} else {
-			getWidgetContainer().addView(button);
+			getWidgetContainer().addView(mButton);
 		}
 
 	}
 
 	@Override
 	protected void setChildWidgetsEnabled(boolean enabled) {
-		button.setEnabled(enabled);
+		mButton.setEnabled(enabled);
 	}
 
 	@Override
 	public void setOnClickListener(OnClickListener listener) {
-		button.setOnClickListener(listener);
+		mButton.setOnClickListener(listener);
 	}
 
-	public void displayPhoto(IPhotoStore photoStore, int receiptId,
-			String fileIdString) {
-		if (receiptId == 0) {
-			if (listeningForPhotoId != 0) {
-				photoStore.removePhotoListener(listeningForPhotoId, true, this);
-				listeningForPhotoId = 0;
-			}
+	/**
+	 * Display a particular photo in the image view
+	 * 
+	 * @param photoStore
+	 *            source of photos
+	 * @param ownerId
+	 *            owner id, or zero if none assigned
+	 * @param photoId
+	 *            id of photo for owner, or null if none; ignored if owner id is
+	 *            zero
+	 */
+	public void displayPhoto(IPhotoStore photoStore, int ownerId, String photoId) {
+		if (ownerId == 0)
+			photoId = null;
+
+		// If owner id is changing, replace old listener with new
+		if (mOwnerIdBeingListenedTo != ownerId) {
+			photoStore.removePhotoListener(mOwnerIdBeingListenedTo,
+					mImageVariant, this);
+			mOwnerIdBeingListenedTo = ownerId;
+			if (ownerId != 0)
+				photoStore.addPhotoListener(ownerId, mImageVariant, this);
+		}
+
+		if (photoId == null) {
+			clearPhoto();
 		} else {
-			if (listeningForPhotoId != 0 && listeningForPhotoId != receiptId) {
-				photoStore.removePhotoListener(listeningForPhotoId, true, this);
-			}
-
-			listeningForPhotoId = receiptId;
-
-			photoStore.addPhotoListener(receiptId, true, this);
-
-			if (fileIdString != null) {
-				// Have the PhotoStore load the image, and it will notify any
-				// listeners (including us) when it has arrived
-				photoStore.readPhoto(receiptId, fileIdString, true);
-			}
+			photoStore.readPhoto(ownerId, photoId, mImageVariant);
 		}
 	}
 
-	@Override
-	public void drawableAvailable(Drawable d, int receiptId, boolean thumbnail) {
-		// We're only interested in thumbnails
-		if (!thumbnail)
-			return;
+	private void clearPhoto() {
+		setDrawable(null);
+	}
 
+	private void setDrawable(Drawable d) {
 		if (d == null) {
-			getForm().context().getResources()
+			d = getForm().context().getResources()
 					.getDrawable(android.R.drawable.ic_menu_gallery);
 		}
-		imageView.setImageDrawable(d);
+		mImageView.setImageDrawable(d);
 	}
 
-	private int listeningForPhotoId;
+	// IPhotoListener interface
+	//
+	@Override
+	public void drawableAvailable(Drawable d, int receiptId, Variant variant) {
+		ASSERT(variant == mImageVariant);
+		setDrawable(d);
+	}
 
-	private boolean withImage;
-	private View button;
-	private ImageView imageView;
+	private int mOwnerIdBeingListenedTo;
+	private boolean mWithImage;
+	private View mButton;
+	private ImageView mImageView;
+	private IPhotoStore.Variant mImageVariant;
 }

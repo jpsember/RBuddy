@@ -119,10 +119,6 @@ public class EditReceiptFragment extends MyFragment {
 		mForm.setValue("cost", mReceipt.getCost(), false);
 		mForm.setValue("date", mReceipt.getDate(), false);
 		mForm.setValue("tags", mReceipt.getTags(), false);
-		final boolean db = true;
-		if (db)
-			pr(hey() + " rid " + mReceipt.getId() + " photoId "
-					+ mReceipt.getPhotoId());
 		mReceiptWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}

@@ -4,6 +4,9 @@ import java.util.Map;
 
 import com.js.android.IPhotoListener;
 import com.js.android.IPhotoStore;
+import com.js.android.IPhotoStore.Variant;
+
+import static com.js.android.Tools.*;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
@@ -25,54 +28,70 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 	public FormImageWidget(Form owner, Map attributes) {
 		super(owner, attributes);
 
-		imageView = new ImageView(context());
-		imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-		imageView.setAdjustViewBounds(true);
+		mImageVariant = Variant.FULLSIZE;
+		mImageView = new ImageView(context());
+		mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		mImageView.setAdjustViewBounds(true);
 
 		constructLabel();
-		getWidgetContainer().addView(imageView);
+		getWidgetContainer().addView(mImageView);
 	}
 
-	public void displayPhoto(IPhotoStore photoStore, int receiptId,
-			String photoId) {
-		if (receiptId == 0) {
-			if (listeningForReceiptId != 0) {
-				photoStore.removePhotoListener(listeningForReceiptId, false,
-						this);
-				listeningForReceiptId = 0;
-			}
+	/**
+	 * Display a particular photo in the image view
+	 * 
+	 * @param photoStore
+	 *            source of photos
+	 * @param ownerId
+	 *            owner id, or zero if none assigned
+	 * @param photoId
+	 *            id of photo for owner, or null if none; ignored if owner id is
+	 *            zero
+	 */
+	public void displayPhoto(IPhotoStore photoStore, int ownerId, String photoId) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "ownerId " + ownerId + " photoId " + photoId);
+		if (ownerId == 0)
+			photoId = null;
+
+		// If owner id is changing, replace old listener with new
+		if (mOwnerIdBeingListenedTo != ownerId) {
+			photoStore.removePhotoListener(mOwnerIdBeingListenedTo,
+					IPhotoStore.Variant.FULLSIZE, this);
+			mOwnerIdBeingListenedTo = ownerId;
+			if (ownerId != 0)
+				photoStore.addPhotoListener(ownerId,
+						IPhotoStore.Variant.FULLSIZE, this);
+		}
+
+		if (photoId == null) {
+			clearPhoto();
 		} else {
-			if (listeningForReceiptId != 0) {
-				photoStore.removePhotoListener(listeningForReceiptId, false,
-						this);
-			}
-
-			listeningForReceiptId = receiptId;
-			photoStore.addPhotoListener(listeningForReceiptId, false, this);
-
-			String fileIdString = photoId;
-			if (fileIdString != null) {
-				// Have the PhotoStore load the image, and it will notify any
-				// listeners (including us) when it has arrived
-				photoStore
-						.readPhoto(listeningForReceiptId, fileIdString, false);
-			}
+			photoStore.readPhoto(ownerId, photoId, mImageVariant);
 		}
 	}
 
-	@Override
-	public void drawableAvailable(Drawable d, int receiptId, boolean thumbnail) {
-		// We're not interested in thumbnails
-		if (thumbnail)
-			return;
+	private void clearPhoto() {
+		setDrawable(null);
+	}
 
+	private void setDrawable(Drawable d) {
 		if (d == null) {
 			d = getForm().context().getResources()
 					.getDrawable(android.R.drawable.ic_menu_gallery);
 		}
-		imageView.setImageDrawable(d);
+		mImageView.setImageDrawable(d);
 	}
 
-	private ImageView imageView;
-	private int listeningForReceiptId;
+	@Override
+	public void drawableAvailable(Drawable d, int receiptId,
+			IPhotoStore.Variant variant) {
+		ASSERT(variant == Variant.FULLSIZE);
+		setDrawable(d);
+	}
+
+	private ImageView mImageView;
+	private int mOwnerIdBeingListenedTo;
+	private Variant mImageVariant;
 }

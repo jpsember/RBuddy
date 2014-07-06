@@ -40,8 +40,8 @@ public class DrivePhotoStore extends SimplePhotoStore {
 
 	@Override
 	public void readPhoto(final int receiptId, final String fileIdString,
-			final boolean thumbnail) {
-		if (readPhotoWithinCache(receiptId, fileIdString, thumbnail))
+			final Variant variant) {
+		if (readPhotoWithinCache(receiptId, fileIdString, variant))
 			return;
 
 		// We don't need the filename for this, just the file id
@@ -58,7 +58,7 @@ public class DrivePhotoStore extends SimplePhotoStore {
 					@Override
 					public void run() {
 						convertJPEGAndCache(args.getData(), receiptId,
-								fileIdString, thumbnail);
+								fileIdString, variant);
 					}
 				});
 			}

@@ -4,12 +4,16 @@ package com.js.android;
 
 public interface IPhotoStore {
 
+	public enum Variant {
+		FULLSIZE, THUMBNAIL,
+	}
+
 	// TODO Issue #31
 	public static final int THUMBNAIL_HEIGHT = 150;
 	public static final int FULLSIZE_HEIGHT = 800;
 	public static final String PREFERENCE_KEY_PHOTO_DELAY = "photo_delays";
 
-	public void readPhoto(int ownerId, String resourceName, boolean thumbnail);
+	public void readPhoto(int ownerId, String resourceName, Variant variant);
 
 	/**
 	 * Stored photos are assumed to be full size (not thumbnails)
@@ -37,7 +41,7 @@ public interface IPhotoStore {
 	 * @param listener
 	 *            the listener to notify when drawable is available
 	 */
-	public void addPhotoListener(int receiptId, boolean thumbnail,
+	public void addPhotoListener(int receiptId, Variant variant,
 			IPhotoListener listener);
 
 	/**
@@ -46,7 +50,7 @@ public interface IPhotoStore {
 	 * @param receiptId
 	 * @param listener
 	 */
-	public void removePhotoListener(int receiptId, boolean thumbnail,
+	public void removePhotoListener(int receiptId, Variant variant,
 			IPhotoListener listener);
 
 }
