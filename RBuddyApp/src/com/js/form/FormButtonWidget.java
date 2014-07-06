@@ -63,7 +63,7 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 		}
 
 		if (mWithImage) {
-			mImageVariant = Variant.THUMBNAIL;
+			mImageVariant = IPhotoStore.Variant.THUMBNAIL;
 			LinearLayout parentView = new LinearLayout(context());
 
 			// What does 'match parent' mean for layout parameters?
@@ -149,7 +149,8 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 	// IPhotoListener interface
 	//
 	@Override
-	public void drawableAvailable(Drawable d, int receiptId, Variant variant) {
+	public void drawableAvailable(Drawable d, int receiptId,
+			IPhotoStore.Variant variant) {
 		ASSERT(variant == mImageVariant);
 		setDrawable(d);
 	}
