@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- package name must be unique so suffix with "tests" so package loader doesn't ignore us -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="js.rbuddy.tests"
+    package="com.js.rbuddy.tests"
     android:versionCode="1"
     android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="20" />
 
     <!--
          We add an application tag here just so that we can indicate that
@@ -27,7 +27,7 @@
     -->
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
-        android:label="Tests for js.rbuddy"
-        android:targetPackage="js.rbuddy" />
+        android:label="Tests for com.js.rbuddy"
+        android:targetPackage="com.js.rbuddy" />
 
 </manifest>

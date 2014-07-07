@@ -12,8 +12,8 @@
   {
     "id": "receipt",
     "type": "button",
-    "label": "Photo",
-    "icon": "photo"
+    "icon": "camera",
+    "hasimage":true
   },
   {
     "id": "tags",
