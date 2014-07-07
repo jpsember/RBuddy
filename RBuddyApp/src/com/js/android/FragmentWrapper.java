@@ -9,15 +9,46 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+/**
+ * Fragment subclass that acts as a wrapper for singleton fragments.
+ * 
+ * Generally, the Android OS will destroy and reconstruct fragments, e.g., if
+ * backstack or orientation events occur. This can be problematic, since it is
+ * convenient to treat some fragments as if they are singletons. Suppose you
+ * have an instance X of a MyFragment subclass, and X is intended to be a
+ * singleton. An instance Y of the FragmentWrapper class can act as a wrapper
+ * for X. Even if multiple instances Y',Y''... end of being constructed, they
+ * will all contain the same instance X.
+ * 
+ * To have X's class behave in this way, there are two steps:
+ * 
+ * 1) have X define Y's class, a concrete subclass of FragmentWrapper, one that
+ * includes two methods:
+ * 
+ * ... i) a zero-argument constructor; and
+ * 
+ * ... ii) getFragmentClass(), a method that returns X's class
+ * 
+ * 2) In X's constructor, make sure Y's class is registered by constructing an
+ * instance of Y.
+ * 
+ * See ReceiptEditor for an example.
+ * 
+ */
 public abstract class FragmentWrapper extends MyFragment {
 
 	/**
-	 * Get the class that this wrapper contains an instance of
+	 * Provide class being wrapped
 	 * 
-	 * @return
+	 * @return subclass of MyFragment
 	 */
 	public abstract Class getFragmentClass();
 
+	/**
+	 * Constructor. Note, for technical reasons, the concrete subclass of this
+	 * abstract class must provide a no-argument constructor (that does
+	 * nothing).
+	 */
 	public FragmentWrapper() {
 		assertUIThread();
 

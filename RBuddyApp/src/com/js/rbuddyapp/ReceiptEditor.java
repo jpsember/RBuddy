@@ -29,10 +29,6 @@ import com.js.rbuddy.TagSet;
 public class ReceiptEditor extends MyFragment {
 
 	private static class Wrapper extends FragmentWrapper {
-		/**
-		 * We need to supply a default constructor; I haven't figured out how to
-		 * construct objects of it otherwise
-		 */
 		public Wrapper() {
 		}
 
@@ -43,9 +39,12 @@ public class ReceiptEditor extends MyFragment {
 	}
 
 	public ReceiptEditor() {
-		//super(true);
-		// Register a wrapper class by constructing an instance of it
+		// super(true); // enable to print log messages
+
+		// Register the wrapper class
 		new Wrapper();
+
+		// Perform class-specific initialization
 		mApp = RBuddyApp.sharedInstance();
 	}
 
