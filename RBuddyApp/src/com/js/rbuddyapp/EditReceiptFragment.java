@@ -5,7 +5,6 @@ import static com.js.android.Tools.*;
 import com.js.android.ActivityState;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
-import com.js.form.FormWidget;
 import com.js.json.JSONEncoder;
 import com.js.rbuddy.Cost;
 import com.js.rbuddy.JSDate;
@@ -19,7 +18,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 public class EditReceiptFragment extends MyFragment {
@@ -52,7 +50,7 @@ public class EditReceiptFragment extends MyFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		setLogging(true);
+		ASSERT(!isResumed());
 		log("onCreateView, savedInstanceState " + savedInstanceState);
 		mApp = RBuddyApp.sharedInstance();
 		layoutElements();
@@ -64,6 +62,7 @@ public class EditReceiptFragment extends MyFragment {
 
 	@Override
 	public void onResume() {
+		ASSERT(isResumed());
 		super.onResume();
 		constructFormIfNecessary();
 		readWidgetValuesFromReceipt();
@@ -71,6 +70,7 @@ public class EditReceiptFragment extends MyFragment {
 
 	@Override
 	public void onPause() {
+		ASSERT(isResumed());
 		super.onPause();
 		updateReceiptWithWidgetValues();
 		mApp.receiptFile().flush();
@@ -78,16 +78,19 @@ public class EditReceiptFragment extends MyFragment {
 
 	@Override
 	public void onDestroyView() {
+		ASSERT(!isResumed());
 		disposeForm();
+		mScrollView = null;
 		super.onDestroyView();
 	}
 
 	private void disposeForm() {
-		if (mForm == null)
-			return;
-		stopFormListeners();
-		mScrollViewContent.removeAllViews();
-		mForm = null;
+		if (mForm != null) {
+			stopFormListeners();
+			mForm = null;
+		}
+		if (mScrollView != null)
+			mScrollView.removeAllViews();
 	}
 
 	private void stopFormListeners() {
@@ -99,18 +102,13 @@ public class EditReceiptFragment extends MyFragment {
 	}
 
 	public void setReceipt(Receipt receipt) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "receipt=" + receipt + " form=" + describe(mForm)
-					+ " scrollView=" + nameOf(mScrollView));
 		// In case there's an existing receipt, flush its changes
 		updateReceiptWithWidgetValues();
 		this.mReceipt = receipt;
-		if (receipt == null) {
+		if (receipt == null)
 			disposeForm();
-		} else {
+		else
 			constructFormIfNecessary();
-		}
 		readWidgetValuesFromReceipt();
 	}
 
@@ -119,25 +117,17 @@ public class EditReceiptFragment extends MyFragment {
 	 * exists
 	 */
 	private void constructFormIfNecessary() {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "mForm=" + mForm + " mReceipt=" + nameOf(mReceipt)
-					+ " scrollView " + nameOf(mScrollView));
-		if (mForm != null)
+		if (!isResumed())
 			return;
-		if (mScrollView == null)
-			return;
-		// Remove nominal view we added above
-		mScrollViewContent.removeAllViews();
 		if (mReceipt == null)
+			return;
+		if (mForm != null)
 			return;
 
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_edit_receipt);
 
-		this.mForm = mApp.parseForm(getActivity(), jsonString);
-		if (db)
-			pr(" constructed mForm " + nameOf(mForm));
+		mForm = mApp.parseForm(getActivity(), jsonString);
 
 		mForm.addListener(new Form.Listener() {
 			@Override
@@ -153,31 +143,16 @@ public class EditReceiptFragment extends MyFragment {
 				processPhotoButtonPress();
 			}
 		});
-		mScrollViewContent.addView(mForm.getView(), new LayoutParams(
+		mScrollView.addView(mForm.getView(), new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-		// Not sure this will have any effect...
-		mScrollViewContent.invalidate();
 	}
 
 	private void layoutElements() {
+		ASSERT(mScrollView == null);
 		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
 
-		// We need to be able to swap between showing
-		// nothing (when receipt is null) and showing
-		// a form (otherwise). I believe a ScrollView doesn't
-		// support having their content view changing, so
-		// we will give it a fixed content view and change ITS
-		// contents dynamically.
-		mScrollViewContent = new LinearLayout(getActivity());
-		FormWidget.setDebugBgnd(mScrollViewContent, "#804040");
-
-		mScrollViewContent.setLayoutParams(new LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		mScrollViewContent.setMinimumHeight(80);
-		mScrollView.addView(mScrollViewContent);
 		constructFormIfNecessary();
 	}
 
@@ -205,13 +180,11 @@ public class EditReceiptFragment extends MyFragment {
 		// To detect if changes have actually occurred, compare JSON
 		// representations of the receipt before and after updating the fields.
 		String origJSON = JSONEncoder.toJSON(mReceipt);
+		String origTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
 
 		mReceipt.setSummary(mForm.getValue("summary"));
 		mReceipt.setCost(new Cost(mForm.getValue("cost"), true));
 		mReceipt.setDate(JSDate.parse(mForm.getValue("date"), true));
-
-		String origTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
-
 		mReceipt.setTags(TagSet.parse(mForm.getValue("tags"), new TagSet()));
 
 		String newJSON = JSONEncoder.toJSON(mReceipt);
@@ -248,5 +221,4 @@ public class EditReceiptFragment extends MyFragment {
 	private Form mForm;
 	private FormButtonWidget mReceiptWidget;
 	private ScrollView mScrollView;
-	private ViewGroup mScrollViewContent;
 }

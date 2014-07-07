@@ -173,6 +173,9 @@ public class PhotoFragment extends MyFragment {
 			args.setCallback(new Runnable() {
 				public void run() {
 					mReceipt.setPhotoId(arg.getFileIdString());
+					mApp.receiptFile().setModified(mReceipt);
+					// TODO: need better pattern to keep track of changes to
+					// receipts, maybe do it silently
 					mApp.photoStore().pushPhoto(mReceipt.getId(),
 							mReceipt.getPhotoId());
 				}
