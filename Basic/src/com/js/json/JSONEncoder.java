@@ -115,7 +115,7 @@ public class JSONEncoder {
 		while (iter.hasNext()) {
 			encode(iter.next());
 		}
-		exitList();
+		exit();
 	}
 
 	public void encode(Set set) {
@@ -137,7 +137,7 @@ public class JSONEncoder {
 		for (int i = 0; i < array.length; i++) {
 			encode(array[i]);
 		}
-		exitList();
+		exit();
 	}
 
 	public void encode(Number number) {
@@ -227,15 +227,6 @@ public class JSONEncoder {
 		sb.append('[');
 	}
 
-	@Deprecated
-	public void exitList() {
-		if (collectionType != COLLECTION_LIST)
-			throw new IllegalStateException();
-		sb.append(']');
-		popState();
-	}
-
-	
 	private void popState() {
 		valueIsNext = (Boolean) pop(stateStack);
 		collectionLength = (Integer) pop(stateStack);
@@ -256,14 +247,6 @@ public class JSONEncoder {
 		collectionLength = 0;
 		valueIsNext = false;
 		sb.append('{');
-	}
-
-	@Deprecated
-	public void exitMap() {
-		if (collectionType != COLLECTION_MAP)
-			throw new IllegalStateException();
-		sb.append('}');
-		popState();
 	}
 
 	public void exit() {

@@ -47,24 +47,6 @@ public class TagSet implements IJSONEncoder {
 		return tags.iterator();
 	}
 
-	/**
-	 * Given a set of tag names, construct user-displayable string
-	 * 
-	 * @param tags
-	 * @return
-	 * @deprecated just use toString()
-	 */
-	public String format() {
-		StringBuilder sb = new StringBuilder();
-		for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
-			String name = iter.next();
-			if (sb.length() != 0)
-				sb.append(", ");
-			sb.append(name);
-		}
-		return sb.toString();
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
