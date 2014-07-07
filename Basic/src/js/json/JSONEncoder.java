@@ -41,6 +41,8 @@ public class JSONEncoder {
 	public void encode(Object value) {
 		if (value == null)
 			encodeNull();
+		else if (value instanceof IJSONEncoder)
+			encode((IJSONEncoder)value);
 		else if (value instanceof Number)
 			encode(((Number) value).doubleValue());
 		else if (value instanceof Boolean)
@@ -205,6 +207,13 @@ public class JSONEncoder {
 		sb.append("null");
 	}
 
+	public void encodePair(String key, Object value) {
+		if (collectionType != COLLECTION_MAP)
+			throw new IllegalStateException();
+	encode(key);
+		encode(value);
+	}
+	
 	public void clear() {
 		sb.setLength(0);
 	}
@@ -226,6 +235,7 @@ public class JSONEncoder {
 		popState();
 	}
 
+	
 	private void popState() {
 		valueIsNext = (Boolean) pop(stateStack);
 		collectionLength = (Integer) pop(stateStack);
