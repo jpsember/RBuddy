@@ -9,6 +9,8 @@ import com.js.form.Form;
 import com.js.form.FormImageWidget;
 import com.js.android.ActivityState;
 import com.js.android.BitmapUtil;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
@@ -26,6 +28,7 @@ import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 import com.js.android.FileArguments;
 import com.js.android.IPhotoStore;
+
 
 public class PhotoFragment extends MyFragment {
 
@@ -196,6 +199,9 @@ public class PhotoFragment extends MyFragment {
 	private void displayReceiptPhoto() {
 		if (!isResumed() || mForm == null)
 			return;
+		final boolean db = true;
+		if (db)
+			pr("imageWidget=" + imageWidget() + " receipt=" + mReceipt);
 		imageWidget().displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}

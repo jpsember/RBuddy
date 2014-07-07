@@ -19,6 +19,8 @@ import com.js.rbuddy.JSDate;
  */
 public class App {
 
+	public static final String PREFERENCE_KEY_SMALL_DEVICE_FLAG = "small_device";
+
 	/**
 	 * Get the singleton instance of the application, preparing it if necessary
 	 * (must be called from UI thread in this case)
@@ -143,8 +145,20 @@ public class App {
 		return (int) (densityPixels * displayMetrics.density);
 	}
 
+	public void setFragments(FragmentOrganizer f) {
+		assertUIThread();
+		mFragments = f;
+	}
+
+	public FragmentOrganizer fragments() {
+		assertUIThread();
+		ASSERT(mFragments != null, "no FragmentOrganizer defined");
+		return mFragments;
+	}
+
 	protected static App sharedInstance;
 	protected Context context;
 	private static DisplayMetrics displayMetrics;
 	private Map<String, Integer> resourceMap = new HashMap();
+	private FragmentOrganizer mFragments;
 }

@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Toast;
 
 public class Tools extends com.js.basic.Tools {
@@ -151,4 +153,21 @@ public class Tools extends com.js.basic.Tools {
 			return DEVICESIZE_UNKNOWN;
 		}
 	}
+
+	/**
+	 * Debug utility to set the background color for a view. Each call
+	 * increments a counter to produce a unique color (from a finite set)
+	 */
+	public static void debugChangeBgndColor(View view) {
+		assertUIThread();
+		int i = mDebugBgndColorIndex % debugColorCycle.length;
+		view.setBackgroundColor(Color.parseColor(debugColorCycle[i]));
+		mDebugBgndColorIndex++;
+	}
+
+	private static String debugColorCycle[] = { "#402020", "#204020",
+			"#202040", "#602020", "#206020", "#202060", "#802020", "#208020",
+			"#202080", };
+
+	private static int mDebugBgndColorIndex;
 }

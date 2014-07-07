@@ -1,4 +1,4 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,18 +25,22 @@ import com.js.json.JSONParser;
  * 
  * Conceptually, manages the display of up to two side-by-side fragments
  * 
+ * Problems:
  * 
- * Problems: [] back button doesn't update slotContents properly
- * 
- * 
- * [] some transactions should not be undoable: placing top-level fragments
- * (those visible if none other)
- * 
+ * [] the back stack and orientation changes highlight a problem: the system may
+ * destroy and construct fragments, so we can't enforce a singleton pattern with
+ * fragment instances. For example, even if we construct a singleton EditReceipt
+ * fragment, if the user rotates the device, a new one will be created by the
+ * system that will be distinct from our singleton instance. One approach: treat
+ * fragments as containers of a separate class of objects that WILL obey the
+ * singleton pattern. For example, let 'Editor' be the class wrapped by the
+ * EditReceiptFragment. Even if multiple EditReceiptFragments exist, they will
+ * all have a reference to the single Editor instance.
  * 
  */
 public class FragmentOrganizer {
 
-	private static final boolean mLogging = false;
+	private static final boolean mLogging = true;
 
 	private static final String BUNDLE_PERSISTENCE_KEY2 = "FragmentOrganizer";
 
@@ -62,8 +66,8 @@ public class FragmentOrganizer {
 		this.mSlotViewBaseId = 1900;
 
 		mSupportsDual = getDeviceSize(mParentActivity) >= DEVICESIZE_LARGE;
-		if (AppPreferences.getBoolean(
-				RBuddyApp.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false)) {
+		if (AppPreferences.getBoolean(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
+				false)) {
 			mSupportsDual = false;
 		}
 
@@ -111,6 +115,19 @@ public class FragmentOrganizer {
 			} else
 				restoreFromJSON(json);
 		}
+
+		restoreFragmentState(savedInstanceState);
+	}
+
+	private void restoreFragmentState(Bundle bundle) {
+		assertUIThread();
+		for (MyFragment f : mSingletonObjects.values()) {
+			f.onRestoreInstanceState(bundle);
+		}
+	}
+
+	public Activity getActivity() {
+		return mParentActivity;
 	}
 
 	private void removeFragmentsFromOldViews() {
@@ -170,7 +187,17 @@ public class FragmentOrganizer {
 	public void onSaveInstanceState(Bundle bundle) {
 		log("onSaveInstanceState bundle=" + nameOf(bundle));
 		bundle.putString(getBundlePersistenceKey(), encodeToJSON());
+
+		persistFragmentState(bundle);
+
 		mIsResumed = false;
+	}
+
+	private void persistFragmentState(Bundle bundle) {
+		assertUIThread();
+		for (MyFragment f : mSingletonObjects.values()) {
+			f.onSaveInstanceState(bundle);
+		}
 	}
 
 	/**
@@ -245,8 +272,8 @@ public class FragmentOrganizer {
 		int actualSlot = slotContainingFragment(tag);
 		if (actualSlot >= 0) {
 			log(" already found in slot " + actualSlot);
-			if (!isResumed())
-				return null;
+			// if (!isResumed())
+			// return null;
 			return get(tag, true);
 		}
 
@@ -412,6 +439,23 @@ public class FragmentOrganizer {
 	private boolean isResumed() {
 		return mIsResumed;
 	}
+
+	public void setWrappedSingleton(MyFragment singleton) {
+		assertUIThread();
+		mSingletonObjects.put(singleton.getClass(), singleton);
+	}
+
+	public MyFragment getWrappedSingleton(Class singletonClass) {
+		assertUIThread();
+		MyFragment obj = mSingletonObjects.get(singletonClass);
+		if (obj == null) {
+			die("no singleton object found for "
+					+ singletonClass.getSimpleName());
+		}
+		return obj;
+	}
+
+	private Map<Class, MyFragment> mSingletonObjects = new HashMap();
 
 	// Map of factories, keyed by name
 	private Map<String, MyFragment.Factory> mFragmentFactories;
