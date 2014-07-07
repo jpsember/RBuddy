@@ -35,19 +35,6 @@ import static com.js.basic.Tools.*;
  */
 public class JSONParser {
 
-	/**
-	 * Utility method that given a JSON string and an IJSONParser, parses and
-	 * returns an object
-	 * 
-	 * @param jsonString
-	 * @param objectParser
-	 * @return
-	 */
-	public static Object parse(String jsonString, IJSONParser objectParser) {
-		JSONParser parser = new JSONParser(jsonString); // JSONParser.parserForJSONString(jsonString);
-		return objectParser.parse(parser);
-	}
-
 	private JSONParser() {
 	}
 

@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.js.android.ActivityState;
 import com.js.android.AndroidDate;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.rbuddy.Receipt;
 
 import android.content.Context;

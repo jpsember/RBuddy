@@ -170,21 +170,18 @@ public class TagSetFile implements IJSONEncoder {
 		json.exit();
 	}
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
-		@Override
-		public Object parse(JSONParser json) {
-			// The tag names appear in order of least-recently-used first. By
-			// adding them in this order, the first one processed will end up at
-			// the end of the list, as we would like.
-			TagSetFile tf = new TagSetFile();
-			json.enterList();
-			while (json.hasNext())
-				tf.addTag(json.nextString());
-			json.exit();
-			tf.setChanged(false);
-			return tf;
-		}
-	};
+	public static TagSetFile parse(JSONParser json) {
+		// The tag names appear in order of least-recently-used first. By
+		// adding them in this order, the first one processed will end up at
+		// the end of the list, as we would like.
+		TagSetFile tf = new TagSetFile();
+		json.enterList();
+		while (json.hasNext())
+			tf.addTag(json.nextString());
+		json.exit();
+		tf.setChanged(false);
+		return tf;
+	}
 
 	@Override
 	public String toString() {

@@ -64,8 +64,8 @@ public class ReceiptTest extends MyTest {
 		JSONEncoder enc = new JSONEncoder();
 		r.encode(enc);
 		String s = enc.toString();
-
-		Receipt r2 = (Receipt) JSONParser.parse(s, Receipt.JSON_PARSER);
+		JSONParser p = new JSONParser(s);
+		Receipt r2 = Receipt.parse(p);
 
 		JSONEncoder enc2 = new JSONEncoder();
 		r2.encode(enc2);

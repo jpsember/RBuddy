@@ -1,11 +1,20 @@
 package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ScrollView;
 
 import com.js.android.ActivityState;
+import com.js.android.FragmentWrapper;
+import com.js.android.MyFragment;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
-import com.js.form.FormWidget;
 import com.js.json.JSONEncoder;
 import com.js.rbuddy.Cost;
 import com.js.rbuddy.JSDate;
@@ -13,52 +22,53 @@ import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSet;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
+/**
+ * Singleton receipt editor
+ * 
+ */
+public class ReceiptEditor extends MyFragment {
 
-public class EditReceiptFragment extends MyFragment {
-
-	public static final String TAG = "EditReceipt";
-	public static Factory FACTORY = new Factory() {
-
-		@Override
-		public String name() {
-			return TAG;
+	public static class Wrapper extends FragmentWrapper {
+		public Wrapper() {
 		}
 
 		@Override
-		public MyFragment construct() {
-			return new EditReceiptFragment();
+		public Class getFragmentClass() {
+			return ReceiptEditor.class;
 		}
-	};
+	}
 
-	/**
-	 * Construct the singleton instance of this fragment, if it hasn't already
-	 * been
-	 * 
-	 * @param organizer
-	 * @return
-	 */
-	public static EditReceiptFragment construct(FragmentOrganizer organizer) {
-		return (EditReceiptFragment) organizer.get(TAG, true);
+	public ReceiptEditor() {
+		// super(true); // enable to print log messages
+
+		// Register the wrapper class
+		new Wrapper();
+
+		// Perform class-specific initialization
+		mApp = RBuddyApp.sharedInstance();
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle bundle) {
+		super.onRestoreInstanceState(bundle);
+		if (bundle != null) {
+			int receiptId = bundle.getInt("XXX", 0);
+			Receipt r = null;
+			if (receiptId != 0)
+				r = mApp.receiptFile().getReceipt(receiptId);
+			setReceipt(r);
+		}
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		setLogging(true);
-		log("onCreateView, savedInstanceState " + savedInstanceState);
-		mApp = RBuddyApp.sharedInstance();
+		log("onCreateView, mReceipt=" + mReceipt);
 		layoutElements();
 		mActivityState = new ActivityState() //
 				.add(mScrollView) //
 				.restoreStateFrom(savedInstanceState);
+		log(" returning scrollView " + mScrollView);
 		return mScrollView;
 	}
 
@@ -79,15 +89,39 @@ public class EditReceiptFragment extends MyFragment {
 	@Override
 	public void onDestroyView() {
 		disposeForm();
+		mScrollView = null;
 		super.onDestroyView();
 	}
 
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mActivityState != null)
+			mActivityState.saveState(outState);
+		outState.putInt("XXX", mReceipt == null ? 0 : mReceipt.getId());
+	}
+
+	public void setReceipt(Receipt receipt) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "receipt=" + receipt);
+		// In case there's an existing receipt, flush its changes
+		updateReceiptWithWidgetValues();
+		this.mReceipt = receipt;
+		if (receipt == null)
+			disposeForm();
+		else
+			constructFormIfNecessary();
+		readWidgetValuesFromReceipt();
+	}
+
 	private void disposeForm() {
-		if (mForm == null)
-			return;
-		stopFormListeners();
-		mScrollViewContent.removeAllViews();
-		mForm = null;
+		if (mForm != null) {
+			stopFormListeners();
+			mForm = null;
+		}
+		if (mScrollView != null)
+			mScrollView.removeAllViews();
 	}
 
 	private void stopFormListeners() {
@@ -98,46 +132,22 @@ public class EditReceiptFragment extends MyFragment {
 		mReceiptWidget.displayPhoto(mApp.photoStore(), 0, null);
 	}
 
-	public void setReceipt(Receipt receipt) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "receipt=" + receipt + " form=" + describe(mForm)
-					+ " scrollView=" + nameOf(mScrollView));
-		// In case there's an existing receipt, flush its changes
-		updateReceiptWithWidgetValues();
-		this.mReceipt = receipt;
-		if (receipt == null) {
-			disposeForm();
-		} else {
-			constructFormIfNecessary();
-		}
-		readWidgetValuesFromReceipt();
-	}
-
 	/**
 	 * Construct the form if it doesn't exist, receipt exists, and its container
 	 * exists
 	 */
 	private void constructFormIfNecessary() {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "mForm=" + mForm + " mReceipt=" + nameOf(mReceipt)
-					+ " scrollView " + nameOf(mScrollView));
+		if (mReceipt == null)
+			return;
 		if (mForm != null)
 			return;
 		if (mScrollView == null)
 			return;
-		// Remove nominal view we added above
-		mScrollViewContent.removeAllViews();
-		if (mReceipt == null)
-			return;
 
-		String jsonString = readTextFileResource(getActivity(),
+		String jsonString = readTextFileResource(getContext(),
 				R.raw.form_edit_receipt);
 
-		this.mForm = mApp.parseForm(getActivity(), jsonString);
-		if (db)
-			pr(" constructed mForm " + nameOf(mForm));
+		mForm = mApp.parseForm(getContext(), jsonString);
 
 		mForm.addListener(new Form.Listener() {
 			@Override
@@ -153,31 +163,18 @@ public class EditReceiptFragment extends MyFragment {
 				processPhotoButtonPress();
 			}
 		});
-		mScrollViewContent.addView(mForm.getView(), new LayoutParams(
+		mScrollView.addView(mForm.getView(), new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-		// Not sure this will have any effect...
-		mScrollViewContent.invalidate();
 	}
 
 	private void layoutElements() {
-		mScrollView = new ScrollView(getActivity());
+		ASSERT(mScrollView == null);
+		mScrollView = new ScrollView(getContext());
+		debugChangeBgndColor(mScrollView);
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
+		log("layoutElements, scrollView " + mScrollView);
 
-		// We need to be able to swap between showing
-		// nothing (when receipt is null) and showing
-		// a form (otherwise). I believe a ScrollView doesn't
-		// support having their content view changing, so
-		// we will give it a fixed content view and change ITS
-		// contents dynamically.
-		mScrollViewContent = new LinearLayout(getActivity());
-		FormWidget.setDebugBgnd(mScrollViewContent, "#804040");
-
-		mScrollViewContent.setLayoutParams(new LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		mScrollViewContent.setMinimumHeight(80);
-		mScrollView.addView(mScrollViewContent);
 		constructFormIfNecessary();
 	}
 
@@ -205,13 +202,11 @@ public class EditReceiptFragment extends MyFragment {
 		// To detect if changes have actually occurred, compare JSON
 		// representations of the receipt before and after updating the fields.
 		String origJSON = JSONEncoder.toJSON(mReceipt);
+		String origTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
 
 		mReceipt.setSummary(mForm.getValue("summary"));
 		mReceipt.setCost(new Cost(mForm.getValue("cost"), true));
 		mReceipt.setDate(JSDate.parse(mForm.getValue("date"), true));
-
-		String origTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
-
 		mReceipt.setTags(TagSet.parse(mForm.getValue("tags"), new TagSet()));
 
 		String newJSON = JSONEncoder.toJSON(mReceipt);
@@ -234,7 +229,7 @@ public class EditReceiptFragment extends MyFragment {
 	 * @return
 	 */
 	private Listener listener() {
-		return (Listener) getActivity();
+		return (Listener) getContext();
 	}
 
 	public static interface Listener {
@@ -243,10 +238,14 @@ public class EditReceiptFragment extends MyFragment {
 		void editPhoto(Receipt r);
 	}
 
+	private Context getContext() {
+		return mApp.fragments().getActivity();
+	}
+
 	private RBuddyApp mApp;
 	private Receipt mReceipt;
 	private Form mForm;
 	private FormButtonWidget mReceiptWidget;
 	private ScrollView mScrollView;
-	private ViewGroup mScrollViewContent;
+	protected ActivityState mActivityState;
 }

@@ -259,17 +259,13 @@ public class JSONTest extends MyTest {
 
 	private static class OurClass implements IJSONEncoder {
 
-		public static final IJSONParser parser = new IJSONParser() {
-
-			@Override
-			public Object parse(JSONParser json) {
-				json.enterList();
-				String message = json.nextString();
-				int number = json.nextInt();
-				json.exit();
-				return new OurClass(message, number);
-			}
-		};
+		public static OurClass parse(JSONParser json) {
+			json.enterList();
+			String message = json.nextString();
+			int number = json.nextInt();
+			json.exit();
+			return new OurClass(message, number);
+		}
 
 		public OurClass(String message, int number) {
 			map.put("message", message);
@@ -298,7 +294,7 @@ public class JSONTest extends MyTest {
 		OurClass c = new OurClass("hello", 42);
 		enc().encode(c);
 		String s = enc().toString();
-		OurClass c2 = (OurClass) JSONParser.parse(s, OurClass.parser);
+		OurClass c2 = OurClass.parse(new JSONParser(s));
 		assertStringsMatch(c, c2);
 	}
 
@@ -314,7 +310,7 @@ public class JSONTest extends MyTest {
 	public void testMapParsing() {
 		Alpha a = Alpha.generateRandomObject(this.random());
 		String s = JSONEncoder.toJSON(a);
-		Alpha a2 = (Alpha) JSONParser.parse(s, Alpha.JSON_PARSER);
+		Alpha a2 = Alpha.parse(new JSONParser(s));
 		String s2 = JSONEncoder.toJSON(a2);
 		assertStringsMatch(s, s2);
 	}
@@ -386,19 +382,16 @@ public class JSONTest extends MyTest {
 			encoder.exit();
 		}
 
-		public static final IJSONParser JSON_PARSER = new IJSONParser() {
-			@Override
-			public Object parse(JSONParser json) {
-				Alpha a = new Alpha();
-				json.enterMap();
-				while (json.hasNext()) {
-					String key = json.nextKey();
-					double d = json.nextDouble();
-					a.map.put(key, d);
-				}
-				return a;
+		public static Alpha parse(JSONParser json) {
+			Alpha a = new Alpha();
+			json.enterMap();
+			while (json.hasNext()) {
+				String key = json.nextKey();
+				double d = json.nextDouble();
+				a.map.put(key, d);
 			}
-		};
+			return a;
+		}
 
 		private Map<String, Double> map = new HashMap();
 	}

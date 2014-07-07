@@ -1,8 +1,6 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
-import static com.js.basic.Tools.nameOf;
-import static com.js.basic.Tools.pr;
-import static com.js.basic.Tools.tab;
+import static com.js.android.Tools.*;
 
 import com.js.android.ActivityState;
 
@@ -72,7 +70,10 @@ public abstract class MyFragment extends Fragment {
 			mActivityState.saveState(outState);
 	}
 
+	public void onRestoreInstanceState(Bundle bundle) {
+		log("onRestoreInstanceState; bundle " + bundle);
+	}
+
 	protected ActivityState mActivityState;
 	private boolean mLogging;
-
 }

@@ -9,6 +9,8 @@ import com.js.form.Form;
 import com.js.form.FormImageWidget;
 import com.js.android.ActivityState;
 import com.js.android.BitmapUtil;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
@@ -26,6 +28,7 @@ import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 import com.js.android.FileArguments;
 import com.js.android.IPhotoStore;
+
 
 public class PhotoFragment extends MyFragment {
 
@@ -88,8 +91,10 @@ public class PhotoFragment extends MyFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		// Display nothing, so widget stops listening; else it will leak
-		mImageWidget.displayPhoto(mApp.photoStore(), 0, null);
+		if (mForm != null) {
+			// Display nothing, so widget stops listening; else it will leak
+			imageWidget().displayPhoto(mApp.photoStore(), 0, null);
+		}
 		mApp.receiptFile().flush();
 	}
 
@@ -114,7 +119,6 @@ public class PhotoFragment extends MyFragment {
 				startImageCaptureIntent();
 			}
 		});
-		mImageWidget = (FormImageWidget) mForm.getField("photo");
 
 		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -173,6 +177,9 @@ public class PhotoFragment extends MyFragment {
 			args.setCallback(new Runnable() {
 				public void run() {
 					mReceipt.setPhotoId(arg.getFileIdString());
+					mApp.receiptFile().setModified(mReceipt);
+					// TODO: need better pattern to keep track of changes to
+					// receipts, maybe do it silently
 					mApp.photoStore().pushPhoto(mReceipt.getId(),
 							mReceipt.getPhotoId());
 				}
@@ -190,9 +197,12 @@ public class PhotoFragment extends MyFragment {
 	 * Update the actual photo, if fragment is in an appropriate state
 	 */
 	private void displayReceiptPhoto() {
-		if (!isResumed())
+		if (!isResumed() || mForm == null)
 			return;
-		mImageWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
+		final boolean db = true;
+		if (db)
+			pr("imageWidget=" + imageWidget() + " receipt=" + mReceipt);
+		imageWidget().displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}
 
@@ -202,9 +212,12 @@ public class PhotoFragment extends MyFragment {
 		displayReceiptPhoto();
 	}
 
+	private FormImageWidget imageWidget() {
+		return (FormImageWidget) mForm.getField("photo");
+	}
+
 	private Receipt mReceipt;
 	private RBuddyApp mApp;
 	private Form mForm;
-	private FormImageWidget mImageWidget;
 	private ScrollView mScrollView;
 }

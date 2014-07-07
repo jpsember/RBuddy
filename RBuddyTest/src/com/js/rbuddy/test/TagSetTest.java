@@ -53,8 +53,9 @@ public class TagSetTest extends MyTest {
 	}
 
 	/**
-	 * Add random tags to a set with a large capacity, and simulate it using a simple
-	 * but slower data structure; verify that the contents match afterwards.
+	 * Add random tags to a set with a large capacity, and simulate it using a
+	 * simple but slower data structure; verify that the contents match
+	 * afterwards.
 	 */
 	public void testJSON() {
 		build();
@@ -64,8 +65,7 @@ public class TagSetTest extends MyTest {
 			ts.addTag(script[random().nextInt(script.length)]);
 		}
 		String s = JSONEncoder.toJSON(ts);
-		TagSetFile ts2 = (TagSetFile) JSONParser.parse(s,
-				TagSetFile.JSON_PARSER);
+		TagSetFile ts2 = TagSetFile.parse(new JSONParser(s));
 		assertStringsMatch(toString(ts.tags()), toString(ts2.tags()));
 		assertStringsMatch(s, JSONEncoder.toJSON(ts2));
 	}
@@ -132,8 +132,9 @@ public class TagSetTest extends MyTest {
 	}
 
 	/**
-	 * Add random tags to a set with a large capacity, and simulate it using a simple
-	 * but slower data structure; verify that the contents match afterwards.
+	 * Add random tags to a set with a large capacity, and simulate it using a
+	 * simple but slower data structure; verify that the contents match
+	 * afterwards.
 	 */
 	public void testLargeTagSet() {
 
@@ -259,7 +260,7 @@ public class TagSetTest extends MyTest {
 			String s = script[i];
 			String sExp = script[i + 1];
 			TagSet tagSet = TagSet.parse(s);
-			assertStringsMatch(sExp,tagSet);
+			assertStringsMatch(sExp, tagSet);
 		}
 	}
 

@@ -5,7 +5,6 @@ import static com.js.basic.Tools.rnd;
 import java.text.NumberFormat;
 
 import com.js.json.IJSONEncoder;
-import com.js.json.IJSONParser;
 import com.js.json.JSONEncoder;
 import com.js.json.JSONParser;
 
@@ -158,12 +157,9 @@ public class Cost implements IJSONEncoder {
 		encoder.encode(value);
 	}
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
-		@Override
-		public Object parse(JSONParser json) {
-			return new Cost(json.nextDouble());
-		}
-	};
+	public static Cost parse(JSONParser json) {
+		return new Cost(json.nextDouble());
+	}
 
 	private double value;
 

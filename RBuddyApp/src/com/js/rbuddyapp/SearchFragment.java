@@ -3,6 +3,8 @@ package com.js.rbuddyapp;
 import static com.js.android.Tools.*;
 
 import com.js.android.ActivityState;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.form.Form;
 import com.js.rbuddy.R;
 

@@ -163,11 +163,8 @@ public class JSDate implements IJSONEncoder {
 		encoder.encode(this.toString());
 	}
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
-		@Override
-		public Object parse(JSONParser json) {
-			return JSDate.parse(json.nextString());
-		}
-	};
+	public static JSDate parse(JSONParser json) {
+		return JSDate.parse(json.nextString());
+	}
 
 }

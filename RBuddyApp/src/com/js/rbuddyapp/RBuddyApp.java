@@ -24,7 +24,6 @@ import com.js.form.FormWidget;
 public class RBuddyApp extends App {
 
 	public static final String PREFERENCE_KEY_USE_GOOGLE_DRIVE_API = "use_google_drive_api";
-	public static final String PREFERENCE_KEY_SMALL_DEVICE_FLAG = "small_device";
 
 	/**
 	 * Convenience method to get the singleton app, assumed to already exist,

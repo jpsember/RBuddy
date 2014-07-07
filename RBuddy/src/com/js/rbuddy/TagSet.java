@@ -13,18 +13,14 @@ import com.js.json.*;
 public class TagSet implements IJSONEncoder {
 	public static final int MAX_SIZE = 5;
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
-
-		@Override
-		public Object parse(JSONParser json) {
-			ArrayList<String> tags = new ArrayList();
-			json.enterList();
-			while (json.hasNext())
-				tags.add(json.nextString());
-			json.exit();
-			return new TagSet(tags.iterator());
-		}
-	};
+	public static TagSet parse(JSONParser json) {
+		ArrayList<String> tags = new ArrayList();
+		json.enterList();
+		while (json.hasNext())
+			tags.add(json.nextString());
+		json.exit();
+		return new TagSet(tags.iterator());
+	}
 
 	public TagSet() {
 		construct();
@@ -49,24 +45,6 @@ public class TagSet implements IJSONEncoder {
 
 	public Iterator<String> iterator() {
 		return tags.iterator();
-	}
-
-	/**
-	 * Given a set of tag names, construct user-displayable string
-	 * 
-	 * @param tags
-	 * @return
-	 * @deprecated just use toString()
-	 */
-	public String format() {
-		StringBuilder sb = new StringBuilder();
-		for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
-			String name = iter.next();
-			if (sb.length() != 0)
-				sb.append(", ");
-			sb.append(name);
-		}
-		return sb.toString();
 	}
 
 	@Override

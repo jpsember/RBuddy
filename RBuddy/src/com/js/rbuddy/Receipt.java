@@ -179,31 +179,26 @@ public class Receipt implements IJSONEncoder {
 		j.exit();
 	}
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
+	public static Receipt parse(JSONParser json) {
+		json.enterList();
+		int id = json.nextInt();
+		JSDate date = JSDate.parse(json);
+		String summary = json.nextString();
+		double costValue = json.nextDouble();
+		String photoId = json.nextString();
+		TagSet tags = TagSet.parse(json);
 
-		@Override
-		public Object parse(JSONParser json) {
-			json.enterList();
-			int id = json.nextInt();
-			JSDate date = (JSDate) JSDate.JSON_PARSER.parse(json);
-			String summary = json.nextString();
-			double costValue = json.nextDouble();
-			String photoId = json.nextString();
-			TagSet tags = (TagSet) TagSet.JSON_PARSER.parse(json);
+		json.exit();
 
-			json.exit();
+		Receipt r = new Receipt(id);
+		r.summary = summary;
+		r.date = date;
+		r.tags = tags;
+		r.cost = new Cost(costValue);
+		r.photoId = photoId;
 
-			Receipt r = new Receipt(id);
-			r.summary = summary;
-			r.date = date;
-			r.tags = tags;
-			r.cost = new Cost(costValue);
-			r.photoId = photoId;
-
-			return r;
-
-		}
-	};
+		return r;
+	}
 
 	/**
 	 * Comparator for sorting receipts by date; ties are broken using ids

@@ -113,8 +113,7 @@ public class UserData {
 				TagSetFile.INITIAL_JSON_CONTENTS.getBytes());
 		this.mTagSetDriveFile = r.file;
 		String contents = blockingReadTextFile(r.file);
-		this.mTagSetFile = (TagSetFile) JSONParser.parse(contents,
-				TagSetFile.JSON_PARSER);
+		this.mTagSetFile = TagSetFile.parse(new JSONParser(contents));
 	}
 
 	/**
