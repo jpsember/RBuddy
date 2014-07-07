@@ -125,10 +125,7 @@ public class ReceiptFilter implements IJSONEncoder {
 	// throw new UnsupportedOperationException("unimplemented");
 	// }
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
-
-		@Override
-		public Object parse(JSONParser json) {
+	public static ReceiptFilter parse(JSONParser json) {
 
 			ReceiptFilter rf = new ReceiptFilter();
 
@@ -155,7 +152,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					rf.setMinDateActive(json.nextBoolean());
 
 				} else if (key.equals("minDate")) {
-					JSDate date = (JSDate)JSDate.JSON_PARSER.parse(json);
+					JSDate date = JSDate.parse(json);
 					rf.setMinDate(date);
 
 				} else if (key.equals("maxDateActive")) {
@@ -163,7 +160,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					rf.setMaxDateActive(json.nextBoolean());
 
 				} else if (key.equals("maxDate")) {
-					JSDate date = (JSDate)JSDate.JSON_PARSER.parse(json);
+					JSDate date = JSDate.parse(json);
 
 					rf.setMaxDate(date);
 
@@ -176,7 +173,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					// Cost does not implement JSON yet...
 					// Cost cost = Cost.parse((String)value);
 					
-					Cost cost = (Cost)Cost.JSON_PARSER.parse(json);
+					Cost cost = Cost.parse(json);
 					
 					rf.setMinCost(cost);
 
@@ -186,7 +183,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					rf.setMaxCostActive(json.nextBoolean());
 
 				} else if (key.equals("maxCost")) {
-					rf.setMaxCost((Cost)Cost.JSON_PARSER.parse(json));
+					rf.setMaxCost(Cost.parse(json));
 
 				} else if (key.equals("exclusiveTagsActive")) {
 
@@ -194,7 +191,7 @@ public class ReceiptFilter implements IJSONEncoder {
 
 				} else if (key.equals("exclusiveTags")) {
 
-					TagSet tag = (TagSet)TagSet.JSON_PARSER.parse(json);
+					TagSet tag = TagSet.parse(json);
 
 					rf.setExclusiveTags(tag);
 
@@ -204,7 +201,7 @@ public class ReceiptFilter implements IJSONEncoder {
 
 				} else if (key.equals("inclusiveTags")) {
 				
-					rf.setInclusiveTags((TagSet)TagSet.JSON_PARSER.parse(json));
+					rf.setInclusiveTags(TagSet.parse(json));
 					pr("\n\n                ----------- just set inclusive tags to "
 							+ rf.getInclusiveTags());
 
@@ -217,9 +214,6 @@ public class ReceiptFilter implements IJSONEncoder {
 			return rf;
 
 		}
-	};
-
-	// private List<String> tags;
 
 	@Override
 	public void encode(JSONEncoder encoder) {

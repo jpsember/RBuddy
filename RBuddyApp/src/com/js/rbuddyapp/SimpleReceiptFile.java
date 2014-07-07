@@ -47,9 +47,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 			TagSetFile tf = null;
 			if (mTagSetStorageFile.isFile()) {
 				try {
-					tf = (TagSetFile) JSONParser.parse(
-							Files.readTextFile(mTagSetStorageFile),
-							TagSetFile.JSON_PARSER);
+					tf = TagSetFile.parse(new JSONParser(Files
+							.readTextFile(mTagSetStorageFile)));
 				} catch (IOException e) {
 					warning("caught " + e + ", starting with empty tag file");
 				}
@@ -68,7 +67,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 			File file = fileForBaseName(mTagSetFileBaseName);
 			try {
 				if (db)
-					pr("\nflushTagSetFile, writing " + file + ": " + mTagSetFile);
+					pr("\nflushTagSetFile, writing " + file + ": "
+							+ mTagSetFile);
 				String json = JSONEncoder.toJSON(mTagSetFile);
 				Files.writeTextFile(file, json);
 			} catch (IOException e) {
@@ -222,7 +222,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 			json.enterList();
 			while (json.hasNext()) {
-				Receipt r = (Receipt) Receipt.JSON_PARSER.parse(json);
+				Receipt r = Receipt.parse(json);
 				mMap.put(r.getId(), r);
 				updateUniqueIdentifier(r.getId());
 			}

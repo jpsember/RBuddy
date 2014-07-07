@@ -42,6 +42,7 @@ public class JSONParser {
 	 * @param jsonString
 	 * @param objectParser
 	 * @return
+	 * @deprecated
 	 */
 	public static Object parse(String jsonString, IJSONParser objectParser) {
 		JSONParser parser = new JSONParser(jsonString); // JSONParser.parserForJSONString(jsonString);

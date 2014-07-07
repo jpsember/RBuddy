@@ -13,18 +13,14 @@ import com.js.json.*;
 public class TagSet implements IJSONEncoder {
 	public static final int MAX_SIZE = 5;
 
-	public static final IJSONParser JSON_PARSER = new IJSONParser() {
-
-		@Override
-		public Object parse(JSONParser json) {
-			ArrayList<String> tags = new ArrayList();
-			json.enterList();
-			while (json.hasNext())
-				tags.add(json.nextString());
-			json.exit();
-			return new TagSet(tags.iterator());
-		}
-	};
+	public static TagSet parse(JSONParser json) {
+		ArrayList<String> tags = new ArrayList();
+		json.enterList();
+		while (json.hasNext())
+			tags.add(json.nextString());
+		json.exit();
+		return new TagSet(tags.iterator());
+	}
 
 	public TagSet() {
 		construct();

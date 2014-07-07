@@ -54,8 +54,7 @@ public class ReceiptFilterTest extends MyTest {
 
 		pr("converted receiptFilter to JSON string:"+s);
 		
-		ReceiptFilter rf2 = (ReceiptFilter) JSONParser.parse(s,
-				ReceiptFilter.JSON_PARSER);
+		ReceiptFilter rf2 = ReceiptFilter.parse(new JSONParser(s));
 		
 		if (rf2.isMinDateActive())
 			pr ("parsed receiptFilter thinks rf minDateActive is TRUE");
