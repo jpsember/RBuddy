@@ -11,6 +11,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
 import com.js.android.ActivityState;
+import com.js.android.FragmentWrapper;
 import com.js.android.MyFragment;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
@@ -22,18 +23,29 @@ import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSet;
 
 /**
- * This represents the singleton receipt editor; it's wrapped inside the
- * EditReceiptFragmentWrapper class
+ * Singleton receipt editor
  * 
  */
 public class ReceiptEditor extends MyFragment {
 
-	private boolean alreadyConstructed;
+	private static class Wrapper extends FragmentWrapper {
+		/**
+		 * We need to supply a default constructor; I haven't figured out how to
+		 * construct objects of it otherwise
+		 */
+		public Wrapper() {
+		}
+
+		@Override
+		public Class getFragmentClass() {
+			return ReceiptEditor.class;
+		}
+	}
 
 	public ReceiptEditor() {
-		super(true);
-		ASSERT(!alreadyConstructed);
-		alreadyConstructed = true;
+		//super(true);
+		// Register a wrapper class by constructing an instance of it
+		new Wrapper();
 		mApp = RBuddyApp.sharedInstance();
 	}
 

@@ -47,7 +47,7 @@ public class RBuddyActivity extends MyActivity implements
 			fragments.plot(ReceiptListFragment.TAG, true, false);
 
 			if (fragments.supportDualFragments()) {
-				fragments.plot(EditReceiptFragment.TAG, false, false);
+				fragments.plot("ReceiptEditor", false, false);
 			}
 		}
 	}
@@ -56,9 +56,8 @@ public class RBuddyActivity extends MyActivity implements
 		fragments = new FragmentOrganizer(this);
 		app.setFragments(fragments);
 
-		fragments.register(ReceiptListFragment.FACTORY).//
-				register(EditReceiptFragment.FACTORY).//
-				register(SearchFragment.FACTORY);
+		fragments.register(ReceiptListFragment.FACTORY);
+		fragments.register(SearchFragment.FACTORY);
 
 		// Construct instances of the fragments we need. They will be stored
 		// within the fragment organizer, and will be the same instances
@@ -186,8 +185,8 @@ public class RBuddyActivity extends MyActivity implements
 						menu,
 						R.id.action_testonly_toggle_small_device,
 						(AppPreferences.getBoolean(
-								App.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
-								false) ? "Disable" : "Enable")
+								App.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false) ? "Disable"
+								: "Enable")
 								+ " small device flag");
 			}
 		});
@@ -235,7 +234,7 @@ public class RBuddyActivity extends MyActivity implements
 	// ReceiptListFragment.Listener
 	@Override
 	public void receiptSelected(Receipt r) {
-		focusOn(EditReceiptFragment.TAG);
+		focusOn("ReceiptEditor");
 		mReceiptEditor.setReceipt(r);
 	}
 

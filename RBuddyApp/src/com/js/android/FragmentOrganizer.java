@@ -40,7 +40,7 @@ import com.js.json.JSONParser;
  */
 public class FragmentOrganizer {
 
-	private static final boolean mLogging = true;
+	private static final boolean mLogging = false;
 
 	private static final String BUNDLE_PERSISTENCE_KEY2 = "FragmentOrganizer";
 
@@ -97,9 +97,12 @@ public class FragmentOrganizer {
 		this.mSlotViewBaseId = id;
 	}
 
-	public FragmentOrganizer register(MyFragment.Factory factory) {
+	public boolean isFactoryRegistered(String name) {
+		return mFragmentFactories.containsKey(name);
+	}
+
+	public void register(MyFragment.Factory factory) {
 		mFragmentFactories.put(factory.name(), factory);
-		return this;
 	}
 
 	public void onCreate(Bundle savedInstanceState) {
