@@ -120,11 +120,6 @@ public class ReceiptFilter implements IJSONEncoder {
 		this.exclusiveTags = exclusiveTags;
 	}
 
-	// @Override
-	// public void encode(JSONEncoder encoder) {
-	// throw new UnsupportedOperationException("unimplemented");
-	// }
-
 	public static ReceiptFilter parse(JSONParser json) {
 
 			ReceiptFilter rf = new ReceiptFilter();
@@ -133,8 +128,7 @@ public class ReceiptFilter implements IJSONEncoder {
 			while (json.hasNext()) {
 
 				String key = json.nextKey();
-				pr("key = " + key);
-
+				
 				if (json.nextIfNull())
 					continue;
 
