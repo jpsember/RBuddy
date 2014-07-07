@@ -11,65 +11,166 @@ import java.util.Map;
 
 import static com.js.basic.Tools.*;
 
+/**
+ * 
+ * 
+ * 
+ * Here's a list of JSON types and their parsed Java equivalents:
+ * 
+ * object => Map
+ * 
+ * array => List
+ * 
+ * string => String
+ * 
+ * number => Double
+ * 
+ * true => Boolean.TRUE
+ * 
+ * false => Boolean.FALSE
+ * 
+ * null => null
+ * 
+ * 
+ */
 public class JSONParser {
 
 	/**
-	 * Utility method that constructs a parser, and given a string and an
-	 * IJSONParser, parses and returns an object
+	 * Utility method that given a JSON string and an IJSONParser, parses and
+	 * returns an object
 	 * 
 	 * @param jsonString
 	 * @param objectParser
 	 * @return
 	 */
 	public static Object parse(String jsonString, IJSONParser objectParser) {
-		JSONParser parser = new JSONParser(jsonString);
-		return parser.read(objectParser);
+		JSONParser parser = new JSONParser(jsonString); // JSONParser.parserForJSONString(jsonString);
+		return objectParser.parse(parser);
 	}
 
-	public JSONParser(String string) {
+	private JSONParser() {
+	}
+
+	/**
+	 * Construct a parser for a Java data structure that has already been parsed
+	 * from a JSON string
+	 * 
+	 * @param javaObject
+	 *            a Java object, corresponding to one of the JSON types; see
+	 *            docs at start of class
+	 * @return parser
+	 */
+	public static JSONParser parserFor(Object javaObject) {
+		JSONParser p = new JSONParser();
+		// Construct a list that contains this single object
+		ArrayList topLevelList = new ArrayList();
+		topLevelList.add(javaObject);
+		p.startProcessing(topLevelList);
+		return p;
+	}
+
+	/**
+	 * Constructor. Given a JSON string, parses it into Java data structures,
+	 * which subsequent method calls can iterate over.
+	 * 
+	 * @param jsonString
+	 */
+	public JSONParser(String jsonString) {
 		if (db)
-			pr("JSONParser constructed for:\n " + string);
+			pr("JSONParser constructed for:\n " + jsonString);
 		setTrace(db);
 
 		try {
 			InputStream stream = new ByteArrayInputStream(
-					string.getBytes("UTF-8"));
+					jsonString.getBytes("UTF-8"));
 			readValueFromStream(stream);
 		} catch (UnsupportedEncodingException e) {
 			throw new JSONException(e);
 		}
 	}
 
-	public Object next() {
-		Object value = this.iterator.next();
-		
-		if (currentMap != null) {
-			this.valueForLastKey = currentMap.get(value);
-		}
-		return value;
-	}
-
-	public String nextKey() {
-		if (currentMap == null)
-			throw new IllegalStateException("not iterating within map");
-		return (String) next();
-	}
-
-	public void setTrace(boolean t) {
-		trace = t;
-		if (trace)
-			warning("enabling trace, called from " + stackTrace(1, 1));
+	/**
+	 * Constructor. Given an InputStream containing a JSON-formatted string,
+	 * parses it into Java data structures, which subsequent method calls can
+	 * iterate over.
+	 * 
+	 * @param jsonString
+	 */
+	public JSONParser(InputStream stream) {
+		readValueFromStream(stream);
 	}
 
 	/**
-	 * Get the value for the last key read; assumes iterating within map
+	 * Determine if the current list or map contains more elements. If not
+	 * within a list or map, this will return true until next() (or one of its
+	 * variants) is called.
 	 * 
 	 * @return
 	 */
-	public Object keyValue() {
-		if (currentMap == null)
+	public boolean hasNext() {
+		return mPeekValueAvailable || this.mIterator.hasNext();
+	}
+
+	/**
+	 * Determine the next value without consuming it
+	 * 
+	 * @return
+	 */
+	public Object peekNext() {
+		if (!mPeekValueAvailable) {
+
+			if (mValueForKeyReady) {
+				mValueForKeyReady = false;
+				mPeekValue = mValueForLastKey;
+			} else {
+				mPeekValue = this.mIterator.next();
+			}
+			mPeekValueAvailable = true;
+		}
+		return mPeekValue;
+	}
+
+	public Object next() {
+		Object val = peekNext();
+		mPeekValueAvailable = false;
+		return val;
+	}
+
+	/**
+	 * If next value is null, read it and return true; else don't read it and
+	 * return false
+	 * 
+	 * @return
+	 */
+	public boolean nextIfNull() {
+		boolean wasNull = peekNext() == null;
+		if (wasNull)
+			next();
+		return wasNull;
+	}
+
+	/**
+	 * Read next key from map, and prime its value as the next object returned
+	 * by a call to next(), nextInt(), etc
+	 * 
+	 * @return
+	 */
+	public String nextKey() {
+		if (mCurrentMap == null)
 			throw new IllegalStateException("not iterating within map");
-		return this.valueForLastKey;
+		// In case user didn't read the value for the previous key, dispose of
+		// it
+		this.mValueForKeyReady = false;
+		String key = nextString();
+		this.mValueForLastKey = mCurrentMap.get(key);
+		this.mValueForKeyReady = true;
+		return key;
+	}
+
+	public void setTrace(boolean t) {
+		mTrace = t;
+		if (mTrace)
+			warning("enabling trace, called from " + stackTrace(1, 1));
 	}
 
 	public int nextInt() {
@@ -78,6 +179,10 @@ public class JSONParser {
 
 	public double nextDouble() {
 		return ((Double) next()).doubleValue();
+	}
+
+	public boolean nextBoolean() {
+		return (Boolean) next();
 	}
 
 	public String nextString() {
@@ -118,32 +223,28 @@ public class JSONParser {
 	 */
 	public void exit(boolean verifyNoItemsRemain) {
 		if (verifyNoItemsRemain) {
-			if (iterator.hasNext())
+			if (mIterator.hasNext())
 				throw new IllegalStateException("incomplete iteration");
 		}
-		if (parseStack.isEmpty())
+		if (mParseStack.isEmpty())
 			throw new IllegalStateException("cannot exit from top level");
-		this.iterator = (Iterator) pop(parseStack);
-		this.currentContainer = pop(parseStack);
-		if (this.currentContainer instanceof Map) {
-			this.currentMap = (Map) this.currentContainer;
+		this.mIterator = (Iterator) pop(mParseStack);
+		this.mCurrentContainer = pop(mParseStack);
+		if (this.mCurrentContainer instanceof Map) {
+			this.mCurrentMap = (Map) this.mCurrentContainer;
 		} else {
-			this.currentMap = null;
+			this.mCurrentMap = null;
 		}
-		this.valueForLastKey = null;
+		this.mValueForLastKey = null;
 	}
 
 	private void pushParseLocation() {
-		parseStack.add(this.currentContainer);
-		parseStack.add(this.iterator);
-	}
-
-	public JSONParser(InputStream stream) {
-		readValueFromStream(stream);
+		mParseStack.add(this.mCurrentContainer);
+		mParseStack.add(this.mIterator);
 	}
 
 	private void readValueFromStream(InputStream s) {
-		this.stream = s;
+		this.mStream = s;
 		Object topLevelValue = readValue();
 		verifyDone();
 		// Construct a list that contains this single object
@@ -153,19 +254,15 @@ public class JSONParser {
 	}
 
 	private void startProcessing(ArrayList list) {
-		this.currentContainer = list;
-		this.currentMap = null;
-		this.iterator = list.iterator();
+		this.mCurrentContainer = list;
+		this.mCurrentMap = null;
+		this.mIterator = list.iterator();
 	}
 
 	private void startProcessing(Map map) {
-		this.currentContainer = map;
-		this.currentMap = map;
-		this.iterator = map.keySet().iterator();
-	}
-
-	public boolean hasNext() {
-		return this.iterator.hasNext();
+		this.mCurrentContainer = map;
+		this.mCurrentMap = map;
+		this.mIterator = map.keySet().iterator();
 	}
 
 	private Object readValue() {
@@ -189,44 +286,44 @@ public class JSONParser {
 	}
 
 	private String readString() {
-		sb.setLength(0);
+		mStringBuilder.setLength(0);
 		read('"', true);
 		while (true) {
 			int c = readCharacter(false);
 			switch (c) {
 			case '"':
-				return sb.toString();
+				return mStringBuilder.toString();
 			case '\\': {
 				c = readCharacter(false);
 				switch (c) {
 				case '"':
 				case '/':
 				case '\\':
-					sb.append((char) c);
+					mStringBuilder.append((char) c);
 					break;
 				case 'b':
-					sb.append('\b');
+					mStringBuilder.append('\b');
 					break;
 				case 'f':
-					sb.append('\f');
+					mStringBuilder.append('\f');
 					break;
 				case 'n':
-					sb.append('\n');
+					mStringBuilder.append('\n');
 					break;
 				case 'r':
-					sb.append('\r');
+					mStringBuilder.append('\r');
 					break;
 				case 't':
-					sb.append('\t');
+					mStringBuilder.append('\t');
 					break;
 				case 'u':
-					sb.append(parseHex());
+					mStringBuilder.append(parseHex());
 					break;
 				}
 			}
 				break;
 			default:
-				sb.append((char) c);
+				mStringBuilder.append((char) c);
 				break;
 			}
 		}
@@ -258,14 +355,15 @@ public class JSONParser {
 		final boolean db = false;
 		if (db)
 			pr("\n\nreadNumber");
-		sb.setLength(0);
+		mStringBuilder.setLength(0);
 		int state = 0;
 		boolean done = false;
 		while (true) {
 			int c = peek(false);
 			boolean isDigit = (c >= '0' && c <= '9');
 			if (db)
-				pr(" state=" + state + " c=" + (char) c + " buffer:" + sb);
+				pr(" state=" + state + " c=" + (char) c + " buffer:"
+						+ mStringBuilder);
 			int oldState = state;
 			state = -1;
 			switch (oldState) {
@@ -334,22 +432,18 @@ public class JSONParser {
 					pr("   ...throwing exception");
 				throw new JSONException("unexpected input");
 			}
-			sb.append((char) c);
+			mStringBuilder.append((char) c);
 			readCharacter(false);
 		}
 		double value;
 		try {
-			value = Double.parseDouble(sb.toString());
+			value = Double.parseDouble(mStringBuilder.toString());
 		} catch (NumberFormatException e) {
 			throw new JSONException(e);
 		}
 		if (db)
 			pr(" returning number: " + value);
 		return value;
-	}
-
-	public Object read(IJSONParser parser) {
-		return parser.parse(this);
 	}
 
 	public Map readObject() {
@@ -406,42 +500,42 @@ public class JSONParser {
 		// If we are ignoring whitespace,
 		// and peek value matches white space, consume it
 		if (ignoreWhitespace) {
-			if (peek <= ' ')
-				peek = -1;
-			else if (peek == '/') {
+			if (mPeekCharacter <= ' ')
+				mPeekCharacter = -1;
+			else if (mPeekCharacter == '/') {
 				// Peek value matches start of a comment, so read one
 				readComment();
 			}
 		}
 
-		if (peek < 0) {
+		if (mPeekCharacter < 0) {
 			try {
 				while (true) {
-					peek = stream.read();
-					if (trace) {
-						String s = (peek < 0) ? "EOF" : Character
-								.toString((char) peek);
+					mPeekCharacter = mStream.read();
+					if (mTrace) {
+						String s = (mPeekCharacter < 0) ? "EOF" : Character
+								.toString((char) mPeekCharacter);
 						boolean newline = (s == "\n");
 						if (newline)
 							s = "\\n";
-						if (traceBuffer.length() > 110) {
-							traceBuffer.replace(0, 4, "...");
+						if (mTraceBuffer.length() > 110) {
+							mTraceBuffer.replace(0, 4, "...");
 						}
-						traceBuffer.append(s);
-						System.out.println("JSON: " + traceBuffer + "\n"
+						mTraceBuffer.append(s);
+						System.out.println("JSON: " + mTraceBuffer + "\n"
 								+ stackTrace(1, 1));
 						if (newline)
-							traceBuffer.setLength(0);
+							mTraceBuffer.setLength(0);
 					}
 					if (!ignoreWhitespace)
 						break;
-					if (peek < 0)
+					if (mPeekCharacter < 0)
 						break;
 					if (ignoreWhitespace) {
-						if (peek == '/') {
+						if (mPeekCharacter == '/') {
 							readComment();
 							continue;
-						} else if (peek <= ' ')
+						} else if (mPeekCharacter <= ' ')
 							continue;
 					}
 					break;
@@ -450,7 +544,7 @@ public class JSONParser {
 				throw new JSONException(e);
 			}
 		}
-		return peek;
+		return mPeekCharacter;
 	}
 
 	private void readComment() {
@@ -463,7 +557,7 @@ public class JSONParser {
 			c = peek(false);
 			if (c < 0)
 				break;
-			peek = -1;
+			mPeekCharacter = -1;
 			if (c == '\n')
 				break;
 		}
@@ -473,7 +567,7 @@ public class JSONParser {
 		int p = peek(skipWhitespace);
 		if (p < 0)
 			throw new JSONException("end of input");
-		peek = -1;
+		mPeekCharacter = -1;
 		return p;
 	}
 
@@ -488,16 +582,19 @@ public class JSONParser {
 			throw new JSONException("extra input");
 	}
 
-	private StringBuilder sb = new StringBuilder();
-	private int peek = -1;
-	private InputStream stream;
-	private boolean trace;
-	private StringBuilder traceBuffer = new StringBuilder();
+	private StringBuilder mStringBuilder = new StringBuilder();
+	private int mPeekCharacter = -1;
+	private InputStream mStream;
+	private boolean mTrace;
+	private StringBuilder mTraceBuffer = new StringBuilder();
 
-	private Object currentContainer;
-	private Map currentMap; // null if current container is not a map
-	private Object valueForLastKey;
+	private Object mCurrentContainer;
+	private Map mCurrentMap; // null if current container is not a map
+	private Object mValueForLastKey;
+	private boolean mValueForKeyReady;
 	// iterator into current object (map or list)
-	private Iterator iterator;
-	private ArrayList parseStack = new ArrayList();
+	private Iterator mIterator;
+	private ArrayList mParseStack = new ArrayList();
+	private boolean mPeekValueAvailable;
+	private Object mPeekValue;
 }

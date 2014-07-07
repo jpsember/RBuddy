@@ -180,15 +180,16 @@ public class Receipt implements IJSONEncoder {
 	}
 
 	public static final IJSONParser JSON_PARSER = new IJSONParser() {
+
 		@Override
 		public Object parse(JSONParser json) {
 			json.enterList();
 			int id = json.nextInt();
-			JSDate date = (JSDate) json.read(JSDate.JSON_PARSER);
+			JSDate date = (JSDate) JSDate.JSON_PARSER.parse(json);
 			String summary = json.nextString();
 			double costValue = json.nextDouble();
 			String photoId = json.nextString();
-			TagSet tags = (TagSet) json.read(TagSet.JSON_PARSER);
+			TagSet tags = (TagSet) TagSet.JSON_PARSER.parse(json);
 
 			json.exit();
 

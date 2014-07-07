@@ -5,6 +5,7 @@ import static com.js.android.Tools.*;
 import com.js.android.ActivityState;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
+import com.js.form.FormWidget;
 import com.js.json.JSONEncoder;
 import com.js.rbuddy.Cost;
 import com.js.rbuddy.JSDate;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 public class EditReceiptFragment extends MyFragment {
@@ -50,6 +52,8 @@ public class EditReceiptFragment extends MyFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		setLogging(true);
+		log("onCreateView, savedInstanceState " + savedInstanceState);
 		mApp = RBuddyApp.sharedInstance();
 		layoutElements();
 		mActivityState = new ActivityState() //
@@ -61,6 +65,7 @@ public class EditReceiptFragment extends MyFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
+		constructFormIfNecessary();
 		readWidgetValuesFromReceipt();
 	}
 
@@ -69,22 +74,71 @@ public class EditReceiptFragment extends MyFragment {
 		super.onPause();
 		updateReceiptWithWidgetValues();
 		mApp.receiptFile().flush();
+	}
+
+	@Override
+	public void onDestroyView() {
+		disposeForm();
+		super.onDestroyView();
+	}
+
+	private void disposeForm() {
+		if (mForm == null)
+			return;
+		stopFormListeners();
+		mScrollViewContent.removeAllViews();
+		mForm = null;
+	}
+
+	private void stopFormListeners() {
+		if (mReceiptWidget == null)
+			return;
 		// Make widget display nothing, so it stops listening; otherwise
 		// the widget will leak
 		mReceiptWidget.displayPhoto(mApp.photoStore(), 0, null);
 	}
 
 	public void setReceipt(Receipt receipt) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "receipt=" + receipt + " form=" + describe(mForm)
+					+ " scrollView=" + nameOf(mScrollView));
 		// In case there's an existing receipt, flush its changes
 		updateReceiptWithWidgetValues();
 		this.mReceipt = receipt;
+		if (receipt == null) {
+			disposeForm();
+		} else {
+			constructFormIfNecessary();
+		}
 		readWidgetValuesFromReceipt();
 	}
 
-	private void layoutElements() {
+	/**
+	 * Construct the form if it doesn't exist, receipt exists, and its container
+	 * exists
+	 */
+	private void constructFormIfNecessary() {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "mForm=" + mForm + " mReceipt=" + nameOf(mReceipt)
+					+ " scrollView " + nameOf(mScrollView));
+		if (mForm != null)
+			return;
+		if (mScrollView == null)
+			return;
+		// Remove nominal view we added above
+		mScrollViewContent.removeAllViews();
+		if (mReceipt == null)
+			return;
+
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_edit_receipt);
+
 		this.mForm = mApp.parseForm(getActivity(), jsonString);
+		if (db)
+			pr(" constructed mForm " + nameOf(mForm));
+
 		mForm.addListener(new Form.Listener() {
 			@Override
 			public void valuesChanged(Form form) {
@@ -99,11 +153,32 @@ public class EditReceiptFragment extends MyFragment {
 				processPhotoButtonPress();
 			}
 		});
+		mScrollViewContent.addView(mForm.getView(), new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
+		// Not sure this will have any effect...
+		mScrollViewContent.invalidate();
+	}
+
+	private void layoutElements() {
 		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
-		mScrollView.addView(mForm.getView());
+
+		// We need to be able to swap between showing
+		// nothing (when receipt is null) and showing
+		// a form (otherwise). I believe a ScrollView doesn't
+		// support having their content view changing, so
+		// we will give it a fixed content view and change ITS
+		// contents dynamically.
+		mScrollViewContent = new LinearLayout(getActivity());
+		FormWidget.setDebugBgnd(mScrollViewContent, "#804040");
+
+		mScrollViewContent.setLayoutParams(new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		mScrollViewContent.setMinimumHeight(80);
+		mScrollView.addView(mScrollViewContent);
+		constructFormIfNecessary();
 	}
 
 	private void processPhotoButtonPress() {
@@ -173,5 +248,5 @@ public class EditReceiptFragment extends MyFragment {
 	private Form mForm;
 	private FormButtonWidget mReceiptWidget;
 	private ScrollView mScrollView;
-
+	private ViewGroup mScrollViewContent;
 }

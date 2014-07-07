@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.js.json.*;
 import com.js.testUtils.*;
@@ -18,7 +19,6 @@ public class JSONTest extends MyTest {
 
 	private JSONParser json(String s) {
 		json = new JSONParser(s);
-
 		return json;
 	}
 
@@ -111,7 +111,7 @@ public class JSONTest extends MyTest {
 		Map m = new HashMap();
 		for (int i = 0; i < 4; i++) {
 			String key = json.nextKey();
-			Object value = json.keyValue();
+			Object value = json.next();
 			assertFalse(m.containsKey(key));
 			m.put(key, value);
 
@@ -298,8 +298,7 @@ public class JSONTest extends MyTest {
 		OurClass c = new OurClass("hello", 42);
 		enc().encode(c);
 		String s = enc().toString();
-		json(s);
-		OurClass c2 = (OurClass) json.read(OurClass.parser);
+		OurClass c2 = (OurClass) JSONParser.parse(s, OurClass.parser);
 		assertStringsMatch(c, c2);
 	}
 
@@ -310,6 +309,98 @@ public class JSONTest extends MyTest {
 		assertNull(json.nextString());
 		assertStringsMatch("there", json.nextString());
 		assertFalse(json.hasNext());
+	}
+
+	public void testMapParsing() {
+		Alpha a = Alpha.generateRandomObject(this.random());
+		String s = JSONEncoder.toJSON(a);
+		Alpha a2 = (Alpha) JSONParser.parse(s, Alpha.JSON_PARSER);
+		String s2 = JSONEncoder.toJSON(a2);
+		assertStringsMatch(s, s2);
+	}
+
+	public void testPeek() {
+		int[] a = { 5, 12, -1, 17, 3, -1, 42, -1 };
+
+		String s = "[5,12,null,17,3,null,42,null]";
+		JSONParser p = new JSONParser(s);
+		p.enterList();
+
+		for (int i = 0; i < a.length; i++) {
+			assertTrue(p.hasNext());
+			Object q = p.peekNext();
+			assertTrue((a[i] < 0) == (q == null));
+			if (q == null) {
+				assertTrue(p.nextIfNull());
+			} else {
+				assertFalse(p.nextIfNull());
+				assertEquals(a[i], p.nextInt());
+			}
+		}
+		assertFalse(p.hasNext());
+		p.exit();
+	}
+
+	public void testPeek2() {
+		String s = "{'a':5,'b':null,'c':17}";
+		s = JSONTools.swapQuotes(s);
+
+		JSONParser p = new JSONParser(s);
+		int sum = 0;
+		p.enterMap();
+		while (p.hasNext()) {
+			String key = p.nextKey();
+			if (!p.nextIfNull()) {
+				if (!key.equals("a")) {
+					assertEquals("c", key);
+				}
+				int val = p.nextInt();
+				sum += val;
+			}
+		}
+		p.exit();
+		assertEquals(5 + 17, sum);
+	}
+
+	// A class that represents an opaque data structure that supports JSON
+	private static class Alpha implements IJSONEncoder {
+
+		public static Alpha generateRandomObject(Random r) {
+			Alpha a = new Alpha();
+			for (int i = r.nextInt(6) + 2; i > 0; i--) {
+				String key = "" + r.nextInt(10000);
+				double value = r.nextDouble();
+				a.map.put(key, value);
+			}
+			return a;
+		}
+
+		@Override
+		public void encode(JSONEncoder encoder) {
+			// TODO Auto-generated method stub
+			encoder.enterMap();
+			for (String s : map.keySet()) {
+				encoder.encode(s);
+				encoder.encode((Double) map.get(s));
+			}
+			encoder.exit();
+		}
+
+		public static final IJSONParser JSON_PARSER = new IJSONParser() {
+			@Override
+			public Object parse(JSONParser json) {
+				Alpha a = new Alpha();
+				json.enterMap();
+				while (json.hasNext()) {
+					String key = json.nextKey();
+					double d = json.nextDouble();
+					a.map.put(key, d);
+				}
+				return a;
+			}
+		};
+
+		private Map<String, Double> map = new HashMap();
 	}
 
 }
