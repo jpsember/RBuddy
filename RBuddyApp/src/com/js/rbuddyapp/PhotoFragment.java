@@ -88,8 +88,10 @@ public class PhotoFragment extends MyFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		// Display nothing, so widget stops listening; else it will leak
-		mImageWidget.displayPhoto(mApp.photoStore(), 0, null);
+		if (mForm != null) {
+			// Display nothing, so widget stops listening; else it will leak
+			imageWidget().displayPhoto(mApp.photoStore(), 0, null);
+		}
 		mApp.receiptFile().flush();
 	}
 
@@ -114,7 +116,6 @@ public class PhotoFragment extends MyFragment {
 				startImageCaptureIntent();
 			}
 		});
-		mImageWidget = (FormImageWidget) mForm.getField("photo");
 
 		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -193,9 +194,9 @@ public class PhotoFragment extends MyFragment {
 	 * Update the actual photo, if fragment is in an appropriate state
 	 */
 	private void displayReceiptPhoto() {
-		if (!isResumed())
+		if (!isResumed() || mForm == null)
 			return;
-		mImageWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
+		imageWidget().displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}
 
@@ -205,9 +206,12 @@ public class PhotoFragment extends MyFragment {
 		displayReceiptPhoto();
 	}
 
+	private FormImageWidget imageWidget() {
+		return (FormImageWidget) mForm.getField("photo");
+	}
+
 	private Receipt mReceipt;
 	private RBuddyApp mApp;
 	private Form mForm;
-	private FormImageWidget mImageWidget;
 	private ScrollView mScrollView;
 }
