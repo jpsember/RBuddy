@@ -138,12 +138,14 @@ public class ReceiptFilter implements IJSONEncoder {
 				String key = json.nextKey();
 				pr("key = " + key);
 
-				if (json.nextIfNull()) continue;
-				
+				if (json.nextIfNull())
+					continue;
+
 				// i forget if there is a switch statement
 				// so i'll use a giant if-else...
 				//
-				// ...There is a switch statement, but it doesn't work for strings.
+				// ...There is a switch statement, but it doesn't work for
+				// strings.
 				//
 				if (key.equals("minDateActive")) {
 					// We know that the value is a boolean, but the compiler
@@ -155,7 +157,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					rf.setMinDateActive(json.nextBoolean());
 
 				} else if (key.equals("minDate")) {
-					JSDate date = (JSDate)JSDate.JSON_PARSER.parse(json);
+					JSDate date = (JSDate) JSDate.JSON_PARSER.parse(json);
 					rf.setMinDate(date);
 
 				} else if (key.equals("maxDateActive")) {
@@ -163,7 +165,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					rf.setMaxDateActive(json.nextBoolean());
 
 				} else if (key.equals("maxDate")) {
-					JSDate date = (JSDate)JSDate.JSON_PARSER.parse(json);
+					JSDate date = (JSDate) JSDate.JSON_PARSER.parse(json);
 
 					rf.setMaxDate(date);
 
@@ -175,18 +177,17 @@ public class ReceiptFilter implements IJSONEncoder {
 
 					// Cost does not implement JSON yet...
 					// Cost cost = Cost.parse((String)value);
-					
-					Cost cost = (Cost)Cost.JSON_PARSER.parse(json);
-					
-					rf.setMinCost(cost);
 
+					Cost cost = (Cost) Cost.JSON_PARSER.parse(json);
+
+					rf.setMinCost(cost);
 
 				} else if (key.equals("maxCostActive")) {
 
 					rf.setMaxCostActive(json.nextBoolean());
 
 				} else if (key.equals("maxCost")) {
-					rf.setMaxCost((Cost)Cost.JSON_PARSER.parse(json));
+					rf.setMaxCost((Cost) Cost.JSON_PARSER.parse(json));
 
 				} else if (key.equals("exclusiveTagsActive")) {
 
@@ -194,7 +195,7 @@ public class ReceiptFilter implements IJSONEncoder {
 
 				} else if (key.equals("exclusiveTags")) {
 
-					TagSet tag = (TagSet)TagSet.JSON_PARSER.parse(json);
+					TagSet tag = (TagSet) TagSet.JSON_PARSER.parse(json);
 
 					rf.setExclusiveTags(tag);
 
@@ -203,8 +204,8 @@ public class ReceiptFilter implements IJSONEncoder {
 					rf.setInclusiveTagsActive(json.nextBoolean());
 
 				} else if (key.equals("inclusiveTags")) {
-				
-					rf.setInclusiveTags((TagSet)TagSet.JSON_PARSER.parse(json));
+
+					rf.setInclusiveTags((TagSet) TagSet.JSON_PARSER.parse(json));
 					pr("\n\n                ----------- just set inclusive tags to "
 							+ rf.getInclusiveTags());
 
@@ -246,9 +247,43 @@ public class ReceiptFilter implements IJSONEncoder {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("ReceiptFilter:");
-		sb.append("\n minDateActive: " + minDateActive);
-		sb.append("\n minDate:       " + minDate);
+		sb.append("\n minDateActive      : " + minDateActive);
+		sb.append("\n minDate            : " + minDate);
+		sb.append("\n maxDateActive      : " + maxDateActive);
+		sb.append("\n maxDate            : " + maxDate);
+		sb.append("\n minCostActive      : " + minCostActive);
+		sb.append("\n minCost            : " + minCost);
+		sb.append("\n maxCostActive      : " + maxCostActive);
+		sb.append("\n maxCost            : " + maxCost);
+		sb.append("\n inclusiveTagsActive: " + inclusiveTagsActive);
+		sb.append("\n inclusiveTags      : " + inclusiveTags);
+		sb.append("\n exclusiveTagsActive: " + exclusiveTagsActive);
+		sb.append("\n exclusiveTags      : " + exclusiveTags);
 		sb.append("\n");
 		return sb.toString();
 	}
+
+	// TJS 7 July
+	// don't know if i like the name, and place this function is
+	// but so what for now...
+	
+	public boolean applyFilter(Cost c, JSDate d, TagSet ts) {
+
+		pr("applying receipt filter");
+		pr("Inputs are:");
+		pr ("Cost");
+		pr (c);
+		pr ("Date");
+		pr (d);
+		pr ("TagSet");
+		pr (ts);
+		
+		pr (this);
+		
+//		if (this.isMinCostActive()) {
+//		}
+		
+		return true;
+	}
+
 }

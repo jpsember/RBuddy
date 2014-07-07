@@ -36,17 +36,14 @@ public class ReceiptFilterTest extends MyTest {
 		ReceiptFilter rf = new ReceiptFilter();
 		
 		rf.setMinDateActive(true);
-		
-	
 		JSDate d = JSDate.currentDate();		
-		pr("got a current date of "+d);
 		rf.setMinDate(d);
 		
-		rf.setMinCostActive(true);
-		
+		rf.setMinCostActive(true);	
 		Cost c = new Cost("123.45");
 		rf.setMinCost(c);
 		
+		rf.setInclusiveTagsActive(true);
 		TagSet ts = TagSet.parse("alpha,bravo,charlie delta,epsilon");
 		rf.setInclusiveTags(ts);
 		
@@ -57,39 +54,41 @@ public class ReceiptFilterTest extends MyTest {
 		ReceiptFilter rf2 = (ReceiptFilter) JSONParser.parse(s,
 				ReceiptFilter.JSON_PARSER);
 		
-		if (rf2.isMinDateActive())
-			pr ("parsed receiptFilter thinks rf minDateActive is TRUE");
-		else 
-			pr ("parsed receiptFilter thinks rf minDateActive is FALSE");
-		
-		pr("Entire receiptFilter looks like");
 		pr(rf2);
 		
-//		pr("min Date active: "+rf2.isMinDateActive());
-//		pr(rf2.getMinDate());
-//	
-//		pr("max Date active: "+rf2.isMaxDateActive());
-//		pr(rf2.getMaxDate());
-//	
-//		pr("min Cost active: "+rf2.isMinCostActive());
-//		pr(rf2.getMinCost());
-//	
-//		pr("max Cost active: "+rf2.isMaxCostActive());
-//		pr(rf2.getMaxCost());
-//
-//		pr("InclusiveTags active: "+rf2.isInclusiveTagsActive());
-//		pr(rf2.getInclusiveTags());
-//	
-//		pr("ExclusiveTags active: "+rf2.isExclusiveTagsActive());
-//		pr(rf2.getExclusiveTags());
-		
-//		TagSetFile ts2 = (TagSetFile) JSONParser.parse(s,
-//				TagSetFile.JSON_PARSER);
-//		assertStringsMatch(toString(ts.tags()), toString(ts2.tags()));
-//		assertStringsMatch(s, JSONEncoder.toJSON(ts2));
+
 		}
 
+	public void filteringTest() {
 
+		ReceiptFilter rf = new ReceiptFilter();
+		
+		rf.setMinDateActive(true);
+		JSDate d = JSDate.currentDate();		
+		rf.setMinDate(d);
+		
+		rf.setMinCostActive(true);	
+		Cost c = new Cost("123.45");
+		rf.setMinCost(c);
+		
+		rf.setInclusiveTagsActive(true);
+		TagSet ts = TagSet.parse("Florida,Georgia");
+		rf.setInclusiveTags(ts);
+		
+		
+		JSDate test_date = JSDate.currentDate();
+		Cost test_cost = new Cost("678.90");
+		TagSet test_ts = TagSet.parse("Florida");
+		
+		if (rf.applyFilter(test_cost,test_date,test_ts) == true) 
+			pr("Test receipt passed thru the filter...");
+		else
+			pr("Filter failed the test receipt...");
+		
+
+
+	}
+	
 
 	private ReceiptFilter f;
 }
