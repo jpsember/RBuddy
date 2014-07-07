@@ -28,7 +28,7 @@ import com.js.rbuddy.TagSet;
  */
 public class ReceiptEditor extends MyFragment {
 
-	private static class Wrapper extends FragmentWrapper {
+	public static class Wrapper extends FragmentWrapper {
 		public Wrapper() {
 		}
 

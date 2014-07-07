@@ -22,8 +22,8 @@ import android.view.ViewGroup;
  * 
  * To have X's class behave in this way, there are two steps:
  * 
- * 1) have X define Y's class, a concrete subclass of FragmentWrapper, one that
- * includes two methods:
+ * 1) have X define Y's class, a (public) concrete subclass of FragmentWrapper,
+ * one that includes two methods:
  * 
  * ... i) a zero-argument constructor; and
  * 
