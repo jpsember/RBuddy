@@ -122,91 +122,48 @@ public class ReceiptFilter implements IJSONEncoder {
 
 	public static ReceiptFilter parse(JSONParser json) {
 
-			ReceiptFilter rf = new ReceiptFilter();
+		ReceiptFilter rf = new ReceiptFilter();
 
-			json.enterMap();
-			while (json.hasNext()) {
+		json.enterMap();
+		while (json.hasNext()) {
+			String key = json.nextKey();
 
-				String key = json.nextKey();
-				
-				if (json.nextIfNull())
-					continue;
+			// If values are null, the pair can be safely ignored
+			if (json.nextIfNull())
+				continue;
 
-				// i forget if there is a switch statement
-				// so i'll use a giant if-else...
-				//
-				// ...There is a switch statement, but it doesn't work for
-				// strings.
-				//
-				if (key.equals("minDateActive")) {
-					// We know that the value is a boolean, but the compiler
-					// doesn't.
-
-					// If it ISN'T a boolean, something is wrong and it will
-					// throw a ClassCastException.
-
-					rf.setMinDateActive(json.nextBoolean());
-
-				} else if (key.equals("minDate")) {
-					JSDate date = JSDate.parse(json);
-					rf.setMinDate(date);
-
-				} else if (key.equals("maxDateActive")) {
-
-					rf.setMaxDateActive(json.nextBoolean());
-
-				} else if (key.equals("maxDate")) {
-					JSDate date = JSDate.parse(json);
-
-					rf.setMaxDate(date);
-
-				} else if (key.equals("minCostActive")) {
-
-					rf.setMinCostActive(json.nextBoolean());
-
-				} else if (key.equals("minCost")) {
-
-					// Cost does not implement JSON yet...
-					// Cost cost = Cost.parse((String)value);
-					
-					Cost cost = Cost.parse(json);
-					
-					rf.setMinCost(cost);
-
-				} else if (key.equals("maxCostActive")) {
-
-					rf.setMaxCostActive(json.nextBoolean());
-
-				} else if (key.equals("maxCost")) {
-					rf.setMaxCost(Cost.parse(json));
-
-				} else if (key.equals("exclusiveTagsActive")) {
-
-					rf.setExclusiveTagsActive(json.nextBoolean());
-
-				} else if (key.equals("exclusiveTags")) {
-
-					TagSet tag = TagSet.parse(json);
-
-					rf.setExclusiveTags(tag);
-
-				} else if (key.equals("inclusiveTagsActive")) {
-
-					rf.setInclusiveTagsActive(json.nextBoolean());
-
-				} else if (key.equals("inclusiveTags")) {
-				
-					rf.setInclusiveTags(TagSet.parse(json));
-
-				} else {
-					throw new JSONException("unrecognized key:" + key);
-				}
+			if (key.equals("minDateActive")) {
+				rf.setMinDateActive(json.nextBoolean());
+			} else if (key.equals("minDate")) {
+				rf.setMinDate(JSDate.parse(json));
+			} else if (key.equals("maxDateActive")) {
+				rf.setMaxDateActive(json.nextBoolean());
+			} else if (key.equals("maxDate")) {
+				rf.setMaxDate(JSDate.parse(json));
+			} else if (key.equals("minCostActive")) {
+				rf.setMinCostActive(json.nextBoolean());
+			} else if (key.equals("minCost")) {
+				rf.setMinCost(Cost.parse(json));
+			} else if (key.equals("maxCostActive")) {
+				rf.setMaxCostActive(json.nextBoolean());
+			} else if (key.equals("maxCost")) {
+				rf.setMaxCost(Cost.parse(json));
+			} else if (key.equals("exclusiveTagsActive")) {
+				rf.setExclusiveTagsActive(json.nextBoolean());
+			} else if (key.equals("exclusiveTags")) {
+				rf.setExclusiveTags(TagSet.parse(json));
+			} else if (key.equals("inclusiveTagsActive")) {
+				rf.setInclusiveTagsActive(json.nextBoolean());
+			} else if (key.equals("inclusiveTags")) {
+				rf.setInclusiveTags(TagSet.parse(json));
+			} else {
+				throw new JSONException("unrecognized key:" + key);
 			}
-			json.exit();
-
-			return rf;
-
 		}
+		json.exit();
+
+		return rf;
+	}
 
 	@Override
 	public void encode(JSONEncoder encoder) {
@@ -247,6 +204,16 @@ public class ReceiptFilter implements IJSONEncoder {
 		sb.append("\n exclusiveTags      : " + exclusiveTags);
 		sb.append("\n");
 		return sb.toString();
+	}
+
+	/**
+	 * Determine if a receipt passes the filter
+	 * 
+	 * @param r
+	 * @return true if receipt satisfies the filter
+	 */
+	public boolean apply(Receipt r) {
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 
 	// TJS 7 July
