@@ -215,9 +215,9 @@ public class ReceiptFilter implements IJSONEncoder {
 	public boolean apply(Receipt r) {
 		if (true) { // Jeff's quick test
 			if (getMinCost() != null
-					&& r.getCost().getValue() < getMinCost().getValue())
-				return false;
-			return true;
+					&& r.getCost().getValue() >= getMinCost().getValue())
+				return true;
+			return false;
 		}
 		throw new UnsupportedOperationException("not implemented yet");
 	}
@@ -225,23 +225,84 @@ public class ReceiptFilter implements IJSONEncoder {
 	// TJS 7 July
 	// don't know if i like the name, and place this function is
 	// but so what for now...
-	
+
 	public boolean applyFilter(Cost c, JSDate d, TagSet ts) {
 
 		pr("applying receipt filter");
 		pr("Inputs are:");
-		pr ("Cost");
-		pr (c);
-		pr ("Date");
-		pr (d);
-		pr ("TagSet");
-		pr (ts);
-		
-		pr (this);
-		
-//		if (this.isMinCostActive()) {
-//		}
-		
+		pr("Cost");
+		pr(c);
+		pr("Date");
+		pr(d);
+		pr("TagSet");
+		pr(ts);
+
+		pr(this);
+
+		// cost filtering
+
+		if (c != null) {
+
+			Cost filter_min_cost = this.getMinCost();
+			if (filter_min_cost != null) {
+				if (c.getValue() < filter_min_cost.getValue()) {
+					pr("input cost is less than the filter minimum cost...");
+					return false;
+				}
+			}
+
+			Cost filter_max_cost = this.getMaxCost();
+			if (filter_max_cost != null) {
+				if (c.getValue() > filter_max_cost.getValue()) {
+					pr("input cost is more than the filter maximum cost...");
+					return false;
+				}
+			}
+		}
+
+		// date filtering
+		if (d != null) {
+			JSDate filter_min_date = this.getMinDate();
+			JSDate filter_max_date = this.getMaxDate();
+
+			if (filter_min_date != null) {
+				if (d.year() < filter_min_date.year()) {
+					pr("input date year is less than the filter date year...");
+					return false;
+				} else if (d.year() == filter_min_date.year()) {
+					if (d.month() < filter_min_date.month()) {
+						pr("input date month is less than the filter date month...");
+						return false;
+					} else if (d.month() == filter_min_date.month()) {
+						if (d.day() < filter_min_date.day()) {
+							pr("input date day is less than filter date day...");
+							return false;
+						}
+					}
+				}
+			}
+
+			if (filter_max_date != null) {
+				if (d.year() > filter_max_date.year()) {
+					pr("input date year is greater than the filter date year...");
+					return false;
+				} else if (d.year() == filter_max_date.year()) {
+					if (d.month() > filter_max_date.month()) {
+						pr("input date month is greater than the filter date month...");
+						return false;
+					} else if (d.month() == filter_max_date.month()) {
+						if (d.day() > filter_max_date.day()) {
+							pr("input date day is greater than filter date day...");
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		TagSet filter_inclusive_tags = this.getInclusiveTags();
+		TagSet filter_exclusive_tags = this.getExclusiveTags();
+
 		return true;
 	}
 

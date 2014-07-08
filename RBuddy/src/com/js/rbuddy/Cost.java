@@ -148,8 +148,9 @@ public class Cost implements IJSONEncoder {
 	 * @return
 	 */
 	public static Cost buildRandom() {
-		return new Cost(rnd.nextDouble() * rnd.nextDouble() * rnd.nextDouble()
-				* 1000);
+		
+		return new Cost(((int)(rnd.nextDouble() * rnd.nextDouble() * rnd.nextDouble()
+				* 100000)) / 100.0);
 	}
 
 	@Override
