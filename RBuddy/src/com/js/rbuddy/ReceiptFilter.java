@@ -213,13 +213,14 @@ public class ReceiptFilter implements IJSONEncoder {
 	 * @return true if receipt satisfies the filter
 	 */
 	public boolean apply(Receipt r) {
-		if (true) { // Jeff's quick test
-			if (getMinCost() != null
-					&& r.getCost().getValue() >= getMinCost().getValue())
-				return true;
+
+		// min cost
+		if (isMinCostActive()
+				&& r.getCost().getValue() < getMinCost().getValue())
 			return false;
-		}
-		throw new UnsupportedOperationException("not implemented yet");
+
+		// passed all the conditions
+		return true;
 	}
 
 	// TJS 7 July

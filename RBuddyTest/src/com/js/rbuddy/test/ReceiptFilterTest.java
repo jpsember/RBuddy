@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.js.basic.Tools;
 import com.js.json.JSONEncoder;
-import com.js.json.JSONParser;
 import com.js.rbuddy.JSDate;
 import com.js.rbuddy.Cost;
 import com.js.rbuddy.Receipt;
@@ -26,7 +25,15 @@ public class ReceiptFilterTest extends MyTest {
 		return list;
 	}
 
-	private void applyTestFilter(ReceiptFilter rf, boolean replaceExistingSnapshot) {
+	private void applyTestFilter(ReceiptFilter rf) {
+		applyTestFilter(rf, false);
+	}
+
+	private void applyTestFilter(ReceiptFilter rf,
+			boolean replaceExistingSnapshot) {
+
+		// TODO: get finally working properly, and discard snapshot if
+		// exception?
 		List<Receipt> receipts = generateReceipts();
 		IOSnapshot.open(replaceExistingSnapshot);
 		pr(JSONEncoder.toJSON(rf));
@@ -41,7 +48,26 @@ public class ReceiptFilterTest extends MyTest {
 		ReceiptFilter rf = new ReceiptFilter();
 		rf.setMinCostActive(true);
 		rf.setMinCost(new Cost(10.0));
-		applyTestFilter(rf,false);
+		applyTestFilter(rf);
+	}
+
+	public void testNoConditionsFilter() {
+		ReceiptFilter rf = new ReceiptFilter();
+		rf.setMinCostActive(false);
+		applyTestFilter(rf);
+	}
+
+	public void testMissingMinCostFails() {
+		ReceiptFilter rf = new ReceiptFilter();
+		rf.setMinCostActive(true); // but note we are not defining a min cost
+		try {
+			applyTestFilter(rf);
+		} catch (Throwable t) {
+			IOSnapshot.close();
+			assertEquals(t.getClass(), NullPointerException.class);
+			return;
+		}
+		fail();
 	}
 
 	/**
@@ -62,32 +88,6 @@ public class ReceiptFilterTest extends MyTest {
 		f();
 		f.setInclusiveTags(s);
 		assertEquals(s.size(), f.getInclusiveTags().size());
-	}
-
-	public void testThereAreSomeWhoKnowMeAsTim() {
-
-		ReceiptFilter rf = new ReceiptFilter();
-
-		rf.setMinDateActive(true);
-		JSDate d = JSDate.currentDate();
-		rf.setMinDate(d);
-
-		rf.setMinCostActive(true);
-		Cost c = new Cost("123.45");
-		rf.setMinCost(c);
-
-		rf.setInclusiveTagsActive(true);
-		TagSet ts = TagSet.parse("alpha,bravo,charlie delta,epsilon");
-		rf.setInclusiveTags(ts);
-
-		String s = JSONEncoder.toJSON(rf);
-
-		pr("converted receiptFilter to JSON string:" + s);
-
-		ReceiptFilter rf2 = ReceiptFilter.parse(new JSONParser(s));
-
-		pr(rf2);
-
 	}
 
 	public void testFiltering() {
@@ -122,10 +122,10 @@ public class ReceiptFilterTest extends MyTest {
 		Cost test_cost = new Cost("500");
 		TagSet test_ts = TagSet.parse("Florida");
 
-		if (rf.applyFilter(test_cost, test_date, test_ts) == true)
-			pr("Test receipt passed thru the filter...");
-		else
-			pr("Filter failed the test receipt...");
+		 if (rf.applyFilter(test_cost, test_date, test_ts) == true)
+		 pr("Test receipt passed thru the filter...");
+		 else
+		 pr("Filter failed the test receipt...");
 
 	}
 
