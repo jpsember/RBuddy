@@ -1,0 +1,8 @@
+{"minDate":null,"minDateActive":false,"maxDate":null,"maxDateActive":false,"minCost":10,"minCostActive":true,"maxCostActive":false,"inclusiveTags":null,"inclusiveTagsActive":false,"exclusiveTags":null,"exclusiveTagsActive":false}
+Receipt [6,"2012-07-21","j",2.640740332566369,null,[]]
+Receipt [21,"2010-02-19","lk",3.8151849363487575,null,[]]
+Receipt [24,"2010-08-16","fghdezg jzhodvupf",2.1720431640529645,null,[]]
+Receipt [27,"2012-05-20","hfmvpffxmvay",0.8019964481312449,null,[]]
+Receipt [30,"2011-04-16","tj ynfdhsyjv yhprofhg",7.850656397124159,null,[]]
+Receipt [47,"2011-03-18","t",0.6579357653260474,null,[]]
+Receipt [49,"2013-10-05","e",6.623206953055433,null,[]]

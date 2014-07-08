@@ -1,15 +1,51 @@
 package com.js.rbuddy.test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.js.basic.Tools;
 import com.js.json.JSONEncoder;
 import com.js.json.JSONParser;
 import com.js.rbuddy.JSDate;
 import com.js.rbuddy.Cost;
+import com.js.rbuddy.Receipt;
 import com.js.rbuddy.ReceiptFilter;
 import com.js.rbuddy.TagSet;
+import com.js.testUtils.IOSnapshot;
 import com.js.testUtils.MyTest;
 import static com.js.basic.Tools.*;
 
 public class ReceiptFilterTest extends MyTest {
+
+	private List<Receipt> generateReceipts() {
+		Tools.seedRandom(1965); // ensure consistent random numbers
+		ArrayList list = new ArrayList();
+		for (int i = 0; i < 50; i++) {
+			list.add(Receipt.buildRandom(1 + i));
+		}
+		return list;
+	}
+
+	private void applyTestFilter(ReceiptFilter rf) {
+		List<Receipt> receipts = generateReceipts();
+		IOSnapshot.open();
+		pr(JSONEncoder.toJSON(rf));
+		for (Receipt r : receipts) {
+			if (rf.apply(r)) {
+				pr(r);
+			}
+		}
+		IOSnapshot.close();
+	}
+
+	public void testMinCostFilter() {
+
+		ReceiptFilter rf = new ReceiptFilter();
+		rf.setMinCostActive(true);
+		rf.setMinCost(new Cost(10.0));
+
+		applyTestFilter(rf);
+	}
 
 	/**
 	 * Build filter, store in instance field 'f'; does nothing if already built
