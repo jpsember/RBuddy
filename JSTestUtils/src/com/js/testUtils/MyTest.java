@@ -21,6 +21,13 @@ public class MyTest extends TestCase {
 		assertEquals(s1.toString(), s2.toString());
 	}
 
+	/**
+	 * Fail test since an exception was expected
+	 */
+	protected void failMissingException() {
+		IOSnapshot.abandon();
+		fail("expected an exception to be thrown");
+	}
 	
 	@Override
 	protected void setUp() {
@@ -30,6 +37,9 @@ public class MyTest extends TestCase {
 
 	@Override
 	protected void tearDown() {
+		// Abandon any snapshot that may not have been closed
+		IOSnapshot.abandon();
+
 		// Remove our reference to the temporary directory, so a new one is
 		// created for the next test.
 		// In order to delete it, if it wasn't empty, we'd have to recursively

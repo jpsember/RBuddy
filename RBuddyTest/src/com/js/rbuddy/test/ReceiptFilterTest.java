@@ -62,12 +62,9 @@ public class ReceiptFilterTest extends MyTest {
 		rf.setMinCostActive(true); // but note we are not defining a min cost
 		try {
 			applyTestFilter(rf);
-		} catch (Throwable t) {
-			IOSnapshot.close();
-			assertEquals(t.getClass(), NullPointerException.class);
-			return;
+			failMissingException();
+		} catch (NullPointerException e) {
 		}
-		fail();
 	}
 
 	/**

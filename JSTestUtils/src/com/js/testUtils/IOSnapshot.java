@@ -10,10 +10,12 @@ import java.util.regex.*;
 import com.js.basic.Files;
 
 /**
- * Designed to be called from within a unit test.  Captures System.out and System.err, and verifies
- * that they match a previously saved 'snapshot' of these streams.  If no snapshot exists, creates one.
+ * Designed to be called from within a unit test. Captures System.out and
+ * System.err, and verifies that they match a previously saved 'snapshot' of
+ * these streams. If no snapshot exists, creates one.
  * 
- * The methods are static methods, since only a single IOSnapshot object should be in existence at a time.
+ * The methods are static methods, since only a single IOSnapshot object should
+ * be in existence at a time.
  */
 public class IOSnapshot {
 
@@ -26,8 +28,11 @@ public class IOSnapshot {
 
 	/**
 	 * Open the snapshot; start capturing output
-	 * @param alwaysReplaceExisting if true, and the new snapshot differs from the previous one,
-	 * a warning is printed but no exception is thrown.  This is useful when writing or debugging code.
+	 * 
+	 * @param alwaysReplaceExisting
+	 *            if true, and the new snapshot differs from the previous one, a
+	 *            warning is printed but no exception is thrown. This is useful
+	 *            when writing or debugging code.
 	 */
 	public static void open(boolean alwaysReplaceExisting) {
 		singleton = new IOSnapshot();
@@ -35,11 +40,22 @@ public class IOSnapshot {
 	}
 
 	/**
-	 * Close the snapshot; stop capturing output, and verify with previously saved output
+	 * Close the snapshot; stop capturing output, and verify with previously
+	 * saved output
 	 */
 	public static void close() {
 		if (singleton != null) {
 			singleton.doClose();
+			singleton = null;
+		}
+	}
+
+	/**
+	 * Abandon any snapshot that is open
+	 */
+	public static void abandon() {
+		if (singleton != null) {
+			singleton.doAbandon();
 			singleton = null;
 		}
 	}
@@ -69,11 +85,19 @@ public class IOSnapshot {
 		return diff;
 	}
 
-	private void doClose() {
+	private void disconnect() {
 		System.setOut(originalStdOut);
 		System.setErr(originalStdErr);
+	}
+
+	private void doAbandon() {
+		disconnect();
+	}
+
+	private void doClose() {
+		disconnect();
 		setSanitizeLineNumbers(false);
-String content = capturedStdOut.content();
+		String content = capturedStdOut.content();
 		String content2 = capturedStdErr.content();
 		if (content2.length() > 0)
 			content = content + "\n*** System.err:\n" + content2;
@@ -120,7 +144,7 @@ String content = capturedStdOut.content();
 		capturedStdErr = StringPrintStream.build();
 		originalStdErr = System.err;
 		System.setErr(capturedStdErr);
-		
+
 		setSanitizeLineNumbers(true);
 	}
 
@@ -138,6 +162,7 @@ String content = capturedStdOut.content();
 	/**
 	 * Examine stack trace to find the name of the calling unit test, and
 	 * extract the test name from it
+	 * 
 	 * @return name of method, without the 'test' prefix
 	 */
 	private String determineTestName() {
