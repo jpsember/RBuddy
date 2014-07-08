@@ -148,9 +148,9 @@ public class Cost implements IJSONEncoder {
 	 * @return
 	 */
 	public static Cost buildRandom() {
-		
-		return new Cost(((int)(rnd.nextDouble() * rnd.nextDouble() * rnd.nextDouble()
-				* 100000)) / 100.0);
+
+		return new Cost(((int) (rnd.nextDouble() * rnd.nextDouble()
+				* rnd.nextDouble() * 100000)) / 100.0);
 	}
 
 	@Override
@@ -160,6 +160,19 @@ public class Cost implements IJSONEncoder {
 
 	public static Cost parse(JSONParser json) {
 		return new Cost(json.nextDouble());
+	}
+
+	/**
+	 * Compare two costs
+	 * 
+	 * @param other
+	 *            other cost
+	 * @return integer indicating whether this cost is greater than (>0), equal
+	 *         to (=0), or less than (<0) the other one
+	 * 
+	 */
+	public int compare(Cost other) {
+		return Double.compare(value, other.value);
 	}
 
 	private double value;

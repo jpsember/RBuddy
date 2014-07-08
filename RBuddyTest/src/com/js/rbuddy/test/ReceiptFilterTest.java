@@ -16,8 +16,13 @@ import static com.js.basic.Tools.*;
 
 public class ReceiptFilterTest extends MyTest {
 
-	private List<Receipt> generateReceipts() {
+	@Override
+	protected void setUp() {
+		super.setUp();
 		Tools.seedRandom(1965); // ensure consistent random numbers
+	}
+
+	private List<Receipt> generateReceipts() {
 		ArrayList list = new ArrayList();
 		for (int i = 0; i < 50; i++) {
 			list.add(Receipt.buildRandom(1 + i));
@@ -65,6 +70,13 @@ public class ReceiptFilterTest extends MyTest {
 			failMissingException();
 		} catch (NullPointerException e) {
 		}
+	}
+
+	public void testMinDateFilter() {
+		ReceiptFilter rf = new ReceiptFilter();
+		rf.setMinDateActive(true);
+		rf.setMinDate(JSDate.buildFromValues(2010, 10, 20));
+		applyTestFilter(rf);
 	}
 
 	/**

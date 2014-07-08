@@ -46,6 +46,19 @@ public class JSDate implements IJSONEncoder {
 		return day;
 	}
 
+	/**
+	 * Compare two dates
+	 * 
+	 * @param other
+	 *            other date
+	 * @return integer indicating whether this date is after (>0), equal to
+	 *         (=0), or before (<0) the other one
+	 * 
+	 */
+	public int compare(JSDate other) {
+		return toString().compareTo(other.toString());
+	}
+
 	public static JSDateFactory factory() {
 		return factory;
 	}

@@ -214,13 +214,21 @@ public class ReceiptFilter implements IJSONEncoder {
 	 */
 	public boolean apply(Receipt r) {
 
-		// min cost
-		if (isMinCostActive()
-				&& r.getCost().getValue() < getMinCost().getValue())
-			return false;
+		boolean success = false;
+		do {
+			if (isMinCostActive() && r.getCost().compare(getMinCost()) < 0)
+				break;
 
-		// passed all the conditions
-		return true;
+			if (isMinDateActive() && r.getDate().compare(getMinDate()) < 0)
+				break;
+
+			if (isMaxCostActive() && r.getCost().compare(getMaxCost()) > 0)
+				break;
+
+			// passed all the conditions
+			success = true;
+		} while (false);
+		return success;
 	}
 
 	// TJS 7 July
