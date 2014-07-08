@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.js.android.ActivityState;
 import com.js.android.AndroidDate;
-import com.js.android.FragmentOrganizer;
+import com.js.android.FragmentWrapper;
 import com.js.android.MyFragment;
 import com.js.rbuddy.Receipt;
 
@@ -26,47 +26,44 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ReceiptListFragment extends MyFragment {
+public class ReceiptList extends MyFragment {
 
-	public static final int MESSAGE_CODE_RECEIPT_SELECTED = 1;
-	public static final String TAG = "ReceiptList";
-
-	public static final Factory FACTORY = new Factory() {
-		@Override
-		public String name() {
-			return TAG;
+	public static class Wrapper extends FragmentWrapper {
+		public Wrapper() {
 		}
 
 		@Override
-		public MyFragment construct() {
-			return new ReceiptListFragment();
+		public Class getFragmentClass() {
+			return ReceiptList.class;
 		}
-	};
+	}
 
-	/**
-	 * Construct the singleton instance of this fragment, if it hasn't already
-	 * been
-	 * 
-	 * @param organizer
-	 * @return
-	 */
-	public static ReceiptListFragment construct(FragmentOrganizer organizer) {
-		return (ReceiptListFragment) organizer.get(TAG, true);
+	public ReceiptList() {
+		setLogging(true);
+
+		// Register the wrapper class
+		new Wrapper();
+
+		// Perform class-specific initialization
+		mApp = RBuddyApp.sharedInstance();
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mApp = RBuddyApp.sharedInstance();
+	public void onRestoreInstanceState(Bundle bundle) {
+		super.onRestoreInstanceState(bundle);
+		if (bundle != null) {
+		}
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		log("onCreateView bundle " + nameOf(savedInstanceState));
 		constructListView();
 		mActivityState = new ActivityState() //
 				.add(mReceiptListView) //
 				.restoreStateFrom(savedInstanceState);
+		log("finished onCreateView");
 		return mReceiptListView;
 	}
 
@@ -80,6 +77,7 @@ public class ReceiptListFragment extends MyFragment {
 	public void refreshList() {
 		if (mReceiptList == null)
 			return;
+		log("refreshList");
 		rebuildReceiptList(mReceiptList);
 	}
 
@@ -90,6 +88,7 @@ public class ReceiptListFragment extends MyFragment {
 	}
 
 	private void rebuildReceiptList(List list) {
+		log("rebuildReceiptList");
 		list.clear();
 		for (Iterator it = mApp.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
@@ -101,10 +100,10 @@ public class ReceiptListFragment extends MyFragment {
 
 	// Construct a view to be used for the list items
 	private void constructListView() {
-		ListView listView = new ListView(this.getActivity());
+		ListView listView = new ListView(getContext());
 
 		List<Receipt> receiptList = buildListOfReceipts();
-		ArrayAdapter arrayAdapter = new ReceiptListAdapter(getActivity(),
+		ArrayAdapter arrayAdapter = new ReceiptListAdapter(getContext(),
 				receiptList);
 		listView.setAdapter(arrayAdapter);
 
@@ -136,7 +135,7 @@ public class ReceiptListFragment extends MyFragment {
 	}
 
 	private Listener listener() {
-		return (Listener) getActivity();
+		return (Listener) getContext();
 	}
 
 	public static interface Listener {
@@ -233,6 +232,11 @@ public class ReceiptListFragment extends MyFragment {
 
 			return listItemView;
 		}
+	}
+
+	private Context getContext() {
+		unimp("make mApp available when constructed, and override getActivity()?");
+		return mApp.fragments().getActivity();
 	}
 
 	private ArrayAdapter<Receipt> mReceiptListAdapter;

@@ -26,6 +26,8 @@ public abstract class MyFragment extends Fragment {
 	}
 
 	public MyFragment(boolean withLogging) {
+		assertUIThread();
+		mUniqueIdentifier = ++sNextUniqueIdentifier;
 		setLogging(withLogging);
 	}
 
@@ -36,7 +38,7 @@ public abstract class MyFragment extends Fragment {
 	protected void log(Object message) {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
-			sb.append(nameOf(this));
+			sb.append(this); // nameOf(this));
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);
@@ -64,16 +66,28 @@ public abstract class MyFragment extends Fragment {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		log("onSaveInstanceState; outState " + outState);
+		log("onSaveInstanceState; " + nameOf(outState) + "\n\n");
 		super.onSaveInstanceState(outState);
-		if (mActivityState != null)
+		if (mActivityState != null) {
+			log("saving ActivityState");
 			mActivityState.saveState(outState);
+		}
 	}
 
 	public void onRestoreInstanceState(Bundle bundle) {
-		log("onRestoreInstanceState; bundle " + bundle);
+		log("onRestoreInstanceState; " + nameOf(bundle) + "\n\n");
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(nameOf(this));
+		sb.append(" #" + mUniqueIdentifier);
+		return sb.toString();
+	}
+
+	private static int sNextUniqueIdentifier;
+
+	private int mUniqueIdentifier;
 	protected ActivityState mActivityState;
 	private boolean mLogging;
 }

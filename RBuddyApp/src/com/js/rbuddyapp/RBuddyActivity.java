@@ -17,7 +17,7 @@ import android.view.ViewGroup.LayoutParams;
 import com.js.android.IPhotoStore;
 
 public class RBuddyActivity extends MyActivity implements
-		ReceiptListFragment.Listener //
+ ReceiptList.Listener //
 		, ReceiptEditor.Listener //
 {
 
@@ -44,7 +44,7 @@ public class RBuddyActivity extends MyActivity implements
 			// defined, so set initial fragments
 			// TODO do this if no fragment exists in the slot, in case no state
 			// was saved for some (unusual) reason
-			fragments.plot(ReceiptListFragment.TAG, true, false);
+			fragments.plot("ReceiptList", true, false);
 
 			if (fragments.supportDualFragments()) {
 				fragments.plot("ReceiptEditor", false, false);
@@ -56,18 +56,18 @@ public class RBuddyActivity extends MyActivity implements
 		fragments = new FragmentOrganizer(this);
 		app.setFragments(fragments);
 
-		fragments.register(ReceiptListFragment.FACTORY);
+		// fragments.register(ReceiptListFragment.FACTORY);
 		fragments.register(SearchFragment.FACTORY);
 
 		// Construct instances of the fragments we need. They will be stored
 		// within the fragment organizer, and will be the same instances
 		// manipulated by the FragmentManager when added to the activity's views
 
+		mReceiptList = new ReceiptList();
+		fragments.setWrappedSingleton(mReceiptList);
 		mReceiptEditor = new ReceiptEditor();
 		fragments.setWrappedSingleton(mReceiptEditor);
 
-		mReceiptListFragment = ReceiptListFragment.construct(fragments);
-		// mEditReceiptFragment = EditReceiptFragment.construct(fragments);
 		mSearchFragment = SearchFragment.construct(fragments);
 		mPhotoFragment = PhotoFragment.construct(fragments);
 	}
@@ -206,7 +206,7 @@ public class RBuddyActivity extends MyActivity implements
 							app.receiptFile().add(r);
 						}
 						app.receiptFile().flush();
-						mReceiptListFragment.refreshList();
+						mReceiptList.refreshList();
 					}
 				});
 	}
@@ -219,7 +219,7 @@ public class RBuddyActivity extends MyActivity implements
 				mReceiptEditor.setReceipt(null);
 				app.receiptFile().clear();
 				app.receiptFile().flush();
-				mReceiptListFragment.refreshList();
+				mReceiptList.refreshList();
 			}
 		});
 	}
@@ -227,7 +227,7 @@ public class RBuddyActivity extends MyActivity implements
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
-		mReceiptListFragment.refreshList();
+		mReceiptList.refreshList();
 		receiptSelected(r);
 	}
 
@@ -241,7 +241,7 @@ public class RBuddyActivity extends MyActivity implements
 	// EditReceiptFragment.Listener
 	@Override
 	public void receiptEdited(Receipt r) {
-		mReceiptListFragment.refreshReceipt(r);
+		mReceiptList.refreshReceipt(r);
 	}
 
 	@Override
@@ -254,10 +254,10 @@ public class RBuddyActivity extends MyActivity implements
 		fragments.plot(fragmentName, false, true);
 	}
 
+	private ReceiptList mReceiptList;
 	private ReceiptEditor mReceiptEditor;
 	private RBuddyApp app;
 	private FragmentOrganizer fragments;
-	private ReceiptListFragment mReceiptListFragment;
 	/* private */SearchFragment mSearchFragment;
 	private PhotoFragment mPhotoFragment;
 }

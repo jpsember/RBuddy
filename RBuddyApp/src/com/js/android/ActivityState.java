@@ -21,11 +21,29 @@ public class ActivityState {
 
 	private static final String KEY_ACTIVITYSTATE = "activityState";
 
+	public void setLogging(boolean f) {
+		mLogging = f;
+	}
+
+	private void log(Object message) {
+		if (mLogging) {
+			StringBuilder sb = new StringBuilder("---> ");
+			sb.append(nameOf(this));
+			sb.append(" : ");
+			tab(sb, 30);
+			sb.append(message);
+			pr(sb);
+		}
+	}
+
 	public ActivityState() {
+		setLogging(true);
 		elements = new ArrayList();
+		log("constructed ActivityState");
 	}
 
 	public ActivityState add(Object element) {
+		log("adding " + describe(element));
 		elements.add(element);
 		return this;
 	}
@@ -48,21 +66,25 @@ public class ActivityState {
 		}
 		enc.exit();
 		String jsonString = enc.toString();
+		log("saveState as " + jsonString);
 		outState.putString(KEY_ACTIVITYSTATE, jsonString);
 	}
 
 	public ActivityState restoreStateFrom(Bundle savedInstanceState) {
+		log("restoreStateFrom " + savedInstanceState);
 		do {
 			if (savedInstanceState == null)
 				break;
 
 			String jsonString = savedInstanceState.getString(KEY_ACTIVITYSTATE);
+			log("jsonString: " + jsonString);
 			if (jsonString == null)
 				break;
 			JSONParser parser = new JSONParser(jsonString);
 			parser.enterList();
 
 			for (Object element : elements) {
+				log("element:" + element);
 				if (!parser.hasNext()) {
 					warning("ran out of elements in saved state");
 					break;
@@ -86,4 +108,5 @@ public class ActivityState {
 	}
 
 	private List elements;
+	private boolean mLogging;
 }

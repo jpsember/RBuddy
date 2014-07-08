@@ -102,9 +102,6 @@ public class ReceiptEditor extends MyFragment {
 	}
 
 	public void setReceipt(Receipt receipt) {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "receipt=" + receipt);
 		// In case there's an existing receipt, flush its changes
 		updateReceiptWithWidgetValues();
 		this.mReceipt = receipt;
@@ -247,5 +244,4 @@ public class ReceiptEditor extends MyFragment {
 	private Form mForm;
 	private FormButtonWidget mReceiptWidget;
 	private ScrollView mScrollView;
-	protected ActivityState mActivityState;
 }
