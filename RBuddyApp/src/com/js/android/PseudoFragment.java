@@ -8,7 +8,7 @@ import android.view.View;
 public abstract class PseudoFragment {
 
 	public PseudoFragment() {
-		mActivityState = new ActivityState(this.getClass().getSimpleName());
+		mActivityState = new ViewStates(this.getClass().getSimpleName());
 	}
 
 	protected void setLogging(boolean f) {
@@ -64,7 +64,7 @@ public abstract class PseudoFragment {
 		log("onDestroy");
 	}
 
-	protected ActivityState getActivityState() {
+	protected ViewStates getActivityState() {
 		return mActivityState;
 	}
 
@@ -73,6 +73,6 @@ public abstract class PseudoFragment {
 		return App.sharedInstance().fragments().getActivity();
 	}
 
-	private ActivityState mActivityState;
+	private ViewStates mActivityState;
 	private boolean mLogging;
 }

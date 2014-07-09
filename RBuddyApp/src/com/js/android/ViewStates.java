@@ -10,14 +10,14 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 
 /**
- * Utility class to save and restore activity state.
+ * Utility class to save and restore the states of views
  * 
  * Instances of the class can be populated with certain types of stateful
  * objects. For example, one supported type are ListViews. The scroll position
  * of these views are saved and restored.
  * 
  */
-public class ActivityState {
+public class ViewStates {
 
 	public void setLogging(boolean f) {
 		mLogging = f;
@@ -34,11 +34,11 @@ public class ActivityState {
 		}
 	}
 
-	public ActivityState(String persistenceKey) {
+	public ViewStates(String persistenceKey) {
 		this(persistenceKey, false);
 	}
 
-	public ActivityState(String persistenceKey, boolean logging) {
+	public ViewStates(String persistenceKey, boolean logging) {
 		mPersistenceKey = persistenceKey;
 		setLogging(logging);
 		mElements = new ArrayList();
@@ -50,7 +50,7 @@ public class ActivityState {
 	 * 
 	 * @return this, to support method chaining
 	 */
-	protected ActivityState clearElementList() {
+	protected ViewStates clearElementList() {
 		log("clearElementList");
 		mElements.clear();
 		return this;
@@ -62,7 +62,7 @@ public class ActivityState {
 	 * @param element
 	 * @return this, to support method chaining
 	 */
-	public ActivityState add(Object element) {
+	public ViewStates add(Object element) {
 		log("add " + describe(element));
 		mElements.add(element);
 		return this;
@@ -100,7 +100,7 @@ public class ActivityState {
 		outState.putString(mPersistenceKey, jsonString);
 	}
 
-	public ActivityState retrieveSnapshotFrom(Bundle savedInstanceState) {
+	public ViewStates retrieveSnapshotFrom(Bundle savedInstanceState) {
 		log("retrieveSnapshotFrom: " + nameOf(savedInstanceState));
 		do {
 			if (savedInstanceState == null)
@@ -116,7 +116,7 @@ public class ActivityState {
 	/**
 	 * Restore state from previously stored JSON string
 	 */
-	public ActivityState restoreViewsFromSnapshot() {
+	public ViewStates restoreViewsFromSnapshot() {
 		log("restoreViewsFromSnapshot, JSON: " + mJsonState);
 		do {
 			if (mJsonState == null)

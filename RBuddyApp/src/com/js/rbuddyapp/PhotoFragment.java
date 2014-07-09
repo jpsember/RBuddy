@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
-import com.js.android.ActivityState;
+import com.js.android.ViewStates;
 import com.js.android.BitmapUtil;
 import com.js.android.FragmentOrganizer;
 import com.js.android.MyFragment;
@@ -217,11 +217,11 @@ public class PhotoFragment extends MyFragment {
 	}
 
 	// Temporary to avoid compiler errors:
-	 protected ActivityState getActivityState() {
+	 protected ViewStates getActivityState() {
 	 return mActivityState;
 	 }
 
-	private ActivityState mActivityState = new ActivityState("Photo");
+	private ViewStates mActivityState = new ViewStates("Photo");
 
 	// -------------------------------------
 	
