@@ -100,6 +100,7 @@ public class FragmentOrganizer {
 		String json = null;
 		if (savedInstanceState != null) {
 			json = savedInstanceState.getString(getBundlePersistenceKey());
+			log(" recalled json: " + json);
 			if (json == null) {
 				warning("JSON string was null!");
 			} else
@@ -176,7 +177,9 @@ public class FragmentOrganizer {
 	 */
 	public void onSaveInstanceState(Bundle bundle) {
 		log("onSaveInstanceState bundle=" + nameOf(bundle));
-		bundle.putString(getBundlePersistenceKey(), encodeToJSON());
+		String json = encodeToJSON();
+		log(" state (JSON): " + json);
+		bundle.putString(getBundlePersistenceKey(), json);
 
 		persistFragmentState(bundle);
 
@@ -262,13 +265,14 @@ public class FragmentOrganizer {
 		int actualSlot = slotContainingFragment(tag);
 		if (actualSlot >= 0) {
 			log(" already found in slot " + actualSlot);
-			// if (!isResumed())
-			// return null;
 			return get(tag, true);
 		}
 
+		// Update our internal desired slot contents
+		mDesiredSlotContents[slot] = tag;
+
+		// Only update the actual view if we're in the resumed state
 		if (!isResumed()) {
-			mDesiredSlotContents[slot] = tag;
 			return null;
 		}
 
@@ -303,6 +307,13 @@ public class FragmentOrganizer {
 		transaction.commit();
 		log(" returning " + newFragment);
 		return newFragment;
+	}
+
+	/**
+	 * Pop the backstack
+	 */
+	public void pop() {
+		getActivity().getFragmentManager().popBackStack();
 	}
 
 	/**

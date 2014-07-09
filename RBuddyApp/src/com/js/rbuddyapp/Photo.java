@@ -71,6 +71,12 @@ public class Photo extends PseudoFragment {
 	public void onResume() {
 		super.onResume();
 
+		if (mPopFlag) {
+			mPopFlag = false;
+			mApp.fragments().pop();
+			return;
+		}
+
 		displayReceiptPhoto();
 
 		// If no photo is defined for this receipt, act as if he has pressed the
@@ -200,9 +206,10 @@ public class Photo extends PseudoFragment {
 				die(e);
 			}
 		}
-		// Whether or not the user selected a new photo, pop this fragment
-		// Issue #70
-		// getActivity().getFragmentManager().popBackStack();
+		// Whether or not the user selected a new photo, pop this fragment at
+		// the next opportunity (we must wait until onResume() is called again;
+		// see issue #70)
+		mPopFlag = true;
 	}
 
 	/**
@@ -222,4 +229,5 @@ public class Photo extends PseudoFragment {
 	private RBuddyApp mApp;
 	private Form mForm;
 	private ScrollView mScrollView;
+	private boolean mPopFlag;
 }
