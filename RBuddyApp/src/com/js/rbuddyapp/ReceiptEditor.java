@@ -1,18 +1,14 @@
 package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
-import android.content.Context;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
-import com.js.android.ActivityState;
 import com.js.android.FragmentWrapper;
-import com.js.android.MyFragment;
+import com.js.android.PseudoFragment;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
 import com.js.json.JSONEncoder;
@@ -26,7 +22,7 @@ import com.js.rbuddy.TagSet;
  * Singleton receipt editor
  * 
  */
-public class ReceiptEditor extends MyFragment {
+public class ReceiptEditor extends PseudoFragment {
 
 	public static class Wrapper extends FragmentWrapper {
 		public Wrapper() {
@@ -39,8 +35,6 @@ public class ReceiptEditor extends MyFragment {
 	}
 
 	public ReceiptEditor() {
-		// super(true); // enable to print log messages
-
 		// Register the wrapper class
 		new Wrapper();
 
@@ -61,13 +55,12 @@ public class ReceiptEditor extends MyFragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		log("onCreateView, mReceipt=" + mReceipt);
+	public View onCreateView() {
+		log("onCreateView");
 		layoutElements();
-		mActivityState = new ActivityState() //
+		getActivityState() //
 				.add(mScrollView) //
-				.restoreStateFrom(savedInstanceState);
+				.restoreViewsFromSnapshot();
 		log(" returning scrollView " + mScrollView);
 		return mScrollView;
 	}
@@ -88,16 +81,23 @@ public class ReceiptEditor extends MyFragment {
 
 	@Override
 	public void onDestroyView() {
+		mScrollView = null;
+		mReceiptWidget = null;
+		mForm = null;
+		super.onDestroyView();
+	}
+
+	@Override
+	public void onDestroy() {
 		disposeForm();
 		mScrollView = null;
-		super.onDestroyView();
+		super.onDestroy();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (mActivityState != null)
-			mActivityState.saveState(outState);
+		getActivityState().persistSnapshot(outState);
 		outState.putInt("XXX", mReceipt == null ? 0 : mReceipt.getId());
 	}
 
@@ -233,10 +233,6 @@ public class ReceiptEditor extends MyFragment {
 		void receiptEdited(Receipt r);
 
 		void editPhoto(Receipt r);
-	}
-
-	private Context getContext() {
-		return mApp.fragments().getActivity();
 	}
 
 	private RBuddyApp mApp;

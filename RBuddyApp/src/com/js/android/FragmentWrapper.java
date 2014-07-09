@@ -1,6 +1,7 @@
 package com.js.android;
 
 import static com.js.android.Tools.*;
+
 import com.js.android.FragmentOrganizer;
 import com.js.android.MyFragment;
 
@@ -68,11 +69,13 @@ public abstract class FragmentWrapper extends MyFragment {
 		mWrappedFragment = f.getWrappedSingleton(getFragmentClass());
 	}
 
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return mWrappedFragment.onCreateView(inflater, container,
-				savedInstanceState);
+		// Perhaps don't send state along, since we are persisting it in other
+		// methods
+		return mWrappedFragment.onCreateView();
 	}
 
 	@Override
@@ -88,18 +91,20 @@ public abstract class FragmentWrapper extends MyFragment {
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		// Ask the pseudo fragment to save its view state, since scrollviews and
+		// whatnot may be disappearing
+		mWrappedFragment.onSaveViews();
+	}
+
+	@Override
 	public void onDestroyView() {
 		mWrappedFragment.onDestroyView();
 		super.onDestroyView();
 	}
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		mWrappedFragment.onSaveInstanceState(outState);
-	}
-
-	private MyFragment mWrappedFragment;
+	private PseudoFragment mWrappedFragment;
 
 	private static class OurFactory implements Factory {
 

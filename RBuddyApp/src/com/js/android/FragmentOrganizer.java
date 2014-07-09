@@ -124,7 +124,7 @@ public class FragmentOrganizer {
 
 	private void restoreFragmentState(Bundle bundle) {
 		assertUIThread();
-		for (MyFragment f : mSingletonObjects.values()) {
+		for (PseudoFragment f : mSingletonObjects.values()) {
 			f.onRestoreInstanceState(bundle);
 		}
 	}
@@ -198,7 +198,7 @@ public class FragmentOrganizer {
 
 	private void persistFragmentState(Bundle bundle) {
 		assertUIThread();
-		for (MyFragment f : mSingletonObjects.values()) {
+		for (PseudoFragment f : mSingletonObjects.values()) {
 			f.onSaveInstanceState(bundle);
 		}
 	}
@@ -443,14 +443,14 @@ public class FragmentOrganizer {
 		return mIsResumed;
 	}
 
-	public void setWrappedSingleton(MyFragment singleton) {
+	public void setWrappedSingleton(PseudoFragment singleton) {
 		assertUIThread();
 		mSingletonObjects.put(singleton.getClass(), singleton);
 	}
 
-	public MyFragment getWrappedSingleton(Class singletonClass) {
+	public PseudoFragment getWrappedSingleton(Class singletonClass) {
 		assertUIThread();
-		MyFragment obj = mSingletonObjects.get(singletonClass);
+		PseudoFragment obj = mSingletonObjects.get(singletonClass);
 		if (obj == null) {
 			die("no singleton object found for "
 					+ singletonClass.getSimpleName());
@@ -458,7 +458,7 @@ public class FragmentOrganizer {
 		return obj;
 	}
 
-	private Map<Class, MyFragment> mSingletonObjects = new HashMap();
+	private Map<Class, PseudoFragment> mSingletonObjects = new HashMap();
 
 	// Map of factories, keyed by name
 	private Map<String, MyFragment.Factory> mFragmentFactories;

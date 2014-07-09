@@ -2,8 +2,7 @@ package com.js.android;
 
 import static com.js.android.Tools.*;
 
-import com.js.android.ActivityState;
-
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 
@@ -29,6 +28,8 @@ public abstract class MyFragment extends Fragment {
 		assertUIThread();
 		mUniqueIdentifier = ++sNextUniqueIdentifier;
 		setLogging(withLogging);
+
+		// mActivityState = new ActivityState(withLogging);
 	}
 
 	protected void setLogging(boolean f) {
@@ -47,6 +48,34 @@ public abstract class MyFragment extends Fragment {
 	}
 
 	@Override
+	public void onAttach(Activity activity) {
+		log("onAttach " + nameOf(activity));
+		super.onAttach(activity);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		log("onCreate " + nameOf(savedInstanceState));
+		super.onCreate(savedInstanceState);
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		log("onActivityCreated " + nameOf(savedInstanceState));
+		super.onActivityCreated(savedInstanceState);
+	}
+
+	public void onRestoreInstanceState(Bundle bundle) {
+		log("onRestoreInstanceState; " + nameOf(bundle) + "\n\n");
+	}
+
+	@Override
+	public void onStart() {
+		log("onStart");
+		super.onStart();
+	}
+
+	@Override
 	public void onResume() {
 		log("onResume");
 		super.onResume();
@@ -59,23 +88,34 @@ public abstract class MyFragment extends Fragment {
 	}
 
 	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		log("onDestroyView finished");
-	}
-
-	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		log("onSaveInstanceState; " + nameOf(outState) + "\n\n");
 		super.onSaveInstanceState(outState);
-		if (mActivityState != null) {
-			log("saving ActivityState");
-			mActivityState.saveState(outState);
-		}
 	}
 
-	public void onRestoreInstanceState(Bundle bundle) {
-		log("onRestoreInstanceState; " + nameOf(bundle) + "\n\n");
+	@Override
+	public void onStop() {
+		log("onStop");
+		super.onStop();
+	}
+
+	@Override
+	public void onDestroyView() {
+		log("onDestroyView begins");
+		super.onDestroyView();
+		log("onDestroyView ends");
+	}
+
+	@Override
+	public void onDestroy() {
+		log("onDestroy");
+		super.onDestroy();
+	}
+
+	@Override
+	public void onDetach() {
+		log("onDetach");
+		super.onDetach();
 	}
 
 	@Override
@@ -85,9 +125,13 @@ public abstract class MyFragment extends Fragment {
 		return sb.toString();
 	}
 
+	// protected ActivityState getActivityState() {
+	// return mActivityState;
+	// }
+
 	private static int sNextUniqueIdentifier;
 
 	private int mUniqueIdentifier;
-	protected ActivityState mActivityState;
+	// private ActivityState mActivityState;
 	private boolean mLogging;
 }

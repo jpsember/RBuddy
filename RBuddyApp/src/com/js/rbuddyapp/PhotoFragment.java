@@ -68,9 +68,9 @@ public class PhotoFragment extends MyFragment {
 		mApp = RBuddyApp.sharedInstance(getActivity());
 		layoutElements();
 
-		mActivityState = new ActivityState() //
+		getActivityState() //
 				.add(mScrollView) //
-				.restoreStateFrom(savedInstanceState);
+				.restoreViewsFromSnapshot();
 		return mScrollView;
 	}
 
@@ -216,6 +216,15 @@ public class PhotoFragment extends MyFragment {
 		return (FormImageWidget) mForm.getField("photo");
 	}
 
+	// Temporary to avoid compiler errors:
+	 protected ActivityState getActivityState() {
+	 return mActivityState;
+	 }
+
+	private ActivityState mActivityState = new ActivityState("Photo");
+
+	// -------------------------------------
+	
 	private Receipt mReceipt;
 	private RBuddyApp mApp;
 	private Form mForm;

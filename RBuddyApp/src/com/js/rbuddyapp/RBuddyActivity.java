@@ -254,10 +254,10 @@ public class RBuddyActivity extends MyActivity implements
 		fragments.plot(fragmentName, false, true);
 	}
 
+	private FragmentOrganizer fragments;
 	private ReceiptList mReceiptList;
 	private ReceiptEditor mReceiptEditor;
 	private RBuddyApp app;
-	private FragmentOrganizer fragments;
 	/* private */SearchFragment mSearchFragment;
 	private PhotoFragment mPhotoFragment;
 }

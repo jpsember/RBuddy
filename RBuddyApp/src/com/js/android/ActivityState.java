@@ -19,8 +19,6 @@ import android.widget.ScrollView;
  */
 public class ActivityState {
 
-	private static final String KEY_ACTIVITYSTATE = "activityState";
-
 	public void setLogging(boolean f) {
 		mLogging = f;
 	}
@@ -28,7 +26,7 @@ public class ActivityState {
 	private void log(Object message) {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
-			sb.append(nameOf(this));
+			sb.append(this);
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);
@@ -36,22 +34,48 @@ public class ActivityState {
 		}
 	}
 
-	public ActivityState() {
-		setLogging(true);
-		elements = new ArrayList();
+	public ActivityState(String persistenceKey) {
+		this(persistenceKey, false);
+	}
+
+	public ActivityState(String persistenceKey, boolean logging) {
+		mPersistenceKey = persistenceKey;
+		setLogging(logging);
+		mElements = new ArrayList();
 		log("constructed ActivityState");
 	}
 
-	public ActivityState add(Object element) {
-		log("adding " + describe(element));
-		elements.add(element);
+	/**
+	 * Remove all elements
+	 * 
+	 * @return this, to support method chaining
+	 */
+	protected ActivityState clearElementList() {
+		log("clearElementList");
+		mElements.clear();
 		return this;
 	}
 
-	public void saveState(Bundle outState) {
+	/**
+	 * Add an element
+	 * 
+	 * @param element
+	 * @return this, to support method chaining
+	 */
+	public ActivityState add(Object element) {
+		log("add " + describe(element));
+		mElements.add(element);
+		return this;
+	}
+
+	/**
+	 * Construct an internal snapshot of the state of the various elements
+	 */
+	public void recordSnapshot() {
+		log("recordSnapshot");
 		JSONEncoder enc = new JSONEncoder();
 		enc.enterList();
-		for (Object element : elements) {
+		for (Object element : mElements) {
 			if (element instanceof ListView) {
 				ListView lv = (ListView) element;
 				enc.encode(lv.getFirstVisiblePosition());
@@ -65,28 +89,51 @@ public class ActivityState {
 				warning("cannot handle element " + element);
 		}
 		enc.exit();
-		String jsonString = enc.toString();
-		log("saveState as " + jsonString);
-		outState.putString(KEY_ACTIVITYSTATE, jsonString);
+		mJsonState = enc.toString();
+		log(" snapshot: " + mJsonState);
 	}
 
-	public ActivityState restoreStateFrom(Bundle savedInstanceState) {
-		log("restoreStateFrom " + savedInstanceState);
+	public void persistSnapshot(Bundle outState) {
+		log("persistSnapshot (JSON " + mJsonState + ") to bundle "
+				+ nameOf(outState));
+		String jsonString = mJsonState;
+		outState.putString(mPersistenceKey, jsonString);
+	}
+
+	public ActivityState retrieveSnapshotFrom(Bundle savedInstanceState) {
+		log("retrieveSnapshotFrom: " + nameOf(savedInstanceState));
 		do {
 			if (savedInstanceState == null)
 				break;
 
-			String jsonString = savedInstanceState.getString(KEY_ACTIVITYSTATE);
+			String jsonString = savedInstanceState.getString(mPersistenceKey);
 			log("jsonString: " + jsonString);
-			if (jsonString == null)
+			this.mJsonState = jsonString;
+		} while (false);
+		return this;
+	}
+
+	/**
+	 * Restore state from previously stored JSON string
+	 */
+	public ActivityState restoreViewsFromSnapshot() {
+		log("restoreViewsFromSnapshot, JSON: " + mJsonState);
+		do {
+			if (mJsonState == null)
 				break;
+
+			String jsonString = mJsonState;
 			JSONParser parser = new JSONParser(jsonString);
 			parser.enterList();
 
-			for (Object element : elements) {
-				log("element:" + element);
+			for (Object element : mElements) {
+				// log("element:" + nameOf(element));
 				if (!parser.hasNext()) {
-					warning("ran out of elements in saved state");
+					warning("ran out of elements in saved state;\n JSON state: "
+							+ mJsonState
+							+ "\n elements:"
+							+ d(mElements)
+							+ "\n " + this);
 					break;
 				}
 				if (element instanceof ListView) {
@@ -107,6 +154,15 @@ public class ActivityState {
 		return this;
 	}
 
-	private List elements;
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(nameOf(this));
+		sb.append("[" + mPersistenceKey + "]");
+		return sb.toString();
+	}
+
+	private String mPersistenceKey;
+	private List mElements;
 	private boolean mLogging;
+	private String mJsonState;
 }

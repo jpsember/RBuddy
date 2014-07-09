@@ -7,16 +7,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.js.android.ActivityState;
 import com.js.android.AndroidDate;
 import com.js.android.FragmentWrapper;
-import com.js.android.MyFragment;
+import com.js.android.PseudoFragment;
 import com.js.rbuddy.Receipt;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -26,7 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ReceiptList extends MyFragment {
+public class ReceiptList extends PseudoFragment {
 
 	public static class Wrapper extends FragmentWrapper {
 		public Wrapper() {
@@ -39,7 +36,12 @@ public class ReceiptList extends MyFragment {
 	}
 
 	public ReceiptList() {
-		setLogging(true);
+		if (db) {
+			pr(hey() + "constructing ReceiptList " + this
+					+ ", setting logging on");
+			setLogging(true);
+			getActivityState().setLogging(true);
+		}
 
 		// Register the wrapper class
 		new Wrapper();
@@ -49,21 +51,13 @@ public class ReceiptList extends MyFragment {
 	}
 
 	@Override
-	public void onRestoreInstanceState(Bundle bundle) {
-		super.onRestoreInstanceState(bundle);
-		if (bundle != null) {
-		}
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		log("onCreateView bundle " + nameOf(savedInstanceState));
+	public View onCreateView() {
+		log("onCreateView");
 		constructListView();
-		mActivityState = new ActivityState() //
+		getActivityState() //
 				.add(mReceiptListView) //
-				.restoreStateFrom(savedInstanceState);
-		log("finished onCreateView");
+				.restoreViewsFromSnapshot();
+		log("finished onCreateView; ");
 		return mReceiptListView;
 	}
 
@@ -232,11 +226,6 @@ public class ReceiptList extends MyFragment {
 
 			return listItemView;
 		}
-	}
-
-	private Context getContext() {
-		unimp("make mApp available when constructed, and override getActivity()?");
-		return mApp.fragments().getActivity();
 	}
 
 	private ArrayAdapter<Receipt> mReceiptListAdapter;
