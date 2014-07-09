@@ -28,34 +28,6 @@ public class Search extends PseudoFragment {
 		new Wrapper();
 		mApp = RBuddyApp.sharedInstance();
 	}
-
-	// extends MyFragment {
-	//
-	// public static final String TAG = "Search";
-	// public static Factory FACTORY = new Factory() {
-	//
-	// @Override
-	// public String name() {
-	// return TAG;
-	// }
-	//
-	// @Override
-	// public MyFragment construct() {
-	// return new SearchFragment();
-	// }
-	// };
-
-	// /**
-	// * Construct the singleton instance of this fragment, if it hasn't already
-	// * been
-	// *
-	// * @param organizer
-	// * @return
-	// */
-	// public static SearchFragment construct(FragmentOrganizer organizer) {
-	// return (SearchFragment) organizer.get(TAG, true);
-	// }
-
 	@Override
 	public View onCreateView() {
 

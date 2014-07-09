@@ -210,8 +210,6 @@ public class SimpleReceiptFile implements IReceiptFile {
 			try {
 				pr("receipt file:\n" + Files.readTextFile(getFile()));
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 		}
 

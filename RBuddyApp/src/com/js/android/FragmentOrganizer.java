@@ -24,25 +24,12 @@ import com.js.json.JSONParser;
  * Class to encapsulate some of the complexity of dealing with fragments.
  * 
  * Conceptually, manages the display of up to two side-by-side fragments
- * 
- * Problems:
- * 
- * [] the back stack and orientation changes highlight a problem: the system may
- * destroy and construct fragments, so we can't enforce a singleton pattern with
- * fragment instances. For example, even if we construct a singleton EditReceipt
- * fragment, if the user rotates the device, a new one will be created by the
- * system that will be distinct from our singleton instance. One approach: treat
- * fragments as containers of a separate class of objects that WILL obey the
- * singleton pattern. For example, let 'Editor' be the class wrapped by the
- * EditReceiptFragment. Even if multiple EditReceiptFragments exist, they will
- * all have a reference to the single Editor instance.
- * 
  */
 public class FragmentOrganizer {
 
 	private static final boolean mLogging = false;
 
-	private static final String BUNDLE_PERSISTENCE_KEY2 = "FragmentOrganizer";
+	private static final String BUNDLE_PERSISTENCE_KEY = "FragmentOrganizer";
 
 	/**
 	 * Use different keys based on whether device supports dual fragments
@@ -50,7 +37,7 @@ public class FragmentOrganizer {
 	 * @return
 	 */
 	private String getBundlePersistenceKey() {
-		return BUNDLE_PERSISTENCE_KEY2 + (mSupportsDual ? "2" : "1");
+		return BUNDLE_PERSISTENCE_KEY + (mSupportsDual ? "2" : "1");
 	}
 
 	/**
@@ -97,11 +84,11 @@ public class FragmentOrganizer {
 		this.mSlotViewBaseId = id;
 	}
 
-	public boolean isFactoryRegistered(String name) {
+	boolean isFactoryRegistered(String name) {
 		return mFragmentFactories.containsKey(name);
 	}
 
-	public void register(MyFragment.Factory factory) {
+	void register(MyFragment.Factory factory) {
 		mFragmentFactories.put(factory.name(), factory);
 	}
 

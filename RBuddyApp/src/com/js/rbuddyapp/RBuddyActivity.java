@@ -16,9 +16,13 @@ import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 import com.js.android.IPhotoStore;
 
-public class RBuddyActivity extends MyActivity implements ReceiptList.Listener //
+public class RBuddyActivity extends MyActivity implements //
+		ReceiptList.Listener //
 		, ReceiptEditor.Listener //
+		, Photo.Listener //
 {
+
+	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
 	public RBuddyActivity() {
 		super(false); // log lifecycle events?
@@ -71,7 +75,8 @@ public class RBuddyActivity extends MyActivity implements ReceiptList.Listener /
 		fragments.setWrappedSingleton(mSearch);
 		warning("this 'setWrapped' business should be hidden or something");
 
-		mPhotoFragment = PhotoFragment.construct(fragments);
+		mPhoto = new Photo();
+		fragments.setWrappedSingleton(mPhoto);
 	}
 
 	@Override
@@ -233,14 +238,14 @@ public class RBuddyActivity extends MyActivity implements ReceiptList.Listener /
 		receiptSelected(r);
 	}
 
-	// ReceiptListFragment.Listener
+	// ReceiptList.Listener
 	@Override
 	public void receiptSelected(Receipt r) {
 		focusOn("ReceiptEditor");
 		mReceiptEditor.setReceipt(r);
 	}
 
-	// EditReceiptFragment.Listener
+	// ReceiptEditor.Listener
 	@Override
 	public void receiptEdited(Receipt r) {
 		mReceiptList.refreshReceipt(r);
@@ -248,18 +253,32 @@ public class RBuddyActivity extends MyActivity implements ReceiptList.Listener /
 
 	@Override
 	public void editPhoto(Receipt r) {
-		mPhotoFragment.setReceipt(r);
-		focusOn(PhotoFragment.TAG);
+		mPhoto.setReceipt(r);
+		focusOn("Photo");
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_IMAGE_CAPTURE) {
+			mPhoto.processImageCaptureResult(resultCode, data);
+		}
 	}
 
 	private void focusOn(String fragmentName) {
 		fragments.plot(fragmentName, false, true);
 	}
 
+	// Photo.Listener
+	@Override
+	public void processCapturePhotoIntent(Intent intent) {
+		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+	}
+
 	private FragmentOrganizer fragments;
 	private ReceiptList mReceiptList;
 	private ReceiptEditor mReceiptEditor;
 	private RBuddyApp app;
-	/* private */Search mSearch;
-	private PhotoFragment mPhotoFragment;
+	private Search mSearch;
+	private Photo mPhoto;
+
 }
