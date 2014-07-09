@@ -162,10 +162,8 @@ public class ReceiptEditor extends PseudoFragment {
 	private void layoutElements() {
 		ASSERT(mScrollView == null);
 		mScrollView = new ScrollView(getContext());
-		debugChangeBgndColor(mScrollView);
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
-		log("layoutElements, scrollView " + mScrollView);
 
 		constructFormIfNecessary();
 	}

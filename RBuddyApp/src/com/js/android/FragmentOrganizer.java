@@ -441,9 +441,10 @@ public class FragmentOrganizer {
 		return mIsResumed;
 	}
 
-	public void setWrappedSingleton(PseudoFragment singleton) {
+	public <T extends PseudoFragment> T register(T singleton) {
 		assertUIThread();
 		mSingletonObjects.put(singleton.getClass(), singleton);
+		return singleton;
 	}
 
 	public PseudoFragment getWrappedSingleton(Class singletonClass) {

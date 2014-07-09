@@ -59,24 +59,10 @@ public class RBuddyActivity extends MyActivity implements //
 		fragments = new FragmentOrganizer(this);
 		app.setFragments(fragments);
 
-		// fragments.register(ReceiptListFragment.FACTORY);
-		// fragments.register(SearchFragment.FACTORY);
-
-		// Construct instances of the fragments we need. They will be stored
-		// within the fragment organizer, and will be the same instances
-		// manipulated by the FragmentManager when added to the activity's views
-
-		mReceiptList = new ReceiptList();
-		fragments.setWrappedSingleton(mReceiptList);
-		mReceiptEditor = new ReceiptEditor();
-		fragments.setWrappedSingleton(mReceiptEditor);
-
-		mSearch = new Search();
-		fragments.setWrappedSingleton(mSearch);
-		warning("this 'setWrapped' business should be hidden or something");
-
-		mPhoto = new Photo();
-		fragments.setWrappedSingleton(mPhoto);
+		mReceiptList = fragments.register(new ReceiptList());
+		mReceiptEditor = fragments.register(new ReceiptEditor());
+		mSearch = fragments.register(new Search());
+		mPhoto = fragments.register(new Photo());
 	}
 
 	@Override
@@ -278,7 +264,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private ReceiptList mReceiptList;
 	private ReceiptEditor mReceiptEditor;
 	private RBuddyApp app;
-	private Search mSearch;
+	/* private */Search mSearch;
 	private Photo mPhoto;
 
 }
