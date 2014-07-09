@@ -35,10 +35,7 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	public ReceiptEditor() {
-		// Register the wrapper class
 		new Wrapper();
-
-		// Perform class-specific initialization
 		mApp = RBuddyApp.sharedInstance();
 	}
 
@@ -81,16 +78,14 @@ public class ReceiptEditor extends PseudoFragment {
 
 	@Override
 	public void onDestroyView() {
+		disposeForm();
 		mScrollView = null;
-		mReceiptWidget = null;
-		mForm = null;
 		super.onDestroyView();
 	}
 
 	@Override
 	public void onDestroy() {
 		disposeForm();
-		mScrollView = null;
 		super.onDestroy();
 	}
 

@@ -75,6 +75,7 @@ public class ViewStates {
 		log("recordSnapshot");
 		JSONEncoder enc = new JSONEncoder();
 		enc.enterList();
+		enc.encode(mElements.size());
 		for (Object element : mElements) {
 			if (element instanceof ListView) {
 				ListView lv = (ListView) element;
@@ -126,16 +127,15 @@ public class ViewStates {
 			JSONParser parser = new JSONParser(jsonString);
 			parser.enterList();
 
+			int persistCount = parser.nextInt();
+			if (persistCount != mElements.size()) {
+				log("saved elements differs from actual;\n JSON state: "
+						+ mJsonState + "\n elements:" + d(mElements) + "\n "
+						+ this);
+				break;
+			}
+
 			for (Object element : mElements) {
-				// log("element:" + nameOf(element));
-				if (!parser.hasNext()) {
-					warning("ran out of elements in saved state;\n JSON state: "
-							+ mJsonState
-							+ "\n elements:"
-							+ d(mElements)
-							+ "\n " + this);
-					break;
-				}
 				if (element instanceof ListView) {
 					ListView lv = (ListView) element;
 					int cursor = parser.nextInt();
@@ -147,9 +147,7 @@ public class ViewStates {
 				} else
 					warning("cannot handle element " + element);
 			}
-			if (parser.hasNext()) {
-				warning("extra elements in saved state");
-			}
+
 		} while (false);
 		return this;
 	}

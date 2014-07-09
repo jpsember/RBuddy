@@ -57,7 +57,7 @@ public class ReceiptList extends PseudoFragment {
 		getActivityState() //
 				.add(mReceiptListView) //
 				.restoreViewsFromSnapshot();
-		log("finished onCreateView; ");
+		log(" returning " + nameOf(mReceiptListView));
 		return mReceiptListView;
 	}
 

@@ -16,8 +16,7 @@ import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 import com.js.android.IPhotoStore;
 
-public class RBuddyActivity extends MyActivity implements
- ReceiptList.Listener //
+public class RBuddyActivity extends MyActivity implements ReceiptList.Listener //
 		, ReceiptEditor.Listener //
 {
 
@@ -57,7 +56,7 @@ public class RBuddyActivity extends MyActivity implements
 		app.setFragments(fragments);
 
 		// fragments.register(ReceiptListFragment.FACTORY);
-		fragments.register(SearchFragment.FACTORY);
+		// fragments.register(SearchFragment.FACTORY);
 
 		// Construct instances of the fragments we need. They will be stored
 		// within the fragment organizer, and will be the same instances
@@ -68,7 +67,10 @@ public class RBuddyActivity extends MyActivity implements
 		mReceiptEditor = new ReceiptEditor();
 		fragments.setWrappedSingleton(mReceiptEditor);
 
-		mSearchFragment = SearchFragment.construct(fragments);
+		mSearch = new Search();
+		fragments.setWrappedSingleton(mSearch);
+		warning("this 'setWrapped' business should be hidden or something");
+
 		mPhotoFragment = PhotoFragment.construct(fragments);
 	}
 
@@ -129,7 +131,7 @@ public class RBuddyActivity extends MyActivity implements
 			AppPreferences.toggle(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
-			fragments.plot(SearchFragment.TAG, false, true);
+			fragments.plot("Search", false, true);
 			return true;
 		case R.id.action_testonly_exit:
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -258,6 +260,6 @@ public class RBuddyActivity extends MyActivity implements
 	private ReceiptList mReceiptList;
 	private ReceiptEditor mReceiptEditor;
 	private RBuddyApp app;
-	/* private */SearchFragment mSearchFragment;
+	/* private */Search mSearch;
 	private PhotoFragment mPhotoFragment;
 }
