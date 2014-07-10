@@ -18,7 +18,7 @@ public abstract class PseudoFragment {
 	protected void log(Object message) {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
-			sb.append(this);
+			sb.append(nameOf(this));
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);
@@ -37,8 +37,22 @@ public abstract class PseudoFragment {
 
 	public abstract View onCreateView();
 
+	/**
+	 * Package visibility entry point for FragmentWrapper, so our isResumed()
+	 * returns true from start of onResume() through end of onPause()
+	 */
+	void onResumeAux() {
+		mIsResumed = true;
+		onResume();
+	}
+
 	public void onResume() {
 		log("onResume");
+	}
+
+	void onPauseAux() {
+		onPause();
+		mIsResumed = false;
 	}
 
 	public void onPause() {
@@ -73,6 +87,11 @@ public abstract class PseudoFragment {
 		return App.sharedInstance().fragments().getActivity();
 	}
 
+	public boolean isResumed() {
+		return mIsResumed;
+	}
+
 	private ViewStates mActivityState;
 	private boolean mLogging;
+	private boolean mIsResumed;
 }

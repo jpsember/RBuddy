@@ -353,10 +353,12 @@ public class FragmentOrganizer {
 	}
 
 	private void constructContainer() {
+		// TODO: it would be useful to have capability of wrapping a view in a border with a label
+
 		// Create view with a horizontal row of panels, one for each slot
 		LinearLayout layout = new LinearLayout(mParentActivity);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
-		FormWidget.setDebugBgnd(layout, "#602020");
+		// debugChangeBgndColor(layout);
 		mSlotsContainer = layout;
 
 		for (int slot = 0; slot < mNumberOfSlots; slot++) {

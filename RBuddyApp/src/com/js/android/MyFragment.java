@@ -39,7 +39,7 @@ public abstract class MyFragment extends Fragment {
 	protected void log(Object message) {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
-			sb.append(this); // nameOf(this));
+			sb.append(nameOf(this));
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);

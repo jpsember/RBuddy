@@ -53,8 +53,12 @@ public class Tools {
 		return stackTrace(1, 1, null);
 	}
 
+	public static String hey(Object object) {
+		return "\n" + nameOf(object) + " (" + stackTrace(1, 1, null) + ") ";
+	}
+
 	public static String hey() {
-		return "\n\n" + stackTrace(1, 1, null) + ": ";
+		return "\n" + stackTrace(1, 1, null) + ": ";
 	}
 
 	/**
@@ -346,7 +350,8 @@ public class Tools {
 	public static String nameOf(Object obj) {
 		if (obj == null)
 			return "<null>";
-		return obj.getClass().getSimpleName();
+		return obj.getClass().getSimpleName() + ":"
+				+ UniqueIdentifier.nameFor(obj);
 	}
 
 	public static String d(Map m) {

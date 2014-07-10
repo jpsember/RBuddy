@@ -26,7 +26,7 @@ public class ViewStates {
 	private void log(Object message) {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
-			sb.append(this);
+			sb.append(nameOf(this));
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);

@@ -38,7 +38,26 @@ public class RBuddyActivity extends MyActivity implements //
 
 		app = RBuddyApp.sharedInstance(this);
 
-		createFragments();
+		createFragments(savedInstanceState);
+
+		if (savedInstanceState != null) {
+			int rid = savedInstanceState.getInt("XXX", 0);
+			mEditReceipt = null;
+			if (rid > 0)
+				// TODO: have it optionally return null if no such id rather
+				// than dying
+				mEditReceipt = app.receiptFile().getReceipt(rid);
+		}
+	}
+
+	private void createFragments(Bundle savedInstanceState) {
+		fragments = new FragmentOrganizer(this);
+		app.setFragments(fragments);
+
+		mReceiptList = fragments.register(new ReceiptList());
+		mReceiptEditor = fragments.register(new ReceiptEditor());
+		mSearch = fragments.register(new Search());
+		mPhoto = fragments.register(new Photo());
 
 		fragments.onCreate(savedInstanceState);
 
@@ -55,14 +74,9 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
-	private void createFragments() {
-		fragments = new FragmentOrganizer(this);
-		app.setFragments(fragments);
-
-		mReceiptList = fragments.register(new ReceiptList());
-		mReceiptEditor = fragments.register(new ReceiptEditor());
-		mSearch = fragments.register(new Search());
-		mPhoto = fragments.register(new Photo());
+	private void setEditReceipt(Receipt r) {
+		mEditReceipt = r;
+		mReceiptEditor.setReceipt(mEditReceipt);
 	}
 
 	@Override
@@ -80,6 +94,8 @@ public class RBuddyActivity extends MyActivity implements //
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		fragments.onSaveInstanceState(outState);
+    // TODO: give this a proper key
+		outState.putInt("XXX", mEditReceipt == null ? 0 : mEditReceipt.getId());
 	}
 
 	@Override
@@ -209,7 +225,7 @@ public class RBuddyActivity extends MyActivity implements //
 			@Override
 			public void run() {
 				// stop editing existing receipt (if any)
-				mReceiptEditor.setReceipt(null);
+				setEditReceipt(null);
 				app.receiptFile().clear();
 				app.receiptFile().flush();
 				mReceiptList.refreshList();
@@ -228,10 +244,14 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void receiptSelected(Receipt r) {
 		focusOn("ReceiptEditor");
-		mReceiptEditor.setReceipt(r);
+		setEditReceipt(r);
 	}
 
 	// ReceiptEditor.Listener
+	public Receipt getReceipt() {
+		return mEditReceipt;
+	}
+
 	@Override
 	public void receiptEdited(Receipt r) {
 		mReceiptList.refreshReceipt(r);
@@ -266,5 +286,5 @@ public class RBuddyActivity extends MyActivity implements //
 	private RBuddyApp app;
 	/* private */Search mSearch;
 	private Photo mPhoto;
-
+	private Receipt mEditReceipt;
 }

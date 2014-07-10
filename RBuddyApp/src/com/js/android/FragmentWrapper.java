@@ -81,13 +81,13 @@ public abstract class FragmentWrapper extends MyFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		mWrappedFragment.onResume();
+		mWrappedFragment.onResumeAux();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		mWrappedFragment.onPause();
+		mWrappedFragment.onPauseAux();
 	}
 
 	@Override

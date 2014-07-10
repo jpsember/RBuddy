@@ -35,6 +35,10 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	public ReceiptEditor() {
+		if (db) {
+			pr(hey() + "setting logging true");
+			setLogging(true);
+		}
 		new Wrapper();
 		mApp = RBuddyApp.sharedInstance();
 	}
@@ -42,37 +46,37 @@ public class ReceiptEditor extends PseudoFragment {
 	@Override
 	public void onRestoreInstanceState(Bundle bundle) {
 		super.onRestoreInstanceState(bundle);
-		if (bundle != null) {
-			int receiptId = bundle.getInt("XXX", 0);
-			Receipt r = null;
-			if (receiptId != 0)
-				r = mApp.receiptFile().getReceipt(receiptId);
-			setReceipt(r);
-		}
+		setReceipt(listener().getReceipt());
 	}
 
 	@Override
 	public View onCreateView() {
 		log("onCreateView");
-		layoutElements();
+
+		{
+			ASSERT(mScrollView == null);
+			mScrollView = new ScrollView(getContext());
+			mScrollView.setLayoutParams(new LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		}
+
 		getActivityState() //
 				.add(mScrollView) //
 				.restoreViewsFromSnapshot();
-		log(" returning scrollView " + mScrollView);
+		log(" returning scrollView " + nameOf(mScrollView));
 		return mScrollView;
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		constructFormIfNecessary();
-		readWidgetValuesFromReceipt();
+		setReceipt(listener().getReceipt());
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		updateReceiptWithWidgetValues();
+		writeReceiptFromWidgets();
 		mApp.receiptFile().flush();
 	}
 
@@ -85,7 +89,6 @@ public class ReceiptEditor extends PseudoFragment {
 
 	@Override
 	public void onDestroy() {
-		disposeForm();
 		super.onDestroy();
 	}
 
@@ -93,27 +96,24 @@ public class ReceiptEditor extends PseudoFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		getActivityState().persistSnapshot(outState);
-		outState.putInt("XXX", mReceipt == null ? 0 : mReceipt.getId());
 	}
 
 	public void setReceipt(Receipt receipt) {
 		// In case there's an existing receipt, flush its changes
-		updateReceiptWithWidgetValues();
+		writeReceiptFromWidgets();
+
 		this.mReceipt = receipt;
-		if (receipt == null)
-			disposeForm();
-		else
-			constructFormIfNecessary();
-		readWidgetValuesFromReceipt();
+
+		constructForm();
+		readReceiptToWidgets();
 	}
 
 	private void disposeForm() {
 		if (mForm != null) {
 			stopFormListeners();
+			mScrollView.removeView(mForm.getView());
 			mForm = null;
 		}
-		if (mScrollView != null)
-			mScrollView.removeAllViews();
 	}
 
 	private void stopFormListeners() {
@@ -128,12 +128,20 @@ public class ReceiptEditor extends PseudoFragment {
 	 * Construct the form if it doesn't exist, receipt exists, and its container
 	 * exists
 	 */
-	private void constructFormIfNecessary() {
-		if (mReceipt == null)
+	private void constructForm() {
+		// TODO: in PsuedoFragment class, keep track of number of fragments paused/resumed/etc
+    // (for development purposes)
+
+		if (!isResumed())
 			return;
+
+		if (!hasReceipt()) {
+			disposeForm();
+			return;
+		}
+
+		// If we already have a form, done
 		if (mForm != null)
-			return;
-		if (mScrollView == null)
 			return;
 
 		String jsonString = readTextFileResource(getContext(),
@@ -144,7 +152,7 @@ public class ReceiptEditor extends PseudoFragment {
 		mForm.addListener(new Form.Listener() {
 			@Override
 			public void valuesChanged(Form form) {
-				updateReceiptWithWidgetValues();
+				writeReceiptFromWidgets();
 			}
 		});
 
@@ -159,24 +167,16 @@ public class ReceiptEditor extends PseudoFragment {
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 	}
 
-	private void layoutElements() {
-		ASSERT(mScrollView == null);
-		mScrollView = new ScrollView(getContext());
-		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT));
-
-		constructFormIfNecessary();
-	}
-
 	private void processPhotoButtonPress() {
 		if (mReceipt == null)
 			return;
 		listener().editPhoto(mReceipt);
 	}
 
-	private void readWidgetValuesFromReceipt() {
-		if (mForm == null || mReceipt == null)
+	private void readReceiptToWidgets() {
+		if (!isResumed() || !hasReceipt())
 			return;
+
 		mForm.setValue("summary", mReceipt.getSummary(), false);
 		mForm.setValue("cost", mReceipt.getCost(), false);
 		mForm.setValue("date", mReceipt.getDate(), false);
@@ -185,8 +185,22 @@ public class ReceiptEditor extends PseudoFragment {
 				mReceipt.getPhotoId());
 	}
 
-	private void updateReceiptWithWidgetValues() {
-		if (mForm == null || mReceipt == null)
+	/**
+	 * Determine if this fragment is displaying a receipt, or an empty view (if
+	 * no receipt has been set)
+	 * 
+	 * @return
+	 */
+	private boolean hasReceipt() {
+		return mReceipt != null;
+	}
+
+	private void writeReceiptFromWidgets() {
+		if (!isResumed() || !hasReceipt())
+			return;
+
+		// If we haven't finished onResume(), mForm may not exist
+		if (mForm == null)
 			return;
 
 		// To detect if changes have actually occurred, compare JSON
@@ -223,8 +237,26 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	public static interface Listener {
+		/**
+		 * Get the receipt to be edited
+		 * 
+		 * @return receipt, or null if user hasn't specified one
+		 */
+		Receipt getReceipt();
+
+		/**
+		 * Notify editor that user has selected a new receipt
+		 * 
+		 * @param r
+		 *            receipt, or null if user hasn't specified one
+		 */
 		void receiptEdited(Receipt r);
 
+		/**
+		 * Request edit of receipt's photo
+		 * 
+		 * @param r
+		 */
 		void editPhoto(Receipt r);
 	}
 
