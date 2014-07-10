@@ -1,6 +1,8 @@
-package com.js.rbuddyapp;
+package com.js.android;
 
 import static com.js.android.Tools.*;
+
+import com.js.android.FragmentOrganizer;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -50,5 +52,17 @@ public class MyActivity extends Activity {
 		super.onPause();
 	}
 
+	@Override
+	protected void onDestroy() {
+		if (mFragments != null)
+		mFragments.kill();
+		super.onDestroy();
+	}
+
+	public FragmentOrganizer getFragments() {
+		return mFragments;
+	}
+
+	private FragmentOrganizer mFragments;
 	private boolean mLogging;
 }

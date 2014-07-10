@@ -7,7 +7,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
-import com.js.android.FragmentWrapper;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.android.PseudoFragment;
 import com.js.form.Form;
 import com.js.form.FormButtonWidget;
@@ -24,7 +25,7 @@ import com.js.rbuddy.TagSet;
  */
 public class ReceiptEditor extends PseudoFragment {
 
-	public static class Wrapper extends FragmentWrapper {
+	public static class Wrapper extends MyFragment {
 		public Wrapper() {
 		}
 
@@ -34,12 +35,13 @@ public class ReceiptEditor extends PseudoFragment {
 		}
 	}
 
-	public ReceiptEditor() {
+	public ReceiptEditor(FragmentOrganizer fragments) {
+		super(fragments);
 		if (db) {
 			pr(hey() + "setting logging true");
 			setLogging(true);
 		}
-		new Wrapper();
+		new Wrapper().register(fragments);
 		mApp = RBuddyApp.sharedInstance();
 	}
 
@@ -99,6 +101,8 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	public void setReceipt(Receipt receipt) {
+		if (db)
+			pr(hey(this) + receipt);
 		// In case there's an existing receipt, flush its changes
 		writeReceiptFromWidgets();
 
@@ -174,6 +178,9 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	private void readReceiptToWidgets() {
+		if (db)
+			pr(hey() + "isRes=" + isResumed() + " hasRec=" + hasReceipt());
+
 		if (!isResumed() || !hasReceipt())
 			return;
 
@@ -196,6 +203,9 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	private void writeReceiptFromWidgets() {
+		if (db)
+			pr(hey() + "isResumed " + isResumed() + " hasReceipt "
+					+ hasReceipt() + " mForm=" + nameOf(mForm));
 		if (!isResumed() || !hasReceipt())
 			return;
 

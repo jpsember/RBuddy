@@ -309,9 +309,6 @@ public class ReceiptFilter implements IJSONEncoder {
 			}
 		}
 
-		TagSet filter_inclusive_tags = this.getInclusiveTags();
-		TagSet filter_exclusive_tags = this.getExclusiveTags();
-
 		return true;
 	}
 

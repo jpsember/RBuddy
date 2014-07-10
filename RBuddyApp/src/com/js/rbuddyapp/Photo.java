@@ -7,7 +7,8 @@ import java.io.IOException;
 
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
-import com.js.android.FragmentWrapper;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.android.PseudoFragment;
 import com.js.android.BitmapUtil;
 import com.js.basic.Files;
@@ -28,7 +29,7 @@ import com.js.android.IPhotoStore;
 
 public class Photo extends PseudoFragment {
 
-	public static class Wrapper extends FragmentWrapper {
+	public static class Wrapper extends MyFragment {
 		public Wrapper() {
 		}
 
@@ -38,8 +39,10 @@ public class Photo extends PseudoFragment {
 		}
 	}
 
-	public Photo() {
-		new Wrapper();
+	public Photo(FragmentOrganizer fragments) {
+		super(fragments);
+		mFragments = fragments;
+		new Wrapper().register(fragments);
 		mApp = RBuddyApp.sharedInstance();
 	}
 
@@ -73,7 +76,7 @@ public class Photo extends PseudoFragment {
 
 		if (mPopFlag) {
 			mPopFlag = false;
-			mApp.fragments().pop();
+			mFragments.pop();
 			return;
 		}
 
@@ -230,4 +233,5 @@ public class Photo extends PseudoFragment {
 	private Form mForm;
 	private ScrollView mScrollView;
 	private boolean mPopFlag;
+	private FragmentOrganizer mFragments;
 }

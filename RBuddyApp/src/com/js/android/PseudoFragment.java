@@ -7,7 +7,9 @@ import android.view.View;
 
 public abstract class PseudoFragment {
 
-	public PseudoFragment() {
+	public PseudoFragment(FragmentOrganizer f) {
+		mFragments = f;
+		setLogging(true);
 		mActivityState = new ViewStates(this.getClass().getSimpleName());
 	}
 
@@ -19,6 +21,7 @@ public abstract class PseudoFragment {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
 			sb.append(nameOf(this));
+			sb.append(" resumed=" + isResumed());
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);
@@ -83,14 +86,14 @@ public abstract class PseudoFragment {
 	}
 
 	protected Context getContext() {
-		// TODO: this seems very involved
-		return App.sharedInstance().fragments().getActivity();
+		return mFragments.getActivity();
 	}
 
 	public boolean isResumed() {
 		return mIsResumed;
 	}
 
+	private FragmentOrganizer mFragments;
 	private ViewStates mActivityState;
 	private boolean mLogging;
 	private boolean mIsResumed;

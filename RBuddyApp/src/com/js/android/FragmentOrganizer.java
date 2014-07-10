@@ -27,7 +27,8 @@ import com.js.json.JSONParser;
  */
 public class FragmentOrganizer {
 
-	private static final boolean mLogging = false;
+	private static final boolean mLogging = true;
+
 
 	private static final String BUNDLE_PERSISTENCE_KEY = "FragmentOrganizer";
 
@@ -48,7 +49,13 @@ public class FragmentOrganizer {
 	 * @return
 	 */
 	public FragmentOrganizer(Activity parent) {
+		final boolean db = true;
+		if (db)
+			pr(hey(this));
 		log("Constructing for parent " + nameOf(parent));
+		
+		registerWithGlobalMap();
+		
 		this.mParentActivity = parent;
 		this.mSlotViewBaseId = 1900;
 
@@ -64,9 +71,6 @@ public class FragmentOrganizer {
 
 		mFragmentFactories = new HashMap();
 		mFragmentMap = new HashMap();
-
-		if (false)
-			info(null); // get rid of unreferenced warning
 	}
 
 	private void log(Object message) {
@@ -89,6 +93,10 @@ public class FragmentOrganizer {
 	}
 
 	void register(MyFragment.Factory factory) {
+		final boolean db = true;
+		if (db)
+			pr(hey(this) + "registering factory " + nameOf(factory) + ", name "
+					+ factory.name());
 		mFragmentFactories.put(factory.name(), factory);
 	}
 
@@ -395,6 +403,9 @@ public class FragmentOrganizer {
 	 * @return fragment, or null
 	 */
 	public MyFragment get(String tag, boolean constructIfMissing) {
+		final boolean db = true;
+		if (db)
+			pr(hey(this) + "tag=" + tag);
 		MyFragment f;
 		f = mFragmentMap.get(tag);
 		if (f != null)
@@ -404,6 +415,7 @@ public class FragmentOrganizer {
 		f = (MyFragment) m.findFragmentByTag(tag);
 		if (f == null && constructIfMissing) {
 			f = factory(tag).construct();
+
 			if (db)
 				pr("\n  ======================= Constructed instance of " + tag
 						+ "\n");
@@ -413,6 +425,9 @@ public class FragmentOrganizer {
 	}
 
 	private MyFragment.Factory factory(String tag) {
+		final boolean db = true;
+		if (db)
+			pr(hey(this) + " looking for factory for tag " + tag);
 		MyFragment.Factory f = mFragmentFactories.get(tag);
 		if (f == null)
 			throw new IllegalArgumentException("no factory registered for: "
@@ -420,7 +435,7 @@ public class FragmentOrganizer {
 		return f;
 	}
 
-	private String info(MyFragment f) {
+	/* private */String info(MyFragment f) {
 		if (f == null)
 			return "<null>";
 		StringBuilder sb = new StringBuilder(nameOf(f));
@@ -446,17 +461,51 @@ public class FragmentOrganizer {
 	public <T extends PseudoFragment> T register(T singleton) {
 		assertUIThread();
 		mSingletonObjects.put(singleton.getClass(), singleton);
+		final boolean db = true;
+		if (db)
+			pr(hey() + "put obj " + nameOf(singleton) + " into map "
+					+ nameOf(mSingletonObjects));
 		return singleton;
 	}
 
 	public PseudoFragment getWrappedSingleton(Class singletonClass) {
+		final boolean db = true;
 		assertUIThread();
 		PseudoFragment obj = mSingletonObjects.get(singletonClass);
+		if (db)
+			pr(hey() + "got obj " + nameOf(obj) + " from map "
+					+ nameOf(mSingletonObjects));
 		if (obj == null) {
 			die("no singleton object found for "
 					+ singletonClass.getSimpleName());
 		}
 		return obj;
+	}
+
+	/**
+	 * To deal with the problems of Android using no-argument fragment
+	 * constructors to recreate old fragments, keep a global map of fragment
+	 * organizers that will be pointed to by a bundle that we will store with
+	 * each fragment when we initially create it (using some other one or more
+	 * arg constructor)
+	 */
+	private static Map<Integer, FragmentOrganizer> mOrganizerMap = new HashMap();
+	private static int mIdentifier;
+
+	private void registerWithGlobalMap() {
+		assertUIThread();
+		mUniqueId = ++mIdentifier;
+		log("registering with global map, unique id=" + mUniqueId);
+		mOrganizerMap.put(mUniqueId, this);
+	}
+	
+	public static FragmentOrganizer getOrganizer(int key) {
+		assertUIThread();
+		return mOrganizerMap.get(key);
+	}
+
+	public int getUniqueId() {
+		return mUniqueId;
 	}
 
 	private Map<Class, PseudoFragment> mSingletonObjects = new HashMap();
@@ -477,4 +526,20 @@ public class FragmentOrganizer {
 	private boolean mIsResumed;
 	private boolean mSupportsDual;
 	private int mNumberOfSlots;
+	private int mUniqueId;
+
+	public boolean isAlive() {
+		return mAlive;
+	}
+
+	private boolean mAlive = true;
+
+	public void kill() {
+		final boolean db = true;
+		if (db)
+			pr(hey(this)
+					+ " ***************************************************** killing id "
+					+ this.mUniqueId);
+		mAlive = false;
+	}
 }

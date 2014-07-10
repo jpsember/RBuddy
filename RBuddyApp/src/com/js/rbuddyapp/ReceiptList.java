@@ -8,7 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.js.android.AndroidDate;
-import com.js.android.FragmentWrapper;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.android.PseudoFragment;
 import com.js.rbuddy.Receipt;
 
@@ -25,7 +26,7 @@ import android.widget.TextView;
 
 public class ReceiptList extends PseudoFragment {
 
-	public static class Wrapper extends FragmentWrapper {
+	public static class Wrapper extends MyFragment {
 		public Wrapper() {
 		}
 
@@ -35,7 +36,9 @@ public class ReceiptList extends PseudoFragment {
 		}
 	}
 
-	public ReceiptList() {
+	public ReceiptList(FragmentOrganizer fragments) {
+		super(fragments);
+		final boolean db = true;
 		if (db) {
 			pr(hey() + "constructing ReceiptList " + this
 					+ ", setting logging on");
@@ -43,8 +46,16 @@ public class ReceiptList extends PseudoFragment {
 			getActivityState().setLogging(true);
 		}
 
+
 		// Register the wrapper class
-		new Wrapper();
+		if (db)
+			pr(" creating wrapper");
+		Wrapper w = new Wrapper();
+		if (db)
+			pr(" registering wrapper");
+		w.register(fragments);
+		if (db)
+			pr(" class-specific init");
 
 		// Perform class-specific initialization
 		mApp = RBuddyApp.sharedInstance();

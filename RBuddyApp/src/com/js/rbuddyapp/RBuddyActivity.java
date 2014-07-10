@@ -5,6 +5,7 @@ import static com.js.android.Tools.*;
 import com.js.android.App;
 import com.js.android.AppPreferences;
 import com.js.android.FragmentOrganizer;
+import com.js.android.MyActivity;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
@@ -51,14 +52,22 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	private void createFragments(Bundle savedInstanceState) {
+		final boolean db = true;
+		if (db)
+			pr(hey(this));
+		if (db)
+			pr(" creating fragments");
 		fragments = new FragmentOrganizer(this);
-		app.setFragments(fragments);
 
-		mReceiptList = fragments.register(new ReceiptList());
-		mReceiptEditor = fragments.register(new ReceiptEditor());
-		mSearch = fragments.register(new Search());
-		mPhoto = fragments.register(new Photo());
-
+		boolean DISABLE = true;
+		if (db)
+			pr(" creating ReceiptList");
+		mReceiptList = fragments.register(new ReceiptList(fragments));
+		if (!DISABLE) {
+		mReceiptEditor = fragments.register(new ReceiptEditor(fragments));
+		mSearch = fragments.register(new Search(fragments));
+		mPhoto = fragments.register(new Photo(fragments));
+		}
 		fragments.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
@@ -67,9 +76,10 @@ public class RBuddyActivity extends MyActivity implements //
 			// TODO do this if no fragment exists in the slot, in case no state
 			// was saved for some (unusual) reason
 			fragments.plot("ReceiptList", true, false);
-
+			if (!DISABLE) {
 			if (fragments.supportDualFragments()) {
 				fragments.plot("ReceiptEditor", false, false);
+			}
 			}
 		}
 	}

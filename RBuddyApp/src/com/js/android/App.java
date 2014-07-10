@@ -145,20 +145,20 @@ public class App {
 		return (int) (densityPixels * displayMetrics.density);
 	}
 
-	public void setFragments(FragmentOrganizer f) {
-		assertUIThread();
-		mFragments = f;
-	}
-
-	public FragmentOrganizer fragments() {
-		assertUIThread();
-		ASSERT(mFragments != null, "no FragmentOrganizer defined");
-		return mFragments;
-	}
+	// public void setFragments(FragmentOrganizer f) {
+	// assertUIThread();
+	// mFragments = f;
+	// }
+	//
+	// public FragmentOrganizer fragments() {
+	// assertUIThread();
+	// ASSERT(mFragments != null, "no FragmentOrganizer defined");
+	// return mFragments;
+	// }
 
 	protected static App sharedInstance;
 	protected Context context;
 	private static DisplayMetrics displayMetrics;
 	private Map<String, Integer> resourceMap = new HashMap();
-	private FragmentOrganizer mFragments;
+	// private FragmentOrganizer mFragments;
 }
