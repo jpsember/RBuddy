@@ -5,31 +5,22 @@ import static com.js.android.Tools.*;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 public abstract class MyFragment extends Fragment {
 
-	public static interface Factory {
-		/**
-		 * Get name of fragment. This is what is used as its tag when it is
-		 * added to an activity
-		 * 
-		 * @return
-		 */
-		public String name();
+	private static final String BUNDLE_ORGANIZER_KEY = "organizer";
 
-		public MyFragment construct();
-	}
-
+	/**
+	 * Constructor. Note, for technical reasons, each concrete subclass of this
+	 * abstract class must provide a no-argument constructor (that does
+	 * nothing).
+	 */
 	public MyFragment() {
-		this(false);
-	}
-
-	public MyFragment(boolean withLogging) {
-		assertUIThread();
-		mUniqueIdentifier = ++sNextUniqueIdentifier;
-		setLogging(withLogging);
-
-		// mActivityState = new ActivityState(withLogging);
+		if (db)
+			pr(hey(this) + "constructing; " + stackTrace(0, 10));
 	}
 
 	protected void setLogging(boolean f) {
@@ -55,18 +46,22 @@ public abstract class MyFragment extends Fragment {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		log("onCreate " + nameOf(savedInstanceState));
+		log("onCreate " + nameOf(savedInstanceState)
+				+ dumpState(savedInstanceState, this.getArguments()));
 		super.onCreate(savedInstanceState);
+		processSavedState(savedInstanceState);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		log("onActivityCreated " + nameOf(savedInstanceState));
+		log("onActivityCreated " + nameOf(savedInstanceState)
+				+ dumpState(savedInstanceState, this.getArguments()));
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	public void onRestoreInstanceState(Bundle bundle) {
-		log("onRestoreInstanceState; " + nameOf(bundle) + "\n\n");
+		log("onRestoreInstanceState; " + nameOf(bundle)
+				+ dumpState(bundle, this.getArguments()) + "\n\n");
 	}
 
 	@Override
@@ -79,31 +74,44 @@ public abstract class MyFragment extends Fragment {
 	public void onResume() {
 		log("onResume");
 		super.onResume();
+		mWrappedFragment.onResumeAux();
 	}
 
 	@Override
 	public void onPause() {
 		log("onPause");
 		super.onPause();
+		mWrappedFragment.onPauseAux();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		log("onSaveInstanceState; " + nameOf(outState) + "\n\n");
+		log("onSaveInstanceState; " + nameOf(outState)
+				+ dumpState(outState, this.getArguments()) + "\n\n");
 		super.onSaveInstanceState(outState);
+
+		// The fragment ought to have a bundle id stored by this point
+		if (db)
+			pr(hey(this) + " >>>>> currently stored key: "
+					+ outState.get(BUNDLE_ORGANIZER_KEY));
+
+		// Ask the pseudo fragment to save its view state, since scrollviews and
+		// whatnot may be disappearing
+		mWrappedFragment.onSaveViews();
+	}
+
+	@Override
+	public void onDestroyView() {
+		log("onDestroyView begins");
+		mWrappedFragment.onDestroyView();
+		super.onDestroyView();
+		log("onDestroyView ends");
 	}
 
 	@Override
 	public void onStop() {
 		log("onStop");
 		super.onStop();
-	}
-
-	@Override
-	public void onDestroyView() {
-		log("onDestroyView begins");
-		super.onDestroyView();
-		log("onDestroyView ends");
 	}
 
 	@Override
@@ -118,20 +126,158 @@ public abstract class MyFragment extends Fragment {
 		super.onDetach();
 	}
 
+	/**
+	 * Provide class being wrapped
+	 * 
+	 * @return subclass of MyFragment
+	 */
+	public abstract Class getFragmentClass();
+
+	public void register(FragmentOrganizer f) {
+		if (db)
+			pr(hey(this) + "organizer=" + nameOf(f));
+
+		Bundle args = this.getArguments();
+		if (args == null) {
+			args = new Bundle();
+			args.putString(BUNDLE_ORGANIZER_KEY, f.getLabel());
+			setArguments(args);
+
+			if (db)
+				pr(hey(this) + " >>>>> stored organizer key " + f.getLabel()
+						+ " in bundle key;"
+						+ dumpState(null, this.getArguments()));
+		}
+
+		String name = getFragmentClass().getSimpleName();
+		if (!f.isFactoryRegistered(name)) {
+			Factory factory = new Factory(this, name, f);
+			if (db)
+				pr(" registering factory " + nameOf(factory) + " name " + name
+						+ " for fragment " + nameOf(this));
+			f.register(factory);
+		}
+	}
+
+	private void processSavedState(Bundle savedInstanceState) {
+		if (db)
+			pr(hey(this) + " savedState " + nameOf(savedInstanceState)
+					+ dumpState(savedInstanceState, this.getArguments()));
+
+		if (mWrappedFragment != null) {
+			if (db)
+				pr("  ...already have a wrapped fragment: "
+						+ nameOf(mWrappedFragment));
+			return;
+		}
+
+		String key = null;
+
+		if (savedInstanceState != null) {
+			key = savedInstanceState.getString(BUNDLE_ORGANIZER_KEY);
+			if (db)
+				pr(" recalled key from savedInstanceState: " + key);
+		}
+		if (key == null) {
+			Bundle b2 = this.getArguments();
+			key = b2.getString(BUNDLE_ORGANIZER_KEY);
+			if (db)
+				pr(" recalled key from current arguments: " + key);
+		}
+
+		ASSERT(key != null, "no organizer key in saved state");
+
+		// int key = savedInstanceState.getInt(BUNDLE_ORGANIZER_KEY, -1);
+
+		FragmentOrganizer f = FragmentOrganizer.getOrganizer(key);
+		ASSERT(f != null);
+		ASSERT(f.isAlive());
+		// It was already registered, so get the singleton object
+		mWrappedFragment = f.getWrappedSingleton(getFragmentClass());
+		if (db)
+			pr("  set mWrappedFragment to " + nameOf(mWrappedFragment));
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		log("onCreateView");
+		processSavedState(savedInstanceState);
+		if (mWrappedFragment == null)
+			die("no wrapped fragment for " + nameOf(this) + ": "
+					+ getFragmentClass().getSimpleName());
+		log("wrappedFragment=" + describe(mWrappedFragment));
+		return mWrappedFragment.onCreateView(this);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(nameOf(this));
-		sb.append(" #" + mUniqueIdentifier);
+		sb.append(" (wrappedFragment " + nameOf(mWrappedFragment) + ")");
 		return sb.toString();
 	}
 
-	// protected ActivityState getActivityState() {
-	// return mActivityState;
-	// }
+	private PseudoFragment mWrappedFragment;
 
-	private static int sNextUniqueIdentifier;
+	static class Factory {
 
-	private int mUniqueIdentifier;
-	// private ActivityState mActivityState;
+		public Factory(MyFragment fragment, String name,
+				FragmentOrganizer organizer) {
+			mWrapperClass = fragment.getClass();
+			mName = name;
+			mOrganizer = organizer;
+		}
+
+		/**
+		 * Get name of fragment. This is what is used as its tag when it is
+		 * added to an activity
+		 * 
+		 * @return
+		 */
+		public String name() {
+			return mName;
+		}
+
+		public MyFragment construct() {
+			MyFragment f = null;
+			try {
+				f = (MyFragment) mWrapperClass.getConstructor().newInstance();
+				Bundle b = new Bundle();
+				b.putString(BUNDLE_ORGANIZER_KEY, mOrganizer.getLabel());
+				f.setArguments(b);
+				if (db)
+					pr(hey(this) + " >>>>> stored organizer key "
+							+ mOrganizer.getLabel() + " in bundle key");
+				f.processSavedState(b);
+			} catch (Throwable t) {
+				die("problem creating instance of " + mWrapperClass
+						+ "; did you supply a default constructor?", t);
+			}
+			return f;
+		}
+
+		private String mName;
+		private Class mWrapperClass;
+		private FragmentOrganizer mOrganizer;
+	}
+
+	private String dumpState(Bundle b1, Bundle b2) {
+		StringBuilder sb = new StringBuilder(" [");
+
+		sb.append("current:");
+		if (b1 == null)
+			sb.append("---");
+		else
+			sb.append(b1.get(BUNDLE_ORGANIZER_KEY));
+		sb.append(" aux:");
+		if (b2 == null)
+			sb.append("---");
+		else
+			sb.append(b2.get(BUNDLE_ORGANIZER_KEY));
+		sb.append("]");
+		return sb.toString();
+
+	}
+
 	private boolean mLogging;
 }

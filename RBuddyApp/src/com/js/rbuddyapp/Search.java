@@ -2,7 +2,8 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
-import com.js.android.FragmentWrapper;
+import com.js.android.FragmentOrganizer;
+import com.js.android.MyFragment;
 import com.js.android.PseudoFragment;
 import com.js.form.Form;
 import com.js.rbuddy.R;
@@ -14,7 +15,7 @@ import android.widget.ScrollView;
 
 public class Search extends PseudoFragment {
 
-	public static class Wrapper extends FragmentWrapper {
+	public static class Wrapper extends MyFragment {
 		public Wrapper() {
 		}
 
@@ -24,12 +25,13 @@ public class Search extends PseudoFragment {
 		}
 	}
 
-	public Search() {
-		new Wrapper();
+	public Search(FragmentOrganizer fragments) {
+		super(fragments);
+		new Wrapper().register(fragments);
 		mApp = RBuddyApp.sharedInstance();
 	}
 	@Override
-	public View onCreateView() {
+	public View onCreateView(MyFragment container) {
 
 		String jsonString = readTextFileResource(getContext(),
 				R.raw.form_search);
