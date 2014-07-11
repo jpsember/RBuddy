@@ -129,7 +129,7 @@ public class ReceiptFilterTest extends MyTest {
 
 		JSDate test_date = JSDate.buildFromValues(2014, 5, 12);
 		Cost test_cost = new Cost("500");
-		TagSet test_ts = TagSet.parse("Florida");
+		TagSet test_ts = TagSet.parse("Georgia");
 
 		 if (rf.applyFilter(test_cost, test_date, test_ts) == true)
 		 pr("Test receipt passed thru the filter...");

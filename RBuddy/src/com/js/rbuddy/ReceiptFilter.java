@@ -309,8 +309,57 @@ public class ReceiptFilter implements IJSONEncoder {
 			}
 		}
 
-		TagSet filter_inclusive_tags = this.getInclusiveTags();
-		TagSet filter_exclusive_tags = this.getExclusiveTags();
+		if (ts != null) {
+			// TJS 10 July
+			// filtering tests
+			// i have thought up reasonable definitions that may or may not
+			// last...
+			// and am not sure what to do about null filter definitions, but
+			// have done something...
+			//
+			// and i'm starting to think there is something obvious that exists
+			// or should be implemented in TagSets so that i can get each
+			// element
+			// one at a time and examine them, and that is gonna have to wait
+			// until
+			// i have more than 5 minutes to discuss and solve...
+
+			TagSet filter_inclusive_tags = this.getInclusiveTags();
+			// TJS 10 July
+			// at this point, if the inclusive tag filter exists,
+			// each element of the rf.tagset should be "in" the inclusive filter
+			// -go thru rf.tagset, and check that each element matches something
+			// in the inclusive filter
+			if (filter_inclusive_tags != null) {
+
+				pr("checking inclusive tags...");
+				pr("tag set = " + ts);
+				pr("inclusive tags = " + filter_inclusive_tags);
+
+				if (ts.isTagsetInTagsetInclusive(filter_inclusive_tags) == false) {
+					pr("tag set is not 'inclusively in' the inclusive set, failed on inclusive test");
+					return false;
+				}
+			}
+
+			TagSet filter_exclusive_tags = this.getExclusiveTags();
+			// TJS 10 July
+			// at this point, if the exclusive tag filter exists,
+			// each element of the exclusive tag filter must be "in" the
+			// rf.tagset
+			// -go thru exclusive tag filter, and check each element matches
+			// something in rf.tagset
+			if (filter_exclusive_tags != null) {
+				pr("checking exclusive tags...");
+				pr("tag set = " + ts);
+				pr("exclusive tags = " + filter_exclusive_tags);
+
+				if (ts.isTagsetInTagsetExclusive(filter_exclusive_tags) == false) {
+					pr("tag set is not 'exclusively in' the exclusive set, failed on exclusive test");
+					return false;
+				}
+			}
+		}
 
 		return true;
 	}
