@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import com.js.android.IPhotoStore;
 
@@ -22,10 +23,12 @@ public class RBuddyActivity extends MyActivity implements //
 		, ReceiptEditor.Listener //
 		, Photo.Listener //
 {
+	private static final boolean OMIT_MOST_FRAGMENTS = false;
 
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
 	public RBuddyActivity() {
+
 		super(false); // log lifecycle events?
 	}
 
@@ -52,21 +55,19 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	private void createFragments(Bundle savedInstanceState) {
-		final boolean db = true;
 		if (db)
 			pr(hey(this));
 		if (db)
 			pr(" creating fragments");
 		fragments = new FragmentOrganizer(this);
 
-		boolean DISABLE = true;
 		if (db)
 			pr(" creating ReceiptList");
 		mReceiptList = fragments.register(new ReceiptList(fragments));
-		if (!DISABLE) {
-		mReceiptEditor = fragments.register(new ReceiptEditor(fragments));
-		mSearch = fragments.register(new Search(fragments));
-		mPhoto = fragments.register(new Photo(fragments));
+		if (!OMIT_MOST_FRAGMENTS) {
+			mReceiptEditor = fragments.register(new ReceiptEditor(fragments));
+			mSearch = fragments.register(new Search(fragments));
+			mPhoto = fragments.register(new Photo(fragments));
 		}
 		fragments.onCreate(savedInstanceState);
 
@@ -76,15 +77,17 @@ public class RBuddyActivity extends MyActivity implements //
 			// TODO do this if no fragment exists in the slot, in case no state
 			// was saved for some (unusual) reason
 			fragments.plot("ReceiptList", true, false);
-			if (!DISABLE) {
-			if (fragments.supportDualFragments()) {
-				fragments.plot("ReceiptEditor", false, false);
-			}
+			if (!OMIT_MOST_FRAGMENTS) {
+				if (fragments.supportDualFragments()) {
+					fragments.plot("ReceiptEditor", false, false);
+				}
 			}
 		}
 	}
 
 	private void setEditReceipt(Receipt r) {
+		if (OMIT_MOST_FRAGMENTS)
+			return;
 		mEditReceipt = r;
 		mReceiptEditor.setReceipt(mEditReceipt);
 	}
@@ -92,19 +95,18 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void onResume() {
 		super.onResume();
-
-		setContentView(fragments.getView(), new LayoutParams(
+		View contentView = fragments.getView();
+		contentView = wrapView(contentView, nameOf(this));
+		setContentView(contentView, new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
 		fragments.onResume();
-
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		fragments.onSaveInstanceState(outState);
-    // TODO: give this a proper key
+		// TODO: give this a proper key
 		outState.putInt("XXX", mEditReceipt == null ? 0 : mEditReceipt.getId());
 	}
 

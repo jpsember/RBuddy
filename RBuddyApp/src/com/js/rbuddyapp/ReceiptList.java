@@ -38,7 +38,6 @@ public class ReceiptList extends PseudoFragment {
 
 	public ReceiptList(FragmentOrganizer fragments) {
 		super(fragments);
-		final boolean db = true;
 		if (db) {
 			pr(hey() + "constructing ReceiptList " + this
 					+ ", setting logging on");
@@ -62,14 +61,14 @@ public class ReceiptList extends PseudoFragment {
 	}
 
 	@Override
-	public View onCreateView() {
+	public View onCreateView(MyFragment container) {
 		log("onCreateView");
-		constructListView();
+		constructListView(container);
 		getActivityState() //
 				.add(mReceiptListView) //
 				.restoreViewsFromSnapshot();
 		log(" returning " + nameOf(mReceiptListView));
-		return mReceiptListView;
+		return mReceiptListViewContainer;
 	}
 
 	// Methods this fragment provides (its non-fragment-related interface)
@@ -104,7 +103,7 @@ public class ReceiptList extends PseudoFragment {
 	}
 
 	// Construct a view to be used for the list items
-	private void constructListView() {
+	private void constructListView(MyFragment container) {
 		ListView listView = new ListView(getContext());
 
 		List<Receipt> receiptList = buildListOfReceipts();
@@ -117,7 +116,6 @@ public class ReceiptList extends PseudoFragment {
 		this.mReceiptListAdapter = arrayAdapter;
 		this.mReceiptList = receiptList;
 		this.mReceiptListView = listView;
-
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView aView, View v, int position,
 					long id) {
@@ -127,6 +125,9 @@ public class ReceiptList extends PseudoFragment {
 		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		listView.setLayoutParams(layoutParam);
+		this.mReceiptListViewContainer = wrapView(mReceiptListView,
+				nameOf(mReceiptListView) + " " + nameOf(getFragments()) + " "
+						+ nameOf(container));
 	}
 
 	/**
@@ -243,4 +244,5 @@ public class ReceiptList extends PseudoFragment {
 	private List<Receipt> mReceiptList;
 	private RBuddyApp mApp;
 	private ListView mReceiptListView;
+	private View mReceiptListViewContainer;
 }

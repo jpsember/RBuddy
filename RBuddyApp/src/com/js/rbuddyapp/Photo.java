@@ -59,7 +59,7 @@ public class Photo extends PseudoFragment {
 	}
 
 	@Override
-	public View onCreateView() {
+	public View onCreateView(MyFragment container) {
 		log("onCreateView");
 
 		layoutElements();

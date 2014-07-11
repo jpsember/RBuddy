@@ -1,6 +1,7 @@
 package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
+import static com.js.basic.Tools.nameOf;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,7 +53,7 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	@Override
-	public View onCreateView() {
+	public View onCreateView(MyFragment container) {
 		log("onCreateView");
 
 		{
@@ -60,17 +61,20 @@ public class ReceiptEditor extends PseudoFragment {
 			mScrollView = new ScrollView(getContext());
 			mScrollView.setLayoutParams(new LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			mScrollViewContainer = wrapView(mScrollView, nameOf(this) + " "
+					+ nameOf(this.getFragments()) + " " + nameOf(container));
 		}
 
 		getActivityState() //
 				.add(mScrollView) //
 				.restoreViewsFromSnapshot();
 		log(" returning scrollView " + nameOf(mScrollView));
-		return mScrollView;
+		return mScrollViewContainer;
 	}
 
 	@Override
 	public void onResume() {
+		ASSERT(mScrollView != null);
 		super.onResume();
 		setReceipt(listener().getReceipt());
 	}
@@ -86,6 +90,7 @@ public class ReceiptEditor extends PseudoFragment {
 	public void onDestroyView() {
 		disposeForm();
 		mScrollView = null;
+		mScrollViewContainer = null;
 		super.onDestroyView();
 	}
 
@@ -133,8 +138,16 @@ public class ReceiptEditor extends PseudoFragment {
 	 * exists
 	 */
 	private void constructForm() {
-		// TODO: in PsuedoFragment class, keep track of number of fragments paused/resumed/etc
-    // (for development purposes)
+		// TODO: in PsuedoFragment class, keep track of number of fragments
+		// paused/resumed/etc
+		// (for development purposes)
+
+		log("constructForm, isResumed=" + isResumed() + " hasReceipt="
+				+ hasReceipt() + " mForm=" + nameOf(mForm));
+
+		if (mScrollView != null && !isResumed()) {
+			warning("mScrollView is nonnull, yet isResumed is false!");
+		}
 
 		if (!isResumed())
 			return;
@@ -167,6 +180,8 @@ public class ReceiptEditor extends PseudoFragment {
 				processPhotoButtonPress();
 			}
 		});
+		log("adding form " + nameOf(mForm) + " to scrollView "
+				+ nameOf(mScrollView));
 		mScrollView.addView(mForm.getView(), new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 	}
@@ -270,9 +285,19 @@ public class ReceiptEditor extends PseudoFragment {
 		void editPhoto(Receipt r);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(nameOf(this));
+		sb.append("----------------------------ReceiptEditor;");
+		sb.append(" fragorg=" + this.getFragments());
+		return sb.toString();
+	}
+
 	private RBuddyApp mApp;
 	private Receipt mReceipt;
 	private Form mForm;
 	private FormButtonWidget mReceiptWidget;
 	private ScrollView mScrollView;
+	private View mScrollViewContainer;
+
 }

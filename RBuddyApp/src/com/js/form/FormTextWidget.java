@@ -134,7 +134,6 @@ public class FormTextWidget extends FormWidget {
 		input.setOnFocusChangeListener(new OnFocusChangeListener() {
 			public void onFocusChange(View v0, boolean hasFocus) {
 				if (!hasFocus) {
-					// final boolean db = true;
 					if (db)
 						pr("FormTextWidget, setting value for new text: "
 								+ input.getText());

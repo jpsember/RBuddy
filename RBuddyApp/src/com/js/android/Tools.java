@@ -11,7 +11,11 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Tools extends com.js.basic.Tools {
@@ -163,6 +167,29 @@ public class Tools extends com.js.basic.Tools {
 		int i = mDebugBgndColorIndex % debugColorCycle.length;
 		view.setBackgroundColor(Color.parseColor(debugColorCycle[i]));
 		mDebugBgndColorIndex++;
+	}
+
+	public static View wrapView(View view) {
+		return wrapView(view, null);
+	}
+
+	public static View wrapView(View view, String title) {
+		LinearLayout f = new LinearLayout(view.getContext());
+		f.setOrientation(LinearLayout.VERTICAL);
+		final int PADDING = 14;
+		f.setPadding(PADDING, PADDING, PADDING, PADDING);
+		if (title != null) {
+			TextView tv = new TextView(view.getContext());
+			tv.setText(title);
+			LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			p.gravity = Gravity.CENTER_HORIZONTAL;
+			f.addView(tv, p);
+		}
+
+		f.addView(view);
+		debugChangeBgndColor(f);
+		return f;
 	}
 
 	private static String debugColorCycle[] = { "#402020", "#204020",

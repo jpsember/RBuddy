@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import static com.js.android.Tools.*;
 
 import com.js.android.AppPreferences;
+import com.js.basic.UniqueIdentifier;
 import com.js.form.FormWidget;
 import com.js.json.JSONEncoder;
 import com.js.json.JSONParser;
@@ -27,8 +28,7 @@ import com.js.json.JSONParser;
  */
 public class FragmentOrganizer {
 
-	private static final boolean mLogging = true;
-
+	private static/* final */boolean mLogging = false;
 
 	private static final String BUNDLE_PERSISTENCE_KEY = "FragmentOrganizer";
 
@@ -49,13 +49,15 @@ public class FragmentOrganizer {
 	 * @return
 	 */
 	public FragmentOrganizer(Activity parent) {
-		final boolean db = true;
 		if (db)
 			pr(hey(this));
+		uniqueId = sUniqueId++;
+
 		log("Constructing for parent " + nameOf(parent));
-		
+
+		this.mLabel = parent.getClass().getSimpleName();
 		registerWithGlobalMap();
-		
+
 		this.mParentActivity = parent;
 		this.mSlotViewBaseId = 1900;
 
@@ -93,7 +95,6 @@ public class FragmentOrganizer {
 	}
 
 	void register(MyFragment.Factory factory) {
-		final boolean db = true;
 		if (db)
 			pr(hey(this) + "registering factory " + nameOf(factory) + ", name "
 					+ factory.name());
@@ -217,7 +218,7 @@ public class FragmentOrganizer {
 	 * @return
 	 */
 	public View getView() {
-		return mSlotsContainer;
+		return mSlotsContainerWrapper;
 	}
 
 	private MyFragment fragmentInSlot(int slot) {
@@ -262,57 +263,66 @@ public class FragmentOrganizer {
 	 * @return if in resumed state, the fragment displayed; else null
 	 */
 	public MyFragment plot(String tag, boolean primary, boolean undoable) {
-		log("plot " + tag + " primary=" + d(primary) + " undoable="
-				+ d(undoable));
 
-		ASSERT(tag != null);
-		int slot = primary ? 0 : mNumberOfSlots - 1;
-		log(" slot=" + slot);
+		mLogging = true;
+		MyFragment newFragment = null;
+		do {
+			ASSERT(tag != null);
+			int slot = primary ? 0 : mNumberOfSlots - 1;
+			log("====plot==== tag: " + tag + " prim=" + d(primary) + " undo="
+					+ d(undoable) + " slot=" + slot);
 
-		// If new fragment exists in another slot, just use that one
-		int actualSlot = slotContainingFragment(tag);
-		if (actualSlot >= 0) {
-			log(" already found in slot " + actualSlot);
-			return get(tag, true);
-		}
+			warning("I suspect the fragment's most recent view is NOT being stored in the slot's container");
 
-		// Update our internal desired slot contents
-		mDesiredSlotContents[slot] = tag;
+			// If new fragment exists in another slot, just use that one
+			int actualSlot = slotContainingFragment(tag);
+			if (actualSlot >= 0) {
+				log(" already found in slot " + actualSlot);
+				newFragment = get(tag, true);
+				break;
+			}
 
-		// Only update the actual view if we're in the resumed state
-		if (!isResumed()) {
-			return null;
-		}
+			// Update our internal desired slot contents
+			mDesiredSlotContents[slot] = tag;
 
-		String oldName = fragmentName(fragmentInSlot(slot));
+			// Only update the actual view if we're in the resumed state
+			if (!isResumed()) {
+				break;
+			}
 
-		MyFragment newFragment = get(tag, true);
-		log(" newFragment " + describe(newFragment) + " oldName=" + oldName);
-		if (tag.equals(oldName))
-			return newFragment;
+			String oldName = fragmentName(fragmentInSlot(slot));
 
-		MyFragment oldFragment = null;
-		if (oldName != null)
-			oldFragment = get(oldName, false);
+			newFragment = get(tag, true);
+			log(" newFragment " + describe(newFragment) + " oldName=" + oldName);
+			if (tag.equals(oldName)) {
+				newFragment = null;
+				break;
+			}
 
-		FragmentManager m = mParentActivity.getFragmentManager();
+			MyFragment oldFragment = null;
+			if (oldName != null)
+				oldFragment = get(oldName, false);
 
-		FragmentTransaction transaction = m.beginTransaction();
-		if (oldFragment == null) {
-			log(" doing transaction:add");
-			transaction.add(mSlotViewBaseId + slot, newFragment, tag);
-		} else {
-			// TODO try to get these working; currently says:
-			// RuntimeException: Unknown animator name: translate.
-			//
-			// transaction.setCustomAnimations(R.anim.slide_in_left,
-			// R.anim.slide_out_right);
-			log(" doing transaction:replace");
-			transaction.replace(mSlotViewBaseId + slot, newFragment, tag);
-		}
-		if (undoable)
-			transaction.addToBackStack(null);
-		transaction.commit();
+			FragmentManager m = mParentActivity.getFragmentManager();
+
+			FragmentTransaction transaction = m.beginTransaction();
+			if (oldFragment == null) {
+				log(" doing transaction:add");
+				transaction.add(mSlotViewBaseId + slot, newFragment, tag);
+			} else {
+				// TODO try to get these working; currently says:
+				// RuntimeException: Unknown animator name: translate.
+				//
+				// transaction.setCustomAnimations(R.anim.slide_in_left,
+				// R.anim.slide_out_right);
+				log(" doing transaction:replace");
+				transaction.replace(mSlotViewBaseId + slot, newFragment, tag);
+			}
+			if (undoable)
+				transaction.addToBackStack(null);
+			transaction.commit();
+		} while (false);
+		mLogging = false;
 		log(" returning " + newFragment);
 		return newFragment;
 	}
@@ -361,18 +371,23 @@ public class FragmentOrganizer {
 	}
 
 	private void constructContainer() {
-		// TODO: it would be useful to have capability of wrapping a view in a border with a label
+		// TODO: it would be useful to have capability of wrapping a view in a
+		// border with a label
 
 		// Create view with a horizontal row of panels, one for each slot
 		LinearLayout layout = new LinearLayout(mParentActivity);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
+
 		// debugChangeBgndColor(layout);
 		mSlotsContainer = layout;
+		mSlotsContainerWrapper = wrapView(mSlotsContainer, nameOf(this));
 
 		for (int slot = 0; slot < mNumberOfSlots; slot++) {
 			View v = buildSlotView(slot);
 			mSlotsContainer.addView(v, slot, new LinearLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1));
+					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
+					// LayoutParams.MATCH_PARENT,
+					1));
 		}
 	}
 
@@ -403,7 +418,6 @@ public class FragmentOrganizer {
 	 * @return fragment, or null
 	 */
 	public MyFragment get(String tag, boolean constructIfMissing) {
-		final boolean db = true;
 		if (db)
 			pr(hey(this) + "tag=" + tag);
 		MyFragment f;
@@ -415,17 +429,14 @@ public class FragmentOrganizer {
 		f = (MyFragment) m.findFragmentByTag(tag);
 		if (f == null && constructIfMissing) {
 			f = factory(tag).construct();
-
 			if (db)
-				pr("\n  ======================= Constructed instance of " + tag
-						+ "\n");
+				pr(" ...constructed instance of " + tag);
 			mFragmentMap.put(tag, f);
 		}
 		return f;
 	}
 
 	private MyFragment.Factory factory(String tag) {
-		final boolean db = true;
 		if (db)
 			pr(hey(this) + " looking for factory for tag " + tag);
 		MyFragment.Factory f = mFragmentFactories.get(tag);
@@ -461,15 +472,13 @@ public class FragmentOrganizer {
 	public <T extends PseudoFragment> T register(T singleton) {
 		assertUIThread();
 		mSingletonObjects.put(singleton.getClass(), singleton);
-		final boolean db = true;
 		if (db)
-			pr(hey() + "put obj " + nameOf(singleton) + " into map "
-					+ nameOf(mSingletonObjects));
+			pr(hey() + "put obj " + nameOf(singleton) + " into singleton map "
+					+ nameOf(mSingletonObjects) + "\n");
 		return singleton;
 	}
 
 	public PseudoFragment getWrappedSingleton(Class singletonClass) {
-		final boolean db = true;
 		assertUIThread();
 		PseudoFragment obj = mSingletonObjects.get(singletonClass);
 		if (db)
@@ -487,25 +496,39 @@ public class FragmentOrganizer {
 	 * constructors to recreate old fragments, keep a global map of fragment
 	 * organizers that will be pointed to by a bundle that we will store with
 	 * each fragment when we initially create it (using some other one or more
-	 * arg constructor)
+	 * arg constructor). Each activity will give a particular name to their
+	 * fragment organizer, and when a fragment is constructed, it will use this
+	 * name to look in the map for the most recent fragment organizer to use.
 	 */
-	private static Map<Integer, FragmentOrganizer> mOrganizerMap = new HashMap();
-	private static int mIdentifier;
+	private static Map<String, FragmentOrganizer> mOrganizerMap = new HashMap();
 
 	private void registerWithGlobalMap() {
 		assertUIThread();
-		mUniqueId = ++mIdentifier;
-		log("registering with global map, unique id=" + mUniqueId);
-		mOrganizerMap.put(mUniqueId, this);
-	}
-	
-	public static FragmentOrganizer getOrganizer(int key) {
-		assertUIThread();
-		return mOrganizerMap.get(key);
+		log("registering with global map, label=" + mLabel + ", currently "
+				+ nameOf(mOrganizerMap.get(mLabel)));
+		mOrganizerMap.put(mLabel, this);
 	}
 
-	public int getUniqueId() {
-		return mUniqueId;
+	public static FragmentOrganizer getOrganizer(String label) {
+		assertUIThread();
+		return mOrganizerMap.get(label);
+	}
+
+	public String getLabel() {
+		return mLabel;
+	}
+
+	/**
+	 * Get the 'live', or most recent, version of this organizer
+	 * 
+	 * @return
+	 */
+	public FragmentOrganizer mostRecent() {
+		assertUIThread();
+		FragmentOrganizer f = mOrganizerMap.get(getLabel());
+		if (f == null)
+			f = this;
+		return f;
 	}
 
 	private Map<Class, PseudoFragment> mSingletonObjects = new HashMap();
@@ -518,6 +541,7 @@ public class FragmentOrganizer {
 
 	private Activity mParentActivity;
 	private LinearLayout mSlotsContainer;
+	private View mSlotsContainerWrapper;
 	private int mSlotViewBaseId;
 
 	// Names of the fragments we want in each slot
@@ -526,20 +550,31 @@ public class FragmentOrganizer {
 	private boolean mIsResumed;
 	private boolean mSupportsDual;
 	private int mNumberOfSlots;
-	private int mUniqueId;
+	private String mLabel;
 
 	public boolean isAlive() {
 		return mAlive;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("FragmentOrganizer:");
+		sb.append(UniqueIdentifier.nameFor(this));
+		sb.append("#" + uniqueId);
+		return sb.toString();
+	}
+
 	private boolean mAlive = true;
+	private int uniqueId;
+	private static int sUniqueId = 100;
 
 	public void kill() {
 		final boolean db = true;
 		if (db)
 			pr(hey(this)
 					+ " ***************************************************** killing id "
-					+ this.mUniqueId);
+					+ this.mLabel);
 		mAlive = false;
 	}
+
 }

@@ -11,12 +11,16 @@ import android.view.ViewGroup;
 
 public abstract class MyFragment extends Fragment {
 
+	private static final String BUNDLE_ORGANIZER_KEY = "organizer";
+
 	/**
 	 * Constructor. Note, for technical reasons, each concrete subclass of this
 	 * abstract class must provide a no-argument constructor (that does
 	 * nothing).
 	 */
 	public MyFragment() {
+		if (db)
+			pr(hey(this) + "constructing; " + stackTrace(0, 10));
 	}
 
 	protected void setLogging(boolean f) {
@@ -42,19 +46,22 @@ public abstract class MyFragment extends Fragment {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		log("onCreate " + nameOf(savedInstanceState));
+		log("onCreate " + nameOf(savedInstanceState)
+				+ dumpState(savedInstanceState, this.getArguments()));
 		super.onCreate(savedInstanceState);
 		processSavedState(savedInstanceState);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		log("onActivityCreated " + nameOf(savedInstanceState));
+		log("onActivityCreated " + nameOf(savedInstanceState)
+				+ dumpState(savedInstanceState, this.getArguments()));
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	public void onRestoreInstanceState(Bundle bundle) {
-		log("onRestoreInstanceState; " + nameOf(bundle) + "\n\n");
+		log("onRestoreInstanceState; " + nameOf(bundle)
+				+ dumpState(bundle, this.getArguments()) + "\n\n");
 	}
 
 	@Override
@@ -79,8 +86,15 @@ public abstract class MyFragment extends Fragment {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		log("onSaveInstanceState; " + nameOf(outState) + "\n\n");
+		log("onSaveInstanceState; " + nameOf(outState)
+				+ dumpState(outState, this.getArguments()) + "\n\n");
 		super.onSaveInstanceState(outState);
+
+		// The fragment ought to have a bundle id stored by this point
+		if (db)
+			pr(hey(this) + " >>>>> currently stored key: "
+					+ outState.get(BUNDLE_ORGANIZER_KEY));
+
 		// Ask the pseudo fragment to save its view state, since scrollviews and
 		// whatnot may be disappearing
 		mWrappedFragment.onSaveViews();
@@ -112,9 +126,6 @@ public abstract class MyFragment extends Fragment {
 		super.onDetach();
 	}
 
-	// From FragmentWrapper:
-	private static final String BUNDLE_ORGANIZER_KEY = "organizer";
-
 	/**
 	 * Provide class being wrapped
 	 * 
@@ -123,46 +134,68 @@ public abstract class MyFragment extends Fragment {
 	public abstract Class getFragmentClass();
 
 	public void register(FragmentOrganizer f) {
-		final boolean db = true;
 		if (db)
 			pr(hey(this) + "organizer=" + nameOf(f));
 
-		Bundle args = new Bundle();
-		args.putInt(BUNDLE_ORGANIZER_KEY, f.getUniqueId());
-		setArguments(args);
+		Bundle args = this.getArguments();
+		if (args == null) {
+			args = new Bundle();
+			args.putString(BUNDLE_ORGANIZER_KEY, f.getLabel());
+			setArguments(args);
+
+			if (db)
+				pr(hey(this) + " >>>>> stored organizer key " + f.getLabel()
+						+ " in bundle key;"
+						+ dumpState(null, this.getArguments()));
+		}
 
 		String name = getFragmentClass().getSimpleName();
-		if (db)
-			pr(" name=" + name);
 		if (!f.isFactoryRegistered(name)) {
-			if (db)
-				pr("  registering factory");
 			Factory factory = new Factory(this, name, f);
+			if (db)
+				pr(" registering factory " + nameOf(factory) + " name " + name
+						+ " for fragment " + nameOf(this));
 			f.register(factory);
-			return;
 		}
 	}
 
 	private void processSavedState(Bundle savedInstanceState) {
-		final boolean db = true;
 		if (db)
-			pr(hey(this) + " savedState " + nameOf(savedInstanceState));
-		if (savedInstanceState != null) {
-			if (mWrappedFragment != null) {
-				if (db)
-					pr("  ...already have a wrapped fragment: "
-							+ nameOf(mWrappedFragment));
-				return;
-			}
-			int key = savedInstanceState.getInt(BUNDLE_ORGANIZER_KEY, -1);
-			FragmentOrganizer f = FragmentOrganizer.getOrganizer(key);
-			ASSERT(f != null);
-			ASSERT(f.isAlive());
-			// It was already registered, so get the singleton object
-			mWrappedFragment = f.getWrappedSingleton(getFragmentClass());
+			pr(hey(this) + " savedState " + nameOf(savedInstanceState)
+					+ dumpState(savedInstanceState, this.getArguments()));
+
+		if (mWrappedFragment != null) {
 			if (db)
-				pr("  set mWrappedFragment to " + nameOf(mWrappedFragment));
+				pr("  ...already have a wrapped fragment: "
+						+ nameOf(mWrappedFragment));
+			return;
 		}
+
+		String key = null;
+
+		if (savedInstanceState != null) {
+			key = savedInstanceState.getString(BUNDLE_ORGANIZER_KEY);
+			if (db)
+				pr(" recalled key from savedInstanceState: " + key);
+		}
+		if (key == null) {
+			Bundle b2 = this.getArguments();
+			key = b2.getString(BUNDLE_ORGANIZER_KEY);
+			if (db)
+				pr(" recalled key from current arguments: " + key);
+		}
+
+		ASSERT(key != null, "no organizer key in saved state");
+
+		// int key = savedInstanceState.getInt(BUNDLE_ORGANIZER_KEY, -1);
+
+		FragmentOrganizer f = FragmentOrganizer.getOrganizer(key);
+		ASSERT(f != null);
+		ASSERT(f.isAlive());
+		// It was already registered, so get the singleton object
+		mWrappedFragment = f.getWrappedSingleton(getFragmentClass());
+		if (db)
+			pr("  set mWrappedFragment to " + nameOf(mWrappedFragment));
 	}
 
 	@Override
@@ -173,10 +206,8 @@ public abstract class MyFragment extends Fragment {
 		if (mWrappedFragment == null)
 			die("no wrapped fragment for " + nameOf(this) + ": "
 					+ getFragmentClass().getSimpleName());
-
-		// Perhaps don't send state along, since we are persisting it in other
-		// methods
-		return mWrappedFragment.onCreateView();
+		log("wrappedFragment=" + describe(mWrappedFragment));
+		return mWrappedFragment.onCreateView(this);
 	}
 
 	@Override
@@ -190,9 +221,9 @@ public abstract class MyFragment extends Fragment {
 
 	static class Factory {
 
-		public Factory(MyFragment wrapper, String name,
+		public Factory(MyFragment fragment, String name,
 				FragmentOrganizer organizer) {
-			mWrapperClass = wrapper.getClass();
+			mWrapperClass = fragment.getClass();
 			mName = name;
 			mOrganizer = organizer;
 		}
@@ -212,8 +243,11 @@ public abstract class MyFragment extends Fragment {
 			try {
 				f = (MyFragment) mWrapperClass.getConstructor().newInstance();
 				Bundle b = new Bundle();
-				b.putInt(BUNDLE_ORGANIZER_KEY, mOrganizer.getUniqueId());
+				b.putString(BUNDLE_ORGANIZER_KEY, mOrganizer.getLabel());
 				f.setArguments(b);
+				if (db)
+					pr(hey(this) + " >>>>> stored organizer key "
+							+ mOrganizer.getLabel() + " in bundle key");
 				f.processSavedState(b);
 			} catch (Throwable t) {
 				die("problem creating instance of " + mWrapperClass
@@ -225,6 +259,24 @@ public abstract class MyFragment extends Fragment {
 		private String mName;
 		private Class mWrapperClass;
 		private FragmentOrganizer mOrganizer;
+	}
+
+	private String dumpState(Bundle b1, Bundle b2) {
+		StringBuilder sb = new StringBuilder(" [");
+
+		sb.append("current:");
+		if (b1 == null)
+			sb.append("---");
+		else
+			sb.append(b1.get(BUNDLE_ORGANIZER_KEY));
+		sb.append(" aux:");
+		if (b2 == null)
+			sb.append("---");
+		else
+			sb.append(b2.get(BUNDLE_ORGANIZER_KEY));
+		sb.append("]");
+		return sb.toString();
+
 	}
 
 	private boolean mLogging;

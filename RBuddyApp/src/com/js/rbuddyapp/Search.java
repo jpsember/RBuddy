@@ -31,7 +31,7 @@ public class Search extends PseudoFragment {
 		mApp = RBuddyApp.sharedInstance();
 	}
 	@Override
-	public View onCreateView() {
+	public View onCreateView(MyFragment container) {
 
 		String jsonString = readTextFileResource(getContext(),
 				R.raw.form_search);
