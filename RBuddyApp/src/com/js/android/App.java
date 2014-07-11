@@ -48,6 +48,7 @@ public class App {
 			final App v = (App) c.newInstance(paramValues);
 
 			sharedInstance = v;
+
 		} catch (Throwable e) {
 			die("failed to construct app instance", e);
 		}

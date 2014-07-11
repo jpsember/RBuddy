@@ -125,6 +125,8 @@ public class ReceiptList extends PseudoFragment {
 		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		listView.setLayoutParams(layoutParam);
+		if (db)
+			pr(hey() + "wrapping receipt list; " + stackTrace(0, 6));
 		this.mReceiptListViewContainer = wrapView(mReceiptListView,
 				nameOf(mReceiptListView) + " " + nameOf(getFragments()) + " "
 						+ nameOf(container));

@@ -68,12 +68,14 @@ public abstract class MyFragment extends Fragment {
 	public void onStart() {
 		log("onStart");
 		super.onStart();
+		updatePseudoFragment();
 	}
 
 	@Override
 	public void onResume() {
 		log("onResume");
 		super.onResume();
+		updatePseudoFragment();
 		mWrappedFragment.onResumeAux();
 	}
 
@@ -81,6 +83,7 @@ public abstract class MyFragment extends Fragment {
 	public void onPause() {
 		log("onPause");
 		super.onPause();
+		updatePseudoFragment();
 		mWrappedFragment.onPauseAux();
 	}
 
@@ -112,6 +115,7 @@ public abstract class MyFragment extends Fragment {
 	public void onStop() {
 		log("onStop");
 		super.onStop();
+		updatePseudoFragment();
 	}
 
 	@Override
@@ -159,11 +163,21 @@ public abstract class MyFragment extends Fragment {
 		}
 	}
 
+	private void setFragmentOrganizer(FragmentOrganizer f) {
+		if (f != mFragmentOrganizer) {
+			mFragmentOrganizer = f;
+		}
+	}
+
 	private void processSavedState(Bundle savedInstanceState) {
+		// TODO: investigate whether we need separate code for our factory
+		// constructor AND the onCreate(Bundle) method to determine the
+		// pseudoFragment
 		if (db)
 			pr(hey(this) + " savedState " + nameOf(savedInstanceState)
 					+ dumpState(savedInstanceState, this.getArguments()));
 
+		// TODO maybe we need to update the wrapped fragment always here?
 		if (mWrappedFragment != null) {
 			if (db)
 				pr("  ...already have a wrapped fragment: "
@@ -191,11 +205,9 @@ public abstract class MyFragment extends Fragment {
 
 		FragmentOrganizer f = FragmentOrganizer.getOrganizer(key);
 		ASSERT(f != null);
-		ASSERT(f.isAlive());
-		// It was already registered, so get the singleton object
-		mWrappedFragment = f.getWrappedSingleton(getFragmentClass());
-		if (db)
-			pr("  set mWrappedFragment to " + nameOf(mWrappedFragment));
+		setFragmentOrganizer(f);
+
+		updatePseudoFragment();
 	}
 
 	@Override
@@ -217,6 +229,47 @@ public abstract class MyFragment extends Fragment {
 		return sb.toString();
 	}
 
+	private void updatePseudoFragment() {
+		// It's holding onto old fragment organizer! Not just the old fragment.
+
+		final boolean db = true;
+		if (db)
+			pr(hey() + "organizer=" + nameOf(mFragmentOrganizer) + "\n"
+					+ stackTrace(1, 3));
+		ASSERT(mFragmentOrganizer != null);
+
+		mFragmentOrganizer = mFragmentOrganizer.mostRecent();
+
+		PseudoFragment f = mFragmentOrganizer
+				.getWrappedSingleton(getFragmentClass());
+		if (f != mWrappedFragment) {
+			if (db)
+				pr("change fragment from " + nameOf(mWrappedFragment) + " to "
+						+ nameOf(f));
+			mWrappedFragment = f;
+		}
+	}
+
+	private String dumpState(Bundle b1, Bundle b2) {
+		StringBuilder sb = new StringBuilder(" [");
+
+		sb.append("current:");
+		if (b1 == null)
+			sb.append("---");
+		else
+			sb.append(b1.get(BUNDLE_ORGANIZER_KEY));
+		sb.append(" aux:");
+		if (b2 == null)
+			sb.append("---");
+		else
+			sb.append(b2.get(BUNDLE_ORGANIZER_KEY));
+		sb.append("]");
+		return sb.toString();
+
+	}
+
+	private boolean mLogging;
+	private FragmentOrganizer mFragmentOrganizer;
 	private PseudoFragment mWrappedFragment;
 
 	static class Factory {
@@ -261,23 +314,4 @@ public abstract class MyFragment extends Fragment {
 		private FragmentOrganizer mOrganizer;
 	}
 
-	private String dumpState(Bundle b1, Bundle b2) {
-		StringBuilder sb = new StringBuilder(" [");
-
-		sb.append("current:");
-		if (b1 == null)
-			sb.append("---");
-		else
-			sb.append(b1.get(BUNDLE_ORGANIZER_KEY));
-		sb.append(" aux:");
-		if (b2 == null)
-			sb.append("---");
-		else
-			sb.append(b2.get(BUNDLE_ORGANIZER_KEY));
-		sb.append("]");
-		return sb.toString();
-
-	}
-
-	private boolean mLogging;
 }

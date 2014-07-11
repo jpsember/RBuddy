@@ -1,7 +1,6 @@
 package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
-import static com.js.basic.Tools.nameOf;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +37,7 @@ public class ReceiptEditor extends PseudoFragment {
 
 	public ReceiptEditor(FragmentOrganizer fragments) {
 		super(fragments);
+		// final boolean db = true;
 		if (db) {
 			pr(hey() + "setting logging true");
 			setLogging(true);
@@ -52,17 +52,22 @@ public class ReceiptEditor extends PseudoFragment {
 		setReceipt(listener().getReceipt());
 	}
 
+	private static int ZZZ = 500;
+
 	@Override
 	public View onCreateView(MyFragment container) {
-		log("onCreateView");
+		log("onCreateView container=" + nameOf(container));
+
 
 		{
 			ASSERT(mScrollView == null);
 			mScrollView = new ScrollView(getContext());
 			mScrollView.setLayoutParams(new LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-			mScrollViewContainer = wrapView(mScrollView, nameOf(this) + " "
-					+ nameOf(this.getFragments()) + " " + nameOf(container));
+			String message = "" + (ZZZ++) + "!" + nameOf(this) + " "
+					+ nameOf(this.getFragments()) + " " + nameOf(container);
+			warning("set msg: " + message);
+			mScrollViewContainer = wrapView(mScrollView, message);
 		}
 
 		getActivityState() //
@@ -106,8 +111,12 @@ public class ReceiptEditor extends PseudoFragment {
 	}
 
 	public void setReceipt(Receipt receipt) {
+		// Somehow calls to setReceipt() are being sent to old fragments, one
+		// with old organizers...?
+
+		final boolean db = true;
 		if (db)
-			pr(hey(this) + receipt);
+			pr(hey() + receipt + "\n" + stackTrace(0, 8));
 		// In case there's an existing receipt, flush its changes
 		writeReceiptFromWidgets();
 

@@ -17,6 +17,7 @@ import static com.js.android.Tools.*;
 
 import com.js.android.AppPreferences;
 import com.js.basic.UniqueIdentifier;
+//import com.js.basic.UniqueIdentifier;
 import com.js.form.FormWidget;
 import com.js.json.JSONEncoder;
 import com.js.json.JSONParser;
@@ -51,7 +52,7 @@ public class FragmentOrganizer {
 	public FragmentOrganizer(Activity parent) {
 		if (db)
 			pr(hey(this));
-		uniqueId = sUniqueId++;
+		// uniqueId = sUniqueId++;
 
 		log("Constructing for parent " + nameOf(parent));
 
@@ -263,16 +264,13 @@ public class FragmentOrganizer {
 	 * @return if in resumed state, the fragment displayed; else null
 	 */
 	public MyFragment plot(String tag, boolean primary, boolean undoable) {
-
-		mLogging = true;
+		mLogging = db;
 		MyFragment newFragment = null;
 		do {
 			ASSERT(tag != null);
 			int slot = primary ? 0 : mNumberOfSlots - 1;
 			log("====plot==== tag: " + tag + " prim=" + d(primary) + " undo="
 					+ d(undoable) + " slot=" + slot);
-
-			warning("I suspect the fragment's most recent view is NOT being stored in the slot's container");
 
 			// If new fragment exists in another slot, just use that one
 			int actualSlot = slotContainingFragment(tag);
@@ -287,6 +285,7 @@ public class FragmentOrganizer {
 
 			// Only update the actual view if we're in the resumed state
 			if (!isResumed()) {
+				log("we're not in the resumed state, breaking");
 				break;
 			}
 
@@ -315,8 +314,12 @@ public class FragmentOrganizer {
 				//
 				// transaction.setCustomAnimations(R.anim.slide_in_left,
 				// R.anim.slide_out_right);
-				log(" doing transaction:replace");
+
+				log(" doing transaction:replace id " + (mSlotViewBaseId + slot)
+						+ " tag " + tag + " newFragment=" + nameOf(newFragment));
+				updateOrganizerFor(newFragment);
 				transaction.replace(mSlotViewBaseId + slot, newFragment, tag);
+				warning("!!!!!!!!!!!!!!!!!!!!!!!!!!! maybe the tag is already used by an old fragment");
 			}
 			if (undoable)
 				transaction.addToBackStack(null);
@@ -371,14 +374,10 @@ public class FragmentOrganizer {
 	}
 
 	private void constructContainer() {
-		// TODO: it would be useful to have capability of wrapping a view in a
-		// border with a label
-
 		// Create view with a horizontal row of panels, one for each slot
 		LinearLayout layout = new LinearLayout(mParentActivity);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
 
-		// debugChangeBgndColor(layout);
 		mSlotsContainer = layout;
 		mSlotsContainerWrapper = wrapView(mSlotsContainer, nameOf(this));
 
@@ -421,19 +420,39 @@ public class FragmentOrganizer {
 		if (db)
 			pr(hey(this) + "tag=" + tag);
 		MyFragment f;
-		f = mFragmentMap.get(tag);
-		if (f != null)
-			return f;
+		do {
+			f = mFragmentMap.get(tag);
+			if (f != null)
+				break;
 
-		FragmentManager m = mParentActivity.getFragmentManager();
-		f = (MyFragment) m.findFragmentByTag(tag);
-		if (f == null && constructIfMissing) {
-			f = factory(tag).construct();
-			if (db)
-				pr(" ...constructed instance of " + tag);
-			mFragmentMap.put(tag, f);
-		}
+			FragmentManager m = mParentActivity.getFragmentManager();
+			f = (MyFragment) m.findFragmentByTag(tag);
+			if (f == null && constructIfMissing) {
+				f = factory(tag).construct();
+				if (db)
+					pr(" ...constructed instance of " + tag);
+				mFragmentMap.put(tag, f);
+			}
+		} while (false);
+		if (f != null)
+			updateOrganizerFor(f);
 		return f;
+	}
+
+	private void updateOrganizerFor(MyFragment f) {
+		if (db)
+			pr(hey() + nameOf(f));
+		PseudoFragment s = getWrappedSingleton(f.getFragmentClass());
+		FragmentOrganizer current = s.getFragments();
+		if (db)
+			pr(" current org " + describe(current) + " new " + describe(this));
+		if (current != this) {
+			warning("updating organizer for " + describe(s) + " from "
+					+ describe(current) + " to " + describe(this));
+			// TODO: not sure if this is necessary; didn't fix the problem
+			die("I don't think this is required");
+			s.setFragments(this);
+		}
 	}
 
 	private MyFragment.Factory factory(String tag) {
@@ -504,8 +523,11 @@ public class FragmentOrganizer {
 
 	private void registerWithGlobalMap() {
 		assertUIThread();
-		log("registering with global map, label=" + mLabel + ", currently "
-				+ nameOf(mOrganizerMap.get(mLabel)));
+		final boolean db = true;
+		if (db)
+			pr(hey() + "map[" + mLabel + "] replace "
+					+ UniqueIdentifier.nameFor(mOrganizerMap.get(mLabel))
+					+ " with " + UniqueIdentifier.nameFor(this));
 		mOrganizerMap.put(mLabel, this);
 	}
 
@@ -524,8 +546,11 @@ public class FragmentOrganizer {
 	 * @return
 	 */
 	public FragmentOrganizer mostRecent() {
+		// TODO: more efficient way of ensuring UI thread? Make it debug only?
 		assertUIThread();
 		FragmentOrganizer f = mOrganizerMap.get(getLabel());
+		if (db)
+			pr(hey() + " version in map=" + nameOf(f) + " this=" + nameOf(this));
 		if (f == null)
 			f = this;
 		return f;
@@ -551,30 +576,4 @@ public class FragmentOrganizer {
 	private boolean mSupportsDual;
 	private int mNumberOfSlots;
 	private String mLabel;
-
-	public boolean isAlive() {
-		return mAlive;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("FragmentOrganizer:");
-		sb.append(UniqueIdentifier.nameFor(this));
-		sb.append("#" + uniqueId);
-		return sb.toString();
-	}
-
-	private boolean mAlive = true;
-	private int uniqueId;
-	private static int sUniqueId = 100;
-
-	public void kill() {
-		final boolean db = true;
-		if (db)
-			pr(hey(this)
-					+ " ***************************************************** killing id "
-					+ this.mLabel);
-		mAlive = false;
-	}
-
 }

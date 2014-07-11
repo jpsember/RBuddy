@@ -22,7 +22,7 @@ public abstract class PseudoFragment {
 		if (mLogging) {
 			StringBuilder sb = new StringBuilder("---> ");
 			sb.append(nameOf(this));
-			sb.append(" resumed=" + isResumed());
+			sb.append(" res=" + d(isResumed()));
 			sb.append(" : ");
 			tab(sb, 30);
 			sb.append(message);
@@ -95,9 +95,14 @@ public abstract class PseudoFragment {
 		return mIsResumed;
 	}
 
-	protected FragmentOrganizer getFragments() {
+	public FragmentOrganizer getFragments() {
 		return mFragments;
 	}
+
+	public void setFragments(FragmentOrganizer f) {
+		mFragments = f;
+	}
+
 
 	private FragmentOrganizer mFragments;
 	private ViewStates mActivityState;

@@ -13,5 +13,6 @@
     <string name="action_testonly_toggle_google_drive">Toggle Google Drive</string>
     <string name="action_testonly_toggle_photo_delay">Toggle photo delay</string>
     <string name="action_testonly_toggle_small_device">Toggle small device</string>
+    <string name="action_testonly_rotate">Rotate</string>
     
 </resources>

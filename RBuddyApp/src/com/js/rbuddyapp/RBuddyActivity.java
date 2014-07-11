@@ -11,6 +11,7 @@ import com.js.rbuddy.Receipt;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,9 +37,26 @@ public class RBuddyActivity extends MyActivity implements //
 		return startIntentFor(context, RBuddyActivity.class);
 	}
 
+	private static int sOrientation = -1;
+
+	private void initOrientation() {
+		if (sOrientation >= 0)
+			return;
+		sOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+		// TODO: make this a preferences flag
+		setRequestedOrientation(sOrientation);
+	}
+
+	private void toggleOrientation() {
+		sOrientation ^= (ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE ^ ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setRequestedOrientation(sOrientation);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		initOrientation();
 
 		app = RBuddyApp.sharedInstance(this);
 
@@ -97,8 +115,8 @@ public class RBuddyActivity extends MyActivity implements //
 		super.onResume();
 		View contentView = fragments.getView();
 		contentView = wrapView(contentView, nameOf(this));
-		setContentView(contentView, new LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		setContentView(contentView, new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
 		fragments.onResume();
 	}
 
@@ -154,6 +172,9 @@ public class RBuddyActivity extends MyActivity implements //
 			return true;
 		case R.id.action_testonly_exit:
 			android.os.Process.killProcess(android.os.Process.myPid());
+			return true;
+		case R.id.action_testonly_rotate:
+			toggleOrientation();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

@@ -54,8 +54,9 @@ public class MyActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if (mFragments != null)
-		mFragments.kill();
+		log("onDestroy");
+		// if (mFragments != null)
+		// mFragments.kill();
 		super.onDestroy();
 	}
 

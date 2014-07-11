@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -174,6 +175,13 @@ public class Tools extends com.js.basic.Tools {
 	}
 
 	public static View wrapView(View view, String title) {
+		// If view already has a parent, something odd is happening
+		if (view.getParent() != null) {
+			pr("wrapView, already has parent: " + describe(view.getParent()));
+			ViewGroup p = (ViewGroup) view.getParent();
+			p.removeView(view);
+		}
+
 		LinearLayout f = new LinearLayout(view.getContext());
 		f.setOrientation(LinearLayout.VERTICAL);
 		final int PADDING = 14;

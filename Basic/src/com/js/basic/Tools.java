@@ -334,6 +334,10 @@ public class Tools {
 		return t.getMessage() + "\n" + stackTrace(0, 15, t);
 	}
 
+	public static String d(Boolean b) {
+		return b.booleanValue() ? "T" : "F";
+	}
+
 	public static String d(Object obj) {
 		String s = null;
 		if (obj != null)
