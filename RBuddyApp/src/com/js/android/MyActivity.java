@@ -5,7 +5,6 @@ import static com.js.android.Tools.*;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -33,7 +32,7 @@ public abstract class MyActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
-		
+
 		refreshFragmentsAux();
 	}
 
@@ -70,11 +69,21 @@ public abstract class MyActivity extends Activity {
 	 * @return true if fragment is different than previous one in the map
 	 */
 	void fragmentCreated(MyFragment f) {
+		final boolean db = true;
+		if (db)
+			pr(hey() + nameOf(f) + " (name=" + f.getName() + ")");
+
 		String name = f.getName();
 		log("fragmentCreated " + nameOf(f) + "(name " + name + ")");
 		if (name == null)
 			throw new IllegalStateException("fragment has no name:" + nameOf(f));
+
+		if (db)
+			pr(" mFragmentMap:\n" + d(mFragmentMap));
+
 		MyFragment fPrevious = mFragmentMap.put(name, f);
+		if (db)
+			pr("  stored new " + nameOf(f) + "; previous=" + nameOf(fPrevious));
 
 		if (fPrevious != null) {
 			// Make sure old fragment is not 'active'; we don't want to be
@@ -86,6 +95,8 @@ public abstract class MyActivity extends Activity {
 		boolean differs = (fPrevious != f);
 		if (differs) {
 			log(" (previous fragment=" + nameOf(fPrevious) + ")");
+			if (db)
+				pr("  calling refreshFragmentsAux");
 			refreshFragmentsAux();
 		}
 	}

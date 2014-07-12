@@ -8,17 +8,14 @@ public class FragmentReference<T extends MyFragment> {
 		final boolean db = true;
 		mActivity = activity;
 		mClass = theClass;
-		String s = theClass.getSimpleName();
-		if (s.endsWith("Fragment"))
-			s = s.substring(0, s.length() - "Fragment".length());
-		mName = s;
+		mName = MyFragment.deriveFragmentName(theClass);
 		if (db)
 			pr("constructed FragmentReference name:" + mName + " activity:"
 					+ nameOf(mActivity));
 	}
 
 	public void refresh() {
-		final boolean db = false;
+		final boolean db = true;
 		if (db)
 			pr("refresh " + this);
 		T fragment = mFragment;

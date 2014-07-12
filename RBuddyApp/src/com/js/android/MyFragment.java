@@ -7,15 +7,22 @@ import static com.js.android.Tools.*;
 
 public class MyFragment extends Fragment {
 
-	public MyFragment() {
-		String s = getClass().getSimpleName();
+	static String deriveFragmentName(Class c) {
+		String s = c.getSimpleName();
 		if (s.endsWith("Fragment"))
 			s = s.substring(0, s.length() - "Fragment".length());
-		setName(s);
+		return s;
+	}
+
+	public MyFragment() {
+		setName(deriveFragmentName(this.getClass()));
 	}
 
 	@Override
 	public void onAttach(Activity activity) {
+		final boolean db = true;
+		if (db)
+			pr(hey());
 		log("onAttach");
 		super.onAttach(activity);
 		((MyActivity) getActivity()).fragmentCreated(this);

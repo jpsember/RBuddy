@@ -118,7 +118,7 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void onResume() {
 		super.onResume();
-		focusOn(mReceiptList);
+		focusOn(mReceiptList.f());
 	}
 
 	private ViewGroup buildSlotView(int slot) {
@@ -265,7 +265,7 @@ public class RBuddyActivity extends MyActivity implements //
 							app.receiptFile().add(r);
 						}
 						app.receiptFile().flush();
-						mReceiptList.refreshList();
+						mReceiptList.f().refreshList();
 					}
 				});
 	}
@@ -278,7 +278,7 @@ public class RBuddyActivity extends MyActivity implements //
 				setEditReceipt(null);
 				app.receiptFile().clear();
 				app.receiptFile().flush();
-				mReceiptList.refreshList();
+				mReceiptList.f().refreshList();
 			}
 		});
 	}
@@ -286,7 +286,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
-		mReceiptList.refreshList();
+		mReceiptList.f().refreshList();
 		receiptSelected(r);
 	}
 
@@ -304,7 +304,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public void receiptEdited(Receipt r) {
-		mReceiptList.refreshReceipt(r);
+		mReceiptList.f().refreshReceipt(r);
 	}
 
 	@Override
@@ -321,6 +321,7 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	private void focusOn(MyFragment fragment) {
+		// TODO: use fragmentReference here
 		plot(fragment);
 	}
 
@@ -360,6 +361,10 @@ public class RBuddyActivity extends MyActivity implements //
 				slot = 0;
 
 			int slotId = FRAGMENT_SLOT_BASE_ID + slot;
+
+			if (db)
+				pr(" plotting to slotId: " + slotId);
+
 			FragmentManager m = getFragmentManager();
 			Fragment oldFragment = m.findFragmentById(slotId);
 			FragmentTransaction transaction = m.beginTransaction();
@@ -393,25 +398,13 @@ public class RBuddyActivity extends MyActivity implements //
 			pr(hey() + "mReceiptEditor=" + nameOf(mReceiptEditor));
 
 		mReceiptEditor.refresh();
-		if (mReceiptList == null) {
-			// Is this necessary?
-
-			// // Try restoring from fragment manager
-			// FragmentManager m = this.getFragmentManager();
-			// mReceiptEditor = (ReceiptEditor) m
-			// .findFragmentByTag("ReceiptEditor");
-			// pr(" previous editor was " + mReceiptEditor);
-			//
-			// pr("RBuddyActivity.createFragments begins");
-			mReceiptList = new ReceiptListFragment().register(this);
-			// if (mReceiptEditor == null)
-			// mReceiptEditor = new ReceiptEditor().register(this);
+		mReceiptList.refresh();
+		if (mSearch == null) {
 			mSearch = new Search().register(this);
 			mPhoto = new Photo().register(this);
 			pr("RBuddyActivity.createFragments ends");
 		}
 
-		mReceiptList = getFragment(mReceiptList);
 		// mReceiptEditor = getFragment(mReceiptEditor);
 		mSearch = getFragment(mSearch);
 		mPhoto = getFragment(mPhoto);
@@ -458,7 +451,8 @@ public class RBuddyActivity extends MyActivity implements //
 	private RBuddyApp app;
 	private Receipt mEditReceipt;
 
-	private ReceiptListFragment mReceiptList;
+	private FragmentReference<ReceiptListFragment> mReceiptList = new FragmentReference<ReceiptListFragment>(
+			this, ReceiptListFragment.class);
 	private FragmentReference<ReceiptEditor> mReceiptEditor = new FragmentReference<ReceiptEditor>(
 			this, ReceiptEditor.class);
 
