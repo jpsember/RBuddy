@@ -170,7 +170,8 @@ public class TagSet implements IJSONEncoder {
 		Iterator<String> iter = this.iterator();
 		while (iter.hasNext()) {
 			String tagName = iter.next();
-			pr("comparing "+tagName+" and "+s);
+			if (db)
+				pr("comparing "+tagName+" and "+s);
 			if (tagName.equals(s)) {
 				return true;
 			}

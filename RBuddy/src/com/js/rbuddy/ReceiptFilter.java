@@ -237,17 +237,18 @@ public class ReceiptFilter implements IJSONEncoder {
 
 	public boolean applyFilter(Cost c, JSDate d, TagSet ts) {
 
-		pr("applying receipt filter");
-		pr("Inputs are:");
-		pr("Cost");
-		pr(c);
-		pr("Date");
-		pr(d);
-		pr("TagSet");
-		pr(ts);
+		if (db) {
+			pr("applying receipt filter");
+			pr("Inputs are:");
+			pr("Cost");
+			pr(c);
+			pr("Date");
+			pr(d);
+			pr("TagSet");
+			pr(ts);
 
-		pr(this);
-
+			pr(this);
+		}
 		// cost filtering
 
 		if (c != null) {
@@ -255,7 +256,8 @@ public class ReceiptFilter implements IJSONEncoder {
 			Cost filter_min_cost = this.getMinCost();
 			if (filter_min_cost != null) {
 				if (c.getValue() < filter_min_cost.getValue()) {
-					pr("input cost is less than the filter minimum cost...");
+					if (db)
+						pr("input cost is less than the filter minimum cost...");
 					return false;
 				}
 			}
@@ -263,7 +265,8 @@ public class ReceiptFilter implements IJSONEncoder {
 			Cost filter_max_cost = this.getMaxCost();
 			if (filter_max_cost != null) {
 				if (c.getValue() > filter_max_cost.getValue()) {
-					pr("input cost is more than the filter maximum cost...");
+					if (db)
+						pr("input cost is more than the filter maximum cost...");
 					return false;
 				}
 			}
@@ -276,15 +279,18 @@ public class ReceiptFilter implements IJSONEncoder {
 
 			if (filter_min_date != null) {
 				if (d.year() < filter_min_date.year()) {
-					pr("input date year is less than the filter date year...");
+					if (db)
+						pr("input date year is less than the filter date year...");
 					return false;
 				} else if (d.year() == filter_min_date.year()) {
 					if (d.month() < filter_min_date.month()) {
-						pr("input date month is less than the filter date month...");
+						if (db)
+							pr("input date month is less than the filter date month...");
 						return false;
 					} else if (d.month() == filter_min_date.month()) {
 						if (d.day() < filter_min_date.day()) {
-							pr("input date day is less than filter date day...");
+							if (db)
+								pr("input date day is less than filter date day...");
 							return false;
 						}
 					}
@@ -293,15 +299,18 @@ public class ReceiptFilter implements IJSONEncoder {
 
 			if (filter_max_date != null) {
 				if (d.year() > filter_max_date.year()) {
-					pr("input date year is greater than the filter date year...");
+					if (db)
+						pr("input date year is greater than the filter date year...");
 					return false;
 				} else if (d.year() == filter_max_date.year()) {
 					if (d.month() > filter_max_date.month()) {
-						pr("input date month is greater than the filter date month...");
+						if (db)
+							pr("input date month is greater than the filter date month...");
 						return false;
 					} else if (d.month() == filter_max_date.month()) {
 						if (d.day() > filter_max_date.day()) {
-							pr("input date day is greater than filter date day...");
+							if (db)
+								pr("input date day is greater than filter date day...");
 							return false;
 						}
 					}
@@ -332,12 +341,14 @@ public class ReceiptFilter implements IJSONEncoder {
 			// in the inclusive filter
 			if (filter_inclusive_tags != null) {
 
-				pr("checking inclusive tags...");
-				pr("tag set = " + ts);
-				pr("inclusive tags = " + filter_inclusive_tags);
-
+				if (db) {
+					pr("checking inclusive tags...");
+					pr("tag set = " + ts);
+					pr("inclusive tags = " + filter_inclusive_tags);
+				}
 				if (ts.isTagsetInTagsetInclusive(filter_inclusive_tags) == false) {
-					pr("tag set is not 'inclusively in' the inclusive set, failed on inclusive test");
+					if (db)
+						pr("tag set is not 'inclusively in' the inclusive set, failed on inclusive test");
 					return false;
 				}
 			}
@@ -350,12 +361,14 @@ public class ReceiptFilter implements IJSONEncoder {
 			// -go thru exclusive tag filter, and check each element matches
 			// something in rf.tagset
 			if (filter_exclusive_tags != null) {
-				pr("checking exclusive tags...");
-				pr("tag set = " + ts);
-				pr("exclusive tags = " + filter_exclusive_tags);
-
+				if (db) {
+					pr("checking exclusive tags...");
+					pr("tag set = " + ts);
+					pr("exclusive tags = " + filter_exclusive_tags);
+				}
 				if (ts.isTagsetInTagsetExclusive(filter_exclusive_tags) == false) {
-					pr("tag set is not 'exclusively in' the exclusive set, failed on exclusive test");
+					if (db)
+						pr("tag set is not 'exclusively in' the exclusive set, failed on exclusive test");
 					return false;
 				}
 			}
@@ -363,5 +376,4 @@ public class ReceiptFilter implements IJSONEncoder {
 
 		return true;
 	}
-
 }
