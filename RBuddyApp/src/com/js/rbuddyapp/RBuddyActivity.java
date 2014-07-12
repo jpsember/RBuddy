@@ -4,6 +4,7 @@ import static com.js.android.Tools.*;
 
 import com.js.android.App;
 import com.js.android.AppPreferences;
+import com.js.android.FragmentReference;
 import com.js.android.MyActivity;
 import com.js.android.MyFragment;
 import com.js.rbuddy.R;
@@ -88,7 +89,7 @@ public class RBuddyActivity extends MyActivity implements //
 		if (OMIT_MOST_FRAGMENTS)
 			return;
 		mEditReceipt = r;
-		mReceiptEditor.setReceipt(mEditReceipt);
+		mReceiptEditor.f().setReceipt(mEditReceipt);
 	}
 
 	private void doLayout() {
@@ -292,7 +293,7 @@ public class RBuddyActivity extends MyActivity implements //
 	// ReceiptList.Listener
 	@Override
 	public void receiptSelected(Receipt r) {
-		focusOn(mReceiptEditor);
+		focusOn(mReceiptEditor.f());
 		setEditReceipt(r);
 	}
 
@@ -390,26 +391,28 @@ public class RBuddyActivity extends MyActivity implements //
 		final boolean db = true;
 		if (db)
 			pr(hey() + "mReceiptEditor=" + nameOf(mReceiptEditor));
+
+		mReceiptEditor.refresh();
 		if (mReceiptList == null) {
 			// Is this necessary?
 
-			// Try restoring from fragment manager
-			FragmentManager m = this.getFragmentManager();
-			mReceiptEditor = (ReceiptEditor) m
-					.findFragmentByTag("ReceiptEditor");
-			pr(" previous editor was " + mReceiptEditor);
-
-			pr("RBuddyActivity.createFragments begins");
+			// // Try restoring from fragment manager
+			// FragmentManager m = this.getFragmentManager();
+			// mReceiptEditor = (ReceiptEditor) m
+			// .findFragmentByTag("ReceiptEditor");
+			// pr(" previous editor was " + mReceiptEditor);
+			//
+			// pr("RBuddyActivity.createFragments begins");
 			mReceiptList = new ReceiptListFragment().register(this);
-			if (mReceiptEditor == null)
-				mReceiptEditor = new ReceiptEditor().register(this);
+			// if (mReceiptEditor == null)
+			// mReceiptEditor = new ReceiptEditor().register(this);
 			mSearch = new Search().register(this);
 			mPhoto = new Photo().register(this);
 			pr("RBuddyActivity.createFragments ends");
 		}
 
 		mReceiptList = getFragment(mReceiptList);
-		mReceiptEditor = getFragment(mReceiptEditor);
+		// mReceiptEditor = getFragment(mReceiptEditor);
 		mSearch = getFragment(mSearch);
 		mPhoto = getFragment(mPhoto);
 	}
@@ -456,7 +459,9 @@ public class RBuddyActivity extends MyActivity implements //
 	private Receipt mEditReceipt;
 
 	private ReceiptListFragment mReceiptList;
-	private ReceiptEditor mReceiptEditor;
+	private FragmentReference<ReceiptEditor> mReceiptEditor = new FragmentReference<ReceiptEditor>(
+			this, ReceiptEditor.class);
+
 	private Search mSearch;
 	private Photo mPhoto;
 }

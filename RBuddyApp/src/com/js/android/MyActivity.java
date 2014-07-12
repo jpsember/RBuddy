@@ -69,7 +69,7 @@ public abstract class MyActivity extends Activity {
 	 * @param f
 	 * @return true if fragment is different than previous one in the map
 	 */
-	public final void fragmentCreated(MyFragment f) {
+	void fragmentCreated(MyFragment f) {
 		String name = f.getName();
 		log("fragmentCreated " + nameOf(f) + "(name " + name + ")");
 		if (name == null)
@@ -106,10 +106,15 @@ public abstract class MyActivity extends Activity {
 
 	public abstract void refreshFragments();
 
-	public <T extends MyFragment> MyFragment getFragment(String name) {
+	<T extends MyFragment> MyFragment getFragment(String name) {
 		return mFragmentMap.get(name);
 	}
 
+	/**
+	 * @deprecated make this package visibility
+	 * @param f
+	 * @return
+	 */
 	public <T extends MyFragment> T getFragment(T f) {
 		if (f == null)
 			return null;
