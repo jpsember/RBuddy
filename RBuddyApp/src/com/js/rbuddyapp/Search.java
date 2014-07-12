@@ -2,47 +2,36 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
-import com.js.android.FragmentOrganizer;
 import com.js.android.MyFragment;
-import com.js.android.PseudoFragment;
 import com.js.form.Form;
 import com.js.rbuddy.R;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
-public class Search extends PseudoFragment {
+public class Search extends MyFragment {
 
-	public static class Wrapper extends MyFragment {
-		public Wrapper() {
-		}
-
-		@Override
-		public Class getFragmentClass() {
-			return Search.class;
-		}
-	}
-
-	public Search(FragmentOrganizer fragments) {
-		super(fragments);
-		new Wrapper().register(fragments);
+	public Search() {
 		mApp = RBuddyApp.sharedInstance();
 	}
 	@Override
-	public View onCreateView(MyFragment container) {
-
-		String jsonString = readTextFileResource(getContext(),
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_search);
-		this.mForm = mApp.parseForm(getContext(), jsonString);
+		this.mForm = mApp.parseForm(getActivity(), jsonString);
 		mForm.getField("search").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				performSearch();
 			}
 		});
-		mScrollView = new ScrollView(getContext());
+		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
 		mScrollView.addView(mForm.getView());
@@ -62,11 +51,11 @@ public class Search extends PseudoFragment {
 	// Methods the Search pseudofragment provides
 
 	private void performSearch() {
-		toast(getContext(), "Search isn't yet implemented.");
+		toast(getActivity(), "Search isn't yet implemented.");
 	}
 
 	/* private */Listener listener() {
-		return (Listener) getContext();
+		return (Listener) getActivity();
 	}
 
 	public static interface Listener {
@@ -76,4 +65,6 @@ public class Search extends PseudoFragment {
 	private RBuddyApp mApp;
 	private Form mForm;
 	private ScrollView mScrollView;
+
+
 }

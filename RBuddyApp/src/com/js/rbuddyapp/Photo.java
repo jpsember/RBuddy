@@ -7,10 +7,8 @@ import java.io.IOException;
 
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
-import com.js.android.FragmentOrganizer;
-import com.js.android.MyFragment;
-import com.js.android.PseudoFragment;
 import com.js.android.BitmapUtil;
+import com.js.android.MyFragment;
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
@@ -20,48 +18,32 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 import android.view.View.OnClickListener;
 import com.js.android.FileArguments;
 import com.js.android.IPhotoStore;
 
-public class Photo extends PseudoFragment {
+public class Photo extends MyFragment {
 
-	public static class Wrapper extends MyFragment {
-		public Wrapper() {
-		}
-
-		@Override
-		public Class getFragmentClass() {
-			return Photo.class;
-		}
-	}
-
-	public Photo(FragmentOrganizer fragments) {
-		super(fragments);
-		mFragments = fragments;
-		new Wrapper().register(fragments);
-		mApp = RBuddyApp.sharedInstance();
-	}
+	// @Override
+	// public void onRestoreInstanceState(Bundle bundle) {
+	// super.onRestoreInstanceState(bundle);
+	// if (bundle != null) {
+	// int receiptId = bundle.getInt("PhotoReceiptNumber", 0);
+	// Receipt r = null;
+	// if (receiptId != 0)
+	// r = mApp.receiptFile().getReceipt(receiptId);
+	// setReceipt(r);
+	// }
+	// }
 
 	@Override
-	public void onRestoreInstanceState(Bundle bundle) {
-		super.onRestoreInstanceState(bundle);
-		if (bundle != null) {
-			int receiptId = bundle.getInt("PhotoReceiptNumber", 0);
-			Receipt r = null;
-			if (receiptId != 0)
-				r = mApp.receiptFile().getReceipt(receiptId);
-			setReceipt(r);
-		}
-	}
-
-	@Override
-	public View onCreateView(MyFragment container) {
-		log("onCreateView");
-
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
 		layoutElements();
 
 		getActivityState() //
@@ -70,15 +52,21 @@ public class Photo extends PseudoFragment {
 		return mScrollView;
 	}
 
+	// @Override
+	// public View onCreateView(MyFragment container) {
+	// log("onCreateView");
+	//
+	// layoutElements();
+	//
+	// getActivityState() //
+	// .add(mScrollView) //
+	// .restoreViewsFromSnapshot();
+	// return mScrollView;
+	// }
+
 	@Override
 	public void onResume() {
 		super.onResume();
-
-		if (mPopFlag) {
-			mPopFlag = false;
-			mFragments.pop();
-			return;
-		}
 
 		displayReceiptPhoto();
 
@@ -101,10 +89,10 @@ public class Photo extends PseudoFragment {
 	}
 
 	private void layoutElements() {
-		String jsonString = readTextFileResource(getContext(),
+		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_photo_activity);
 
-		this.mForm = mApp.parseForm(getContext(), jsonString);
+		this.mForm = mApp.parseForm(getActivity(), jsonString);
 		mForm.getField("takephoto").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -112,7 +100,7 @@ public class Photo extends PseudoFragment {
 			}
 		});
 
-		mScrollView = new ScrollView(getContext());
+		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
 		mScrollView.addView(mForm.getView());
@@ -121,7 +109,7 @@ public class Photo extends PseudoFragment {
 	private void startImageCaptureIntent() {
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-		if (intent.resolveActivity(getContext().getPackageManager()) == null) {
+		if (intent.resolveActivity(getActivity().getPackageManager()) == null) {
 			return;
 		}
 
@@ -212,7 +200,7 @@ public class Photo extends PseudoFragment {
 		// Whether or not the user selected a new photo, pop this fragment at
 		// the next opportunity (we must wait until onResume() is called again;
 		// see issue #70)
-		mPopFlag = true;
+		// mPopFlag = true;
 	}
 
 	/**
@@ -221,7 +209,7 @@ public class Photo extends PseudoFragment {
 	 * @return
 	 */
 	private Listener listener() {
-		return (Listener) getContext();
+		return (Listener) getActivity();
 	}
 
 	public static interface Listener {
@@ -232,6 +220,4 @@ public class Photo extends PseudoFragment {
 	private RBuddyApp mApp;
 	private Form mForm;
 	private ScrollView mScrollView;
-	private boolean mPopFlag;
-	private FragmentOrganizer mFragments;
 }

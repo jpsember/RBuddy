@@ -8,13 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.js.android.AndroidDate;
-import com.js.android.FragmentOrganizer;
 import com.js.android.MyFragment;
-import com.js.android.PseudoFragment;
 import com.js.rbuddy.Receipt;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -24,51 +24,57 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ReceiptList extends PseudoFragment {
+public class ReceiptListFragment extends MyFragment {
 
-	public static class Wrapper extends MyFragment {
-		public Wrapper() {
-		}
-
-		@Override
-		public Class getFragmentClass() {
-			return ReceiptList.class;
-		}
+	public ReceiptListFragment() {
+		// setLogging(true);
 	}
 
-	public ReceiptList(FragmentOrganizer fragments) {
-		super(fragments);
-		if (db) {
-			pr(hey() + "constructing ReceiptList " + this
-					+ ", setting logging on");
-			setLogging(true);
-			getActivityState().setLogging(true);
-		}
-
-
-		// Register the wrapper class
-		if (db)
-			pr(" creating wrapper");
-		Wrapper w = new Wrapper();
-		if (db)
-			pr(" registering wrapper");
-		w.register(fragments);
-		if (db)
-			pr(" class-specific init");
-
+	private void prepareActivity() {
+		ASSERT(getActivity() != null, "activity is null");
+		mParent = (RBuddyActivity) getActivity();
 		// Perform class-specific initialization
 		mApp = RBuddyApp.sharedInstance();
 	}
 
 	@Override
-	public View onCreateView(MyFragment container) {
-		log("onCreateView");
-		constructListView(container);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		prepareActivity();
+
+		// if (false) {
+		// TextView tv = new TextView(getActivity());
+		// tv.setText("hello there");
+		// View v;
+		// v = tv;
+		// if (false)
+		// v = new View(getActivity());
+		// v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+		// LayoutParams.MATCH_PARENT));
+		//
+		// v.setMinimumHeight(100);
+		// v.setMinimumWidth(300);
+		// debugChangeBgndColor(v);
+		// debugChangeBgndColor(v);
+		// if (false)
+		// v = wrapView(v, "ReceiptList sample view");
+		// final boolean db = true;
+		// if (db)
+		// pr(hey() + "returning " + describe(v));
+		// return v;
+		// }
+
+		log("onCreateView savedState=" + nameOf(savedInstanceState));
+
+		constructViews();
+
 		getActivityState() //
 				.add(mReceiptListView) //
 				.restoreViewsFromSnapshot();
-		log(" returning " + nameOf(mReceiptListView));
-		return mReceiptListViewContainer;
+		log("returning " + describe(mContentView));
+
+		return mContentView;
 	}
 
 	// Methods this fragment provides (its non-fragment-related interface)
@@ -81,7 +87,6 @@ public class ReceiptList extends PseudoFragment {
 	public void refreshList() {
 		if (mReceiptList == null)
 			return;
-		log("refreshList");
 		rebuildReceiptList(mReceiptList);
 	}
 
@@ -96,6 +101,8 @@ public class ReceiptList extends PseudoFragment {
 		list.clear();
 		for (Iterator it = mApp.receiptFile().iterator(); it.hasNext();)
 			list.add(it.next());
+		log("receipts size=" + list.size());
+
 		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);
 
 		if (mReceiptListAdapter != null)
@@ -103,11 +110,11 @@ public class ReceiptList extends PseudoFragment {
 	}
 
 	// Construct a view to be used for the list items
-	private void constructListView(MyFragment container) {
-		ListView listView = new ListView(getContext());
+	private void constructViews() {
+		ListView listView = new ListView(getActivity());
 
 		List<Receipt> receiptList = buildListOfReceipts();
-		ArrayAdapter arrayAdapter = new ReceiptListAdapter(getContext(),
+		ArrayAdapter arrayAdapter = new ReceiptListAdapter(getActivity(),
 				receiptList);
 		listView.setAdapter(arrayAdapter);
 
@@ -125,11 +132,10 @@ public class ReceiptList extends PseudoFragment {
 		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		listView.setLayoutParams(layoutParam);
-		if (db)
-			pr(hey() + "wrapping receipt list; " + stackTrace(0, 6));
-		this.mReceiptListViewContainer = wrapView(mReceiptListView,
-				nameOf(mReceiptListView) + " " + nameOf(getFragments()) + " "
-						+ nameOf(container));
+		this.mContentView = mReceiptListView;
+		if (false)
+			this.mContentView = wrapView(mReceiptListView,
+					nameOf(mReceiptListView));
 	}
 
 	/**
@@ -139,12 +145,12 @@ public class ReceiptList extends PseudoFragment {
 	 */
 	private void processReceiptSelection(int position) {
 		Receipt r = mReceiptList.get(position);
-		listener().receiptSelected(r);
+		mParent.receiptSelected(r);
 	}
 
-	private Listener listener() {
-		return (Listener) getContext();
-	}
+	// private Listener listener() {
+	// return (Listener) getActivity();
+	// }
 
 	public static interface Listener {
 		void receiptSelected(Receipt r);
@@ -169,7 +175,7 @@ public class ReceiptList extends PseudoFragment {
 				if (db)
 					pr("must construct new view");
 
-				LinearLayout view = new LinearLayout(this.getContext());
+				LinearLayout view = new LinearLayout(getContext());
 				listItemView = view;
 				final int LIST_ITEM_PADDING = 10;
 				view.setPadding(LIST_ITEM_PADDING, LIST_ITEM_PADDING,
@@ -179,20 +185,11 @@ public class ReceiptList extends PseudoFragment {
 				final int LIST_ITEM_HEIGHT = 80;
 
 				// Construct the various child views contained in this list
-				// view.
-				// We'll refer to the individual views by tags that are strings
-				// indicating their contents ("date","summary").
-				// We could instead use the ViewHolder method to speed up
-				// finding
-				// the child views (see
-				// http://developer.android.com/training/improving-layouts/smooth-scrolling.html);
-				// but this
-				// only saves ~15% according to some estimates, so for
-				// simplicity
-				// I'm omitting this step.
+				// view. We'll refer to the individual views by tags that are
+				// strings indicating their contents ("date","summary").
 
 				{
-					TextView tv = new TextView(this.getContext());
+					TextView tv = new TextView(getContext());
 					tv.setMinEms(5);
 					tv.setTag("date");
 					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -202,7 +199,7 @@ public class ReceiptList extends PseudoFragment {
 					tv.setPadding(10, 5, 10, 5);
 				}
 				{
-					TextView tv = new TextView(this.getContext());
+					TextView tv = new TextView(getContext());
 					tv.setTag("cost");
 					tv.setMinEms(4);
 					tv.setGravity(Gravity.RIGHT);
@@ -214,7 +211,7 @@ public class ReceiptList extends PseudoFragment {
 				}
 
 				{
-					TextView tv = new TextView(this.getContext());
+					TextView tv = new TextView(getContext());
 					tv.setTag("summary");
 
 					// Give this view any extra pixels by setting its weight
@@ -242,9 +239,11 @@ public class ReceiptList extends PseudoFragment {
 		}
 	}
 
+	// Be aware that these fields will all be reset if fragment is destroyed!
+	private RBuddyApp mApp;
+	private RBuddyActivity mParent;
 	private ArrayAdapter<Receipt> mReceiptListAdapter;
 	private List<Receipt> mReceiptList;
-	private RBuddyApp mApp;
 	private ListView mReceiptListView;
-	private View mReceiptListViewContainer;
+	private View mContentView;
 }

@@ -4,11 +4,14 @@ import static com.js.android.Tools.*;
 
 import com.js.android.App;
 import com.js.android.AppPreferences;
-import com.js.android.FragmentOrganizer;
 import com.js.android.MyActivity;
+import com.js.android.MyFragment;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -16,11 +19,16 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
 import com.js.android.IPhotoStore;
+import com.js.form.FormWidget;
 
 public class RBuddyActivity extends MyActivity implements //
-		ReceiptList.Listener //
+		ReceiptListFragment.Listener //
 		, ReceiptEditor.Listener //
 		, Photo.Listener //
 {
@@ -28,9 +36,10 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
-	public RBuddyActivity() {
+	private static final int FRAGMENT_SLOT_BASE_ID = 992;
 
-		super(false); // log lifecycle events?
+	public RBuddyActivity() {
+		setLogging(true);
 	}
 
 	public static Intent getStartIntent(Context context) {
@@ -54,13 +63,16 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		final boolean db = true;
+		if (db)
+			pr(hey());
 		super.onCreate(savedInstanceState);
 
 		initOrientation();
 
 		app = RBuddyApp.sharedInstance(this);
 
-		createFragments(savedInstanceState);
+		doLayout();
 
 		if (savedInstanceState != null) {
 			int rid = savedInstanceState.getInt("XXX", 0);
@@ -72,37 +84,6 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
-	private void createFragments(Bundle savedInstanceState) {
-		if (db)
-			pr(hey(this));
-		if (db)
-			pr(" creating fragments");
-		fragments = new FragmentOrganizer(this);
-
-		if (db)
-			pr(" creating ReceiptList");
-		mReceiptList = fragments.register(new ReceiptList(fragments));
-		if (!OMIT_MOST_FRAGMENTS) {
-			mReceiptEditor = fragments.register(new ReceiptEditor(fragments));
-			mSearch = fragments.register(new Search(fragments));
-			mPhoto = fragments.register(new Photo(fragments));
-		}
-		fragments.onCreate(savedInstanceState);
-
-		if (savedInstanceState == null) {
-			// No previous state (including, presumably, the fragments) was
-			// defined, so set initial fragments
-			// TODO do this if no fragment exists in the slot, in case no state
-			// was saved for some (unusual) reason
-			fragments.plot("ReceiptList", true, false);
-			if (!OMIT_MOST_FRAGMENTS) {
-				if (fragments.supportDualFragments()) {
-					fragments.plot("ReceiptEditor", false, false);
-				}
-			}
-		}
-	}
-
 	private void setEditReceipt(Receipt r) {
 		if (OMIT_MOST_FRAGMENTS)
 			return;
@@ -110,20 +91,50 @@ public class RBuddyActivity extends MyActivity implements //
 		mReceiptEditor.setReceipt(mEditReceipt);
 	}
 
+	private void doLayout() {
+		// Create view with a horizontal row of panels, one for each slot
+		LinearLayout layout = new LinearLayout(this);
+		layout.setOrientation(LinearLayout.HORIZONTAL);
+
+		mSlotsContainer = layout;
+
+		for (int slot = 0; slot < mNumberOfSlots; slot++) {
+			View v = buildSlotView(slot);
+			if (true)
+				v = wrapView(v, "slot#" + slot);
+
+			mSlotsContainer.addView(v, new LinearLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1));
+		}
+		mSlotsContainerWrapper = mSlotsContainer;
+
+		if (true)
+			mSlotsContainerWrapper = wrapView(mSlotsContainer, nameOf(this));
+		setContentView(mSlotsContainerWrapper, new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();
-		View contentView = fragments.getView();
-		contentView = wrapView(contentView, nameOf(this));
-		setContentView(contentView, new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
-		fragments.onResume();
+		focusOn(mReceiptList);
 	}
+
+	private ViewGroup buildSlotView(int slot) {
+		FrameLayout f2 = new FrameLayout(this);
+		f2.setId(FRAGMENT_SLOT_BASE_ID + slot);
+		FormWidget.setDebugBgnd(f2, (slot == 0) ? "#206020" : "#202060");
+		return f2;
+	}
+
+	private int mNumberOfSlots = 2;
+	private LinearLayout mSlotsContainer;
+	private View mSlotsContainerWrapper;
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		fragments.onSaveInstanceState(outState);
+		// fragments.onSaveInstanceState(outState);
 		// TODO: give this a proper key
 		outState.putInt("XXX", mEditReceipt == null ? 0 : mEditReceipt.getId());
 	}
@@ -131,8 +142,13 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	protected void onPause() {
 		super.onPause();
-		fragments.onPause();
 		app.receiptFile().flush();
+	}
+
+	@Override
+	protected void onDestroy() {
+		mReceiptList = null;
+		super.onDestroy();
 	}
 
 	@Override
@@ -168,7 +184,7 @@ public class RBuddyActivity extends MyActivity implements //
 			AppPreferences.toggle(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
-			fragments.plot("Search", false, true);
+			focusOn(mSearch);
 			return true;
 		case R.id.action_testonly_exit:
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -276,7 +292,7 @@ public class RBuddyActivity extends MyActivity implements //
 	// ReceiptList.Listener
 	@Override
 	public void receiptSelected(Receipt r) {
-		focusOn("ReceiptEditor");
+		focusOn(mReceiptEditor);
 		setEditReceipt(r);
 	}
 
@@ -293,7 +309,7 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void editPhoto(Receipt r) {
 		mPhoto.setReceipt(r);
-		focusOn("Photo");
+		focusOn(mPhoto);
 	}
 
 	@Override
@@ -303,8 +319,65 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
-	private void focusOn(String fragmentName) {
-		fragments.plot(fragmentName, false, true);
+	private void focusOn(MyFragment fragment) {
+		plot(fragment);
+	}
+
+	// private int slotFor(boolean primary) {
+	// return primary ? 0 : mNumberOfSlots - 1;
+	// }
+
+	// private void hideFragment(boolean primary) {
+	// int slot = slotFor(primary);
+	// FragmentManager m = getFragmentManager();
+	// Fragment f = m.findFragmentById(FRAGMENT_SLOT_BASE_ID + slot);
+	// if (f == null)
+	// return;
+	// FragmentTransaction transaction = m.beginTransaction();
+	// transaction.remove(f).commit();
+	// }
+
+	/**
+	 * Display a fragment, if it isn't already in one of the slots
+	 * 
+	 * @param tag
+	 *            name of fragment
+	 * @return if in resumed state, the fragment displayed; else null
+	 */
+	private void plot(MyFragment fragment) {
+		final boolean db = true;
+		if (db)
+			pr("plot " + nameOf(fragment));
+
+		do {
+			// If fragment is already visible, ignore
+			if (fragment.isVisible())
+				return;
+
+			int slot = mNumberOfSlots - 1;
+			if (fragment instanceof ReceiptListFragment)
+				slot = 0;
+
+			int slotId = FRAGMENT_SLOT_BASE_ID + slot;
+			FragmentManager m = getFragmentManager();
+			Fragment oldFragment = m.findFragmentById(slotId);
+			FragmentTransaction transaction = m.beginTransaction();
+			if (oldFragment == null) {
+				if (db)
+					pr(" doing add of " + fragment);
+				transaction.add(slotId, fragment, fragment.getName());
+			} else {
+				transaction.replace(slotId, fragment, fragment.getName());
+			}
+			if (oldFragment != null)
+				transaction.addToBackStack(null);
+			if (db)
+				pr(" committing " + transaction);
+			transaction.commit();
+			// // Is this necessary?
+			// if (true)
+			// m.executePendingTransactions();
+		} while (false);
 	}
 
 	// Photo.Listener
@@ -313,11 +386,77 @@ public class RBuddyActivity extends MyActivity implements //
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
-	private FragmentOrganizer fragments;
-	private ReceiptList mReceiptList;
-	private ReceiptEditor mReceiptEditor;
+	public void refreshFragments() {
+		final boolean db = true;
+		if (db)
+			pr(hey() + "mReceiptEditor=" + nameOf(mReceiptEditor));
+		if (mReceiptList == null) {
+			// Is this necessary?
+
+			// Try restoring from fragment manager
+			FragmentManager m = this.getFragmentManager();
+			mReceiptEditor = (ReceiptEditor) m
+					.findFragmentByTag("ReceiptEditor");
+			pr(" previous editor was " + mReceiptEditor);
+
+			pr("RBuddyActivity.createFragments begins");
+			mReceiptList = new ReceiptListFragment().register(this);
+			if (mReceiptEditor == null)
+				mReceiptEditor = new ReceiptEditor().register(this);
+			mSearch = new Search().register(this);
+			mPhoto = new Photo().register(this);
+			pr("RBuddyActivity.createFragments ends");
+		}
+
+		mReceiptList = getFragment(mReceiptList);
+		mReceiptEditor = getFragment(mReceiptEditor);
+		mSearch = getFragment(mSearch);
+		mPhoto = getFragment(mPhoto);
+	}
+
+	// @Override
+	// public boolean fragmentCreated(MyFragment f) {
+	// boolean differs = super.fragmentCreated(f);
+	// if (differs) {
+	// log("fragmentCreated: " + nameOf(f) + "; differs from previous");
+	// refreshFragments();
+	// }
+	// return differs;
+	// }
+
+	// private static int sScriptIndex = 0;
+	//
+	// private void updateScript() {
+	// int k = sScriptIndex++;
+	// switch (k) {
+	// case 0:
+	// hideFragment(true);
+	// break;
+	// case 1:
+	// plot("ReceiptList", true, false);
+	// break;
+	// case 2:
+	// plot("Search", false, false);
+	// break;
+	// case 3:
+	// hideFragment(true);
+	// break;
+	// case 4:
+	// hideFragment(false);
+	// break;
+	// default:
+	// sScriptIndex = 0;
+	// break;
+	// }
+	// }
+
+	// TODO: how do we communicate with a fragment that may not exist?
+
 	private RBuddyApp app;
-	/* private */Search mSearch;
-	private Photo mPhoto;
 	private Receipt mEditReceipt;
+
+	private ReceiptListFragment mReceiptList;
+	private ReceiptEditor mReceiptEditor;
+	private Search mSearch;
+	private Photo mPhoto;
 }
