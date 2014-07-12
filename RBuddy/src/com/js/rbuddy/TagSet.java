@@ -137,7 +137,8 @@ public class TagSet implements IJSONEncoder {
 	}
 
 	/**
-	 *     ----deprecated
+	 * ----deprecated
+	 * 
 	 * @param ts
 	 * @return
 	 */
@@ -165,20 +166,23 @@ public class TagSet implements IJSONEncoder {
 		return true;
 	}
 
+	boolean contains(TagSet ts) {
+
+		return false;
+	}
+
 	public boolean isStringInTagset(String s) {
 
 		Iterator<String> iter = this.iterator();
 		while (iter.hasNext()) {
 			String tagName = iter.next();
 			if (db)
-				pr("comparing "+tagName+" and "+s);
+				pr("comparing " + tagName + " and " + s);
 			if (tagName.equals(s)) {
 				return true;
 			}
 		}
 		return false;
 	}
-
-	
 
 }
