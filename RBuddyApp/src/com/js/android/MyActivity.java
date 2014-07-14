@@ -37,6 +37,7 @@ public abstract class MyActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
+		if (!NEWSTUFF)
 		refreshFragmentsAux();
 	}
 
@@ -100,6 +101,8 @@ public abstract class MyActivity extends Activity {
 	}
 
 	private void refreshFragmentsAux() {
+		if (NEWSTUFF)
+			return;
 		// Avoid recursive rentry
 		if (mRefreshingFragments)
 			return;
@@ -108,15 +111,19 @@ public abstract class MyActivity extends Activity {
 		mRefreshingFragments = false;
 	}
 
-	public abstract void refreshFragments();
+	@Deprecated
+	public void refreshFragments() {
+	}
 
 	<T extends MyFragment> MyFragment getFragment(String name) {
 		return mFragmentMap.get(name);
 	}
 
 	void addReference(FragmentReference reference) {
-		if (NEWSTUFF)
+		if (NEWSTUFF) {
 			mReferenceMap.put(reference.getName(), reference);
+			reference.refresh();
+		}
 	}
 
 	private Map<String, FragmentReference> mReferenceMap;

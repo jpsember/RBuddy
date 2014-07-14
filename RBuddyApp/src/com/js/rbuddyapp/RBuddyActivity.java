@@ -405,6 +405,7 @@ public class RBuddyActivity extends MyActivity implements //
 		} while (false);
 	}
 
+	@Override
 	public void refreshFragments() {
 		mReceiptEditor.refresh();
 		mReceiptList.refresh();
