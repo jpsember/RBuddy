@@ -136,4 +136,53 @@ public class TagSet implements IJSONEncoder {
 		}
 	}
 
+	/**
+	 * ----deprecated
+	 * 
+	 * @param ts
+	 * @return
+	 */
+	public boolean isTagsetInTagsetInclusive(TagSet ts) {
+
+		Iterator<String> iter = ts.iterator();
+		while (iter.hasNext()) {
+			String tagName = iter.next();
+			if (this.isStringInTagset(tagName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isTagsetInTagsetExclusive(TagSet ts) {
+
+		Iterator<String> iter = ts.iterator();
+		while (iter.hasNext()) {
+			String tagName = iter.next();
+			if (this.isStringInTagset(tagName) != true) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	boolean contains(TagSet ts) {
+
+		return false;
+	}
+
+	public boolean isStringInTagset(String s) {
+
+		Iterator<String> iter = this.iterator();
+		while (iter.hasNext()) {
+			String tagName = iter.next();
+			if (db)
+				pr("comparing " + tagName + " and " + s);
+			if (tagName.equals(s)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
