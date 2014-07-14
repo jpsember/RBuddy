@@ -14,6 +14,7 @@ import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,23 +28,12 @@ import android.view.View.OnClickListener;
 import com.js.android.FileArguments;
 import com.js.android.IPhotoStore;
 
-public class Photo extends MyFragment {
-
-	// @Override
-	// public void onRestoreInstanceState(Bundle bundle) {
-	// super.onRestoreInstanceState(bundle);
-	// if (bundle != null) {
-	// int receiptId = bundle.getInt("PhotoReceiptNumber", 0);
-	// Receipt r = null;
-	// if (receiptId != 0)
-	// r = mApp.receiptFile().getReceipt(receiptId);
-	// setReceipt(r);
-	// }
-	// }
+public class Photo extends MyFragment implements IRBuddyActivityListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		mApp = RBuddyApp.sharedInstance();
 		layoutElements();
 
 		getActivityState() //
@@ -52,29 +42,24 @@ public class Photo extends MyFragment {
 		return mScrollView;
 	}
 
-	// @Override
-	// public View onCreateView(MyFragment container) {
-	// log("onCreateView");
-	//
-	// layoutElements();
-	//
-	// getActivityState() //
-	// .add(mScrollView) //
-	// .restoreViewsFromSnapshot();
-	// return mScrollView;
-	// }
-
 	@Override
 	public void onResume() {
 		super.onResume();
 
-		displayReceiptPhoto();
+		getRBuddyActivity().addListener(this);
+		setReceipt(getRBuddyActivity().getReceipt());
 
-		// If no photo is defined for this receipt, act as if he has pressed the
-		// camera button
-
-		if (mReceipt.getPhotoId() == null) {
-			startImageCaptureIntent();
+		// Pop this fragment if that was our intention
+		if (mPopFlag) {
+			mPopFlag = false;
+			FragmentManager m = getActivity().getFragmentManager();
+			m.popBackStack();
+		} else {
+			// If no photo is defined for this receipt, act as if he has pressed
+			// the camera button
+			if (mReceipt != null && mReceipt.getPhotoId() == null) {
+				startImageCaptureIntent();
+			}
 		}
 	}
 
@@ -86,6 +71,7 @@ public class Photo extends MyFragment {
 			imageWidget().displayPhoto(mApp.photoStore(), 0, null);
 		}
 		mApp.receiptFile().flush();
+		getRBuddyActivity().removeListener(this);
 	}
 
 	private void layoutElements() {
@@ -125,7 +111,7 @@ public class Photo extends MyFragment {
 
 		Uri uri = Uri.fromFile(workFile);
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-		listener().processCapturePhotoIntent(intent);
+		getRBuddyActivity().processCapturePhotoIntent(intent);
 	}
 
 	private File getWorkPhotoFile() {
@@ -138,12 +124,13 @@ public class Photo extends MyFragment {
 	private void displayReceiptPhoto() {
 		if (mForm == null)
 			return;
+		if (mReceipt == null)
+			return;
 		imageWidget().displayPhoto(mApp.photoStore(), mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}
 
-	// Photo interface (non-fragment methods)
-	public void setReceipt(Receipt r) {
+	private void setReceipt(Receipt r) {
 		this.mReceipt = r;
 		displayReceiptPhoto();
 	}
@@ -200,22 +187,29 @@ public class Photo extends MyFragment {
 		// Whether or not the user selected a new photo, pop this fragment at
 		// the next opportunity (we must wait until onResume() is called again;
 		// see issue #70)
-		// mPopFlag = true;
+		mPopFlag = true;
 	}
 
-	/**
-	 * Get listener by casting parent activity
-	 * 
-	 * @return
-	 */
-	private Listener listener() {
-		return (Listener) getActivity();
+	private IRBuddyActivity getRBuddyActivity() {
+		return (IRBuddyActivity) getActivity();
 	}
 
-	public static interface Listener {
-		void processCapturePhotoIntent(Intent intent);
+	// IRBuddyActivity interface
+
+	@Override
+	public void activeReceiptChanged() {
+		setReceipt(getRBuddyActivity().getReceipt());
 	}
 
+	@Override
+	public void activeReceiptEdited() {
+	}
+
+	@Override
+	public void receiptFileChanged() {
+	}
+
+	private boolean mPopFlag;
 	private Receipt mReceipt;
 	private RBuddyApp mApp;
 	private Form mForm;

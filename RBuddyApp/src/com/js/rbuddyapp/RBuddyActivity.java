@@ -33,7 +33,6 @@ import com.js.form.FormWidget;
 
 public class RBuddyActivity extends MyActivity implements //
 		IRBuddyActivity //
-		, Photo.Listener //
 {
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
@@ -310,7 +309,7 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_IMAGE_CAPTURE) {
-			mPhoto.processImageCaptureResult(resultCode, data);
+			mPhoto.f().processImageCaptureResult(resultCode, data);
 		}
 	}
 
@@ -332,8 +331,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public void editPhoto(Receipt r) {
-		mPhoto.setReceipt(r);
-		focusOn(mPhoto);
+		focusOn(mPhoto.f());
 	}
 
 	@Override
@@ -352,6 +350,11 @@ public class RBuddyActivity extends MyActivity implements //
 	public void setActiveReceipt(Receipt r) {
 		setEditReceipt(r);
 		focusOn(mReceiptEditor.f());
+	}
+
+	@Override
+	public void processCapturePhotoIntent(Intent intent) {
+		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
 	private void focusOn(MyFragment fragment) {
@@ -416,23 +419,15 @@ public class RBuddyActivity extends MyActivity implements //
 		} while (false);
 	}
 
-	// Photo.Listener
-	@Override
-	public void processCapturePhotoIntent(Intent intent) {
-		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-	}
-
 	public void refreshFragments() {
 		mReceiptEditor.refresh();
 		mReceiptList.refresh();
 		mSearch.refresh();
-		if (mPhoto == null) {
-			mPhoto = new Photo().register(this);
-		}
-		mPhoto = getFragment(mPhoto);
+		mPhoto.refresh();
 	}
 
 	private RBuddyApp app;
+	private Receipt mReceipt;
 
 	// Fragments
 
@@ -442,9 +437,8 @@ public class RBuddyActivity extends MyActivity implements //
 			this, ReceiptEditor.class);
 	private FragmentReference<Search> mSearch = new FragmentReference<Search>(
 			this, Search.class);
-
-	private Photo mPhoto;
-	private Receipt mReceipt;
+	private FragmentReference<Photo> mPhoto = new FragmentReference<Photo>(
+			this, Photo.class);
 
 	// Set of registered listeners
 	private Set<IRBuddyActivityListener> listeners = new HashSet();

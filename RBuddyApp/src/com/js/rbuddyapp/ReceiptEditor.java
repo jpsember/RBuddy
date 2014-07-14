@@ -231,11 +231,6 @@ public class ReceiptEditor extends MyFragment implements
 		}
 	}
 
-	/**
-	 * Get parent activity
-	 * 
-	 * @return
-	 */
 	private IRBuddyActivity getRBuddyActivity() {
 		return (IRBuddyActivity) getActivity();
 	}
