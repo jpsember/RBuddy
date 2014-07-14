@@ -171,7 +171,16 @@ public class TagSet implements IJSONEncoder {
 	//
 	public boolean contains(TagSet ts) {
 
-		return false;
+		Iterator<String> iter = ts.iterator();
+		while (iter.hasNext()) {
+			String tagName = iter.next();
+			if (this.isStringInTagset(tagName) != true) {
+				return false;
+			}
+		}
+		
+		return true;
+		
 	}
 
 	public boolean isStringInTagset(String s) {
