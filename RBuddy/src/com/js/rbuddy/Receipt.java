@@ -20,47 +20,73 @@ public class Receipt implements IJSONEncoder {
 	 * Sets date to current date, string fields to the empty string, tags empty
 	 * set
 	 * 
+	 * @param identifier
+	 *            unique, nonnegative identifier to uniquely identify this
+	 *            receipt
 	 * @throws IllegalArgumentException
 	 *             if identifier <= 0
 	 */
 	public Receipt(int identifier) {
 		if (identifier <= 0)
 			throw new IllegalArgumentException();
-		this.id = identifier;
+		this.mId = identifier;
 		setDate(JSDate.currentDate());
-		this.summary = "";
-		this.tags = new TagSet();
-		this.cost = new Cost(0);
+		this.mSummary = "";
+		this.mTags = new TagSet();
+		this.mCost = new Cost(0);
+	}
+
+	public int getId() {
+		return mId;
+	}
+
+	/**
+	 * Set the cost (or amount)
+	 * 
+	 * @param c
+	 *            Cost
+	 */
+	public void setCost(Cost c) {
+		this.mCost = c;
 	}
 
 	public Cost getCost() {
-		return this.cost;
+		return this.mCost;
 	}
 
-	public void setCost(Cost c) {
-		this.cost = c;
+	/**
+	 * Set the date
+	 * 
+	 * @param date
+	 */
+	public void setDate(JSDate date) {
+		this.mDate = date;
 	}
 
 	public JSDate getDate() {
-		return this.date;
+		return this.mDate;
 	}
 
-	public void setDate(JSDate date) {
-		this.date = date;
-	}
-
-	public String getSummary() {
-		return summary;
+	/**
+	 * Set the photo identifier, a string that can be used, for instance, to
+	 * identify the filename or resource containing a photograph of this receipt
+	 * 
+	 * @param s
+	 *            photo identifier, or null
+	 */
+	public void setPhotoId(String s) {
+		this.mPhotoId = s;
 	}
 
 	public String getPhotoId() {
-		return photoId;
+		return mPhotoId;
 	}
 
-	public void setPhotoId(String s) {
-		this.photoId = s;
-	}
-
+	/**
+	 * Set the summary, a possibly lengthy description of the receipt
+	 * 
+	 * @param s
+	 */
 	public void setSummary(String s) {
 
 		s = s.trim();
@@ -103,12 +129,12 @@ public class Receipt implements IJSONEncoder {
 
 		}
 
-		summary = s_result.toString();
+		mSummary = s_result.toString();
 
 	}
 
-	public int getId() {
-		return id;
+	public String getSummary() {
+		return mSummary;
 	}
 
 	@Override
@@ -137,17 +163,16 @@ public class Receipt implements IJSONEncoder {
 	 * @return set of strings
 	 */
 	public TagSet getTags() {
-		return tags;
+		return mTags;
 	}
 
 	/**
-	 * Set tags
+	 * Set the tags, a set of keywords related to the receipt
 	 * 
 	 * @param set
-	 *            set of zero to MAX_TAGS tags
 	 */
 	public void setTags(TagSet set) {
-		this.tags = set;
+		this.mTags = set;
 	}
 
 	/**
@@ -157,7 +182,7 @@ public class Receipt implements IJSONEncoder {
 	 */
 	public String getTagsString() {
 		StringBuilder sb = new StringBuilder();
-		Iterator<String> it = tags.iterator();
+		Iterator<String> it = mTags.iterator();
 		while (it.hasNext()) {
 			String s = it.next();
 			if (sb.length() > 0)
@@ -171,7 +196,7 @@ public class Receipt implements IJSONEncoder {
 	public void encode(JSONEncoder j) {
 		j.enterList();
 		j.encode(getId());
-		j.encode(date);
+		j.encode(mDate);
 		j.encode(getSummary());
 		j.encode(getCost().getValue());
 		j.encode(getPhotoId());
@@ -191,11 +216,11 @@ public class Receipt implements IJSONEncoder {
 		json.exit();
 
 		Receipt r = new Receipt(id);
-		r.summary = summary;
-		r.date = date;
-		r.tags = tags;
-		r.cost = new Cost(costValue);
-		r.photoId = photoId;
+		r.mSummary = summary;
+		r.mDate = date;
+		r.mTags = tags;
+		r.mCost = new Cost(costValue);
+		r.mPhotoId = photoId;
 
 		return r;
 	}
@@ -214,11 +239,11 @@ public class Receipt implements IJSONEncoder {
 		}
 	};
 
-	private TagSet tags;
-	private JSDate date;
-	private String summary;
-	private String photoId;
-	private int id;
-	private Cost cost;
+	private TagSet mTags;
+	private JSDate mDate;
+	private String mSummary;
+	private String mPhotoId;
+	private int mId;
+	private Cost mCost;
 
 }
