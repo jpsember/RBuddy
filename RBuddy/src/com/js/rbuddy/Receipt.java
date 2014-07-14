@@ -1,7 +1,6 @@
 package com.js.rbuddy;
 
 import java.util.Comparator;
-import java.util.Iterator;
 
 import com.js.basic.StringUtil;
 import com.js.json.*;
@@ -137,6 +136,19 @@ public class Receipt implements IJSONEncoder {
 		return mSummary;
 	}
 
+	/**
+	 * Set the tags, a set of keywords related to the receipt
+	 * 
+	 * @param set
+	 */
+	public void setTags(TagSet set) {
+		this.mTags = set;
+	}
+
+	public TagSet getTags() {
+		return mTags;
+	}
+
 	@Override
 	public String toString() {
 		JSONEncoder json = new JSONEncoder();
@@ -155,41 +167,6 @@ public class Receipt implements IJSONEncoder {
 		r.setSummary(StringUtil.randomString(30));
 		r.setCost(Cost.buildRandom());
 		return r;
-	}
-
-	/**
-	 * Get the set of tags
-	 * 
-	 * @return set of strings
-	 */
-	public TagSet getTags() {
-		return mTags;
-	}
-
-	/**
-	 * Set the tags, a set of keywords related to the receipt
-	 * 
-	 * @param set
-	 */
-	public void setTags(TagSet set) {
-		this.mTags = set;
-	}
-
-	/**
-	 * Get receipt's tags as a user-displayable string
-	 * 
-	 * @return tags separated by commas
-	 */
-	public String getTagsString() {
-		StringBuilder sb = new StringBuilder();
-		Iterator<String> it = mTags.iterator();
-		while (it.hasNext()) {
-			String s = it.next();
-			if (sb.length() > 0)
-				sb.append(", ");
-			sb.append(s);
-		}
-		return sb.toString();
 	}
 
 	@Override
