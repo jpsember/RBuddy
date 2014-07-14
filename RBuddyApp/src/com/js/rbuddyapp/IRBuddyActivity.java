@@ -16,31 +16,23 @@ public interface IRBuddyActivity {
 	void removeListener(IRBuddyActivityListener listener);
 
 	/**
-	 * Get the 'active' receipt
+	 * Get the active receipt
 	 * 
-	 * TODO: rename to include 'active'
-	 * 
-	 * @return
+	 * @return active receipt, or null if none selected
 	 */
-	Receipt getReceipt();
+	Receipt getActiveReceipt();
 
 	/**
-	 * Request edit of receipt's photo TODO: omit receipt arg, assume active
-	 * 
-	 * @param r
+	 * Request edit of active receipt's photo
 	 */
-	void editPhoto(Receipt r);
+	void editActiveReceiptPhoto();
 
 	/**
-	 * Notify activity that a receipt has been edited (e.g., ReceiptEditor calls
-	 * this method to have ReceiptActivity refresh the receipt's appearance in
-	 * the ReceiptList fragment)
-	 * 
-	 * TODO: omit receipt argument, assume 'active' receipt
-	 * 
-	 * @param r
+	 * Notify activity that the active receipt has been edited (e.g.,
+	 * ReceiptEditor calls this method to have ReceiptActivity refresh the
+	 * receipt's appearance in the ReceiptList fragment)
 	 */
-	void receiptEdited(Receipt r);
+	void activeReceiptEdited();
 
 	/**
 	 * Perform search (will later figure out how to indicate which search filter

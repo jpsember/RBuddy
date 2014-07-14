@@ -325,17 +325,17 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	@Override
-	public Receipt getReceipt() {
+	public Receipt getActiveReceipt() {
 		return mReceipt;
 	}
 
 	@Override
-	public void editPhoto(Receipt r) {
+	public void editActiveReceiptPhoto() {
 		focusOn(mPhoto);
 	}
 
 	@Override
-	public void receiptEdited(Receipt r) {
+	public void activeReceiptEdited() {
 		for (IRBuddyActivityListener listener : listeners) {
 			listener.activeReceiptEdited();
 		}

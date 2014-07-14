@@ -47,7 +47,7 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 		super.onResume();
 
 		getRBuddyActivity().addListener(this);
-		setReceipt(getRBuddyActivity().getReceipt());
+		setReceipt(getRBuddyActivity().getActiveReceipt());
 
 		// Pop this fragment if that was our intention
 		if (mPopFlag) {
@@ -198,7 +198,7 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 
 	@Override
 	public void activeReceiptChanged() {
-		setReceipt(getRBuddyActivity().getReceipt());
+		setReceipt(getRBuddyActivity().getActiveReceipt());
 	}
 
 	@Override
@@ -209,7 +209,9 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 	public void receiptFileChanged() {
 	}
 
-	private boolean mPopFlag;
+	private boolean mPopFlag; // TODO: we can't assume this instance variable
+								// will persist; the fragment may be purged in
+								// low memory situations (I think)
 	private Receipt mReceipt;
 	private RBuddyApp mApp;
 	private Form mForm;

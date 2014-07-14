@@ -72,7 +72,7 @@ public class ReceiptEditor extends MyFragment implements
 		ASSERT(mScrollView != null);
 		super.onResume();
 		getRBuddyActivity().addListener(this);
-		setReceipt(getRBuddyActivity().getReceipt());
+		setReceipt(getRBuddyActivity().getActiveReceipt());
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class ReceiptEditor extends MyFragment implements
 	private void processPhotoButtonPress() {
 		if (mReceipt == null)
 			return;
-		getRBuddyActivity().editPhoto(mReceipt);
+		getRBuddyActivity().editActiveReceiptPhoto();
 	}
 
 	private void readReceiptToWidgets() {
@@ -220,7 +220,7 @@ public class ReceiptEditor extends MyFragment implements
 				mReceipt.getTags().moveTagsToFrontOfQueue(mApp.tagSetFile());
 			}
 
-			getRBuddyActivity().receiptEdited(mReceipt);
+			getRBuddyActivity().activeReceiptEdited();
 		}
 	}
 
@@ -231,7 +231,7 @@ public class ReceiptEditor extends MyFragment implements
 	// IRBuddyActivityListener
 	@Override
 	public void activeReceiptChanged() {
-		setReceipt(getRBuddyActivity().getReceipt());
+		setReceipt(getRBuddyActivity().getActiveReceipt());
 	}
 
 	@Override
