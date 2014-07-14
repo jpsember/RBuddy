@@ -339,7 +339,9 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public void receiptEdited(Receipt r) {
-		mReceiptList.f().refreshReceipt(r);
+		for (IRBuddyActivityListener listener : listeners) {
+			listener.activeReceiptEdited();
+		}
 	}
 
 	private void focusOn(MyFragment fragment) {

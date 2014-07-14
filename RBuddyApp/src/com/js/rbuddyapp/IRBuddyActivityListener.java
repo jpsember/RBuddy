@@ -8,4 +8,8 @@ public interface IRBuddyActivityListener {
 	 */
 	void activeReceiptChanged();
 
+	/**
+	 * Called when active receipt has been modified within the editor
+	 */
+	void activeReceiptEdited();
 }

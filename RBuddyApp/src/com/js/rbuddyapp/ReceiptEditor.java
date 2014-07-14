@@ -246,6 +246,11 @@ public class ReceiptEditor extends MyFragment implements
 		setReceipt(getRBuddyActivity().getReceipt());
 	}
 
+	@Override
+	public void activeReceiptEdited() {
+		// Ignore these events, since we generated them
+	}
+
 	private RBuddyApp mApp;
 	private Receipt mReceipt;
 	private Form mForm;

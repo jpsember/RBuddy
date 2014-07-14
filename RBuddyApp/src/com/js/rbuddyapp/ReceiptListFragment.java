@@ -24,10 +24,27 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ReceiptListFragment extends MyFragment {
+public class ReceiptListFragment extends MyFragment implements
+		IRBuddyActivityListener {
 
 	public ReceiptListFragment() {
 		// setLogging(true);
+	}
+
+	private IRBuddyActivity getRBuddyActivity() {
+		return (IRBuddyActivity) getActivity();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		getRBuddyActivity().addListener(this);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		getRBuddyActivity().removeListener(this);
 	}
 
 	private void prepareActivity() {
@@ -54,9 +71,16 @@ public class ReceiptListFragment extends MyFragment {
 		return mContentView;
 	}
 
-	// Methods this fragment provides (its non-fragment-related interface)
 
-	public void refreshReceipt(Receipt r) {
+	// IRBuddyActivityListener
+	@Override
+	public void activeReceiptChanged() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void activeReceiptEdited() {
 		if (mReceiptListAdapter != null)
 			mReceiptListAdapter.notifyDataSetChanged();
 	}
@@ -223,4 +247,5 @@ public class ReceiptListFragment extends MyFragment {
 	private List<Receipt> mReceiptList;
 	private ListView mReceiptListView;
 	private View mContentView;
+
 }
