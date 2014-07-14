@@ -180,7 +180,8 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 			}
 		}
 		// Whether or not the user selected a new photo, pop the photo fragment
-		((MyActivity) getActivity()).popFragment(this.getName());
+		((MyActivity) getActivity()).getFragmentOrganizer().popFragment(
+				this.getName(), true);
 	}
 
 	private IRBuddyActivity getRBuddyActivity() {

@@ -88,6 +88,38 @@ public class FragmentOrganizer {
 	}
 
 	/**
+	 * Pop a fragment, and anything above it, from the backstack
+	 * 
+	 * @param fragmentName
+	 *            name of fragment to pop
+	 * @param inclusive
+	 *            true to pop the fragment, false to pop only those elements
+	 *            above it
+	 */
+	public void popFragment(String fragmentName, boolean inclusive) {
+		assertUIThread();
+		FragmentManager manager = mActivity.getFragmentManager();
+		boolean success = false;
+		while (true) {
+			MyFragment f = (MyFragment) manager.findFragmentByTag(fragmentName);
+			if (f == null)
+				break;
+			// If we only want to pop items obscuring this one, check if we're
+			// finished
+			if (f.isVisible() && !inclusive) {
+				success = true;
+				break;
+			}
+			manager.popBackStack();
+			manager.executePendingTransactions();
+			success = true;
+		}
+		if (!success) {
+			warning("couldn't find fragment " + fragmentName + " on back stack");
+		}
+	}
+
+	/**
 	 * Display a fragment, if it isn't already in one of the slots
 	 * 
 	 * @param r
@@ -101,6 +133,12 @@ public class FragmentOrganizer {
 			if (fragment.isVisible())
 				return;
 
+			FragmentManager m = mActivity.getFragmentManager();
+
+			// If fragment is in the back stack, pop elements above it
+			if (m.findFragmentByTag(fragment.getName()) != null) {
+			}
+
 			int slot = auxilliarySlot ? mNumberOfSlots - 1 : 0;
 
 			int slotId = FRAGMENT_SLOT_BASE_ID + slot;
@@ -108,7 +146,6 @@ public class FragmentOrganizer {
 			if (db)
 				pr(" plotting to slotId: " + slotId);
 
-			FragmentManager m = mActivity.getFragmentManager();
 			Fragment oldFragment = m.findFragmentById(slotId);
 			FragmentTransaction transaction = m.beginTransaction();
 			if (oldFragment == null) {

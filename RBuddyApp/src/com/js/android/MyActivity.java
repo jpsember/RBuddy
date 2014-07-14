@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.os.Bundle;
 
 public abstract class MyActivity extends Activity {
@@ -80,28 +79,6 @@ public abstract class MyActivity extends Activity {
 			Class fragmentClass) {
 		FragmentReference<T> ref = new FragmentReference<T>(this, fragmentClass);
 		return ref;
-	}
-
-	/**
-	 * Pop a fragment, and anything above it, from the backstack
-	 * 
-	 * @param fragmentName
-	 *            name of fragment to pop
-	 */
-	public void popFragment(String fragmentName) {
-		assertUIThread();
-		FragmentManager manager = getFragmentManager();
-		boolean popped = false;
-		while (true) {
-			if (manager.findFragmentByTag(fragmentName) == null)
-				break;
-			manager.popBackStack();
-			manager.executePendingTransactions();
-			popped = true;
-		}
-		if (!popped) {
-			warning("couldn't find fragment " + fragmentName + " on back stack");
-		}
 	}
 
 	public void buildFragmentOrganizer() {
