@@ -49,7 +49,6 @@ public class ReceiptListFragment extends MyFragment implements
 
 	private void prepareActivity() {
 		ASSERT(getActivity() != null, "activity is null");
-		mParent = (RBuddyActivity) getActivity();
 		// Perform class-specific initialization
 		mApp = RBuddyApp.sharedInstance();
 	}
@@ -144,15 +143,7 @@ public class ReceiptListFragment extends MyFragment implements
 	 */
 	private void processReceiptSelection(int position) {
 		Receipt r = mReceiptList.get(position);
-		mParent.receiptSelected(r);
-	}
-
-	// private Listener listener() {
-	// return (Listener) getActivity();
-	// }
-
-	public static interface Listener {
-		void receiptSelected(Receipt r);
+		getRBuddyActivity().setActiveReceipt(r);
 	}
 
 	private static class ReceiptListAdapter extends ArrayAdapter {
@@ -240,7 +231,6 @@ public class ReceiptListFragment extends MyFragment implements
 
 	// Be aware that these fields will all be reset if fragment is destroyed!
 	private RBuddyApp mApp;
-	private RBuddyActivity mParent;
 	private ArrayAdapter<Receipt> mReceiptListAdapter;
 	private List<Receipt> mReceiptList;
 	private ListView mReceiptListView;

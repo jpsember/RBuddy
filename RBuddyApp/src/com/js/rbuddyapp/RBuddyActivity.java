@@ -33,7 +33,6 @@ import com.js.form.FormWidget;
 
 public class RBuddyActivity extends MyActivity implements //
 		IRBuddyActivity //
-		, ReceiptListFragment.Listener //
 		, Photo.Listener //
 {
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
@@ -304,15 +303,8 @@ public class RBuddyActivity extends MyActivity implements //
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
+		setActiveReceipt(r);
 		sendReceiptFileChanged();
-		receiptSelected(r);
-	}
-
-	// ReceiptList.Listener
-	@Override
-	public void receiptSelected(Receipt r) {
-		setEditReceipt(r);
-		focusOn(mReceiptEditor.f());
 	}
 
 	@Override
@@ -354,6 +346,12 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void performSearch() {
 		toast(this, "Search isn't yet implemented.");
+	}
+
+	@Override
+	public void setActiveReceipt(Receipt r) {
+		setEditReceipt(r);
+		focusOn(mReceiptEditor.f());
 	}
 
 	private void focusOn(MyFragment fragment) {

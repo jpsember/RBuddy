@@ -45,4 +45,12 @@ public interface IRBuddyActivity {
 	 * to use)
 	 */
 	void performSearch();
+
+	/**
+	 * Specify active receipt
+	 * 
+	 * @param r
+	 */
+	void setActiveReceipt(Receipt r);
+
 }
