@@ -27,7 +27,10 @@ public class FragmentOrganizer {
 		log("Constructing for parent " + nameOf(activity));
 		this.mActivity = activity;
 
-		// TODO: reenable small device override for development purposes
+		if (AppPreferences.getBoolean(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
+				false))
+			mNumberOfSlots = 1;
+
 		mSupportsDual = (mNumberOfSlots >= 2);
 		createContainer();
 	}
