@@ -8,13 +8,13 @@ import java.io.IOException;
 import com.js.form.Form;
 import com.js.form.FormImageWidget;
 import com.js.android.BitmapUtil;
+import com.js.android.MyActivity;
 import com.js.android.MyFragment;
 import com.js.basic.Files;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -49,17 +49,10 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 		getRBuddyActivity().addListener(this);
 		setReceipt(getRBuddyActivity().getActiveReceipt());
 
-		// Pop this fragment if that was our intention
-		if (mPopFlag) {
-			mPopFlag = false;
-			FragmentManager m = getActivity().getFragmentManager();
-			m.popBackStack();
-		} else {
-			// If no photo is defined for this receipt, act as if he has pressed
-			// the camera button
-			if (mReceipt != null && mReceipt.getPhotoId() == null) {
-				startImageCaptureIntent();
-			}
+		// If no photo is defined for this receipt, act as if he has pressed
+		// the camera button
+		if (mReceipt != null && mReceipt.getPhotoId() == null) {
+			startImageCaptureIntent();
 		}
 	}
 
@@ -186,10 +179,8 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 				die(e);
 			}
 		}
-		// Whether or not the user selected a new photo, pop this fragment at
-		// the next opportunity (we must wait until onResume() is called again;
-		// see issue #70)
-		mPopFlag = true;
+		// Whether or not the user selected a new photo, pop the photo fragment
+		((MyActivity) getActivity()).popFragment(this.getName());
 	}
 
 	private IRBuddyActivity getRBuddyActivity() {
@@ -211,9 +202,6 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 	public void receiptFileChanged() {
 	}
 
-	private boolean mPopFlag; // TODO: we can't assume this instance variable
-								// will persist; the fragment may be purged in
-								// low memory situations (I think)
 	private Receipt mReceipt;
 	private RBuddyApp mApp;
 	private Form mForm;

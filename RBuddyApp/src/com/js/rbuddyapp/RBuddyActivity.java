@@ -417,4 +417,5 @@ public class RBuddyActivity extends MyActivity implements //
 
 	// Set of registered listeners
 	private Set<IRBuddyActivityListener> listeners = new HashSet();
+
 }

@@ -53,4 +53,5 @@ public interface IRBuddyActivity {
 	 * @param intent
 	 */
 	void processCapturePhotoIntent(Intent intent);
+
 }
