@@ -317,6 +317,7 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void setActiveReceipt(Receipt r) {
 		setEditReceipt(r);
+		getFragmentOrganizer().popFragment(mReceiptEditor.f().getName(), false);
 		getFragmentOrganizer().focusOn(mReceiptEditor);
 	}
 

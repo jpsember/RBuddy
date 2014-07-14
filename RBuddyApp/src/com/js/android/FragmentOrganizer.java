@@ -120,7 +120,14 @@ public class FragmentOrganizer {
 	}
 
 	/**
-	 * Display a fragment, if it isn't already in one of the slots
+	 * Display a fragment, if it isn't already visible in one of the slots.
+	 * 
+	 * If the fragment is in the backstack, but not currently visible, fragments
+	 * above it are popped from the back stack.
+	 * 
+	 * If an existing fragment in the slot is covered up by this action, the
+	 * transaction is added to the back stack (so the 'back' button restores the
+	 * now-obscured fragment).
 	 * 
 	 * @param r
 	 *            FragmentReference
