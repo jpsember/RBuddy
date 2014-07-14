@@ -10,11 +10,6 @@ import android.os.Bundle;
 
 public abstract class MyActivity extends Activity {
 
-	public MyActivity() {
-		mFragmentMap = new HashMap();
-		mReferenceMap = new HashMap();
-	}
-
 	public void setLogging(boolean f) {
 		mLogging = f;
 	}
@@ -61,29 +56,18 @@ public abstract class MyActivity extends Activity {
 	}
 
 	/**
-	 * Called when a fragment has been created, so we can store it in our map of
-	 * current fragments; any older version will be bumped out
+	 * Store fragment within FragmentReference, if one has been registered with
+	 * this activity
 	 * 
 	 * @param f
+	 *            fragment
 	 */
-	void fragmentCreated(MyFragment f) {
-		String name = f.getName();
-		log("fragmentCreated " + nameOf(f) + "(name " + name + ")");
-		if (name == null)
-			throw new IllegalStateException("fragment has no name:" + nameOf(f));
-
-		{
-			FragmentReference reference = mReferenceMap.get(name);
-			if (reference != null) {
-				reference.setFragment(f);
-			}
+	void registerFragment(MyFragment f) {
+		log("registerFragment " + nameOf(f) + "(name " + f.getName() + ")");
+		FragmentReference reference = mReferenceMap.get(f.getName());
+		if (reference != null) {
+			reference.setFragment(f);
 		}
-
-		mFragmentMap.put(name, f);
-	}
-
-	<T extends MyFragment> MyFragment getFragment(String name) {
-		return mFragmentMap.get(name);
 	}
 
 	void addReference(FragmentReference reference) {
@@ -97,7 +81,6 @@ public abstract class MyActivity extends Activity {
 		return ref;
 	}
 
-	private Map<String, FragmentReference> mReferenceMap;
-	private Map<String, MyFragment> mFragmentMap;
+	private Map<String, FragmentReference> mReferenceMap = new HashMap();
 	private boolean mLogging;
 }

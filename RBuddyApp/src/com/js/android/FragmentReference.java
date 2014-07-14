@@ -18,15 +18,6 @@ public class FragmentReference<T extends MyFragment> {
 			pr("refresh " + this);
 		T fragment = mFragment;
 
-		// Replace with the instance that the activity is storing, if such an
-		// instance exists
-		{
-			T fragmentFromActivityMap = (T) mActivity.getFragment(mName);
-			if (fragmentFromActivityMap != null) {
-				fragment = fragmentFromActivityMap;
-			}
-		}
-
 		// If still null, see if there's one in the FragmentManager (which may
 		// include items in the back stack)
 		if (fragment == null) {
@@ -34,7 +25,7 @@ public class FragmentReference<T extends MyFragment> {
 			fragment = (T) manager.findFragmentByTag(mName);
 		}
 
-		// If it's still null, construct a new instance and register it with the
+		// If still null, construct a new instance and register it with the
 		// activity
 		if (fragment == null) {
 			try {
@@ -42,7 +33,7 @@ public class FragmentReference<T extends MyFragment> {
 			} catch (Throwable e) {
 				die("failed to build instance of " + mName, e);
 			}
-			mActivity.fragmentCreated(fragment);
+			mActivity.registerFragment(fragment);
 		}
 		mFragment = fragment;
 	}

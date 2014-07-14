@@ -24,7 +24,7 @@ public class MyFragment extends Fragment {
 			pr(hey());
 		log("onAttach");
 		super.onAttach(activity);
-		((MyActivity) getActivity()).fragmentCreated(this);
+		((MyActivity) getActivity()).registerFragment(this);
 	}
 
 	@Override
