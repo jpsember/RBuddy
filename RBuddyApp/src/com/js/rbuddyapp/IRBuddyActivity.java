@@ -40,4 +40,9 @@ public interface IRBuddyActivity {
 	 */
 	void receiptEdited(Receipt r);
 
+	/**
+	 * Perform search (will later figure out how to indicate which search filter
+	 * to use)
+	 */
+	void performSearch();
 }

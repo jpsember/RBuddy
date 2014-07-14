@@ -19,4 +19,5 @@ public interface IRBuddyActivityListener {
 	 * development-only code)
 	 */
 	void receiptFileChanged();
+
 }

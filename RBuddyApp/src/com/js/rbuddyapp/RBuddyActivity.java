@@ -196,7 +196,7 @@ public class RBuddyActivity extends MyActivity implements //
 			AppPreferences.toggle(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
-			focusOn(mSearch);
+			focusOn(mSearch.f());
 			return true;
 		case R.id.action_testonly_exit:
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -351,6 +351,11 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
+	@Override
+	public void performSearch() {
+		toast(this, "Search isn't yet implemented.");
+	}
+
 	private void focusOn(MyFragment fragment) {
 		// TODO: use fragmentReference here
 		plot(fragment);
@@ -422,12 +427,10 @@ public class RBuddyActivity extends MyActivity implements //
 	public void refreshFragments() {
 		mReceiptEditor.refresh();
 		mReceiptList.refresh();
-		if (mSearch == null) {
-			mSearch = new Search().register(this);
+		mSearch.refresh();
+		if (mPhoto == null) {
 			mPhoto = new Photo().register(this);
 		}
-
-		mSearch = getFragment(mSearch);
 		mPhoto = getFragment(mPhoto);
 	}
 
@@ -439,7 +442,9 @@ public class RBuddyActivity extends MyActivity implements //
 			this, ReceiptListFragment.class);
 	private FragmentReference<ReceiptEditor> mReceiptEditor = new FragmentReference<ReceiptEditor>(
 			this, ReceiptEditor.class);
-	private Search mSearch;
+	private FragmentReference<Search> mSearch = new FragmentReference<Search>(
+			this, Search.class);
+
 	private Photo mPhoto;
 	private Receipt mReceipt;
 

@@ -14,11 +14,12 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ScrollView;
 
-public class Search extends MyFragment {
+public class Search extends MyFragment implements IRBuddyActivityListener {
 
 	public Search() {
 		mApp = RBuddyApp.sharedInstance();
 	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -28,7 +29,7 @@ public class Search extends MyFragment {
 		mForm.getField("search").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				performSearch();
+				getRBuddyActivity().performSearch();
 			}
 		});
 		mScrollView = new ScrollView(getActivity());
@@ -42,29 +43,43 @@ public class Search extends MyFragment {
 	}
 
 	@Override
+	public void onResume() {
+		super.onResume();
+		getRBuddyActivity().addListener(this);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		getRBuddyActivity().removeListener(this);
+	}
+
+	@Override
 	public void onDestroyView() {
 		mScrollView = null;
 		mForm = null;
 		super.onDestroyView();
 	}
 
-	// Methods the Search pseudofragment provides
-
-	private void performSearch() {
-		toast(getActivity(), "Search isn't yet implemented.");
+	private IRBuddyActivity getRBuddyActivity() {
+		return (IRBuddyActivity) getActivity();
 	}
 
-	/* private */Listener listener() {
-		return (Listener) getActivity();
+	// IRBuddyActivityListener
+	@Override
+	public void activeReceiptChanged() {
 	}
 
-	public static interface Listener {
-		// no methods yet
+	@Override
+	public void activeReceiptEdited() {
+	}
+
+	@Override
+	public void receiptFileChanged() {
 	}
 
 	private RBuddyApp mApp;
 	private Form mForm;
 	private ScrollView mScrollView;
-
 
 }
