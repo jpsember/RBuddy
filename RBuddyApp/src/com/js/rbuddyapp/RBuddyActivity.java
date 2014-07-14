@@ -49,6 +49,8 @@ public class RBuddyActivity extends MyActivity implements //
 		return startIntentFor(context, RBuddyActivity.class);
 	}
 
+	private static boolean DEBUG_ORIENTATION = false;
+
 	private static int sOrientation = -1;
 
 	private void initOrientation() {
@@ -70,7 +72,8 @@ public class RBuddyActivity extends MyActivity implements //
 			pr(hey());
 		super.onCreate(savedInstanceState);
 
-		initOrientation();
+		if (DEBUG_ORIENTATION)
+			initOrientation();
 
 		app = RBuddyApp.sharedInstance(this);
 
@@ -200,7 +203,8 @@ public class RBuddyActivity extends MyActivity implements //
 			android.os.Process.killProcess(android.os.Process.myPid());
 			return true;
 		case R.id.action_testonly_rotate:
-			toggleOrientation();
+			if (DEBUG_ORIENTATION)
+				toggleOrientation();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -227,6 +231,9 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public boolean onPrepareOptionsMenu(final Menu menu) {
+
+		if (!DEBUG_ORIENTATION)
+			menu.removeItem(R.id.action_testonly_rotate);
 
 		// There's a bug in the Android API which causes some items to
 		// disappear; specifically, the 'exit' item (the last one) is not
