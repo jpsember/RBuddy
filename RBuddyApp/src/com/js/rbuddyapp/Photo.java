@@ -141,6 +141,10 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 
 	public void processImageCaptureResult(int resultCode, Intent intent) {
 		if (resultCode == Activity.RESULT_OK) {
+			// Get reference to receipt, in case the small chance that the
+			// active receipt changes while we're doing this work
+			final Receipt ourReceipt = mReceipt;
+
 			// TODO handle various problem situations in ways other than just
 			// 'die'
 
@@ -156,23 +160,21 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 			try {
 				FileArguments args = new FileArguments();
 				args.setData(Files.readBinaryFile(workFile));
-				args.setFileId(mReceipt.getPhotoId());
+				args.setFileId(ourReceipt.getPhotoId());
 
 				final FileArguments arg = args;
 
 				// We have to wait until the photo has been processed, and a
-				// photoId
-				// assigned; then store this assignment in the receipt, and push
-				// new
-				// version to any listeners
+				// photoId assigned; then store this assignment in the receipt,
+				// and push new version to any listeners
 				args.setCallback(new Runnable() {
 					public void run() {
-						mReceipt.setPhotoId(arg.getFileIdString());
-						mApp.receiptFile().setModified(mReceipt);
+						ourReceipt.setPhotoId(arg.getFileIdString());
+						mApp.receiptFile().setModified(ourReceipt);
 						// TODO: need better pattern to keep track of changes to
 						// receipts, maybe do it silently
-						mApp.photoStore().pushPhoto(mReceipt.getId(),
-								mReceipt.getPhotoId());
+						mApp.photoStore().pushPhoto(ourReceipt.getId(),
+								ourReceipt.getPhotoId());
 					}
 				});
 				IPhotoStore ps = mApp.photoStore();

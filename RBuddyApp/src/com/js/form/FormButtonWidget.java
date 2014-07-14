@@ -115,7 +115,6 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 	 *            zero
 	 */
 	public void displayPhoto(IPhotoStore photoStore, int ownerId, String photoId) {
-		final boolean db = false;
 		if (db)
 			pr(hey() + "ownerId " + ownerId + " photoId " + photoId
 					+ " ownerBeingListenedTo " + mOwnerIdBeingListenedTo);
