@@ -41,7 +41,7 @@ public class FragmentReference<T extends MyFragment> {
 			} catch (Throwable e) {
 				die("failed to build instance of " + mName, e);
 			}
-			fragment.register(mActivity);
+			mActivity.fragmentCreated(fragment);
 		}
 		mFragment = fragment;
 	}

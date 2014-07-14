@@ -96,11 +96,6 @@ public class MyFragment extends Fragment {
 		mLogging = logging;
 	}
 
-	public <T extends MyFragment> T register(MyActivity activity) {
-		activity.fragmentCreated(this);
-		return (T) this;
-	}
-
 	private ViewStates mActivityState = new ViewStates(this.getClass()
 			.getSimpleName());
 	private boolean mLogging;
