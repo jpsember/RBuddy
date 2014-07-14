@@ -10,6 +10,7 @@ public class FragmentReference<T extends MyFragment> {
 		mActivity = activity;
 		mClass = theClass;
 		mName = MyFragment.deriveFragmentName(theClass);
+		activity.addReference(this);
 	}
 
 	public void refresh() {
@@ -77,6 +78,14 @@ public class FragmentReference<T extends MyFragment> {
 	// */
 	// public void saveState(JSONEncoder json) {
 	// }
+
+	String getName() {
+		return mName;
+	}
+
+	void setFragment(T fragment) {
+		mFragment = fragment;
+	}
 
 	private MyActivity mActivity;
 	private T mFragment;

@@ -56,20 +56,16 @@ public class ReceiptEditor extends MyFragment implements
 	}
 
 	private void constructViews() {
-
-		ASSERT(mScrollView == null);
 		mScrollView = new ScrollView(getActivity());
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
 		String message = nameOf(this);
 		mScrollViewContainer = wrapView(mScrollView, message);
 		constructForm();
-		readReceiptToWidgets();
 	}
 
 	@Override
 	public void onResume() {
-		ASSERT(mScrollView != null);
 		super.onResume();
 		getRBuddyActivity().addListener(this);
 		setReceipt(getRBuddyActivity().getActiveReceipt());
@@ -79,6 +75,7 @@ public class ReceiptEditor extends MyFragment implements
 	public void onPause() {
 		super.onPause();
 		writeReceiptFromWidgets();
+		// TODO: this is not necessarily a good place to do this
 		mApp.receiptFile().flush();
 		getRBuddyActivity().removeListener(this);
 	}
@@ -99,11 +96,8 @@ public class ReceiptEditor extends MyFragment implements
 	private void setReceipt(Receipt receipt) {
 		// In case there's an existing receipt, flush its changes
 		writeReceiptFromWidgets();
-
 		this.mReceipt = receipt;
-
 		constructForm();
-		readReceiptToWidgets();
 	}
 
 	private void disposeForm() {
@@ -123,16 +117,11 @@ public class ReceiptEditor extends MyFragment implements
 	}
 
 	/**
-	 * Construct the form if it doesn't exist, receipt exists, and its container
-	 * exists
+	 * If receipt exists, construct form if none already exists; otherwise,
+	 * dispose of any existing form
 	 */
 	private void constructForm() {
-		if (db)
-			pr(hey(this) + " isResumed=" + isResumed() + " hasReceipt="
-					+ hasReceipt() + " mForm=" + mForm);
-		ASSERT(mScrollView != null);
-
-		if (!hasReceipt()) {
+		if (mReceipt == null) {
 			disposeForm();
 			return;
 		}
@@ -162,18 +151,11 @@ public class ReceiptEditor extends MyFragment implements
 		});
 		mScrollView.addView(mForm.getView(), new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-	}
 
-	private void processPhotoButtonPress() {
-		if (mReceipt == null)
-			return;
-		getRBuddyActivity().editActiveReceiptPhoto();
+		readReceiptToWidgets();
 	}
 
 	private void readReceiptToWidgets() {
-		if (!isResumed() || !hasReceipt())
-			return;
-
 		mForm.setValue("summary", mReceipt.getSummary(), false);
 		mForm.setValue("cost", mReceipt.getCost(), false);
 		mForm.setValue("date", mReceipt.getDate(), false);
@@ -182,21 +164,16 @@ public class ReceiptEditor extends MyFragment implements
 				mReceipt.getPhotoId());
 	}
 
-	/**
-	 * Determine if this fragment is displaying a receipt, or an empty view (if
-	 * no receipt has been set)
-	 * 
-	 * @return
-	 */
-	private boolean hasReceipt() {
-		return mReceipt != null;
+	private void processPhotoButtonPress() {
+		if (mReceipt == null)
+			return;
+		getRBuddyActivity().editActiveReceiptPhoto();
 	}
 
+	/**
+	 * If form exists, write its values to the receipt
+	 */
 	private void writeReceiptFromWidgets() {
-		if (!isResumed() || !hasReceipt())
-			return;
-
-		// If we haven't finished onResume(), mForm may not exist
 		if (mForm == null)
 			return;
 

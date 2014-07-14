@@ -9,8 +9,13 @@ import android.app.Activity;
 import android.os.Bundle;
 
 public abstract class MyActivity extends Activity {
+	// Temporary for fragment reference experiment
+	private static final boolean NEWSTUFF = false;
+
 	public MyActivity() {
 		mFragmentMap = new HashMap();
+		if (NEWSTUFF)
+			mReferenceMap = new HashMap();
 	}
 
 	public void setLogging(boolean f) {
@@ -64,13 +69,20 @@ public abstract class MyActivity extends Activity {
 	 * current fragments; any older version will be bumped out
 	 * 
 	 * @param f
-	 * @return true if fragment is different than previous one in the map
 	 */
 	void fragmentCreated(MyFragment f) {
 		String name = f.getName();
 		log("fragmentCreated " + nameOf(f) + "(name " + name + ")");
 		if (name == null)
 			throw new IllegalStateException("fragment has no name:" + nameOf(f));
+
+		if (NEWSTUFF) {
+			FragmentReference reference = mReferenceMap.get(name);
+			if (reference != null) {
+				reference.setFragment(f);
+			}
+		}
+
 		MyFragment fPrevious = mFragmentMap.put(name, f);
 		if (fPrevious != null) {
 			// Make sure old fragment is not 'active'; we don't want to be
@@ -78,9 +90,12 @@ public abstract class MyActivity extends Activity {
 			if (fPrevious.isResumed())
 				die("old fragment " + nameOf(fPrevious) + " is still active!");
 		}
-		if (fPrevious != f) {
-			log(" (previous fragment=" + nameOf(fPrevious) + ")");
-			refreshFragmentsAux();
+
+		if (!NEWSTUFF) {
+			if (fPrevious != f) {
+				log(" (previous fragment=" + nameOf(fPrevious) + ")");
+				refreshFragmentsAux();
+			}
 		}
 	}
 
@@ -99,6 +114,12 @@ public abstract class MyActivity extends Activity {
 		return mFragmentMap.get(name);
 	}
 
+	void addReference(FragmentReference reference) {
+		if (NEWSTUFF)
+			mReferenceMap.put(reference.getName(), reference);
+	}
+
+	private Map<String, FragmentReference> mReferenceMap;
 	private Map<String, MyFragment> mFragmentMap;
 	private boolean mLogging;
 	private boolean mRefreshingFragments;

@@ -49,7 +49,7 @@ public class RBuddyActivity extends MyActivity implements //
 		return startIntentFor(context, RBuddyActivity.class);
 	}
 
-	private static boolean DEBUG_ORIENTATION = false;
+	private static boolean DEBUG_ORIENTATION = true;
 
 	private static int sOrientation = -1;
 
