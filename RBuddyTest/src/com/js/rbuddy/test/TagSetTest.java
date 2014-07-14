@@ -263,5 +263,53 @@ public class TagSetTest extends MyTest {
 			assertStringsMatch(sExp, tagSet);
 		}
 	}
+	
+	public void testTrivialContain() {
+		ArrayList list = new ArrayList();
+		list.add("Eagles");
+		list.add("Falcons");
+		list.add("Cardinals");
+		TagSet tagSet = new TagSet(list.iterator());
+		assertTrue(tagSet.contains(tagSet));
+	}
 
+	public void testVariousContains() {
+		ArrayList list1 = new ArrayList();
+		list1.add("Eagles");
+		list1.add("Falcons");
+		list1.add("Cardinals");
+		TagSet birdNFLteams = new TagSet(list1.iterator());
+		
+		ArrayList list2 = new ArrayList();
+		list2.add("Eagles");
+		TagSet eagles = new TagSet(list2.iterator());
+		
+		ArrayList list3 = new ArrayList();
+		list3.add("Bears");
+		TagSet bears = new TagSet(list3.iterator());
+		
+		ArrayList list4 = new ArrayList();
+		list4.add("76ers");
+		list4.add("Flyers");
+		list4.add("Eagles");
+		TagSet phillyteams = new TagSet(list4.iterator());
+		
+		ArrayList list5 = new ArrayList();
+		list5.add("Flyers");
+		list5.add("76ers");
+		TagSet winningphillyteams = new TagSet(list5.iterator());
+		
+		assertTrue(birdNFLteams.contains(eagles));
+		
+		assertFalse(birdNFLteams.contains(bears));
+		
+		assertTrue(phillyteams.contains(eagles));
+		
+		assertFalse(phillyteams.contains(bears));
+		
+		assertFalse(winningphillyteams.contains(eagles));
+		
+		assertTrue(phillyteams.contains(winningphillyteams));
+		
+	}
 }

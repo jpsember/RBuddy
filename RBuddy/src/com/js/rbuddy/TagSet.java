@@ -166,7 +166,10 @@ public class TagSet implements IJSONEncoder {
 		return true;
 	}
 
-	boolean contains(TagSet ts) {
+	//
+	// basic set operations test for tagsets
+	//
+	public boolean contains(TagSet ts) {
 
 		return false;
 	}
