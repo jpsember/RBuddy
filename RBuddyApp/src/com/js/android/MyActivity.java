@@ -115,20 +115,8 @@ public abstract class MyActivity extends Activity {
 
 	public abstract void refreshFragments();
 
-	// TODO: make this package visibility again once done experiment
-	public <T extends MyFragment> MyFragment getFragment(String name) {
+	<T extends MyFragment> MyFragment getFragment(String name) {
 		return mFragmentMap.get(name);
-	}
-
-	/**
-	 * @deprecated make this package visibility
-	 * @param f
-	 * @return
-	 */
-	public <T extends MyFragment> T getFragment(T f) {
-		if (f == null)
-			return null;
-		return (T) mFragmentMap.get(f.getName());
 	}
 
 	private Map<String, MyFragment> mFragmentMap;
