@@ -104,6 +104,17 @@ public abstract class MyActivity extends Activity {
 		}
 	}
 
+	public void buildFragmentOrganizer() {
+		if (mFragmentOrganizer != null)
+			return;
+		mFragmentOrganizer = new FragmentOrganizer(this);
+	}
+
+	public FragmentOrganizer getFragmentOrganizer() {
+		return mFragmentOrganizer;
+	}
+
 	private Map<String, FragmentReference> mReferenceMap = new HashMap();
 	private boolean mLogging;
+	private FragmentOrganizer mFragmentOrganizer;
 }
