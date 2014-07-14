@@ -21,6 +21,11 @@ import android.widget.Toast;
 
 public class Tools extends com.js.basic.Tools {
 
+  /**
+   * If true, views can be wrapped with diagnostic labels and colors
+   */
+	public static final boolean DEBUG_VIEWS = false;
+
 	public static final int DEVICESIZE_UNKNOWN = 0;
 	public static final int DEVICESIZE_SMALL = 1;
 	public static final int DEVICESIZE_NORMAL = 2;
@@ -175,6 +180,9 @@ public class Tools extends com.js.basic.Tools {
 	}
 
 	public static View wrapView(View view, String title) {
+		if (!DEBUG_VIEWS)
+			return view;
+
 		// If view already has a parent, something odd is happening
 		if (view.getParent() != null) {
 			pr("wrapView, already has parent: " + describe(view.getParent()));

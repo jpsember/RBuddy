@@ -110,7 +110,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 		for (int slot = 0; slot < mNumberOfSlots; slot++) {
 			View v = buildSlotView(slot);
-			if (true)
+			if (DEBUG_VIEWS)
 				v = wrapView(v, "slot#" + slot);
 
 			mSlotsContainer.addView(v, new LinearLayout.LayoutParams(
@@ -118,7 +118,7 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 		mSlotsContainerWrapper = mSlotsContainer;
 
-		if (true)
+		if (DEBUG_VIEWS)
 			mSlotsContainerWrapper = wrapView(mSlotsContainer, nameOf(this));
 		setContentView(mSlotsContainerWrapper, new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));

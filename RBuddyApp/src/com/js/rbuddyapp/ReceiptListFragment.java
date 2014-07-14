@@ -131,7 +131,7 @@ public class ReceiptListFragment extends MyFragment implements
 				LayoutParams.WRAP_CONTENT);
 		listView.setLayoutParams(layoutParam);
 		this.mContentView = mReceiptListView;
-		if (false)
+		if (DEBUG_VIEWS)
 			this.mContentView = wrapView(mReceiptListView,
 					nameOf(mReceiptListView));
 	}
