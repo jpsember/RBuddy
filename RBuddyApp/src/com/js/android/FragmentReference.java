@@ -10,51 +10,40 @@ public class FragmentReference<T extends MyFragment> {
 		mActivity = activity;
 		mClass = theClass;
 		mName = MyFragment.deriveFragmentName(theClass);
-		if (db)
-			pr("constructed FragmentReference name:" + mName + " activity:"
-					+ nameOf(mActivity));
 	}
 
 	public void refresh() {
 		if (db)
 			pr("refresh " + this);
 		T fragment = mFragment;
-		T fragment2 = (T) mActivity.getFragment(mName);
-		if (db)
-			pr(" activity map yields " + nameOf(fragment2));
 
-		if (fragment2 != null && fragment2 != fragment) {
-			fragment = fragment2;
+		// Replace with the instance that the activity is storing, if such an
+		// instance exists
+		{
+			T fragmentFromActivityMap = (T) mActivity.getFragment(mName);
+			if (fragmentFromActivityMap != null) {
+				fragment = fragmentFromActivityMap;
+			}
 		}
 
-		// TODO:not sure this code is required
-
-		if (false && fragment == null) {
-			// See if there's one in the FragmentManager
-			FragmentManager m = mActivity.getFragmentManager();
-			fragment = (T) m.findFragmentByTag(mName);
-			if (fragment != null)
-				pr(hey()
-						+ "======================================= found in frag manager: "
-						+ fragment);
+		// If still null, see if there's one in the FragmentManager (which may
+		// include items in the back stack)
+		if (fragment == null) {
+			FragmentManager manager = mActivity.getFragmentManager();
+			fragment = (T) manager.findFragmentByTag(mName);
 		}
 
+		// If it's still null, construct a new instance and register it with the
+		// activity
 		if (fragment == null) {
 			try {
 				fragment = (T) mClass.newInstance();
-				if (db)
-					pr(" constructed new instance " + nameOf(fragment));
 			} catch (Throwable e) {
 				die("failed to build instance of " + mName, e);
 			}
-			if (db)
-				pr(" registering " + nameOf(fragment) + " with "
-						+ nameOf(mActivity));
 			fragment.register(mActivity);
 		}
 		mFragment = fragment;
-		if (db)
-			pr(" done refresh: " + this);
 	}
 
 	public T f() {
