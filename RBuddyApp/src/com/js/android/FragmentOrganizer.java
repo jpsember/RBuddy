@@ -23,7 +23,6 @@ public class FragmentOrganizer {
 	 * @param activity
 	 */
 	public FragmentOrganizer(MyActivity activity) {
-		setLogging(true);
 		mNumberOfSlots = 2;
 		log("Constructing for parent " + nameOf(activity));
 		this.mActivity = activity;

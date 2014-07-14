@@ -7,36 +7,26 @@ import java.util.Set;
 
 import com.js.android.App;
 import com.js.android.AppPreferences;
+import com.js.android.FragmentOrganizer;
 import com.js.android.FragmentReference;
 import com.js.android.MyActivity;
-import com.js.android.MyFragment;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import com.js.android.IPhotoStore;
-import com.js.form.FormWidget;
 
 public class RBuddyActivity extends MyActivity implements //
 		IRBuddyActivity //
 {
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
-
-	private static final int FRAGMENT_SLOT_BASE_ID = 992;
 
 	private static final String PERSIST_KEY_ACTIVE_RECEIPT_ID = "activeReceiptId";
 
@@ -77,12 +67,17 @@ public class RBuddyActivity extends MyActivity implements //
 
 		app = RBuddyApp.sharedInstance(this);
 
-		doLayout();
+		buildFragmentOrganizer();
+		setContentView(getFragmentOrganizer().getContainer(), new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 		// Don't modify the slots if we're restoring a previous state
 		// (presumably due to an orientation change)
 		if (savedInstanceState == null) {
-			focusOn(mReceiptList);
+			FragmentOrganizer f = getFragmentOrganizer();
+			f.focusOn(mReceiptList, false);
+			if (f.supportDualFragments())
+				f.focusOn(mReceiptEditor, true);
 		} else {
 			restorePreviousSavedState(savedInstanceState);
 		}
@@ -104,44 +99,10 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
-	private void doLayout() {
-		// Create view with a horizontal row of panels, one for each slot
-		LinearLayout layout = new LinearLayout(this);
-		layout.setOrientation(LinearLayout.HORIZONTAL);
-
-		mSlotsContainer = layout;
-
-		for (int slot = 0; slot < mNumberOfSlots; slot++) {
-			View v = buildSlotView(slot);
-			if (DEBUG_VIEWS)
-				v = wrapView(v, "slot#" + slot);
-
-			mSlotsContainer.addView(v, new LinearLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1));
-		}
-		mSlotsContainerWrapper = mSlotsContainer;
-
-		if (DEBUG_VIEWS)
-			mSlotsContainerWrapper = wrapView(mSlotsContainer, nameOf(this));
-		setContentView(mSlotsContainerWrapper, new LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-	}
-
 	@Override
 	public void onResume() {
 		super.onResume();
 	}
-
-	private ViewGroup buildSlotView(int slot) {
-		FrameLayout f2 = new FrameLayout(this);
-		f2.setId(FRAGMENT_SLOT_BASE_ID + slot);
-		FormWidget.setDebugBgnd(f2, (slot == 0) ? "#206020" : "#202060");
-		return f2;
-	}
-
-	private int mNumberOfSlots = 2;
-	private LinearLayout mSlotsContainer;
-	private View mSlotsContainerWrapper;
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -197,7 +158,7 @@ public class RBuddyActivity extends MyActivity implements //
 			AppPreferences.toggle(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
-			focusOn(mSearch);
+			getFragmentOrganizer().focusOn(mSearch);
 			return true;
 		case R.id.action_testonly_exit:
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -338,7 +299,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public void editActiveReceiptPhoto() {
-		focusOn(mPhoto);
+		getFragmentOrganizer().focusOn(mPhoto);
 	}
 
 	@Override
@@ -356,53 +317,12 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void setActiveReceipt(Receipt r) {
 		setEditReceipt(r);
-		focusOn(mReceiptEditor);
+		getFragmentOrganizer().focusOn(mReceiptEditor);
 	}
 
 	@Override
 	public void processCapturePhotoIntent(Intent intent) {
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-	}
-
-	/**
-	 * Display a fragment, if it isn't already in one of the slots
-	 * 
-	 * @param r
-	 *            FragmentReference
-	 */
-	private void focusOn(FragmentReference r) {
-		MyFragment fragment = r.f();
-
-		do {
-			// If fragment is already visible, ignore
-			if (fragment.isVisible())
-				return;
-
-			int slot = mNumberOfSlots - 1;
-			if (fragment instanceof ReceiptListFragment)
-				slot = 0;
-
-			int slotId = FRAGMENT_SLOT_BASE_ID + slot;
-
-			if (db)
-				pr(" plotting to slotId: " + slotId);
-
-			FragmentManager m = getFragmentManager();
-			Fragment oldFragment = m.findFragmentById(slotId);
-			FragmentTransaction transaction = m.beginTransaction();
-			if (oldFragment == null) {
-				if (db)
-					pr(" doing add of " + fragment);
-				transaction.add(slotId, fragment, fragment.getName());
-			} else {
-				transaction.replace(slotId, fragment, fragment.getName());
-			}
-			if (oldFragment != null)
-				transaction.addToBackStack(null);
-			if (db)
-				pr(" committing " + transaction);
-			transaction.commit();
-		} while (false);
 	}
 
 	private RBuddyApp app;
