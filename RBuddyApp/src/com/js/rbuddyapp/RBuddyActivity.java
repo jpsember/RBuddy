@@ -79,7 +79,7 @@ public class RBuddyActivity extends MyActivity implements //
 		// Don't modify the slots if we're restoring a previous state
 		// (presumably due to an orientation change)
 		if (savedInstanceState == null) {
-			focusOn(mReceiptList.f());
+			focusOn(mReceiptList);
 		} else {
 			restorePreviousSavedState(savedInstanceState);
 		}
@@ -194,7 +194,7 @@ public class RBuddyActivity extends MyActivity implements //
 			AppPreferences.toggle(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
-			focusOn(mSearch.f());
+			focusOn(mSearch);
 			return true;
 		case R.id.action_testonly_exit:
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -331,7 +331,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public void editPhoto(Receipt r) {
-		focusOn(mPhoto.f());
+		focusOn(mPhoto);
 	}
 
 	@Override
@@ -349,7 +349,7 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void setActiveReceipt(Receipt r) {
 		setEditReceipt(r);
-		focusOn(mReceiptEditor.f());
+		focusOn(mReceiptEditor);
 	}
 
 	@Override
@@ -357,35 +357,14 @@ public class RBuddyActivity extends MyActivity implements //
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
-	private void focusOn(MyFragment fragment) {
-		// TODO: use fragmentReference here
-		plot(fragment);
-	}
-
-	// private int slotFor(boolean primary) {
-	// return primary ? 0 : mNumberOfSlots - 1;
-	// }
-
-	// private void hideFragment(boolean primary) {
-	// int slot = slotFor(primary);
-	// FragmentManager m = getFragmentManager();
-	// Fragment f = m.findFragmentById(FRAGMENT_SLOT_BASE_ID + slot);
-	// if (f == null)
-	// return;
-	// FragmentTransaction transaction = m.beginTransaction();
-	// transaction.remove(f).commit();
-	// }
-
 	/**
 	 * Display a fragment, if it isn't already in one of the slots
 	 * 
-	 * @param tag
-	 *            name of fragment
-	 * @return if in resumed state, the fragment displayed; else null
+	 * @param r
+	 *            FragmentReference
 	 */
-	private void plot(MyFragment fragment) {
-		if (db)
-			pr("plot " + nameOf(fragment));
+	private void focusOn(FragmentReference r) {
+		MyFragment fragment = r.f();
 
 		do {
 			// If fragment is already visible, ignore
