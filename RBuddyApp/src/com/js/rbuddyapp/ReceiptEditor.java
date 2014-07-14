@@ -251,6 +251,10 @@ public class ReceiptEditor extends MyFragment implements
 		// Ignore these events, since we generated them
 	}
 
+	@Override
+	public void receiptFileChanged() {
+	}
+
 	private RBuddyApp mApp;
 	private Receipt mReceipt;
 	private Form mForm;

@@ -71,24 +71,22 @@ public class ReceiptListFragment extends MyFragment implements
 		return mContentView;
 	}
 
-
 	// IRBuddyActivityListener
 	@Override
 	public void activeReceiptChanged() {
-		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void receiptFileChanged() {
+		if (mReceiptList == null)
+			return;
+		rebuildReceiptList(mReceiptList);
 	}
 
 	@Override
 	public void activeReceiptEdited() {
 		if (mReceiptListAdapter != null)
 			mReceiptListAdapter.notifyDataSetChanged();
-	}
-
-	public void refreshList() {
-		if (mReceiptList == null)
-			return;
-		rebuildReceiptList(mReceiptList);
 	}
 
 	private List<Receipt> buildListOfReceipts() {

@@ -276,7 +276,7 @@ public class RBuddyActivity extends MyActivity implements //
 							app.receiptFile().add(r);
 						}
 						app.receiptFile().flush();
-						mReceiptList.f().refreshList();
+						sendReceiptFileChanged();
 					}
 				});
 	}
@@ -289,15 +289,22 @@ public class RBuddyActivity extends MyActivity implements //
 				setEditReceipt(null);
 				app.receiptFile().clear();
 				app.receiptFile().flush();
-				mReceiptList.f().refreshList();
+
+				sendReceiptFileChanged();
 			}
 		});
+	}
+
+	private void sendReceiptFileChanged() {
+		for (IRBuddyActivityListener listener : listeners) {
+			listener.receiptFileChanged();
+		}
 	}
 
 	private void processAddReceipt() {
 		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
 		app.receiptFile().add(r);
-		mReceiptList.f().refreshList();
+		sendReceiptFileChanged();
 		receiptSelected(r);
 	}
 
