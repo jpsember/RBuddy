@@ -71,7 +71,7 @@ public class ViewStates {
 	/**
 	 * Construct an internal snapshot of the state of the various elements
 	 */
-	public void recordSnapshot() {
+	private void recordSnapshot() {
 		log("recordSnapshot");
 		JSONEncoder enc = new JSONEncoder();
 		enc.enterList();
@@ -95,6 +95,7 @@ public class ViewStates {
 	}
 
 	public void persistSnapshot(Bundle outState) {
+		recordSnapshot();
 		log("persistSnapshot (JSON " + mJsonState + ") to bundle "
 				+ nameOf(outState));
 		String jsonString = mJsonState;
@@ -117,7 +118,8 @@ public class ViewStates {
 	/**
 	 * Restore state from previously stored JSON string
 	 */
-	public ViewStates restoreViewsFromSnapshot() {
+	public ViewStates restoreViewsFromSnapshot(Bundle savedInstanceState) {
+		retrieveSnapshotFrom(savedInstanceState);
 		log("restoreViewsFromSnapshot, JSON: " + mJsonState);
 		do {
 			if (mJsonState == null)

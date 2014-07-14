@@ -28,7 +28,7 @@ public class ReceiptListFragment extends MyFragment implements
 		IRBuddyActivityListener {
 
 	public ReceiptListFragment() {
-		// setLogging(true);
+		//setLogging(true);
 	}
 
 	private IRBuddyActivity getRBuddyActivity() {
@@ -64,8 +64,7 @@ public class ReceiptListFragment extends MyFragment implements
 
 		getActivityState() //
 				.add(mReceiptListView) //
-				.restoreViewsFromSnapshot();
-		log("returning " + describe(mContentView));
+				.restoreViewsFromSnapshot(savedInstanceState);
 
 		return mContentView;
 	}

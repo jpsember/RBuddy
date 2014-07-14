@@ -51,7 +51,7 @@ public class ReceiptEditor extends MyFragment implements
 		constructViews();
 		getActivityState() //
 				.add(mScrollView) //
-				.restoreViewsFromSnapshot();
+				.restoreViewsFromSnapshot(savedInstanceState);
 		return mScrollViewContainer;
 	}
 
@@ -94,13 +94,6 @@ public class ReceiptEditor extends MyFragment implements
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		// TODO: try to make this part of MyFragment
-		getActivityState().persistSnapshot(outState);
 	}
 
 	private void setReceipt(Receipt receipt) {

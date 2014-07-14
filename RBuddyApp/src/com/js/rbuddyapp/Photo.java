@@ -38,7 +38,7 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 
 		getActivityState() //
 				.add(mScrollView) //
-				.restoreViewsFromSnapshot();
+				.restoreViewsFromSnapshot(savedInstanceState);
 		return mScrollView;
 	}
 
