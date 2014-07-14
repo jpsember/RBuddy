@@ -77,6 +77,7 @@ public abstract class MyActivity extends Activity {
 		if (name == null)
 			throw new IllegalStateException("fragment has no name:" + nameOf(f));
 
+
 		if (NEWSTUFF) {
 			FragmentReference reference = mReferenceMap.get(name);
 			if (reference != null) {
