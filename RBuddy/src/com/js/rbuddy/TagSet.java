@@ -137,7 +137,7 @@ public class TagSet implements IJSONEncoder {
 	}
 
 	/**
-	 * ----deprecated
+	 * @deprecated
 	 * 
 	 * @param ts
 	 * @return
@@ -154,6 +154,10 @@ public class TagSet implements IJSONEncoder {
 		return false;
 	}
 
+	/**
+	 * @deprecated
+	 * 
+	 **/
 	public boolean isTagsetInTagsetExclusive(TagSet ts) {
 
 		Iterator<String> iter = ts.iterator();
