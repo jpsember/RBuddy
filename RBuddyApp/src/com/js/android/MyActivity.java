@@ -9,13 +9,10 @@ import android.app.Activity;
 import android.os.Bundle;
 
 public abstract class MyActivity extends Activity {
-	// Temporary for fragment reference experiment
-	private static final boolean NEWSTUFF = false;
 
 	public MyActivity() {
 		mFragmentMap = new HashMap();
-		if (NEWSTUFF)
-			mReferenceMap = new HashMap();
+		mReferenceMap = new HashMap();
 	}
 
 	public void setLogging(boolean f) {
@@ -37,8 +34,6 @@ public abstract class MyActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
-		if (!NEWSTUFF)
-		refreshFragmentsAux();
 	}
 
 	@Override
@@ -77,43 +72,14 @@ public abstract class MyActivity extends Activity {
 		if (name == null)
 			throw new IllegalStateException("fragment has no name:" + nameOf(f));
 
-
-		if (NEWSTUFF) {
+		{
 			FragmentReference reference = mReferenceMap.get(name);
 			if (reference != null) {
 				reference.setFragment(f);
 			}
 		}
 
-		MyFragment fPrevious = mFragmentMap.put(name, f);
-		if (fPrevious != null) {
-			// Make sure old fragment is not 'active'; we don't want to be
-			// confused about which one should be used
-			if (fPrevious.isResumed())
-				die("old fragment " + nameOf(fPrevious) + " is still active!");
-		}
-
-		if (!NEWSTUFF) {
-			if (fPrevious != f) {
-				log(" (previous fragment=" + nameOf(fPrevious) + ")");
-				refreshFragmentsAux();
-			}
-		}
-	}
-
-	private void refreshFragmentsAux() {
-		if (NEWSTUFF)
-			return;
-		// Avoid recursive rentry
-		if (mRefreshingFragments)
-			return;
-		mRefreshingFragments = true;
-		refreshFragments();
-		mRefreshingFragments = false;
-	}
-
-	@Deprecated
-	public void refreshFragments() {
+		mFragmentMap.put(name, f);
 	}
 
 	<T extends MyFragment> MyFragment getFragment(String name) {
@@ -121,14 +87,17 @@ public abstract class MyActivity extends Activity {
 	}
 
 	void addReference(FragmentReference reference) {
-		if (NEWSTUFF) {
-			mReferenceMap.put(reference.getName(), reference);
-			reference.refresh();
-		}
+		mReferenceMap.put(reference.getName(), reference);
+		reference.refresh();
+	}
+
+	public <T extends MyFragment> FragmentReference<T> buildFragment(
+			Class fragmentClass) {
+		FragmentReference<T> ref = new FragmentReference<T>(this, fragmentClass);
+		return ref;
 	}
 
 	private Map<String, FragmentReference> mReferenceMap;
 	private Map<String, MyFragment> mFragmentMap;
 	private boolean mLogging;
-	private boolean mRefreshingFragments;
 }

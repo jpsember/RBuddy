@@ -405,27 +405,15 @@ public class RBuddyActivity extends MyActivity implements //
 		} while (false);
 	}
 
-	@Override
-	public void refreshFragments() {
-		mReceiptEditor.refresh();
-		mReceiptList.refresh();
-		mSearch.refresh();
-		mPhoto.refresh();
-	}
-
 	private RBuddyApp app;
 	private Receipt mReceipt;
 
 	// Fragments
 
-	private FragmentReference<ReceiptListFragment> mReceiptList = new FragmentReference<ReceiptListFragment>(
-			this, ReceiptListFragment.class);
-	private FragmentReference<ReceiptEditor> mReceiptEditor = new FragmentReference<ReceiptEditor>(
-			this, ReceiptEditor.class);
-	private FragmentReference<Search> mSearch = new FragmentReference<Search>(
-			this, Search.class);
-	private FragmentReference<Photo> mPhoto = new FragmentReference<Photo>(
-			this, Photo.class);
+	private FragmentReference mReceiptList = buildFragment(ReceiptListFragment.class);
+	private FragmentReference mReceiptEditor = buildFragment(ReceiptEditor.class);
+	private FragmentReference mSearch = buildFragment(Search.class);
+	private FragmentReference<Photo> mPhoto = buildFragment(Photo.class);
 
 	// Set of registered listeners
 	private Set<IRBuddyActivityListener> listeners = new HashSet();

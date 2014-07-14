@@ -27,7 +27,7 @@ public class ReceiptEditor extends MyFragment implements
 		IRBuddyActivityListener {
 
 	public ReceiptEditor() {
-		final boolean db = true;
+		// final boolean db = true;
 		if (db)
 			setLogging(true);
 		log("constructing");
@@ -123,10 +123,6 @@ public class ReceiptEditor extends MyFragment implements
 	 * dispose of any existing form
 	 */
 	private void constructForm() {
-		final boolean db = true;
-		if (db)
-			pr("constructForm mReceipt=" + nameOf(mReceipt) + " mForm="
-					+ nameOf(mForm));
 		if (mReceipt == null) {
 			disposeForm();
 			return;
@@ -216,9 +212,6 @@ public class ReceiptEditor extends MyFragment implements
 	// IRBuddyActivityListener
 	@Override
 	public void activeReceiptChanged() {
-		final boolean db = true;
-		if (db)
-			pr("activeReceiptChanged");
 		setReceipt(getRBuddyActivity().getActiveReceipt());
 	}
 
