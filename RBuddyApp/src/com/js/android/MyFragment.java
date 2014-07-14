@@ -20,7 +20,6 @@ public class MyFragment extends Fragment {
 
 	@Override
 	public void onAttach(Activity activity) {
-		final boolean db = true;
 		if (db)
 			pr(hey());
 		log("onAttach");
@@ -66,7 +65,6 @@ public class MyFragment extends Fragment {
 	 *            name to distinguish it from other fragments
 	 */
 	public void setName(String name) {
-		pr("setName of " + nameOf(this) + " to " + name);
 		mName = name;
 	}
 

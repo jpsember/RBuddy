@@ -2,6 +2,9 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.js.android.App;
 import com.js.android.AppPreferences;
 import com.js.android.FragmentReference;
@@ -29,18 +32,19 @@ import com.js.android.IPhotoStore;
 import com.js.form.FormWidget;
 
 public class RBuddyActivity extends MyActivity implements //
-		ReceiptListFragment.Listener //
-		, ReceiptEditor.Listener //
+		IRBuddyActivity //
+		, ReceiptListFragment.Listener //
 		, Photo.Listener //
 {
-	private static final boolean OMIT_MOST_FRAGMENTS = false;
-
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
 	private static final int FRAGMENT_SLOT_BASE_ID = 992;
 
+	private static final String PERSIST_KEY_ACTIVE_RECEIPT_ID = "activeReceiptId";
+
 	public RBuddyActivity() {
-		setLogging(true);
+		if (db)
+			setLogging(true);
 	}
 
 	public static Intent getStartIntent(Context context) {
@@ -64,7 +68,6 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		final boolean db = true;
 		if (db)
 			pr(hey());
 		super.onCreate(savedInstanceState);
@@ -75,21 +78,29 @@ public class RBuddyActivity extends MyActivity implements //
 
 		doLayout();
 
-		if (savedInstanceState != null) {
-			int rid = savedInstanceState.getInt("XXX", 0);
-			mEditReceipt = null;
-			if (rid > 0)
-				// TODO: have it optionally return null if no such id rather
-				// than dying
-				mEditReceipt = app.receiptFile().getReceipt(rid);
+		// Don't modify the slots if we're restoring a previous state
+		// (presumably due to an orientation change)
+		if (savedInstanceState == null) {
+			focusOn(mReceiptList.f());
+		} else {
+			restorePreviousSavedState(savedInstanceState);
 		}
 	}
 
+	private void restorePreviousSavedState(Bundle savedInstanceState) {
+		int receiptId = savedInstanceState.getInt(
+				PERSIST_KEY_ACTIVE_RECEIPT_ID, 0);
+		if (receiptId > 0)
+			setEditReceipt(app.receiptFile().getReceipt(receiptId));
+	}
+
 	private void setEditReceipt(Receipt r) {
-		if (OMIT_MOST_FRAGMENTS)
-			return;
-		mEditReceipt = r;
-		mReceiptEditor.f().setReceipt(mEditReceipt);
+		if (r != mReceipt) {
+			mReceipt = r;
+			for (IRBuddyActivityListener listener : listeners) {
+				listener.activeReceiptChanged();
+			}
+		}
 	}
 
 	private void doLayout() {
@@ -118,7 +129,6 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	public void onResume() {
 		super.onResume();
-		focusOn(mReceiptList.f());
 	}
 
 	private ViewGroup buildSlotView(int slot) {
@@ -135,9 +145,10 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		// fragments.onSaveInstanceState(outState);
-		// TODO: give this a proper key
-		outState.putInt("XXX", mEditReceipt == null ? 0 : mEditReceipt.getId());
+
+		if (mReceipt != null) {
+			outState.putInt(PERSIST_KEY_ACTIVE_RECEIPT_ID, mReceipt.getId());
+		}
 	}
 
 	@Override
@@ -293,18 +304,31 @@ public class RBuddyActivity extends MyActivity implements //
 	// ReceiptList.Listener
 	@Override
 	public void receiptSelected(Receipt r) {
-		focusOn(mReceiptEditor.f());
 		setEditReceipt(r);
-	}
-
-	// ReceiptEditor.Listener
-	public Receipt getReceipt() {
-		return mEditReceipt;
+		focusOn(mReceiptEditor.f());
 	}
 
 	@Override
-	public void receiptEdited(Receipt r) {
-		mReceiptList.f().refreshReceipt(r);
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_IMAGE_CAPTURE) {
+			mPhoto.processImageCaptureResult(resultCode, data);
+		}
+	}
+
+	// IRBuddyActivity
+	@Override
+	public void addListener(IRBuddyActivityListener listener) {
+		listeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(IRBuddyActivityListener listener) {
+		listeners.remove(listener);
+	}
+
+	@Override
+	public Receipt getReceipt() {
+		return mReceipt;
 	}
 
 	@Override
@@ -314,10 +338,8 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_IMAGE_CAPTURE) {
-			mPhoto.processImageCaptureResult(resultCode, data);
-		}
+	public void receiptEdited(Receipt r) {
+		mReceiptList.f().refreshReceipt(r);
 	}
 
 	private void focusOn(MyFragment fragment) {
@@ -347,7 +369,6 @@ public class RBuddyActivity extends MyActivity implements //
 	 * @return if in resumed state, the fragment displayed; else null
 	 */
 	private void plot(MyFragment fragment) {
-		final boolean db = true;
 		if (db)
 			pr("plot " + nameOf(fragment));
 
@@ -380,9 +401,6 @@ public class RBuddyActivity extends MyActivity implements //
 			if (db)
 				pr(" committing " + transaction);
 			transaction.commit();
-			// // Is this necessary?
-			// if (true)
-			// m.executePendingTransactions();
 		} while (false);
 	}
 
@@ -393,69 +411,29 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	public void refreshFragments() {
-		final boolean db = true;
-		if (db)
-			pr(hey() + "mReceiptEditor=" + nameOf(mReceiptEditor));
-
 		mReceiptEditor.refresh();
 		mReceiptList.refresh();
 		if (mSearch == null) {
 			mSearch = new Search().register(this);
 			mPhoto = new Photo().register(this);
-			pr("RBuddyActivity.createFragments ends");
 		}
 
-		// mReceiptEditor = getFragment(mReceiptEditor);
 		mSearch = getFragment(mSearch);
 		mPhoto = getFragment(mPhoto);
 	}
 
-	// @Override
-	// public boolean fragmentCreated(MyFragment f) {
-	// boolean differs = super.fragmentCreated(f);
-	// if (differs) {
-	// log("fragmentCreated: " + nameOf(f) + "; differs from previous");
-	// refreshFragments();
-	// }
-	// return differs;
-	// }
-
-	// private static int sScriptIndex = 0;
-	//
-	// private void updateScript() {
-	// int k = sScriptIndex++;
-	// switch (k) {
-	// case 0:
-	// hideFragment(true);
-	// break;
-	// case 1:
-	// plot("ReceiptList", true, false);
-	// break;
-	// case 2:
-	// plot("Search", false, false);
-	// break;
-	// case 3:
-	// hideFragment(true);
-	// break;
-	// case 4:
-	// hideFragment(false);
-	// break;
-	// default:
-	// sScriptIndex = 0;
-	// break;
-	// }
-	// }
-
-	// TODO: how do we communicate with a fragment that may not exist?
-
 	private RBuddyApp app;
-	private Receipt mEditReceipt;
+
+	// Fragments
 
 	private FragmentReference<ReceiptListFragment> mReceiptList = new FragmentReference<ReceiptListFragment>(
 			this, ReceiptListFragment.class);
 	private FragmentReference<ReceiptEditor> mReceiptEditor = new FragmentReference<ReceiptEditor>(
 			this, ReceiptEditor.class);
-
 	private Search mSearch;
 	private Photo mPhoto;
+	private Receipt mReceipt;
+
+	// Set of registered listeners
+	private Set<IRBuddyActivityListener> listeners = new HashSet();
 }

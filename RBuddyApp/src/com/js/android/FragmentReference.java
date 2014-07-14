@@ -2,10 +2,11 @@ package com.js.android;
 
 import static com.js.basic.Tools.*;
 
+import android.app.FragmentManager;
+
 public class FragmentReference<T extends MyFragment> {
 
 	public FragmentReference(MyActivity activity, Class theClass) {
-		final boolean db = true;
 		mActivity = activity;
 		mClass = theClass;
 		mName = MyFragment.deriveFragmentName(theClass);
@@ -15,7 +16,6 @@ public class FragmentReference<T extends MyFragment> {
 	}
 
 	public void refresh() {
-		final boolean db = true;
 		if (db)
 			pr("refresh " + this);
 		T fragment = mFragment;
@@ -25,6 +25,18 @@ public class FragmentReference<T extends MyFragment> {
 
 		if (fragment2 != null && fragment2 != fragment) {
 			fragment = fragment2;
+		}
+
+		// TODO:not sure this code is required
+
+		if (false && fragment == null) {
+			// See if there's one in the FragmentManager
+			FragmentManager m = mActivity.getFragmentManager();
+			fragment = (T) m.findFragmentByTag(mName);
+			if (fragment != null)
+				pr(hey()
+						+ "======================================= found in frag manager: "
+						+ fragment);
 		}
 
 		if (fragment == null) {
@@ -58,6 +70,24 @@ public class FragmentReference<T extends MyFragment> {
 
 		return sb.toString();
 	}
+
+	// Maybe add this support later
+	// /**
+	// * Subclasses can override this to restore state from JSON string
+	// *
+	// * @param jsonString
+	// * previous state, or null if none
+	// */
+	// public void restoreState(String jsonString) {
+	// }
+	//
+	// /**
+	// * Subclasses can override this to save state to JSON string
+	// *
+	// * @param json
+	// */
+	// public void saveState(JSONEncoder json) {
+	// }
 
 	private MyActivity mActivity;
 	private T mFragment;

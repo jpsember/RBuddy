@@ -69,7 +69,6 @@ public abstract class MyActivity extends Activity {
 	 * @return true if fragment is different than previous one in the map
 	 */
 	void fragmentCreated(MyFragment f) {
-		final boolean db = true;
 		if (db)
 			pr(hey() + nameOf(f) + " (name=" + f.getName() + ")");
 
@@ -102,7 +101,6 @@ public abstract class MyActivity extends Activity {
 	}
 
 	private void refreshFragmentsAux() {
-		final boolean db = true;
 		if (db)
 			pr("refreshFragmentsAux  mRef=" + d(mRefreshingFragments)
 					+ " mFragmentsMap=" + d(mFragmentMap));
@@ -117,7 +115,8 @@ public abstract class MyActivity extends Activity {
 
 	public abstract void refreshFragments();
 
-	<T extends MyFragment> MyFragment getFragment(String name) {
+	// TODO: make this package visibility again once done experiment
+	public <T extends MyFragment> MyFragment getFragment(String name) {
 		return mFragmentMap.get(name);
 	}
 

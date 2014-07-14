@@ -81,7 +81,7 @@ public class App {
 					"h:mm:ss", Locale.CANADA);
 			strTime = sdf.format(cal.getTime());
 		}
-		for (int i = 0; i < 40; i++)
+		for (int i = 0; i < 20; i++)
 			pr("\n");
 		pr("--------------- Start of App ----- "
 				+ strTime + " -------------\n\n\n");

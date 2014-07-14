@@ -42,29 +42,6 @@ public class ReceiptListFragment extends MyFragment {
 			Bundle savedInstanceState) {
 
 		prepareActivity();
-
-		// if (false) {
-		// TextView tv = new TextView(getActivity());
-		// tv.setText("hello there");
-		// View v;
-		// v = tv;
-		// if (false)
-		// v = new View(getActivity());
-		// v.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-		// LayoutParams.MATCH_PARENT));
-		//
-		// v.setMinimumHeight(100);
-		// v.setMinimumWidth(300);
-		// debugChangeBgndColor(v);
-		// debugChangeBgndColor(v);
-		// if (false)
-		// v = wrapView(v, "ReceiptList sample view");
-		// final boolean db = true;
-		// if (db)
-		// pr(hey() + "returning " + describe(v));
-		// return v;
-		// }
-
 		log("onCreateView savedState=" + nameOf(savedInstanceState));
 
 		constructViews();

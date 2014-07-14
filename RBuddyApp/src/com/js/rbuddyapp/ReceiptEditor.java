@@ -23,31 +23,29 @@ import com.js.rbuddy.TagSet;
  * Singleton receipt editor
  * 
  */
-public class ReceiptEditor extends MyFragment {
+public class ReceiptEditor extends MyFragment implements
+		IRBuddyActivityListener {
 
 	public ReceiptEditor() {
-		setLogging(true);
+		if (db)
+			setLogging(true);
 		log("constructing");
+		ASSERT(!isAdded());
 	}
 
 	private void prepareActivity() {
 		mApp = RBuddyApp.sharedInstance();
 	}
 
-
-	// @Override
-	// public void onRestoreInstanceState(Bundle bundle) {
-	// super.onRestoreInstanceState(bundle);
-	// setReceipt(listener().getReceipt());
-	// }
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		log("onCreateView");
-
-		mReceipt = listener().getReceipt();
-		log("mReceipt set to " + mReceipt);
 
 		prepareActivity();
 		constructViews();
@@ -65,14 +63,16 @@ public class ReceiptEditor extends MyFragment {
 				LayoutParams.WRAP_CONTENT));
 		String message = nameOf(this);
 		mScrollViewContainer = wrapView(mScrollView, message);
-
+		constructForm();
+		readReceiptToWidgets();
 	}
 
 	@Override
 	public void onResume() {
 		ASSERT(mScrollView != null);
 		super.onResume();
-		setReceipt(listener().getReceipt());
+		getRBuddyActivity().addListener(this);
+		setReceipt(getRBuddyActivity().getReceipt());
 	}
 
 	@Override
@@ -80,6 +80,7 @@ public class ReceiptEditor extends MyFragment {
 		super.onPause();
 		writeReceiptFromWidgets();
 		mApp.receiptFile().flush();
+		getRBuddyActivity().removeListener(this);
 	}
 
 	@Override
@@ -98,10 +99,11 @@ public class ReceiptEditor extends MyFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		// TODO: try to make this part of MyFragment
 		getActivityState().persistSnapshot(outState);
 	}
 
-	public void setReceipt(Receipt receipt) {
+	private void setReceipt(Receipt receipt) {
 		// In case there's an existing receipt, flush its changes
 		writeReceiptFromWidgets();
 
@@ -132,12 +134,10 @@ public class ReceiptEditor extends MyFragment {
 	 * exists
 	 */
 	private void constructForm() {
-		if (mScrollView != null && !isResumed()) {
-			warning("mScrollView is nonnull, yet isResumed is false!");
-		}
-
-		if (!isResumed())
-			return;
+		if (db)
+			pr(hey(this) + " isResumed=" + isResumed() + " hasReceipt="
+					+ hasReceipt() + " mForm=" + mForm);
+		ASSERT(mScrollView != null);
 
 		if (!hasReceipt()) {
 			disposeForm();
@@ -174,13 +174,10 @@ public class ReceiptEditor extends MyFragment {
 	private void processPhotoButtonPress() {
 		if (mReceipt == null)
 			return;
-		listener().editPhoto(mReceipt);
+		getRBuddyActivity().editPhoto(mReceipt);
 	}
 
 	private void readReceiptToWidgets() {
-		if (db)
-			pr(hey() + "isRes=" + isResumed() + " hasRec=" + hasReceipt());
-
 		if (!isResumed() || !hasReceipt())
 			return;
 
@@ -203,9 +200,6 @@ public class ReceiptEditor extends MyFragment {
 	}
 
 	private void writeReceiptFromWidgets() {
-		if (db)
-			pr(hey() + "isResumed " + isResumed() + " hasReceipt "
-					+ hasReceipt() + " mForm=" + nameOf(mForm));
 		if (!isResumed() || !hasReceipt())
 			return;
 
@@ -233,41 +227,23 @@ public class ReceiptEditor extends MyFragment {
 				mReceipt.getTags().moveTagsToFrontOfQueue(mApp.tagSetFile());
 			}
 
-			listener().receiptEdited(mReceipt);
+			getRBuddyActivity().receiptEdited(mReceipt);
 		}
 	}
 
 	/**
-	 * Get listener by casting parent activity
+	 * Get parent activity
 	 * 
 	 * @return
 	 */
-	private Listener listener() {
-		return (Listener) getActivity();
+	private IRBuddyActivity getRBuddyActivity() {
+		return (IRBuddyActivity) getActivity();
 	}
 
-	public static interface Listener {
-		/**
-		 * Get the receipt to be edited
-		 * 
-		 * @return receipt, or null if user hasn't specified one
-		 */
-		Receipt getReceipt();
-
-		/**
-		 * Notify editor that user has selected a new receipt
-		 * 
-		 * @param r
-		 *            receipt, or null if user hasn't specified one
-		 */
-		void receiptEdited(Receipt r);
-
-		/**
-		 * Request edit of receipt's photo
-		 * 
-		 * @param r
-		 */
-		void editPhoto(Receipt r);
+	// IRBuddyActivityListener
+	@Override
+	public void activeReceiptChanged() {
+		setReceipt(getRBuddyActivity().getReceipt());
 	}
 
 	private RBuddyApp mApp;
