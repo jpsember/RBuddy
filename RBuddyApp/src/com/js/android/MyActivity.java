@@ -32,7 +32,6 @@ public abstract class MyActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
-
 		refreshFragmentsAux();
 	}
 
@@ -40,7 +39,6 @@ public abstract class MyActivity extends Activity {
 	protected void onResume() {
 		log("onResume");
 		super.onResume();
-
 	}
 
 	@Override
@@ -69,48 +67,30 @@ public abstract class MyActivity extends Activity {
 	 * @return true if fragment is different than previous one in the map
 	 */
 	void fragmentCreated(MyFragment f) {
-		if (db)
-			pr(hey() + nameOf(f) + " (name=" + f.getName() + ")");
-
 		String name = f.getName();
 		log("fragmentCreated " + nameOf(f) + "(name " + name + ")");
 		if (name == null)
 			throw new IllegalStateException("fragment has no name:" + nameOf(f));
-
-		if (db)
-			pr(" mFragmentMap:\n" + d(mFragmentMap));
-
 		MyFragment fPrevious = mFragmentMap.put(name, f);
-		if (db)
-			pr("  stored new " + nameOf(f) + "; previous=" + nameOf(fPrevious));
-
 		if (fPrevious != null) {
 			// Make sure old fragment is not 'active'; we don't want to be
 			// confused about which one should be used
-			ASSERT(!fPrevious.isResumed(), "old fragment " + nameOf(fPrevious)
-					+ " is still active");
+			if (fPrevious.isResumed())
+				die("old fragment " + nameOf(fPrevious) + " is still active!");
 		}
-
-		boolean differs = (fPrevious != f);
-		if (differs) {
+		if (fPrevious != f) {
 			log(" (previous fragment=" + nameOf(fPrevious) + ")");
-			if (db)
-				pr("  calling refreshFragmentsAux");
 			refreshFragmentsAux();
 		}
 	}
 
 	private void refreshFragmentsAux() {
-		if (db)
-			pr("refreshFragmentsAux  mRef=" + d(mRefreshingFragments)
-					+ " mFragmentsMap=" + d(mFragmentMap));
+		// Avoid recursive rentry
 		if (mRefreshingFragments)
 			return;
 		mRefreshingFragments = true;
 		refreshFragments();
 		mRefreshingFragments = false;
-		if (db)
-			pr(" done refreshFragmentsAux");
 	}
 
 	public abstract void refreshFragments();
