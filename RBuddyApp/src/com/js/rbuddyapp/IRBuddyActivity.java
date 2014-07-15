@@ -1,7 +1,5 @@
 package com.js.rbuddyapp;
 
-import java.util.List;
-
 import android.content.Intent;
 
 import com.js.rbuddy.Receipt;
@@ -58,11 +56,12 @@ public interface IRBuddyActivity {
 	void processCapturePhotoIntent(Intent intent);
 
 	/**
-	 * Get list of receipts filtered according to search parameters
+	 * Get list of receipt ids filtered according to search parameters
 	 * 
-	 * @return
+	 * @return list of ids of receipts satisfying search criteria, or null if no
+	 *         search active
 	 */
-	List<Receipt> getSearchResults();
+	int[] getSearchResults();
 
 	/**
 	 * Dispose of any existing search results

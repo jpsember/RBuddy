@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.js.android.AndroidDate;
 import com.js.android.MyFragment;
+import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.Receipt;
 
 import android.content.Context;
@@ -118,15 +119,19 @@ public class ReceiptListFragment extends MyFragment implements
 		log("rebuildReceiptList");
 		list.clear();
 
-		Iterator<Receipt> it = null;
-		List<Receipt> source = getRBuddyActivity().getSearchResults();
-		if (source != null) {
-			it = source.iterator();
+		IReceiptFile receiptFile = mApp.receiptFile();
+		int[] searchResults = getRBuddyActivity().getSearchResults();
+		if (searchResults != null) {
+			for (int id : searchResults) {
+				if (!receiptFile.exists(id))
+					continue;
+				list.add(receiptFile.getReceipt(id));
+			}
 		} else {
-			it = mApp.receiptFile().iterator();
-		}
-		while (it.hasNext()) {
-			list.add(it.next());
+			Iterator<Receipt> iterator = receiptFile.iterator();
+			while (iterator.hasNext()) {
+				list.add(iterator.next());
+			}
 		}
 
 		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);

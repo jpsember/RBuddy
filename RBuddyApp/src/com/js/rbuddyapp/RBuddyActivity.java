@@ -33,6 +33,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
 	private static final String PERSIST_KEY_ACTIVE_RECEIPT_ID = "activeReceiptId";
+	private static final String PERSIST_KEY_SEARCH_RESULTS = "searchResults";
 
 	public RBuddyActivity() {
 		if (db)
@@ -92,6 +93,9 @@ public class RBuddyActivity extends MyActivity implements //
 				PERSIST_KEY_ACTIVE_RECEIPT_ID, 0);
 		if (receiptId > 0)
 			setEditReceipt(app.receiptFile().getReceipt(receiptId));
+
+		mSearchResults = savedInstanceState
+				.getIntArray(PERSIST_KEY_SEARCH_RESULTS);
 	}
 
 	private void setEditReceipt(Receipt r) {
@@ -114,6 +118,9 @@ public class RBuddyActivity extends MyActivity implements //
 
 		if (mReceipt != null) {
 			outState.putInt(PERSIST_KEY_ACTIVE_RECEIPT_ID, mReceipt.getId());
+		}
+		if (mSearchResults != null) {
+			outState.putIntArray(PERSIST_KEY_SEARCH_RESULTS, mSearchResults);
 		}
 	}
 
@@ -319,7 +326,7 @@ public class RBuddyActivity extends MyActivity implements //
 		// TODO: maybe just store receipt id in search results, instead of whole
 		// receipt
 		mSearchResults = applySearch(filter);
-		if (mSearchResults.isEmpty()) {
+		if (mSearchResults.length == 0) {
 			toast(this, "No Results");
 		}
 		getFragmentOrganizer().focusOn(mReceiptList);
@@ -327,7 +334,7 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	@Override
-	public List<Receipt> getSearchResults() {
+	public int[] getSearchResults() {
 		return mSearchResults;
 	}
 
@@ -335,15 +342,24 @@ public class RBuddyActivity extends MyActivity implements //
 		mSearchResults = null;
 	}
 
-	private List<Receipt> applySearch(ReceiptFilter filter) {
-		List<Receipt> list = new ArrayList();
+	private int[] applySearch(ReceiptFilter filter) {
+		List<Integer> list = new ArrayList();
 		for (Iterator<Receipt> it = app.receiptFile().iterator(); it.hasNext();) {
 			Receipt r = it.next();
 			if (filter.apply(r)) {
-				list.add(r);
+				list.add(r.getId());
 			}
 		}
-		return list;
+
+		return convertListToArray(list);
+	}
+
+	private static int[] convertListToArray(List<Integer> list) {
+		int[] array = new int[list.size()];
+		for (int i = 0; i < array.length; i++) {
+			array[i] = list.get(i);
+		}
+		return array;
 	}
 
 	@Override
@@ -360,7 +376,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private RBuddyApp app;
 	private Receipt mReceipt;
-	private List<Receipt> mSearchResults;
+	private int[] mSearchResults;
 
 	// Fragments
 
