@@ -2,7 +2,10 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.js.android.App;
@@ -12,6 +15,7 @@ import com.js.android.FragmentReference;
 import com.js.android.MyActivity;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
+import com.js.rbuddy.ReceiptFilter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -310,8 +314,33 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	@Override
-	public void performSearch() {
-		toast(this, "Search isn't yet implemented.");
+	public void performSearch(ReceiptFilter filter) {
+		mSearchResults = applySearch(filter);
+		if (mSearchResults.isEmpty()) {
+			toast(this, "No Results");
+		}
+		getFragmentOrganizer().focusOn(mReceiptList);
+		mReceiptList.f().updateForSearchResults();
+	}
+
+	@Override
+	public List<Receipt> getSearchResults() {
+		return mSearchResults;
+	}
+
+	public void clearSearchResults() {
+		mSearchResults = null;
+	}
+
+	private List<Receipt> applySearch(ReceiptFilter filter) {
+		List<Receipt> list = new ArrayList();
+		for (Iterator<Receipt> it = app.receiptFile().iterator(); it.hasNext();) {
+			Receipt r = it.next();
+			if (filter.apply(r)) {
+				list.add(r);
+			}
+		}
+		return list;
 	}
 
 	@Override
@@ -328,10 +357,11 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private RBuddyApp app;
 	private Receipt mReceipt;
+	private List<Receipt> mSearchResults;
 
 	// Fragments
 
-	private FragmentReference mReceiptList = buildFragment(ReceiptListFragment.class);
+	private FragmentReference<ReceiptListFragment> mReceiptList = buildFragment(ReceiptListFragment.class);
 	private FragmentReference mReceiptEditor = buildFragment(ReceiptEditor.class);
 	private FragmentReference mSearch = buildFragment(Search.class);
 	private FragmentReference<Photo> mPhoto = buildFragment(Photo.class);

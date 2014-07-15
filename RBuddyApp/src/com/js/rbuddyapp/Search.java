@@ -4,7 +4,9 @@ import static com.js.android.Tools.*;
 
 import com.js.android.MyFragment;
 import com.js.form.Form;
+import com.js.rbuddy.Cost;
 import com.js.rbuddy.R;
+import com.js.rbuddy.ReceiptFilter;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -29,7 +31,8 @@ public class Search extends MyFragment implements IRBuddyActivityListener {
 		mForm.getField("search").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getRBuddyActivity().performSearch();
+				ReceiptFilter f = constructFilter();
+				getRBuddyActivity().performSearch(f);
 			}
 		});
 		mScrollView = new ScrollView(getActivity());
@@ -62,6 +65,21 @@ public class Search extends MyFragment implements IRBuddyActivityListener {
 
 	private IRBuddyActivity getRBuddyActivity() {
 		return (IRBuddyActivity) getActivity();
+	}
+
+	/**
+	 * Construct a ReceiptFilter from the form's values
+	 * 
+	 * @return
+	 */
+	private ReceiptFilter constructFilter() {
+		ReceiptFilter f = new ReceiptFilter();
+
+		// TODO: fill in filter values
+		f.setMinCostActive(true);
+		f.setMinCost(new Cost(2.50));
+
+		return f;
 	}
 
 	// IRBuddyActivityListener

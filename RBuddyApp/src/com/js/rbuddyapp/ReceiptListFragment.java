@@ -86,6 +86,16 @@ public class ReceiptListFragment extends MyFragment implements
 			mReceiptListAdapter.notifyDataSetChanged();
 	}
 
+	/**
+	 * If fragment is resumed, modify view if necessary to display search
+	 * results
+	 */
+	public void updateForSearchResults() {
+		unimp("not yet implemented");
+		pr("update for search results: "
+				+ d(getRBuddyActivity().getSearchResults()));
+	}
+
 	private List<Receipt> buildListOfReceipts() {
 		ArrayList list = new ArrayList();
 		rebuildReceiptList(list);
