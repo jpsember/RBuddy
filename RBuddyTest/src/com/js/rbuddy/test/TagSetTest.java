@@ -299,29 +299,25 @@ public class TagSetTest extends MyTest {
 		list5.add("76ers");
 		TagSet winningphillyteams = new TagSet(list5.iterator());
 		
-		if (db)
-			pr("Seeing if birdNFLteams contains eagles...");
+		TagSet nullset = new TagSet();
+		
 		assertTrue(birdNFLteams.contains(eagles));
 		
-		if (db)
-			pr("Seeing if birdNFLteams contains bears...");
 		assertFalse(birdNFLteams.contains(bears));
 		
-		if (db)
-			pr("Seeing if phillyteams contains eagles...");
 		assertTrue(phillyteams.contains(eagles));
 		
-		if (db)
-			pr("Seeing if phillyteams contains bears...");
 		assertFalse(phillyteams.contains(bears));
 		
-		if (db)
-			pr("Seeing if winningphillyteams contains eagles...");
 		assertFalse(winningphillyteams.contains(eagles));
 		
-		if (db)
-			pr("Seeing if phillyteams contains winningphillyteams...");
 		assertTrue(phillyteams.contains(winningphillyteams));
 		
-	}
+		assertTrue(phillyteams.contains(nullset));
+		
+		assertFalse(nullset.contains(phillyteams));
+		
+		assertTrue(phillyteams.contains(phillyteams));
+		
+		}
 }

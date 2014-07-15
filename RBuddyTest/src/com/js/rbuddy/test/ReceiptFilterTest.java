@@ -100,9 +100,9 @@ public class ReceiptFilterTest extends MyTest {
 	}
 
 	public void testFiltering() {
-
+		
 		ReceiptFilter rf = new ReceiptFilter();
-
+		
 		JSDate min_date = JSDate.buildFromValues(2014, 4, 4);
 		rf.setMinDate(min_date);
 		rf.setMinDateActive(true);
@@ -127,15 +127,19 @@ public class ReceiptFilterTest extends MyTest {
 		rf.setExclusiveTags(exc_ts);
 		rf.setExclusiveTagsActive(true);
 
+		Receipt r= new Receipt(1);
+		
 		JSDate test_date = JSDate.buildFromValues(2014, 5, 12);
+		r.setDate(test_date);
+		
 		Cost test_cost = new Cost("500");
+		r.setCost(test_cost);
+		
 		TagSet test_ts = TagSet.parse("Florida");
-
-		 if (rf.applyFilter(test_cost, test_date, test_ts) == true)
-		 pr("Test receipt passed thru the filter...");
-		 else
-		 pr("Filter failed the test receipt...");
-
+		r.setTags(test_ts);
+		
+		assertTrue(rf.apply(r));
+		
 	}
 
 	private ReceiptFilter f;
