@@ -36,9 +36,8 @@ public class Search extends MyFragment implements IRBuddyActivityListener {
 		mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT));
 		mScrollView.addView(mForm.getView());
-		getActivityState()//
-				.add(mScrollView) //
-				.restoreViewsFromSnapshot(savedInstanceState);
+		defineState(mScrollView);
+		restoreStateFrom(savedInstanceState);
 		return mScrollView;
 	}
 

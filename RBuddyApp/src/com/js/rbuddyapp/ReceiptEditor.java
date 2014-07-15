@@ -50,9 +50,8 @@ public class ReceiptEditor extends MyFragment implements
 
 		prepareActivity();
 		constructViews();
-		getActivityState() //
-				.add(mScrollView) //
-				.restoreViewsFromSnapshot(savedInstanceState);
+		defineState(mScrollView);
+		restoreStateFrom(savedInstanceState);
 		return mScrollViewContainer;
 	}
 

@@ -55,8 +55,8 @@ public class MyFragment extends Fragment {
 	public void onSaveInstanceState(Bundle outState) {
 		log("onSaveInstanceState");
 		super.onSaveInstanceState(outState);
-		log(" persisting activity state " + nameOf(getActivityState()));
-		getActivityState().persistSnapshot(outState);
+		log(" persisting activity state " + nameOf(getState()));
+		getState().saveTo(outState);
 	}
 
 	/**
@@ -84,20 +84,27 @@ public class MyFragment extends Fragment {
 		}
 	}
 
-	protected final ViewStates getActivityState() {
+	protected void defineState(Object... elements) {
+		mState.add(elements);
+	}
+
+	protected void restoreStateFrom(Bundle savedInstanceState) {
+		mState.restoreFrom(savedInstanceState);
+	}
+
+	private final PersistentFragmentState getState() {
 		if (db) {
 			warning("enabling ActivityState logging");
-			mActivityState.setLogging(true);
+			mState.setLogging(true);
 		}
-		return mActivityState;
+		return mState;
 	}
 
 	protected void setLogging(boolean logging) {
 		mLogging = logging;
 	}
 
-	private ViewStates mActivityState = new ViewStates(this.getClass()
-			.getSimpleName());
+	private PersistentFragmentState mState = new PersistentFragmentState();
 	private boolean mLogging;
 	private String mName;
 }

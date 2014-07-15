@@ -62,9 +62,8 @@ public class ReceiptListFragment extends MyFragment implements
 
 		constructViews();
 
-		getActivityState() //
-				.add(mReceiptListView) //
-				.restoreViewsFromSnapshot(savedInstanceState);
+		defineState(mReceiptListView);
+		restoreStateFrom(savedInstanceState);
 
 		return mContentView;
 	}

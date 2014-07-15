@@ -105,7 +105,6 @@ public class JSONParser {
 	 */
 	public Object peekNext() {
 		if (!mPeekValueAvailable) {
-
 			if (mValueForKeyReady) {
 				mValueForKeyReady = false;
 				mPeekValue = mValueForLastKey;
