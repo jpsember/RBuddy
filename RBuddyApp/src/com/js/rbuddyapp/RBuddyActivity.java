@@ -315,6 +315,9 @@ public class RBuddyActivity extends MyActivity implements //
 
 	@Override
 	public void performSearch(ReceiptFilter filter) {
+		// TODO: Persist search results within activity's bundle
+		// TODO: maybe just store receipt id in search results, instead of whole
+		// receipt
 		mSearchResults = applySearch(filter);
 		if (mSearchResults.isEmpty()) {
 			toast(this, "No Results");
