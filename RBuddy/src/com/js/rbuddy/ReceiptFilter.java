@@ -225,6 +225,15 @@ public class ReceiptFilter implements IJSONEncoder {
 			if (isMaxCostActive() && r.getCost().compare(getMaxCost()) > 0)
 				break;
 
+			if (isMaxDateActive() && r.getDate().compare(getMaxDate()) > 0)
+				break;
+
+			if (isInclusiveTagsActive() && inclusiveTags.contains(r.getTags()))
+					break;
+			
+			if (isExclusiveTagsActive() && r.getTags().contains(exclusiveTags))
+				break;
+		
 			// passed all the conditions
 			success = true;
 		} while (false);
@@ -346,7 +355,8 @@ public class ReceiptFilter implements IJSONEncoder {
 					pr("tag set = " + ts);
 					pr("inclusive tags = " + filter_inclusive_tags);
 				}
-				if (ts.isTagsetInTagsetInclusive(filter_inclusive_tags) == false) {
+				if (filter_inclusive_tags.contains(ts) == false){
+					
 					if (db)
 						pr("tag set is not 'inclusively in' the inclusive set, failed on inclusive test");
 					return false;
@@ -366,7 +376,7 @@ public class ReceiptFilter implements IJSONEncoder {
 					pr("tag set = " + ts);
 					pr("exclusive tags = " + filter_exclusive_tags);
 				}
-				if (ts.isTagsetInTagsetExclusive(filter_exclusive_tags) == false) {
+				if (ts.contains(filter_exclusive_tags) == false) {
 					if (db)
 						pr("tag set is not 'exclusively in' the exclusive set, failed on exclusive test");
 					return false;
