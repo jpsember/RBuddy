@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 public class FragmentOrganizer {
 
 	private static final int FRAGMENT_SLOT_BASE_ID = 992;
+	public static final String PREFERENCE_KEY_SMALL_DEVICE_FLAG = "small_device";
 
 	/**
 	 * Constructor
@@ -27,7 +28,7 @@ public class FragmentOrganizer {
 		log("Constructing for parent " + nameOf(activity));
 		this.mActivity = activity;
 
-		if (AppPreferences.getBoolean(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
+		if (AppPreferences.getBoolean(PREFERENCE_KEY_SMALL_DEVICE_FLAG,
 				false))
 			mNumberOfSlots = 1;
 

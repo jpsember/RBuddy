@@ -7,7 +7,6 @@ import java.util.Set;
 
 import android.test.AndroidTestCase;
 
-import com.js.rbuddyapp.RBuddyApp;
 import com.js.rbuddyapp.SimpleReceiptFile;
 
 import com.js.rbuddy.Receipt;
@@ -98,8 +97,6 @@ public class SimpleReceiptFileTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		// Make sure we construct the correct type of app
-		RBuddyApp.sharedInstance(getContext());
 		constructFile();
 		File f = rf.fileForBaseName(BASENAME);
 		if (f.isFile())

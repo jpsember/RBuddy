@@ -72,8 +72,7 @@ public class RBuddyActivity extends MyActivity implements //
 		if (db)
 			pr(hey());
 		super.onCreate(savedInstanceState);
-		// TODO: Is this still required?
-		RBuddyApp.sharedInstance(RBuddyApp.class, this);
+		App.sharedInstance(App.class, this);
 
 		if (DEBUG_ORIENTATION)
 			initOrientation();
@@ -175,7 +174,8 @@ public class RBuddyActivity extends MyActivity implements //
 			showGoogleDriveState();
 			return true;
 		case R.id.action_testonly_toggle_small_device:
-			AppPreferences.toggle(App.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
+			AppPreferences
+					.toggle(FragmentOrganizer.PREFERENCE_KEY_SMALL_DEVICE_FLAG);
 			return true;
 		case R.id.action_search:
 			getFragmentOrganizer().focusOn(mSearch);
@@ -240,7 +240,8 @@ public class RBuddyActivity extends MyActivity implements //
 						menu,
 						R.id.action_testonly_toggle_small_device,
 						(AppPreferences.getBoolean(
-								App.PREFERENCE_KEY_SMALL_DEVICE_FLAG, false) ? "Disable"
+										FragmentOrganizer.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
+										false) ? "Disable"
 								: "Enable")
 								+ " small device flag");
 			}
