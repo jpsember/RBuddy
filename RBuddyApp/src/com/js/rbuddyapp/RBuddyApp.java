@@ -104,7 +104,6 @@ public class RBuddyApp extends App {
 			mAdditionalWidgetTypes.add(FormTagSetWidget.FACTORY);
 		}
 		return Form.parse(context, json, mAdditionalWidgetTypes);
-
 	}
 
 	private GoogleApiClient mGoogleApiClient;

@@ -113,13 +113,20 @@ public class FragmentOrganizer {
 				success = true;
 				break;
 			}
-			manager.popBackStack();
-			manager.executePendingTransactions();
+			boolean popped = manager.popBackStackImmediate();
+			if (!popped) {
+				warning("nothing was on the back stack (Issue #78)");
+				break;
+			}
 			success = true;
 		}
 		if (!success) {
 			warning("couldn't find fragment " + fragmentName + " on back stack");
 		}
+	}
+
+	public void focusOn(FragmentReference r, boolean auxilliarySlot) {
+		focusOn(r, auxilliarySlot, true);
 	}
 
 	/**
@@ -134,8 +141,15 @@ public class FragmentOrganizer {
 	 * 
 	 * @param r
 	 *            FragmentReference
+	 * @param auxilliarySlot
+	 *            if true, puts in auxilliary slot instead of main
+	 * @param addToBackStack
+	 *            if true, and replacing an existing slot, adds operation to
+	 *            back stack
 	 */
-	public void focusOn(FragmentReference r, boolean auxilliarySlot) {
+	public void focusOn(FragmentReference r, boolean auxilliarySlot,
+			boolean addToBackStack) {
+		// TODO: refactor this method signature, arguments are too confusing
 		MyFragment fragment = r.f();
 
 		do {
@@ -165,7 +179,7 @@ public class FragmentOrganizer {
 			} else {
 				transaction.replace(slotId, fragment, fragment.getName());
 			}
-			if (oldFragment != null)
+			if (oldFragment != null && addToBackStack)
 				transaction.addToBackStack(null);
 			if (db)
 				pr(" committing " + transaction);

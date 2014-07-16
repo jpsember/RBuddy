@@ -68,4 +68,5 @@ public interface IRBuddyActivity {
 	 */
 	void clearSearchResults();
 
+	void processGoogleApiConnected();
 }

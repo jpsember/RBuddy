@@ -66,11 +66,18 @@ public class RBuddyActivity extends MyActivity implements //
 		if (db)
 			pr(hey());
 		super.onCreate(savedInstanceState);
+		app = (RBuddyApp) RBuddyApp.sharedInstance(RBuddyApp.class, this);
+
+		// We must delay building fragments until the app instance has been
+		// prepared above
+		mStart = buildFragment(StartFragment.class);
+		mReceiptList = buildFragment(ReceiptListFragment.class);
+		mReceiptEditor = buildFragment(ReceiptEditor.class);
+		mSearch = buildFragment(Search.class);
+		mPhoto = buildFragment(Photo.class);
 
 		if (DEBUG_ORIENTATION)
 			initOrientation();
-
-		app = RBuddyApp.sharedInstance(this);
 
 		buildFragmentOrganizer();
 		setContentView(getFragmentOrganizer().getContainer(), new LayoutParams(
@@ -80,9 +87,13 @@ public class RBuddyActivity extends MyActivity implements //
 		// (presumably due to an orientation change)
 		if (savedInstanceState == null) {
 			FragmentOrganizer f = getFragmentOrganizer();
-			f.focusOn(mReceiptList, false);
-			if (f.supportDualFragments())
-				f.focusOn(mReceiptEditor, true);
+			f.focusOn(mStart, false);
+
+			if (false) { // Do this once startup completes
+				f.focusOn(mReceiptList, false);
+				if (f.supportDualFragments())
+					f.focusOn(mReceiptEditor, true);
+			}
 		} else {
 			restorePreviousSavedState(savedInstanceState);
 		}
@@ -374,18 +385,61 @@ public class RBuddyActivity extends MyActivity implements //
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
+	public void processGoogleApiConnected() {
+		if (db)
+			pr(hey() + "processGoogleAPIConnected");
+
+		if (app.useGoogleAPI()) {
+			if (db)
+				pr("constructing UserData");
+			mUserData = new UserData(this, app);
+			if (db)
+				pr("calling open() with null callback");
+			mUserData.open(new Runnable() {
+				@Override
+				public void run() {
+					processUserDataReady();
+				}
+			});
+		} else {
+			processUserDataReady();
+		}
+	}
+
+	private void processUserDataReady() {
+		if (!userFilesPrepared) {
+			if (app.useGoogleAPI()) {
+				app.setUserData(mUserData.getReceiptFile(),
+						mUserData.getTagSetFile(), mUserData.getPhotoStore());
+			} else {
+				SimpleReceiptFile s = new SimpleReceiptFile(this);
+				IPhotoStore ps = new SimplePhotoStore(this);
+				app.setUserData(s, s.readTagSetFile(), ps);
+			}
+			userFilesPrepared = true;
+		}
+
+		{
+			FragmentOrganizer f = getFragmentOrganizer();
+			f.focusOn(mReceiptList, false, false);
+			if (f.supportDualFragments())
+				f.focusOn(mReceiptEditor, true);
+		}
+	}
+
 	private RBuddyApp app;
 	private Receipt mReceipt;
 	private int[] mSearchResults;
+	private boolean userFilesPrepared;
+	private UserData mUserData;
 
 	// Fragments
-
-	private FragmentReference<ReceiptListFragment> mReceiptList = buildFragment(ReceiptListFragment.class);
-	private FragmentReference mReceiptEditor = buildFragment(ReceiptEditor.class);
-	private FragmentReference mSearch = buildFragment(Search.class);
-	private FragmentReference<Photo> mPhoto = buildFragment(Photo.class);
+	private FragmentReference<StartFragment> mStart;
+	private FragmentReference<ReceiptListFragment> mReceiptList;
+	private FragmentReference mReceiptEditor;
+	private FragmentReference mSearch;
+	private FragmentReference<Photo> mPhoto;
 
 	// Set of registered listeners
 	private Set<IRBuddyActivityListener> listeners = new HashSet();
-
 }

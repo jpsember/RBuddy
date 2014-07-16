@@ -231,6 +231,9 @@ public class ReceiptFilter implements IJSONEncoder {
 		return success;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	// TJS 7 July
 	// don't know if i like the name, and place this function is
 	// but so what for now...
