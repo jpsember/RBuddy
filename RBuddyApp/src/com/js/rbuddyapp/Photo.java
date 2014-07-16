@@ -33,7 +33,6 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		mApp = RBuddyApp.sharedInstance();
 		layoutElements();
 
 		defineState(mScrollView);
@@ -71,7 +70,7 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_photo_activity);
 
-		this.mForm = mApp.parseForm(getActivity(), jsonString);
+		mForm = getRBuddyActivity().parseForm(jsonString);
 		mForm.getField("takephoto").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -207,7 +206,6 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 	}
 
 	private Receipt mReceipt;
-	private RBuddyApp mApp;
 	private Form mForm;
 	private ScrollView mScrollView;
 }

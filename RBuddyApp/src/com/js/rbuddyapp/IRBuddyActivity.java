@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.js.android.IPhotoStore;
+import com.js.form.Form;
 import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.ReceiptFilter;
@@ -101,5 +102,13 @@ public interface IRBuddyActivity {
 	TagSetFile tagSetFile();
 
 	IPhotoStore photoStore();
+
+	/**
+	 * Parse a Form; calls Form.parse, using additional app-specific widgets
+	 * 
+	 * @param json
+	 * @return
+	 */
+	Form parseForm(String json);
 
 }

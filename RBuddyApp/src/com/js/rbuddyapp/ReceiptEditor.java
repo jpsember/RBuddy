@@ -34,10 +34,6 @@ public class ReceiptEditor extends MyFragment implements
 		ASSERT(!isAdded());
 	}
 
-	private void prepareActivity() {
-		mApp = RBuddyApp.sharedInstance();
-	}
-
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -48,7 +44,6 @@ public class ReceiptEditor extends MyFragment implements
 			Bundle savedInstanceState) {
 		log("onCreateView");
 
-		prepareActivity();
 		constructViews();
 		defineState(mScrollView);
 		restoreStateFrom(savedInstanceState);
@@ -134,7 +129,7 @@ public class ReceiptEditor extends MyFragment implements
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_edit_receipt);
 
-		mForm = mApp.parseForm(getActivity(), jsonString);
+		mForm = getRBuddyActivity().parseForm(jsonString);
 
 		mForm.addListener(new Form.Listener() {
 			@Override
@@ -225,7 +220,6 @@ public class ReceiptEditor extends MyFragment implements
 	public void receiptFileChanged() {
 	}
 
-	private RBuddyApp mApp;
 	private Receipt mReceipt;
 	private Form mForm;
 	private FormButtonWidget mReceiptWidget;

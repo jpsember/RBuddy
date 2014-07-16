@@ -29,6 +29,8 @@ import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 
 import com.js.android.IPhotoStore;
+import com.js.form.Form;
+import com.js.form.FormWidget;
 
 public class RBuddyActivity extends MyActivity implements //
 		IRBuddyActivity //
@@ -72,8 +74,6 @@ public class RBuddyActivity extends MyActivity implements //
 		super.onCreate(savedInstanceState);
 		// TODO: Is this still required?
 		RBuddyApp.sharedInstance(RBuddyApp.class, this);
-
-		FormTagSetWidget.setActivity(this);
 
 		// We must delay building fragments until the app instance has been
 		// prepared above
@@ -481,6 +481,18 @@ public class RBuddyActivity extends MyActivity implements //
 		ASSERT(mPhotoStore != null);
 		return mPhotoStore;
 	}
+
+	@Override
+	public Form parseForm(String json) {
+		if (mAdditionalWidgetTypes == null) {
+			mAdditionalWidgetTypes = new HashSet();
+			FormTagSetWidget.setActivity(this);
+			mAdditionalWidgetTypes.add(FormTagSetWidget.FACTORY);
+		}
+		return Form.parse(this, json, mAdditionalWidgetTypes);
+	}
+
+	private Set<FormWidget.Factory> mAdditionalWidgetTypes;
 
 	private Receipt mReceipt;
 	private int[] mSearchResults;

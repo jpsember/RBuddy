@@ -18,16 +18,12 @@ import android.widget.ScrollView;
 
 public class Search extends MyFragment implements IRBuddyActivityListener {
 
-	public Search() {
-		mApp = RBuddyApp.sharedInstance();
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		String jsonString = readTextFileResource(getActivity(),
 				R.raw.form_search);
-		this.mForm = mApp.parseForm(getActivity(), jsonString);
+		this.mForm = getRBuddyActivity().parseForm(jsonString);
 		mForm.getField("search").setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -95,7 +91,6 @@ public class Search extends MyFragment implements IRBuddyActivityListener {
 	public void receiptFileChanged() {
 	}
 
-	private RBuddyApp mApp;
 	private Form mForm;
 	private ScrollView mScrollView;
 
