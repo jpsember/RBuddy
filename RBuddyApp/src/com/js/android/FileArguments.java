@@ -3,18 +3,12 @@ package com.js.android;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.*;
 
-import static com.js.basic.Tools.*;
-
 /**
  * Class for organizing parameters for file operations (whether using Google
  * Drive API, or simple local file system)
  * 
  */
 public class FileArguments {
-
-	static {
-		suppressWarning();
-	}
 
 	public FileArguments() {
 		this.mData = EMPTY_DATA;

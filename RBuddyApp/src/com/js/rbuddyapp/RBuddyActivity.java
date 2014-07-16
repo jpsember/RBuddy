@@ -227,10 +227,10 @@ public class RBuddyActivity extends MyActivity implements //
 				setMenuLabel(
 						menu,
 						R.id.action_testonly_toggle_small_device,
-						(AppPreferences.getBoolean(
+						(AppPreferences
+								.getBoolean(
 										FragmentOrganizer.PREFERENCE_KEY_SMALL_DEVICE_FLAG,
-										false) ? "Disable"
-								: "Enable")
+										false) ? "Disable" : "Enable")
 								+ " small device flag");
 			}
 		});
@@ -399,24 +399,18 @@ public class RBuddyActivity extends MyActivity implements //
 		return this;
 	}
 
-	private void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
-			IPhotoStore photoStore) {
-		sReceiptFile = receiptFile;
-		sTagSetFile = tagSetFile;
-		sPhotoStore = photoStore;
-	}
-
 	private void processUserDataReady() {
 		if (!sUserFilesPrepared) {
 			if (usingGoogleAPI()) {
-				setUserData(mUserData.getReceiptFile(),
-						mUserData.getTagSetFile(), mUserData.getPhotoStore());
-				// TODO: what's the point of having UserData class?
+				sReceiptFile = mUserData.getReceiptFile();
+				sTagSetFile = mUserData.getTagSetFile();
+				sPhotoStore = mUserData.getPhotoStore();
 				mUserData = null;
 			} else {
-				SimpleReceiptFile s = new SimpleReceiptFile(this);
-				IPhotoStore ps = new SimplePhotoStore(this);
-				setUserData(s, s.readTagSetFile(), ps);
+				sReceiptFile = new SimpleReceiptFile(this);
+				sTagSetFile = ((SimpleReceiptFile) sReceiptFile)
+						.readTagSetFile();
+				sPhotoStore = new SimplePhotoStore(this);
 			}
 			sUserFilesPrepared = true;
 		}

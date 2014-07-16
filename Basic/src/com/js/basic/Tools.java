@@ -762,13 +762,6 @@ public class Tools {
 		return sb;
 	}
 
-	/**
-	 * This do-nothing method can be called by classes to suppress the 'unused
-	 * js.basic.Tools import' warning
-	 */
-	public static void suppressWarning() {
-	}
-
 	public static void pr(Object obj) {
 		System.out.println(obj);
 	}
