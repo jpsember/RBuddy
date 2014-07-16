@@ -22,9 +22,9 @@ public class DriveReceiptFile implements IReceiptFile {
 	 * 
 	 * @param driveFile
 	 */
-	public DriveReceiptFile(RBuddyDataStore userData, DriveFile driveFile,
+	public DriveReceiptFile(RBuddyDataStore dataStore, DriveFile driveFile,
 			String contents) {
-		this.mUserData = userData;
+		this.mDataStore = dataStore;
 		this.mDriveFile = driveFile;
 		this.mMap = new HashMap();
 
@@ -67,18 +67,18 @@ public class DriveReceiptFile implements IReceiptFile {
 			}
 			FileArguments args = new FileArguments();
 			args.setFileId(mDriveFile);
-			mUserData.writeTextFile(args, text);
+			mDataStore.writeTextFile(args, text);
 		}
 		flushTagSet();
 	}
 
 	private void flushTagSet() {
-		TagSetFile tf = mUserData.getTagSetFile();
+		TagSetFile tf = mDataStore.getTagSetFile();
 		if (tf.isChanged()) {
 			String json = JSONEncoder.toJSON(tf);
 			FileArguments args = new FileArguments();
-			args.setFileId(mUserData.getTagSetFileId());
-			mUserData.writeTextFile(args, json);
+			args.setFileId(mDataStore.getTagSetFileId());
+			mDataStore.writeTextFile(args, json);
 			tf.setChanged(false);
 		}
 	}
@@ -152,7 +152,7 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	private boolean mChanges;
 	private DriveFile mDriveFile;
-	private RBuddyDataStore mUserData;
+	private RBuddyDataStore mDataStore;
 	private Map mMap;
 	private int mHighestId;
 }

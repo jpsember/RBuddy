@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.android.gms.drive.DriveFolder;
 import com.js.android.BitmapUtil;
+import com.js.android.DataStore;
 import com.js.android.FileArguments;
 
 import static com.js.basic.Tools.*;
@@ -15,11 +16,10 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	 * 
 	 * @param driveFile
 	 */
-	public DrivePhotoStore(Context context, RBuddyDataStore userData,
+	public DrivePhotoStore(Context context, DataStore dataStore,
 			DriveFolder photosFolder) {
 		super(context);
-		// UserData and DrivePhotoStore are mutually coupled
-		this.mUserData = userData;
+		this.mDataStore = dataStore;
 		this.mPhotosFolder = photosFolder;
 	}
 
@@ -30,7 +30,7 @@ public class DrivePhotoStore extends SimplePhotoStore {
 		args.setParentFolder(mPhotosFolder);
 		args.setMimeType("image/jpeg");
 		args.setFilename(BitmapUtil.constructReceiptImageFilename(receiptId));
-		mUserData.writeBinaryFile(args);
+		mDataStore.writeBinaryFile(args);
 	}
 
 	@Override
@@ -63,9 +63,9 @@ public class DrivePhotoStore extends SimplePhotoStore {
 				});
 			}
 		});
-		mUserData.readBinaryFile(args);
+		mDataStore.readBinaryFile(args);
 	}
 
-	private RBuddyDataStore mUserData;
+	private DataStore mDataStore;
 	private DriveFolder mPhotosFolder;
 }

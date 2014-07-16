@@ -68,11 +68,11 @@ public class RBuddyDataStore extends DataStore {
 		return mTagSetDriveFile.getDriveId().encodeToString();
 	}
 
-	private void findUserDataFolder() {
+	private void findDataStoreFolder() {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
 				+ FILENAME_USER_ROOT_FOLDER,
 				DriveApi.getRootFolder(mApiClient), FILENAME_USER_ROOT_FOLDER);
-		mUserDataFolder = r.folder;
+		mDataStoreFolder = r.folder;
 		if (r.wasCreated) {
 			// We must remove any stored keys associated with files/folders
 			// lying within the old user data folder, since we couldn't find it
@@ -88,7 +88,7 @@ public class RBuddyDataStore extends DataStore {
 
 	private void findReceiptFile() {
 		LocateResult r = locateFile(PREFERENCE_KEY_PREFIX + FILENAME_RECEIPTS,
-				mUserDataFolder, FILENAME_RECEIPTS, DriveReceiptFile.MIME_TYPE,
+				mDataStoreFolder, FILENAME_RECEIPTS, DriveReceiptFile.MIME_TYPE,
 				DriveReceiptFile.INITIAL_CONTENTS.getBytes());
 		String contents = blockingReadTextFile(r.file);
 		this.mReceiptFile = new DriveReceiptFile(this, r.file, contents);
@@ -96,7 +96,7 @@ public class RBuddyDataStore extends DataStore {
 
 	private void findTagsFile() {
 		LocateResult r = locateFile(PREFERENCE_KEY_PREFIX + FILENAME_TAGS,
-				mUserDataFolder, FILENAME_TAGS, JSONTools.JSON_MIME_TYPE,
+				mDataStoreFolder, FILENAME_TAGS, JSONTools.JSON_MIME_TYPE,
 				TagSetFile.INITIAL_JSON_CONTENTS.getBytes());
 		this.mTagSetDriveFile = r.file;
 		String contents = blockingReadTextFile(r.file);
@@ -109,7 +109,7 @@ public class RBuddyDataStore extends DataStore {
 	 * @param callback
 	 */
 	private void open_bgndThread(Runnable callback) {
-		findUserDataFolder();
+		findDataStoreFolder();
 		findReceiptFile();
 		findTagsFile();
 		findPhotosFolder();
@@ -124,12 +124,12 @@ public class RBuddyDataStore extends DataStore {
 
 	private void findPhotosFolder() {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
-				+ FILENAME_PHOTOS_FOLDER, mUserDataFolder,
+				+ FILENAME_PHOTOS_FOLDER, mDataStoreFolder,
 				FILENAME_PHOTOS_FOLDER);
 		this.mPhotoStore = new DrivePhotoStore(mContext, this, r.folder);
 	}
 
-	private DriveFolder mUserDataFolder;
+	private DriveFolder mDataStoreFolder;
 	private IReceiptFile mReceiptFile;
 	private DriveFile mTagSetDriveFile;
 	private TagSetFile mTagSetFile;

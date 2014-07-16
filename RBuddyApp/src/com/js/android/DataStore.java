@@ -71,7 +71,7 @@ public class DataStore {
 		this.mBackgroundHandler.post(new Runnable() {
 			public void run() {
 				if (db)
-					pr("UserData.writeBinaryFile " + arg);
+					pr("DataStore.writeBinaryFile " + arg);
 
 				DriveFile driveFile = arg.getFile(mApiClient);
 
@@ -156,7 +156,7 @@ public class DataStore {
 
 		State state = State.CHECK_PREFERENCES;
 		if (db)
-			pr("\nUserData.locateFile name=" + filename + " key="
+			pr("\nDataStore.locateFile name=" + filename + " key="
 					+ preferencesKey);
 
 		while (true) {
@@ -246,7 +246,7 @@ public class DataStore {
 
 		State state = State.CHECK_PREFERENCES;
 		if (db)
-			pr("\nUserData.locateFolder name=" + folderName + " key="
+			pr("\nDataStore.locateFolder name=" + folderName + " key="
 					+ preferencesKey);
 
 		while (true) {
@@ -407,7 +407,7 @@ public class DataStore {
 
 	private byte[] blockingReadBinaryFile(DriveFile driveFile) {
 		if (db)
-			pr("\n\nUserData.blockingReadTextFile " + dbPrefix(driveFile));
+			pr("\n\nDataStore.blockingReadTextFile " + dbPrefix(driveFile));
 
 		DriveApi.ContentsResult cr = driveFile.openContents(mApiClient,
 				DriveFile.MODE_READ_ONLY, null).await();

@@ -376,15 +376,15 @@ public class RBuddyActivity extends MyActivity implements //
 		if (usingGoogleAPI()) {
 			setGoogleApiClient(apiClient);
 			if (db)
-				pr("constructing UserData");
-			mUserData = new RBuddyDataStore(this, sGoogleApiClient, new Runnable() {
+				pr("constructing DataStore");
+			mDataStore = new RBuddyDataStore(this, sGoogleApiClient, new Runnable() {
 				@Override
 				public void run() {
-					processUserDataReady();
+							processDataStoreReady();
 				}
 			});
 		} else {
-			processUserDataReady();
+			processDataStoreReady();
 		}
 	}
 
@@ -393,13 +393,13 @@ public class RBuddyActivity extends MyActivity implements //
 		return this;
 	}
 
-	private void processUserDataReady() {
+	private void processDataStoreReady() {
 		if (!sUserFilesPrepared) {
 			if (usingGoogleAPI()) {
-				sReceiptFile = mUserData.getReceiptFile();
-				sTagSetFile = mUserData.getTagSetFile();
-				sPhotoStore = mUserData.getPhotoStore();
-				mUserData = null;
+				sReceiptFile = mDataStore.getReceiptFile();
+				sTagSetFile = mDataStore.getTagSetFile();
+				sPhotoStore = mDataStore.getPhotoStore();
+				mDataStore = null;
 			} else {
 				sReceiptFile = new SimpleReceiptFile(this);
 				sTagSetFile = ((SimpleReceiptFile) sReceiptFile)
@@ -466,7 +466,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private Receipt mReceipt;
 	private int[] mSearchResults;
-	private RBuddyDataStore mUserData;
+	private RBuddyDataStore mDataStore;
 	private Boolean mUsingGoogleAPIFlag;
 
 	// Fragments
