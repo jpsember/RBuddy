@@ -422,20 +422,19 @@ public class RBuddyActivity extends MyActivity implements //
 
 	void setGoogleApiClient(GoogleApiClient c) {
 		ASSERT(usingGoogleAPI());
-		ASSERT(sGoogleApiClient == null);
 		sGoogleApiClient = c;
 	}
 
 	public boolean usingGoogleAPI() {
-		if (sUsingGoogleAPIFlag == null) {
+		if (mUsingGoogleAPIFlag == null) {
 			if (testing())
-				sUsingGoogleAPIFlag = false;
+				mUsingGoogleAPIFlag = false;
 			else {
-				sUsingGoogleAPIFlag = AppPreferences.getBoolean(
+				mUsingGoogleAPIFlag = AppPreferences.getBoolean(
 						PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
 			}
 		}
-		return sUsingGoogleAPIFlag.booleanValue();
+		return mUsingGoogleAPIFlag.booleanValue();
 	}
 
 	@Override
@@ -471,6 +470,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private Receipt mReceipt;
 	private int[] mSearchResults;
 	private UserData mUserData;
+	private Boolean mUsingGoogleAPIFlag;
 
 	// Fragments
 	private FragmentReference<StartFragment> mStart = buildFragment(StartFragment.class);
@@ -485,7 +485,6 @@ public class RBuddyActivity extends MyActivity implements //
 	// Static fields, to survive longer than a particular activity instance
 	private static boolean sUserFilesPrepared;
 	private static GoogleApiClient sGoogleApiClient;
-	private static Boolean sUsingGoogleAPIFlag;
 	private static IPhotoStore sPhotoStore;
 	private static IReceiptFile sReceiptFile;
 	private static TagSetFile sTagSetFile;

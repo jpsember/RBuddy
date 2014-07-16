@@ -103,8 +103,11 @@ public abstract class MyActivity extends Activity {
 		return mFragmentOrganizer;
 	}
 
-	private static void prepareSystemOut() {
+	private void prepareSystemOut() {
 		AndroidSystemOutFilter.install();
+		if (sConsoleGreetingPrinted)
+			return;
+		sConsoleGreetingPrinted = true;
 
 		// Print message about app starting. Print a bunch of newlines
 		// to simulate clearing the console, and for convenience,
@@ -120,8 +123,8 @@ public abstract class MyActivity extends Activity {
 		}
 		for (int i = 0; i < 20; i++)
 			pr("\n");
-		pr("--------------- Start of App ----- " + strTime
-				+ " -------------\n\n\n");
+		pr("--------------- Start of " + this.getClass().getSimpleName()
+				+ " ----- " + strTime + " -------------\n\n\n");
 	}
 
 	/**
@@ -166,4 +169,5 @@ public abstract class MyActivity extends Activity {
 	private FragmentOrganizer mFragmentOrganizer;
 	private Map<String, Integer> mResourceMap = new HashMap();
 
+	private static boolean sConsoleGreetingPrinted;
 }
