@@ -24,20 +24,21 @@ Issue #
 #
 #  'fixes #123', 'resolves #123', 'closes #123'.
 #
-
   EOS
 
   COMMIT_MESSAGE_TEMPLATE_2=<<-EOS
-# Previous commit's message:
 
+# --------------------------------------------------------------------------
+# Previous commit's message:
+# --------------------------------------------------------------------------
   EOS
 
 
   COMMIT_MESSAGE_TEMPLATE_3=<<-EOS
+
 # --------------------------------------------------------------------------
 # Git repository status:
 # --------------------------------------------------------------------------
-
   EOS
 
   def initialize
@@ -135,7 +136,7 @@ Issue #
   end
 
   def convert_string_to_comments(s)
-    s.split("\n").collect{|x| "# #{x}"}.join("\n")
+    s.split("\n").collect{|x| "# #{x}"}.join("\n") + "\n"
   end
 
   def previous_commit_message
