@@ -12,7 +12,7 @@ class Commit
   GIT_STATE_FILENAME = ".commit_state"
   GIT_MESSAGE_FILENAME = ".commit_git_message"
   COMMIT_MESSAGE_FILENAME = ".commit_editor_message"
-  PREVIOUS_COMMIT_MESSAGE_FILENAME = ".previous_commit_editor_message"
+  PREVIOUS_COMMIT_MESSAGE_FILENAME = ".commit_previous_editor_message"
 
 
   COMMIT_MESSAGE_TEMPLATE_1=<<-EOS
