@@ -48,27 +48,8 @@ public class FragmentReference<T extends MyFragment> {
 		StringBuilder sb = new StringBuilder(nameOf(this));
 		sb.append(" mName:" + mName);
 		sb.append(" mFragment:" + nameOf(mFragment));
-
 		return sb.toString();
 	}
-
-	// Maybe add this support later
-	// /**
-	// * Subclasses can override this to restore state from JSON string
-	// *
-	// * @param jsonString
-	// * previous state, or null if none
-	// */
-	// public void restoreState(String jsonString) {
-	// }
-	//
-	// /**
-	// * Subclasses can override this to save state to JSON string
-	// *
-	// * @param json
-	// */
-	// public void saveState(JSONEncoder json) {
-	// }
 
 	String getName() {
 		return mName;

@@ -36,9 +36,8 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 		mApp = RBuddyApp.sharedInstance();
 		layoutElements();
 
-		getActivityState() //
-				.add(mScrollView) //
-				.restoreViewsFromSnapshot(savedInstanceState);
+		defineState(mScrollView);
+		restoreStateFrom(savedInstanceState);
 		return mScrollView;
 	}
 

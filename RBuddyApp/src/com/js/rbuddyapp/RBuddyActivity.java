@@ -2,7 +2,10 @@ package com.js.rbuddyapp;
 
 import static com.js.android.Tools.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.js.android.App;
@@ -12,6 +15,7 @@ import com.js.android.FragmentReference;
 import com.js.android.MyActivity;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
+import com.js.rbuddy.ReceiptFilter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +33,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private static final int REQUEST_IMAGE_CAPTURE = 990;
 
 	private static final String PERSIST_KEY_ACTIVE_RECEIPT_ID = "activeReceiptId";
+	private static final String PERSIST_KEY_SEARCH_RESULTS = "searchResults";
 
 	public RBuddyActivity() {
 		if (db)
@@ -88,6 +93,9 @@ public class RBuddyActivity extends MyActivity implements //
 				PERSIST_KEY_ACTIVE_RECEIPT_ID, 0);
 		if (receiptId > 0)
 			setEditReceipt(app.receiptFile().getReceipt(receiptId));
+
+		mSearchResults = savedInstanceState
+				.getIntArray(PERSIST_KEY_SEARCH_RESULTS);
 	}
 
 	private void setEditReceipt(Receipt r) {
@@ -110,6 +118,9 @@ public class RBuddyActivity extends MyActivity implements //
 
 		if (mReceipt != null) {
 			outState.putInt(PERSIST_KEY_ACTIVE_RECEIPT_ID, mReceipt.getId());
+		}
+		if (mSearchResults != null) {
+			outState.putIntArray(PERSIST_KEY_SEARCH_RESULTS, mSearchResults);
 		}
 	}
 
@@ -310,8 +321,45 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	@Override
-	public void performSearch() {
-		toast(this, "Search isn't yet implemented.");
+	public void performSearch(ReceiptFilter filter) {
+		// TODO: Persist search results within activity's bundle
+		// TODO: maybe just store receipt id in search results, instead of whole
+		// receipt
+		mSearchResults = applySearch(filter);
+		if (mSearchResults.length == 0) {
+			toast(this, "No Results");
+		}
+		getFragmentOrganizer().focusOn(mReceiptList);
+		mReceiptList.f().updateForSearchResults();
+	}
+
+	@Override
+	public int[] getSearchResults() {
+		return mSearchResults;
+	}
+
+	public void clearSearchResults() {
+		mSearchResults = null;
+	}
+
+	private int[] applySearch(ReceiptFilter filter) {
+		List<Integer> list = new ArrayList();
+		for (Iterator<Receipt> it = app.receiptFile().iterator(); it.hasNext();) {
+			Receipt r = it.next();
+			if (filter.apply(r)) {
+				list.add(r.getId());
+			}
+		}
+
+		return convertListToArray(list);
+	}
+
+	private static int[] convertListToArray(List<Integer> list) {
+		int[] array = new int[list.size()];
+		for (int i = 0; i < array.length; i++) {
+			array[i] = list.get(i);
+		}
+		return array;
 	}
 
 	@Override
@@ -328,10 +376,11 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private RBuddyApp app;
 	private Receipt mReceipt;
+	private int[] mSearchResults;
 
 	// Fragments
 
-	private FragmentReference mReceiptList = buildFragment(ReceiptListFragment.class);
+	private FragmentReference<ReceiptListFragment> mReceiptList = buildFragment(ReceiptListFragment.class);
 	private FragmentReference mReceiptEditor = buildFragment(ReceiptEditor.class);
 	private FragmentReference mSearch = buildFragment(Search.class);
 	private FragmentReference<Photo> mPhoto = buildFragment(Photo.class);

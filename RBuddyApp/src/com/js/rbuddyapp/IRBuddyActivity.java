@@ -3,6 +3,7 @@ package com.js.rbuddyapp;
 import android.content.Intent;
 
 import com.js.rbuddy.Receipt;
+import com.js.rbuddy.ReceiptFilter;
 
 /**
  * Methods that RBuddyActivity implements. This defines the methods that the
@@ -38,7 +39,7 @@ public interface IRBuddyActivity {
 	 * Perform search (will later figure out how to indicate which search filter
 	 * to use)
 	 */
-	void performSearch();
+	void performSearch(ReceiptFilter filter);
 
 	/**
 	 * Specify active receipt
@@ -53,5 +54,18 @@ public interface IRBuddyActivity {
 	 * @param intent
 	 */
 	void processCapturePhotoIntent(Intent intent);
+
+	/**
+	 * Get list of receipt ids filtered according to search parameters
+	 * 
+	 * @return list of ids of receipts satisfying search criteria, or null if no
+	 *         search active
+	 */
+	int[] getSearchResults();
+
+	/**
+	 * Dispose of any existing search results
+	 */
+	void clearSearchResults();
 
 }

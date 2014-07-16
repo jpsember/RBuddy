@@ -381,6 +381,8 @@ public class Tools {
 	}
 
 	public static String d(Collection c) {
+		if (c == null)
+			return "<null>";
 		StringBuilder sb = new StringBuilder();
 		sb.append("[\n");
 		Iterator it = c.iterator();

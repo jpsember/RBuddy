@@ -9,17 +9,21 @@ import java.util.List;
 
 import com.js.android.AndroidDate;
 import com.js.android.MyFragment;
+import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.Receipt;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,7 +32,7 @@ public class ReceiptListFragment extends MyFragment implements
 		IRBuddyActivityListener {
 
 	public ReceiptListFragment() {
-		//setLogging(true);
+		// setLogging(true);
 	}
 
 	private IRBuddyActivity getRBuddyActivity() {
@@ -62,9 +66,8 @@ public class ReceiptListFragment extends MyFragment implements
 
 		constructViews();
 
-		getActivityState() //
-				.add(mReceiptListView) //
-				.restoreViewsFromSnapshot(savedInstanceState);
+		defineState(mReceiptListView);
+		restoreStateFrom(savedInstanceState);
 
 		return mContentView;
 	}
@@ -87,8 +90,27 @@ public class ReceiptListFragment extends MyFragment implements
 			mReceiptListAdapter.notifyDataSetChanged();
 	}
 
+	/**
+	 * If fragment is resumed, modify view if necessary to display search
+	 * results
+	 */
+	public void updateForSearchResults() {
+		if (!isResumed())
+			return;
+
+		/*
+		 * Rebuild existing listview to reflect current search results (or lack
+		 * thereof). We want to use the existing ListView (since it's registered
+		 * with the fragment for persistence purposes), but may be adding
+		 * additional widgets
+		 */
+		boolean nowShowingSearch = (getRBuddyActivity().getSearchResults() != null);
+		if (nowShowingSearch || mShowingSearchResults)
+			placeElementsWithinMainView();
+	}
+
 	private List<Receipt> buildListOfReceipts() {
-		ArrayList list = new ArrayList();
+		List<Receipt> list = new ArrayList();
 		rebuildReceiptList(list);
 		return list;
 	}
@@ -96,9 +118,21 @@ public class ReceiptListFragment extends MyFragment implements
 	private void rebuildReceiptList(List list) {
 		log("rebuildReceiptList");
 		list.clear();
-		for (Iterator it = mApp.receiptFile().iterator(); it.hasNext();)
-			list.add(it.next());
-		log("receipts size=" + list.size());
+
+		IReceiptFile receiptFile = mApp.receiptFile();
+		int[] searchResults = getRBuddyActivity().getSearchResults();
+		if (searchResults != null) {
+			for (int id : searchResults) {
+				if (!receiptFile.exists(id))
+					continue;
+				list.add(receiptFile.getReceipt(id));
+			}
+		} else {
+			Iterator<Receipt> iterator = receiptFile.iterator();
+			while (iterator.hasNext()) {
+				list.add(iterator.next());
+			}
+		}
 
 		Collections.sort(list, Receipt.COMPARATOR_SORT_BY_DATE);
 
@@ -106,33 +140,88 @@ public class ReceiptListFragment extends MyFragment implements
 			mReceiptListAdapter.notifyDataSetChanged();
 	}
 
+	private void populateReceiptListView() {
+		mReceiptList = buildListOfReceipts();
+		mReceiptListAdapter = new ReceiptListAdapter(getActivity(),
+				mReceiptList);
+		mReceiptListView.setAdapter(mReceiptListAdapter);
+	}
+
 	// Construct a view to be used for the list items
 	private void constructViews() {
-		ListView listView = new ListView(getActivity());
+		mReceiptListView = new ListView(getActivity());
+		mReceiptListView
+				.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+					public void onItemClick(AdapterView aView, View v,
+							int position, long id) {
+						processReceiptSelection(position);
+					}
+				});
 
-		List<Receipt> receiptList = buildListOfReceipts();
-		ArrayAdapter arrayAdapter = new ReceiptListAdapter(getActivity(),
-				receiptList);
-		listView.setAdapter(arrayAdapter);
+		// place the receipt list view within a container that we can add
+		// additional items to dynamically
+		mContentView = new LinearLayout(getActivity());
+		// Specify how this container is to be laid out in ITS container
+		mContentView.setLayoutParams(new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mContentView.setOrientation(LinearLayout.VERTICAL);
 
-		// Store references to both the ArrayAdapter and the backing ArrayList,
-		// to make responding to selection actions more convenient.
-		this.mReceiptListAdapter = arrayAdapter;
-		this.mReceiptList = receiptList;
-		this.mReceiptListView = listView;
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			public void onItemClick(AdapterView aView, View v, int position,
-					long id) {
-				processReceiptSelection(position);
+		placeElementsWithinMainView();
+	}
+
+	private void hideSearchResults() {
+		getRBuddyActivity().clearSearchResults();
+		updateForSearchResults();
+	}
+
+	private void placeElementsWithinMainView() {
+		mShowingSearchResults = (getRBuddyActivity().getSearchResults() != null);
+
+		mContentView.removeAllViews();
+		if (mShowingSearchResults) {
+			// TODO: Issue #14; avoid hard-coded numbers, colors
+			LinearLayout panel = new LinearLayout(getActivity());
+			{
+				panel.setOrientation(LinearLayout.HORIZONTAL);
+				mContentView.addView(panel,
+						new LinearLayout.LayoutParams(
+								LayoutParams.MATCH_PARENT,
+								LayoutParams.WRAP_CONTENT, 0));
 			}
-		});
-		LayoutParams layoutParam = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		listView.setLayoutParams(layoutParam);
-		this.mContentView = mReceiptListView;
-		if (DEBUG_VIEWS)
-			this.mContentView = wrapView(mReceiptListView,
-					nameOf(mReceiptListView));
+
+			{
+				TextView t = new TextView(panel.getContext());
+				t.setTextSize(20);
+				t.setText("Search Results");
+				t.setGravity(Gravity.CENTER_VERTICAL);
+				panel.addView(t,
+						new LinearLayout.LayoutParams(
+								LayoutParams.WRAP_CONTENT,
+								LayoutParams.MATCH_PARENT, 1));
+			}
+			{
+				Button b = new Button(panel.getContext());
+				b.setText("Done");
+				panel.addView(b,
+						new LinearLayout.LayoutParams(
+								LayoutParams.WRAP_CONTENT,
+								LayoutParams.MATCH_PARENT, 0));
+				b.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						hideSearchResults();
+					}
+				});
+			}
+		}
+
+		mContentView.addView(mReceiptListView, new LinearLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1.0f));
+
+		mReceiptListView.setBackgroundColor(Color
+				.parseColor(mShowingSearchResults ? "#303030" : "#205020"));
+
+		populateReceiptListView();
 	}
 
 	/**
@@ -233,6 +322,6 @@ public class ReceiptListFragment extends MyFragment implements
 	private ArrayAdapter<Receipt> mReceiptListAdapter;
 	private List<Receipt> mReceiptList;
 	private ListView mReceiptListView;
-	private View mContentView;
-
+	private LinearLayout mContentView;
+	private boolean mShowingSearchResults;
 }
