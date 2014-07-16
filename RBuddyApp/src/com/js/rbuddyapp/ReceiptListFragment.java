@@ -51,17 +51,10 @@ public class ReceiptListFragment extends MyFragment implements
 		getRBuddyActivity().removeListener(this);
 	}
 
-	private void prepareActivity() {
-		ASSERT(getActivity() != null, "activity is null");
-		// Perform class-specific initialization
-		mApp = RBuddyApp.sharedInstance();
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		prepareActivity();
 		log("onCreateView savedState=" + nameOf(savedInstanceState));
 
 		constructViews();
@@ -119,7 +112,7 @@ public class ReceiptListFragment extends MyFragment implements
 		log("rebuildReceiptList");
 		list.clear();
 
-		IReceiptFile receiptFile = mApp.receiptFile();
+		IReceiptFile receiptFile = getRBuddyActivity().receiptFile();
 		int[] searchResults = getRBuddyActivity().getSearchResults();
 		if (searchResults != null) {
 			for (int id : searchResults) {
@@ -318,7 +311,6 @@ public class ReceiptListFragment extends MyFragment implements
 	}
 
 	// Be aware that these fields will all be reset if fragment is destroyed!
-	private RBuddyApp mApp;
 	private ArrayAdapter<Receipt> mReceiptListAdapter;
 	private List<Receipt> mReceiptList;
 	private ListView mReceiptListView;

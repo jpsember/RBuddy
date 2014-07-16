@@ -24,6 +24,10 @@ public class FormTagSetWidget extends FormTextWidget {
 		}
 	};
 
+	public static void setActivity(IRBuddyActivity activity) {
+		sActivity = activity;
+	}
+
 	public FormTagSetWidget(Form owner, Map attributes) {
 		super(owner,attributes);
 	}
@@ -45,7 +49,7 @@ public class FormTagSetWidget extends FormTextWidget {
 		textView.setKeyListener(TextKeyListener.getInstance(true,
 				TextKeyListener.Capitalize.NONE));
 
-		TagSetFile tf = RBuddyApp.sharedInstance().tagSetFile();
+		TagSetFile tf = sActivity.tagSetFile();
 
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context(),
 				android.R.layout.simple_dropdown_item_1line, tf.tagNamesList());
@@ -120,4 +124,6 @@ public class FormTagSetWidget extends FormTextWidget {
 			return text + ", ";
 		}
 	}
+
+	private static IRBuddyActivity sActivity;
 }

@@ -14,9 +14,11 @@ import com.js.android.AppPreferences;
 import com.js.android.FragmentOrganizer;
 import com.js.android.FragmentReference;
 import com.js.android.MyActivity;
+import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.R;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.ReceiptFilter;
+import com.js.rbuddy.TagSetFile;
 
 import android.content.Context;
 import android.content.Intent;
@@ -68,7 +70,10 @@ public class RBuddyActivity extends MyActivity implements //
 		if (db)
 			pr(hey());
 		super.onCreate(savedInstanceState);
-		app = (RBuddyApp) RBuddyApp.sharedInstance(RBuddyApp.class, this);
+		// TODO: Is this still required?
+		RBuddyApp.sharedInstance(RBuddyApp.class, this);
+
+		FormTagSetWidget.setActivity(this);
 
 		// We must delay building fragments until the app instance has been
 		// prepared above
@@ -105,7 +110,7 @@ public class RBuddyActivity extends MyActivity implements //
 		int receiptId = savedInstanceState.getInt(
 				PERSIST_KEY_ACTIVE_RECEIPT_ID, 0);
 		if (receiptId > 0)
-			setEditReceipt(app.receiptFile().getReceipt(receiptId));
+			setEditReceipt(receiptFile().getReceipt(receiptId));
 
 		mSearchResults = savedInstanceState
 				.getIntArray(PERSIST_KEY_SEARCH_RESULTS);
@@ -140,7 +145,7 @@ public class RBuddyActivity extends MyActivity implements //
 	@Override
 	protected void onPause() {
 		super.onPause();
-		app.receiptFile().flush();
+		receiptFile().flush();
 	}
 
 	@Override
@@ -174,8 +179,7 @@ public class RBuddyActivity extends MyActivity implements //
 			AppPreferences.toggle(IPhotoStore.PREFERENCE_KEY_PHOTO_DELAY);
 			return true;
 		case R.id.action_testonly_toggle_google_drive:
-			AppPreferences
-.toggle(PREFERENCE_KEY_USE_GOOGLE_DRIVE_API);
+			AppPreferences.toggle(PREFERENCE_KEY_USE_GOOGLE_DRIVE_API);
 			showGoogleDriveState();
 			return true;
 		case R.id.action_testonly_toggle_small_device:
@@ -202,9 +206,8 @@ public class RBuddyActivity extends MyActivity implements //
 						+ (usingGoogleAPI() ? "active" : "inactive")
 						+ ", and will be "
 						+ (AppPreferences.getBoolean(
-								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
-								true) ? "active" : "inactive")
-						+ " when app restarts.");
+								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true) ? "active"
+								: "inactive") + " when app restarts.");
 	}
 
 	public static void setMenuLabel(Menu menu, int menuItemId, String label) {
@@ -231,8 +234,8 @@ public class RBuddyActivity extends MyActivity implements //
 						menu,
 						R.id.action_testonly_toggle_google_drive,
 						(AppPreferences.getBoolean(
-								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
-								true) ? "Disable" : "Enable")
+								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true) ? "Disable"
+								: "Enable")
 								+ " Google Drive");
 				setMenuLabel(
 						menu,
@@ -261,11 +264,11 @@ public class RBuddyActivity extends MyActivity implements //
 						seedRandom(0);
 
 						for (int i = 0; i < 30; i++) {
-							int id = app.receiptFile().allocateUniqueId();
+							int id = receiptFile().allocateUniqueId();
 							Receipt r = Receipt.buildRandom(id);
-							app.receiptFile().add(r);
+							receiptFile().add(r);
 						}
-						app.receiptFile().flush();
+						receiptFile().flush();
 						sendReceiptFileChanged();
 					}
 				});
@@ -277,8 +280,8 @@ public class RBuddyActivity extends MyActivity implements //
 			public void run() {
 				// stop editing existing receipt (if any)
 				setEditReceipt(null);
-				app.receiptFile().clear();
-				app.receiptFile().flush();
+				receiptFile().clear();
+				receiptFile().flush();
 
 				sendReceiptFileChanged();
 			}
@@ -292,8 +295,8 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	private void processAddReceipt() {
-		Receipt r = new Receipt(app.receiptFile().allocateUniqueId());
-		app.receiptFile().add(r);
+		Receipt r = new Receipt(receiptFile().allocateUniqueId());
+		receiptFile().add(r);
 		setActiveReceipt(r);
 		sendReceiptFileChanged();
 	}
@@ -357,7 +360,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private int[] applySearch(ReceiptFilter filter) {
 		List<Integer> list = new ArrayList();
-		for (Iterator<Receipt> it = app.receiptFile().iterator(); it.hasNext();) {
+		for (Iterator<Receipt> it = receiptFile().iterator(); it.hasNext();) {
 			Receipt r = it.next();
 			if (filter.apply(r)) {
 				list.add(r.getId());
@@ -415,15 +418,22 @@ public class RBuddyActivity extends MyActivity implements //
 		return this;
 	}
 
+	private void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
+			IPhotoStore photoStore) {
+		this.mReceiptFile = receiptFile;
+		this.mTagSetFile = tagSetFile;
+		this.mPhotoStore = photoStore;
+	}
+
 	private void processUserDataReady() {
 		if (!userFilesPrepared) {
 			if (usingGoogleAPI()) {
-				app.setUserData(mUserData.getReceiptFile(),
+				setUserData(mUserData.getReceiptFile(),
 						mUserData.getTagSetFile(), mUserData.getPhotoStore());
 			} else {
 				SimpleReceiptFile s = new SimpleReceiptFile(this);
 				IPhotoStore ps = new SimplePhotoStore(this);
-				app.setUserData(s, s.readTagSetFile(), ps);
+				setUserData(s, s.readTagSetFile(), ps);
 			}
 			userFilesPrepared = true;
 		}
@@ -454,13 +464,33 @@ public class RBuddyActivity extends MyActivity implements //
 		return mUsingGoogleAPIFlag.booleanValue();
 	}
 
-	private RBuddyApp app;
+	@Override
+	public IReceiptFile receiptFile() {
+		ASSERT(mReceiptFile != null);
+		return mReceiptFile;
+	}
+
+	@Override
+	public TagSetFile tagSetFile() {
+		ASSERT(mTagSetFile != null);
+		return mTagSetFile;
+	}
+
+	@Override
+	public IPhotoStore photoStore() {
+		ASSERT(mPhotoStore != null);
+		return mPhotoStore;
+	}
+
 	private Receipt mReceipt;
 	private int[] mSearchResults;
 	private boolean userFilesPrepared;
 	private UserData mUserData;
 	private GoogleApiClient mGoogleApiClient;
 	private Boolean mUsingGoogleAPIFlag;
+	private IPhotoStore mPhotoStore;
+	private IReceiptFile mReceiptFile;
+	private TagSetFile mTagSetFile;
 
 	// Fragments
 	private FragmentReference<StartFragment> mStart;

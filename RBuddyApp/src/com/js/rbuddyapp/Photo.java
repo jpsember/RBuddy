@@ -60,9 +60,10 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 		super.onPause();
 		if (mForm != null) {
 			// Display nothing, so widget stops listening; else it will leak
-			imageWidget().displayPhoto(mApp.photoStore(), 0, null);
+			imageWidget().displayPhoto(getRBuddyActivity().photoStore(), 0,
+					null);
 		}
-		mApp.receiptFile().flush();
+		getRBuddyActivity().receiptFile().flush();
 		getRBuddyActivity().removeListener(this);
 	}
 
@@ -118,7 +119,8 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 			return;
 		if (mReceipt == null)
 			return;
-		imageWidget().displayPhoto(mApp.photoStore(), mReceipt.getId(),
+		imageWidget().displayPhoto(getRBuddyActivity().photoStore(),
+				mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}
 
@@ -162,14 +164,16 @@ public class Photo extends MyFragment implements IRBuddyActivityListener {
 				args.setCallback(new Runnable() {
 					public void run() {
 						ourReceipt.setPhotoId(arg.getFileIdString());
-						mApp.receiptFile().setModified(ourReceipt);
+						getRBuddyActivity().receiptFile().setModified(
+								ourReceipt);
 						// TODO: need better pattern to keep track of changes to
 						// receipts, maybe do it silently
-						mApp.photoStore().pushPhoto(ourReceipt.getId(),
+						getRBuddyActivity().photoStore().pushPhoto(
+								ourReceipt.getId(),
 								ourReceipt.getPhotoId());
 					}
 				});
-				IPhotoStore ps = mApp.photoStore();
+				IPhotoStore ps = getRBuddyActivity().photoStore();
 				ps.storePhoto(mReceipt.getId(), args);
 			} catch (IOException e) {
 				// TODO display popup message to user, and don't update

@@ -76,7 +76,7 @@ public class ReceiptEditor extends MyFragment implements
 		super.onPause();
 		writeReceiptFromWidgets();
 		// TODO: this is not necessarily a good place to do this
-		mApp.receiptFile().flush();
+		getRBuddyActivity().receiptFile().flush();
 		getRBuddyActivity().removeListener(this);
 	}
 
@@ -114,7 +114,7 @@ public class ReceiptEditor extends MyFragment implements
 			return;
 		// Make widget display nothing, so it stops listening; otherwise
 		// the widget will leak
-		mReceiptWidget.displayPhoto(mApp.photoStore(), 0, null);
+		mReceiptWidget.displayPhoto(getRBuddyActivity().photoStore(), 0, null);
 	}
 
 	/**
@@ -163,7 +163,8 @@ public class ReceiptEditor extends MyFragment implements
 		mForm.setValue("cost", mReceipt.getCost(), false);
 		mForm.setValue("date", mReceipt.getDate(), false);
 		mForm.setValue("tags", mReceipt.getTags(), false);
-		mReceiptWidget.displayPhoto(mApp.photoStore(), mReceipt.getId(),
+		mReceiptWidget.displayPhoto(getRBuddyActivity().photoStore(),
+				mReceipt.getId(),
 				mReceipt.getPhotoId());
 	}
 
@@ -193,11 +194,12 @@ public class ReceiptEditor extends MyFragment implements
 		String newJSON = JSONEncoder.toJSON(mReceipt);
 
 		if (!origJSON.equals(newJSON)) {
-			mApp.receiptFile().setModified(mReceipt);
+			getRBuddyActivity().receiptFile().setModified(mReceipt);
 
 			String newTagSetString = JSONEncoder.toJSON(mReceipt.getTags());
 			if (!origTagSetString.equals(newTagSetString)) {
-				mReceipt.getTags().moveTagsToFrontOfQueue(mApp.tagSetFile());
+				mReceipt.getTags().moveTagsToFrontOfQueue(
+						getRBuddyActivity().tagSetFile());
 			}
 
 			getRBuddyActivity().activeReceiptEdited();

@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.js.android.IPhotoStore;
+import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.ReceiptFilter;
+import com.js.rbuddy.TagSetFile;
 
 /**
  * Methods that RBuddyActivity implements. This defines the methods that the
@@ -92,4 +95,11 @@ public interface IRBuddyActivity {
 	 * @return
 	 */
 	Context getContext();
+
+	IReceiptFile receiptFile();
+
+	TagSetFile tagSetFile();
+
+	IPhotoStore photoStore();
+
 }
