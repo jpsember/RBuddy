@@ -25,7 +25,7 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	public SimpleReceiptFile(IRBuddyActivity activity, String receiptsBaseName,
 			String tagsBaseName) {
-		ASSERT(!activity.useGoogleAPI());
+		ASSERT(!activity.usingGoogleAPI());
 		this.mActivity = activity;
 		if (receiptsBaseName == null)
 			receiptsBaseName = "receipts_json_v" + Receipt.VERSION + ".txt";

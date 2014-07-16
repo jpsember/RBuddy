@@ -199,7 +199,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private void showGoogleDriveState() {
 		toast(this,
 				"Google Drive is "
-						+ (useGoogleAPI() ? "active" : "inactive")
+						+ (usingGoogleAPI() ? "active" : "inactive")
 						+ ", and will be "
 						+ (AppPreferences.getBoolean(
 								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
@@ -388,14 +388,15 @@ public class RBuddyActivity extends MyActivity implements //
 	}
 
 	@Override
-	public void connectedToServer() {
+	public void connectedToServer(GoogleApiClient apiClient) {
 		if (db)
 			pr(hey() + "processGoogleAPIConnected");
 
-		if (useGoogleAPI()) {
+		if (usingGoogleAPI()) {
+			setGoogleApiClient(apiClient);
 			if (db)
 				pr("constructing UserData");
-			mUserData = new UserData(this);
+			mUserData = new UserData(this, mGoogleApiClient);
 			if (db)
 				pr("calling open() with null callback");
 			mUserData.open(new Runnable() {
@@ -416,7 +417,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private void processUserDataReady() {
 		if (!userFilesPrepared) {
-			if (useGoogleAPI()) {
+			if (usingGoogleAPI()) {
 				app.setUserData(mUserData.getReceiptFile(),
 						mUserData.getTagSetFile(), mUserData.getPhotoStore());
 			} else {
@@ -435,27 +436,22 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
-	public GoogleApiClient getGoogleApiClient() {
-		ASSERT(useGoogleAPI());
-		return mGoogleApiClient;
-	}
-
-	public void setGoogleApiClient(GoogleApiClient c) {
-		ASSERT(useGoogleAPI());
+	void setGoogleApiClient(GoogleApiClient c) {
+		ASSERT(usingGoogleAPI());
 		ASSERT(mGoogleApiClient == null);
 		mGoogleApiClient = c;
 	}
 
-	public boolean useGoogleAPI() {
-		if (mUseGoogleAPIFlag == null) {
+	public boolean usingGoogleAPI() {
+		if (mUsingGoogleAPIFlag == null) {
 			if (testing())
-				mUseGoogleAPIFlag = false;
+				mUsingGoogleAPIFlag = false;
 			else {
-				mUseGoogleAPIFlag = AppPreferences.getBoolean(
+				mUsingGoogleAPIFlag = AppPreferences.getBoolean(
 						PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
 			}
 		}
-		return mUseGoogleAPIFlag.booleanValue();
+		return mUsingGoogleAPIFlag.booleanValue();
 	}
 
 	private RBuddyApp app;
@@ -464,7 +460,7 @@ public class RBuddyActivity extends MyActivity implements //
 	private boolean userFilesPrepared;
 	private UserData mUserData;
 	private GoogleApiClient mGoogleApiClient;
-	private Boolean mUseGoogleAPIFlag;
+	private Boolean mUsingGoogleAPIFlag;
 
 	// Fragments
 	private FragmentReference<StartFragment> mStart;

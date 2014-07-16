@@ -44,7 +44,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 		mCacheMap = new HashMap();
 
-		if (!mActivity.useGoogleAPI()) {
+		if (!mActivity.usingGoogleAPI()) {
 			// Use reduced cache capacities for test purposes
 			mCacheMap.put(Variant.THUMBNAIL, new PhotoCache(200000, 5));
 			mCacheMap.put(Variant.FULLSIZE, new PhotoCache(5000000, 5));

@@ -45,10 +45,10 @@ public class UserData {
 	// keys for the stored preferences
 	private static final String PREFERENCE_KEY_PREFIX = "DriveId_";
 
-	public UserData(IRBuddyActivity activity) {
+	public UserData(IRBuddyActivity activity, GoogleApiClient client) {
 		assertUIThread();
 		this.mActivity = activity;
-		this.mApiClient = activity.getGoogleApiClient();
+		this.mApiClient = client;
 
 		HandlerThread ht = new HandlerThread("BgndHandler");
 		ht.start();

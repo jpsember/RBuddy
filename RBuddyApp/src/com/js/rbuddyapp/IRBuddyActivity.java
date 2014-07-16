@@ -73,8 +73,10 @@ public interface IRBuddyActivity {
 	/**
 	 * Called when a connection to the cloud service (e.g. Google Drive) has
 	 * been achieved
+	 * 
+	 * @param apiClient
 	 */
-	void connectedToServer();
+	void connectedToServer(GoogleApiClient apiClient);
 
 	/**
 	 * Determine if we're to use the Google Drive API (for test purposes, we can
@@ -82,11 +84,12 @@ public interface IRBuddyActivity {
 	 * 
 	 * @return true if so
 	 */
-	boolean useGoogleAPI();
+	boolean usingGoogleAPI();
 
-	GoogleApiClient getGoogleApiClient();
-
-	void setGoogleApiClient(GoogleApiClient c);
-
+	/**
+	 * Get activity's context (for Activities, probably returns 'this')
+	 * 
+	 * @return
+	 */
 	Context getContext();
 }

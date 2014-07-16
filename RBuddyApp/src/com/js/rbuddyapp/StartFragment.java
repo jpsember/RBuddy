@@ -42,15 +42,15 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 
 	private void connectToGoogleDrive() {
 		IRBuddyActivity activity = getRBuddyActivity();
-		if (!activity.useGoogleAPI()) {
-			getRBuddyActivity().connectedToServer();
+		if (!activity.usingGoogleAPI()) {
+			getRBuddyActivity().connectedToServer(null);
 		} else {
 			if (db)
 				pr(" attempting to connect to Google Drive API...");
 			// TODO: Maybe construct our own client, then only store it in
 			// activity if successful... this will eliminate an interface method
 			// or two
-			GoogleApiClient c = activity.getGoogleApiClient();
+			GoogleApiClient c = mApiClient;
 			if (c == null) {
 				if (db)
 					pr(" building client");
@@ -58,17 +58,17 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 						.addApi(Drive.API).addScope(Drive.SCOPE_FILE)
 						.addConnectionCallbacks(this)
 						.addOnConnectionFailedListener(this).build();
-				activity.setGoogleApiClient(c);
+				mApiClient = c;
 			}
 			if (!(c.isConnected() || c.isConnecting())) {
 				if (db)
 					pr(" connecting to client");
-				activity.getGoogleApiClient().connect();
+				c.connect();
 			}
 			if (c.isConnected()) {
 				if (db)
 					pr(" already connected");
-				getRBuddyActivity().connectedToServer();
+				getRBuddyActivity().connectedToServer(c);
 			}
 		}
 	}
@@ -107,7 +107,7 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 	public void onConnected(Bundle connectionHint) {
 		if (db)
 			pr(hey() + " onConnected, connectionHint " + connectionHint);
-		getRBuddyActivity().connectedToServer();
+		getRBuddyActivity().connectedToServer(mApiClient);
 	}
 
 	@Override
@@ -124,8 +124,9 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 				LayoutParams.MATCH_PARENT));
 		mView.setOrientation(LinearLayout.VERTICAL);
 		FormWidget.setDebugBgnd(mView,
-				getRBuddyActivity().useGoogleAPI() ? "blue" : "green");
+				getRBuddyActivity().usingGoogleAPI() ? "blue" : "green");
 	}
 
 	private LinearLayout mView;
+	private GoogleApiClient mApiClient;
 }
