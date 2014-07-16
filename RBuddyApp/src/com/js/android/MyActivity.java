@@ -2,13 +2,20 @@ package com.js.android;
 
 import static com.js.android.Tools.*;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+
+import com.js.rbuddy.JSDate;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 
 public abstract class MyActivity extends Activity {
+
+	public static final String PREFERENCE_KEY_SMALL_DEVICE_FLAG = "small_device";
 
 	public void setLogging(boolean f) {
 		mLogging = f;
@@ -27,6 +34,14 @@ public abstract class MyActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		if (!testing()) {
+			prepareSystemOut();
+			addResourceMappings();
+		}
+		JSDate.setFactory(AndroidDate.androidDateFactory(this));
+		displayMetrics = getResources().getDisplayMetrics();
+		AppPreferences.prepare(this);
+
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
 	}
@@ -91,7 +106,78 @@ public abstract class MyActivity extends Activity {
 		return mFragmentOrganizer;
 	}
 
+	private void prepareSystemOut() {
+		AndroidSystemOutFilter.install();
+
+		// Print message about app starting. Print a bunch of newlines
+		// to simulate clearing the console, and for convenience,
+		// print the time of day so we can figure out if the
+		// output is current or not.
+
+		String strTime = "";
+		{
+			Calendar cal = Calendar.getInstance();
+			java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(
+					"h:mm:ss", Locale.CANADA);
+			strTime = sdf.format(cal.getTime());
+		}
+		for (int i = 0; i < 20; i++)
+			pr("\n");
+		pr("--------------- Start of App ----- " + strTime
+				+ " -------------\n\n\n");
+
+	}
+
+	/**
+	 * Store the resource id associated with the resource's name, so we can
+	 * refer to them by name (for example, we want to be able to refer to them
+	 * within JSON strings).
+	 * 
+	 * There are some facilities to do this mapping using reflection, but
+	 * apparently it's really slow.
+	 * 
+	 * @param key
+	 * @param resourceId
+	 */
+	public void addResource(String key, int resourceId) {
+		resourceMap.put(key, resourceId);
+	}
+
+	/**
+	 * Get the resource id associated with a resource name (added earlier).
+	 * 
+	 * @param key
+	 * @return resource id
+	 * @throws IllegalArgumentException
+	 *             if no mapping exists
+	 */
+	public int getResource(String key) {
+		Integer id = resourceMap.get(key);
+		if (id == null)
+			throw new IllegalArgumentException(
+					"no resource id mapping found for " + key);
+		return id.intValue();
+	}
+
+	private void addResourceMappings() {
+		addResource("photo", android.R.drawable.ic_menu_gallery);
+		addResource("camera", android.R.drawable.ic_menu_camera);
+		addResource("search", android.R.drawable.ic_menu_search);
+	}
+
+	/**
+	 * Convert density pixels to true pixels
+	 * 
+	 * @param densityPixels
+	 * @return
+	 */
+	public int truePixels(float densityPixels) {
+		return (int) (densityPixels * displayMetrics.density);
+	}
+
 	private Map<String, FragmentReference> mReferenceMap = new HashMap();
 	private boolean mLogging;
 	private FragmentOrganizer mFragmentOrganizer;
+	private Map<String, Integer> resourceMap = new HashMap();
+	private static DisplayMetrics displayMetrics;
 }

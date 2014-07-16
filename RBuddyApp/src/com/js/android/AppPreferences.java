@@ -5,7 +5,6 @@ import java.util.Map;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import static com.js.basic.Tools.*;
 
 /**
  * Simpler interface to application preferences
@@ -27,8 +26,8 @@ public class AppPreferences {
 	 *            mode)
 	 */
 	public synchronized static void prepare(Context context) {
-
-		ASSERT(preferences == null, "already prepared");
+		if (preferences != null)
+			return;
 
 		if (context instanceof Activity) {
 			preferences = ((Activity) context)

@@ -2,27 +2,23 @@ package com.js.form;
 
 import java.util.*;
 
+import com.js.android.MyActivity;
 import com.js.json.*;
 
-import android.content.Context;
 import android.widget.LinearLayout;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
 public class Form implements IJSONEncoder {
-	
-	private static FormWidget.Factory[] basicWidgets = {
-		FormTextWidget.FACTORY,
-		FormHeaderWidget.FACTORY,
-		FormDateWidget.FACTORY,
-		FormCostWidget.FACTORY,
-		FormButtonWidget.FACTORY,
-		FormImageWidget.FACTORY,
-		FormCheckBoxWidget.FACTORY,
-	};
 
-	private Form(Context context) {
-		this.context = context;
+	private static FormWidget.Factory[] basicWidgets = {
+			FormTextWidget.FACTORY, FormHeaderWidget.FACTORY,
+			FormDateWidget.FACTORY, FormCostWidget.FACTORY,
+			FormButtonWidget.FACTORY, FormImageWidget.FACTORY,
+			FormCheckBoxWidget.FACTORY, };
+
+	private Form(MyActivity activity) {
+		this.mActivity = activity;
 		for (int i = 0; i < basicWidgets.length; i++)
 			registerWidget(basicWidgets[i]);
 	}
@@ -31,20 +27,18 @@ public class Form implements IJSONEncoder {
 		mWidgetFactoryMap.put(factory.getName(), factory);
 	}
 
-	private Context context;
-
-	public Context context() {
-		return context;
+	public MyActivity getActivity() {
+		return mActivity;
 	}
 
-	public static Form parse(Context context, String jsonString,
+	public static Form parse(MyActivity activity, String jsonString,
 			Set<FormWidget.Factory> widgetTypes) {
-		return parse(context, new JSONParser(jsonString), widgetTypes);
+		return parse(activity, new JSONParser(jsonString), widgetTypes);
 	}
 
-	public static Form parse(Context context, JSONParser json,
+	public static Form parse(MyActivity activity, JSONParser json,
 			Set<FormWidget.Factory> widgetTypes) {
-		Form f = new Form(context);
+		Form f = new Form(activity);
 		if (widgetTypes != null)
 			for (FormWidget.Factory factory : widgetTypes) {
 				f.registerWidget(factory);
@@ -81,7 +75,7 @@ public class Form implements IJSONEncoder {
 
 	public View getView() {
 		if (layout == null) {
-			LinearLayout layout = new LinearLayout(context);
+			LinearLayout layout = new LinearLayout(mActivity);
 			this.layout = layout;
 			layout.setOrientation(LinearLayout.VERTICAL);
 			layout.setLayoutParams(new LinearLayout.LayoutParams(
@@ -142,4 +136,5 @@ public class Form implements IJSONEncoder {
 	private List<FormWidget> fieldsList = new ArrayList();
 	private View layout;
 	private Map<String, FormWidget> itemsMap = new HashMap();
+	private MyActivity mActivity;
 }

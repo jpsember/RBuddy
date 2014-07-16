@@ -28,15 +28,15 @@ public class FormHeaderWidget extends FormWidget {
 
 		LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		getWidgetContainer().addView(horizontalSpace(context()));
+		getWidgetContainer().addView(horizontalSpace(getActivity()));
 
 		if (!headerText.isEmpty()) {
-			TextView label = new TextView(context());
+			TextView label = new TextView(getActivity());
 			label.setText(headerText);
 			getWidgetContainer().addView(label, p);
 		}
 
-		getWidgetContainer().addView(horizontalSeparator(context()));
+		getWidgetContainer().addView(horizontalSeparator(getActivity()));
 	}
 
 	protected String getId() {

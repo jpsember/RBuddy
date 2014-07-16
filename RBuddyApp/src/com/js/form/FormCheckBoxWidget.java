@@ -26,12 +26,12 @@ public class FormCheckBoxWidget extends FormWidget {
 	public FormCheckBoxWidget(Form owner, Map attributes) {
 		super(owner,attributes);
 
-		checkBox = new CheckBox(context());
+		checkBox = new CheckBox(getActivity());
 
 		// Construct a new container that contains the checkbox on the left and
 		// a label on the right
 
-		LinearLayout horizontalPanel = new LinearLayout(context());
+		LinearLayout horizontalPanel = new LinearLayout(getActivity());
 		ViewGroup ourContainer = horizontalPanel;
 		horizontalPanel.setLayoutParams(LAYOUT_PARMS);
 		horizontalPanel.setOrientation(LinearLayout.HORIZONTAL);
@@ -49,7 +49,7 @@ public class FormCheckBoxWidget extends FormWidget {
 	}
 
 	private void buildLabel(String labelText, ViewGroup container) {
-		TextView label = new TextView(context());
+		TextView label = new TextView(getActivity());
 		label.setText(labelText);
 		label.setLayoutParams(FormWidget.LAYOUT_PARMS);
 

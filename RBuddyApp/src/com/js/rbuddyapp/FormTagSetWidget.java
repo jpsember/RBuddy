@@ -51,7 +51,7 @@ public class FormTagSetWidget extends FormTextWidget {
 
 		TagSetFile tf = sActivity.tagSetFile();
 
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(context(),
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
 				android.R.layout.simple_dropdown_item_1line, tf.tagNamesList());
 		textView.setAdapter(adapter);
 	}

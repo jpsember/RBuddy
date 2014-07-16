@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.js.android.App;
 import com.js.android.AppPreferences;
 import com.js.android.FragmentOrganizer;
 import com.js.android.FragmentReference;
@@ -72,7 +71,6 @@ public class RBuddyActivity extends MyActivity implements //
 		if (db)
 			pr(hey());
 		super.onCreate(savedInstanceState);
-		App.sharedInstance(App.class, this);
 
 		if (DEBUG_ORIENTATION)
 			initOrientation();

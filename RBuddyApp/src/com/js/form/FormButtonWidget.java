@@ -2,7 +2,6 @@ package com.js.form;
 
 import java.util.Map;
 
-import com.js.android.App;
 import com.js.android.IPhotoListener;
 import com.js.android.IPhotoStore;
 
@@ -43,19 +42,19 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 				// Use id as fallback
 				button_label = getId();
 			}
-			Button b = new Button(context());
+			Button b = new Button(getActivity());
 			b.setText(button_label);
 			mButton = b;
 		} else {
-			int resourceId = App.sharedInstance().getResource(button_icon);
-			Drawable img = context().getResources().getDrawable(resourceId);
+			int resourceId = getActivity().getResource(button_icon);
+			Drawable img = getActivity().getResources().getDrawable(resourceId);
 
 			if (button_label.isEmpty()) {
-				ImageButton ib = new ImageButton(context());
+				ImageButton ib = new ImageButton(getActivity());
 				ib.setImageDrawable(img);
 				mButton = ib;
 			} else {
-				Button b = new Button(context());
+				Button b = new Button(getActivity());
 				b.setText(button_label);
 				b.setCompoundDrawablesWithIntrinsicBounds(img, null, null, null);
 				mButton = b;
@@ -64,7 +63,7 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 
 		if (mWithImage) {
 			mImageVariant = IPhotoStore.Variant.THUMBNAIL;
-			LinearLayout parentView = new LinearLayout(context());
+			LinearLayout parentView = new LinearLayout(getActivity());
 
 			// What does 'match parent' mean for layout parameters?
 			parentView.setLayoutParams(LAYOUT_PARMS);
@@ -77,15 +76,15 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 			p.gravity = Gravity.BOTTOM;
 			parentView.addView(mButton, p);
 
-			mImageView = new ImageView(context());
+			mImageView = new ImageView(getActivity());
 			mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 			mImageView.setAdjustViewBounds(true);
 
-			int THUMBNAIL_WIDTH = App
-					.truePixels(IPhotoStore.THUMBNAIL_HEIGHT * 1.0f);
+			int THUMBNAIL_WIDTH = getActivity().truePixels(
+					IPhotoStore.THUMBNAIL_HEIGHT * 1.0f);
 
-			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH,
-					App.truePixels(IPhotoStore.THUMBNAIL_HEIGHT), 0.2f);
+			p = new LinearLayout.LayoutParams(THUMBNAIL_WIDTH, getActivity()
+					.truePixels(IPhotoStore.THUMBNAIL_HEIGHT), 0.2f);
 			parentView.addView(mImageView, p);
 		} else {
 			getWidgetContainer().addView(mButton);
@@ -143,7 +142,7 @@ public class FormButtonWidget extends FormWidget implements IPhotoListener {
 
 	private void setDrawable(Drawable d) {
 		if (d == null) {
-			d = getForm().context().getResources()
+			d = getForm().getActivity().getResources()
 					.getDrawable(android.R.drawable.ic_menu_gallery);
 		}
 		mImageView.setImageDrawable(d);

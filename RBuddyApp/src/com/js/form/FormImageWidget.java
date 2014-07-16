@@ -29,7 +29,7 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 		super(owner, attributes);
 
 		mImageVariant = Variant.FULLSIZE;
-		mImageView = new ImageView(context());
+		mImageView = new ImageView(getActivity());
 		mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 		mImageView.setAdjustViewBounds(true);
 
@@ -77,7 +77,7 @@ public class FormImageWidget extends FormWidget implements IPhotoListener {
 
 	private void setDrawable(Drawable d) {
 		if (d == null) {
-			d = getForm().context().getResources()
+			d = getForm().getActivity().getResources()
 					.getDrawable(android.R.drawable.ic_menu_gallery);
 		}
 		mImageView.setImageDrawable(d);

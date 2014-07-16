@@ -72,7 +72,7 @@ public class FormDateWidget extends FormTextWidget {
 		JSDate date = JSDate.parse(getValue(), true);
 		int[] ymd = AndroidDate.getJavaYearMonthDay(date);
 
-		new DatePickerDialog(context(), dateListener,
+		new DatePickerDialog(getActivity(), dateListener,
 				ymd[0], ymd[1], ymd[2]).show();
 	}
 

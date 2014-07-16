@@ -2,7 +2,7 @@ package com.js.form;
 
 import java.util.Map;
 
-import com.js.android.App;
+import com.js.android.MyActivity;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -98,7 +98,7 @@ public abstract class FormWidget {
 		this.enabledState = true;
 		this.widgetValue = "";
 
-		LinearLayout verticalPanel = new LinearLayout(context());
+		LinearLayout verticalPanel = new LinearLayout(getActivity());
 		verticalPanel.setLayoutParams(LAYOUT_PARMS);
 		verticalPanel.setOrientation(LinearLayout.VERTICAL);
 
@@ -117,19 +117,20 @@ public abstract class FormWidget {
 			// they will display blank values instead of the actual 'internal'
 			// widget value.
 
-			LinearLayout horizontalPanel = new LinearLayout(context());
+			LinearLayout horizontalPanel = new LinearLayout(getActivity());
 			horizontalPanel.setLayoutParams(LAYOUT_PARMS);
 			horizontalPanel.setOrientation(LinearLayout.HORIZONTAL);
 			this.outerContainerView = horizontalPanel;
 
 			if (auxType == AUXPANEL_EMPTY) {
-				View v = new View(context());
+				View v = new View(getActivity());
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						App.truePixels(AUX_WIDTH), App.truePixels(10));
+						getActivity().truePixels(AUX_WIDTH), getActivity().truePixels(
+								10));
 				p.weight = 0;
 				horizontalPanel.addView(v, p);
 			} else if (auxType == AUXPANEL_CHECKBOX) {
-				CheckBox cb = new CheckBox(context());
+				CheckBox cb = new CheckBox(getActivity());
 				auxCheckBox = cb;
 				cb.setChecked(true);
 
@@ -141,7 +142,7 @@ public abstract class FormWidget {
 					}
 				});
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						App.truePixels(AUX_WIDTH),
+						getActivity().truePixels(AUX_WIDTH),
 						LayoutParams.WRAP_CONTENT);
 				p.weight = 0;
 				p.gravity = Gravity.BOTTOM;
@@ -196,12 +197,12 @@ public abstract class FormWidget {
 	}
 
 	/**
-	 * Convenience method to return the containing Form's context
+	 * Convenience method to return the containing Form's activity
 	 * 
 	 * @return
 	 */
-	public Context context() {
-		return getForm().context();
+	public MyActivity getActivity() {
+		return getForm().getActivity();
 	}
 
 	/**
@@ -293,7 +294,7 @@ public abstract class FormWidget {
 
 	public String getLabel() {
 		String labelValue = strAttr("label", getId());
-		return applyStringSubstitution(context(), labelValue);
+		return applyStringSubstitution(getActivity(), labelValue);
 	}
 
 	/**
@@ -303,7 +304,7 @@ public abstract class FormWidget {
 	protected void constructLabel() {
 		String labelText = getLabel();
 		if (!labelText.isEmpty()) {
-			TextView label = new TextView(context());
+			TextView label = new TextView(getActivity());
 			label.setText(labelText);
 			label.setLayoutParams(FormWidget.LAYOUT_PARMS);
 			getWidgetContainer().addView(label);

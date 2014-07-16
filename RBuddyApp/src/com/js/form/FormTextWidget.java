@@ -87,7 +87,7 @@ public class FormTextWidget extends FormWidget {
 				// from:
 				// http://stackoverflow.com/questions/5105354/how-to-show-soft-keyboard-when-edittext-is-focused
 				//
-				InputMethodManager imm = (InputMethodManager) context()
+				InputMethodManager imm = (InputMethodManager) getActivity()
 						.getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
 			}
@@ -107,11 +107,11 @@ public class FormTextWidget extends FormWidget {
 
 		String autoCompletion = getAutoCompletionType();
 		if (autoCompletion.equals("none")) {
-			input = new EditText(context());
+			input = new EditText(getActivity());
 		} else if (autoCompletion.equals("single")) {
-			input = new AutoCompleteTextView(context());
+			input = new AutoCompleteTextView(getActivity());
 		} else if (autoCompletion.equals("multiple")) {
-			input = new MultiAutoCompleteTextView(context());
+			input = new MultiAutoCompleteTextView(getActivity());
 		} else
 			throw new IllegalArgumentException(
 					"unsupported autocompletion type: " + autoCompletion);
