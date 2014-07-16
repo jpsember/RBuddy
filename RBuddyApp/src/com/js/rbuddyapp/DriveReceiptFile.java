@@ -22,7 +22,7 @@ public class DriveReceiptFile implements IReceiptFile {
 	 * 
 	 * @param driveFile
 	 */
-	public DriveReceiptFile(UserData userData, DriveFile driveFile,
+	public DriveReceiptFile(RBuddyDataStore userData, DriveFile driveFile,
 			String contents) {
 		this.mUserData = userData;
 		this.mDriveFile = driveFile;
@@ -152,7 +152,7 @@ public class DriveReceiptFile implements IReceiptFile {
 
 	private boolean mChanges;
 	private DriveFile mDriveFile;
-	private UserData mUserData;
+	private RBuddyDataStore mUserData;
 	private Map mMap;
 	private int mHighestId;
 }

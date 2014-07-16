@@ -15,7 +15,7 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	 * 
 	 * @param driveFile
 	 */
-	public DrivePhotoStore(Context context, UserData userData,
+	public DrivePhotoStore(Context context, RBuddyDataStore userData,
 			DriveFolder photosFolder) {
 		super(context);
 		// UserData and DrivePhotoStore are mutually coupled
@@ -66,6 +66,6 @@ public class DrivePhotoStore extends SimplePhotoStore {
 		mUserData.readBinaryFile(args);
 	}
 
-	private UserData mUserData;
+	private RBuddyDataStore mUserData;
 	private DriveFolder mPhotosFolder;
 }

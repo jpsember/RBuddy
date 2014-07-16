@@ -377,7 +377,7 @@ public class RBuddyActivity extends MyActivity implements //
 			setGoogleApiClient(apiClient);
 			if (db)
 				pr("constructing UserData");
-			mUserData = new UserData(this, sGoogleApiClient, new Runnable() {
+			mUserData = new RBuddyDataStore(this, sGoogleApiClient, new Runnable() {
 				@Override
 				public void run() {
 					processUserDataReady();
@@ -466,7 +466,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private Receipt mReceipt;
 	private int[] mSearchResults;
-	private UserData mUserData;
+	private RBuddyDataStore mUserData;
 	private Boolean mUsingGoogleAPIFlag;
 
 	// Fragments

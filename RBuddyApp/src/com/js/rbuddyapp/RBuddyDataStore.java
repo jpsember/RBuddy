@@ -16,7 +16,7 @@ import static com.js.android.Tools.*;
 import com.js.android.DataStore;
 import com.js.android.IPhotoStore;
 
-public class UserData extends DataStore {
+public class RBuddyDataStore extends DataStore {
 
 	/*
 	 * TODO We may want to allow calls to read/write files from other threads by
@@ -41,7 +41,7 @@ public class UserData extends DataStore {
 	 * @throws RuntimeException
 	 *             if unable to create user data folder
 	 */
-	public UserData(Context context, GoogleApiClient client,
+	public RBuddyDataStore(Context context, GoogleApiClient client,
 			final Runnable callback) {
 		super(client);
 		this.mContext = context;
