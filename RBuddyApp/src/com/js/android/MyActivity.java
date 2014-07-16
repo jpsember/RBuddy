@@ -40,7 +40,6 @@ public abstract class MyActivity extends Activity {
 				addResourceMappings();
 			}
 			JSDate.setFactory(AndroidDate.androidDateFactory(this));
-			sDisplayMetrics = getResources().getDisplayMetrics();
 			AppPreferences.prepare(this);
 		}
 
@@ -166,16 +165,6 @@ public abstract class MyActivity extends Activity {
 		addResource("search", android.R.drawable.ic_menu_search);
 	}
 
-	/**
-	 * Convert density pixels to true pixels
-	 * 
-	 * @param densityPixels
-	 * @return
-	 */
-	public int truePixels(float densityPixels) {
-		return (int) (densityPixels * sDisplayMetrics.density);
-	}
-
 	private Map<String, FragmentReference> mReferenceMap = new HashMap();
 	private boolean mLogging;
 	private FragmentOrganizer mFragmentOrganizer;
@@ -183,5 +172,4 @@ public abstract class MyActivity extends Activity {
 	// Static fields, to outlive a particular activity instance
 	private static boolean sClassInitialized;
 	private static Map<String, Integer> sResourceMap = new HashMap();
-	private static DisplayMetrics sDisplayMetrics;
 }

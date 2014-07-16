@@ -125,9 +125,7 @@ public abstract class FormWidget {
 			if (auxType == AUXPANEL_EMPTY) {
 				View v = new View(getActivity());
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						getActivity().truePixels(AUX_WIDTH), getActivity().truePixels(
-								10));
-				p.weight = 0;
+						AUX_WIDTH, 10, 0);
 				horizontalPanel.addView(v, p);
 			} else if (auxType == AUXPANEL_CHECKBOX) {
 				CheckBox cb = new CheckBox(getActivity());
@@ -142,8 +140,7 @@ public abstract class FormWidget {
 					}
 				});
 				LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-						getActivity().truePixels(AUX_WIDTH),
-						LayoutParams.WRAP_CONTENT);
+						AUX_WIDTH, LayoutParams.WRAP_CONTENT);
 				p.weight = 0;
 				p.gravity = Gravity.BOTTOM;
 				horizontalPanel.addView(cb, p);
