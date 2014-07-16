@@ -1,5 +1,7 @@
 package com.js.rbuddyapp;
 
+import android.content.Context;
+
 import com.js.android.AppPreferences;
 import com.js.json.JSONParser;
 import com.js.json.JSONTools;
@@ -31,9 +33,25 @@ public class UserData extends DataStore {
 	// keys for the stored preferences
 	private static final String PREFERENCE_KEY_PREFIX = "DriveId_";
 
-	public UserData(IRBuddyActivity activity, GoogleApiClient client) {
+	public UserData(Context context, GoogleApiClient client) {
 		super(client);
-		this.mActivity = activity;
+		this.mContext = context;
+	}
+
+	public IReceiptFile getReceiptFile() {
+		return mReceiptFile;
+	}
+
+	public TagSetFile getTagSetFile() {
+		return mTagSetFile;
+	}
+
+	public IPhotoStore getPhotoStore() {
+		return mPhotoStore;
+	}
+
+	public DriveFile getTagSetDriveFile() {
+		return mTagSetDriveFile;
 	}
 
 	private void findUserDataFolder() {
@@ -110,23 +128,7 @@ public class UserData extends DataStore {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
 				+ FILENAME_PHOTOS_FOLDER, mUserDataFolder,
 				FILENAME_PHOTOS_FOLDER);
-		this.mPhotoStore = new DrivePhotoStore(mActivity, this, r.folder);
-	}
-
-	public IReceiptFile getReceiptFile() {
-		return mReceiptFile;
-	}
-
-	public TagSetFile getTagSetFile() {
-		return mTagSetFile;
-	}
-
-	public DriveFile getTagSetDriveFile() {
-		return mTagSetDriveFile;
-	}
-
-	public IPhotoStore getPhotoStore() {
-		return mPhotoStore;
+		this.mPhotoStore = new DrivePhotoStore(mContext, this, r.folder);
 	}
 
 	private DriveFolder mUserDataFolder;
@@ -134,5 +136,5 @@ public class UserData extends DataStore {
 	private DriveFile mTagSetDriveFile;
 	private TagSetFile mTagSetFile;
 	private IPhotoStore mPhotoStore;
-	private IRBuddyActivity mActivity;
+	private Context mContext;
 }

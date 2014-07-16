@@ -1,5 +1,7 @@
 package com.js.rbuddyapp;
 
+import android.content.Context;
+
 import com.google.android.gms.drive.DriveFolder;
 import com.js.android.BitmapUtil;
 import com.js.android.FileArguments;
@@ -13,9 +15,9 @@ public class DrivePhotoStore extends SimplePhotoStore {
 	 * 
 	 * @param driveFile
 	 */
-	public DrivePhotoStore(IRBuddyActivity activity, UserData userData,
+	public DrivePhotoStore(Context context, UserData userData,
 			DriveFolder photosFolder) {
-		super(activity);
+		super(context);
 		// UserData and DrivePhotoStore are mutually coupled
 		this.mUserData = userData;
 		this.mPhotosFolder = photosFolder;
