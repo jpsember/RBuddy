@@ -11,7 +11,6 @@ import com.js.rbuddy.JSDate;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 
 public abstract class MyActivity extends Activity {
 
@@ -34,15 +33,12 @@ public abstract class MyActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (!sClassInitialized) {
-			if (!testing()) {
-				prepareSystemOut();
-				addResourceMappings();
-			}
-			JSDate.setFactory(AndroidDate.androidDateFactory(this));
-			AppPreferences.prepare(this);
+		if (!testing()) {
+			prepareSystemOut();
 		}
-
+		JSDate.setFactory(AndroidDate.androidDateFactory(this));
+		AppPreferences.prepare(this);
+		addResourceMappings();
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
 	}
@@ -139,8 +135,8 @@ public abstract class MyActivity extends Activity {
 	 * @param key
 	 * @param resourceId
 	 */
-	public static void addResource(String key, int resourceId) {
-		sResourceMap.put(key, resourceId);
+	public void addResource(String key, int resourceId) {
+		mResourceMap.put(key, resourceId);
 	}
 
 	/**
@@ -152,14 +148,14 @@ public abstract class MyActivity extends Activity {
 	 *             if no mapping exists
 	 */
 	public int getResource(String key) {
-		Integer id = sResourceMap.get(key);
+		Integer id = mResourceMap.get(key);
 		if (id == null)
 			throw new IllegalArgumentException(
 					"no resource id mapping found for " + key);
 		return id.intValue();
 	}
 
-	private static void addResourceMappings() {
+	private void addResourceMappings() {
 		addResource("photo", android.R.drawable.ic_menu_gallery);
 		addResource("camera", android.R.drawable.ic_menu_camera);
 		addResource("search", android.R.drawable.ic_menu_search);
@@ -168,8 +164,6 @@ public abstract class MyActivity extends Activity {
 	private Map<String, FragmentReference> mReferenceMap = new HashMap();
 	private boolean mLogging;
 	private FragmentOrganizer mFragmentOrganizer;
+	private Map<String, Integer> mResourceMap = new HashMap();
 
-	// Static fields, to outlive a particular activity instance
-	private static boolean sClassInitialized;
-	private static Map<String, Integer> sResourceMap = new HashMap();
 }
