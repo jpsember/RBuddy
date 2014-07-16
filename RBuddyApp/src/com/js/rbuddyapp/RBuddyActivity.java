@@ -385,7 +385,7 @@ public class RBuddyActivity extends MyActivity implements //
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
-	public void processGoogleApiConnected() {
+	public void connectedToServer() {
 		if (db)
 			pr(hey() + "processGoogleAPIConnected");
 

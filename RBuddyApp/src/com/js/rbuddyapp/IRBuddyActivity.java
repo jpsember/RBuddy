@@ -68,5 +68,9 @@ public interface IRBuddyActivity {
 	 */
 	void clearSearchResults();
 
-	void processGoogleApiConnected();
+	/**
+	 * Called when a connection to the cloud service (e.g. Google Drive) has
+	 * been achieved
+	 */
+	void connectedToServer();
 }

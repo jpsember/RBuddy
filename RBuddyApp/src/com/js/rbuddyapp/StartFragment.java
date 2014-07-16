@@ -43,7 +43,7 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 
 	private void connectToGoogleDrive() {
 		if (!mApp.useGoogleAPI()) {
-			getRBuddyActivity().processGoogleApiConnected();
+			getRBuddyActivity().connectedToServer();
 		} else {
 			if (db)
 				pr(" attempting to connect to Google Drive API...");
@@ -65,7 +65,7 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 			if (c.isConnected()) {
 				if (db)
 					pr(" already connected");
-				getRBuddyActivity().processGoogleApiConnected();
+				getRBuddyActivity().connectedToServer();
 			}
 		}
 	}
@@ -104,7 +104,7 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 	public void onConnected(Bundle connectionHint) {
 		if (db)
 			pr(hey() + " onConnected, connectionHint " + connectionHint);
-		getRBuddyActivity().processGoogleApiConnected();
+		getRBuddyActivity().connectedToServer();
 	}
 
 	@Override
