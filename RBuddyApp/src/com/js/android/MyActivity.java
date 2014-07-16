@@ -34,13 +34,15 @@ public abstract class MyActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if (!testing()) {
-			prepareSystemOut();
-			addResourceMappings();
+		if (!sClassInitialized) {
+			if (!testing()) {
+				prepareSystemOut();
+				addResourceMappings();
+			}
+			JSDate.setFactory(AndroidDate.androidDateFactory(this));
+			sDisplayMetrics = getResources().getDisplayMetrics();
+			AppPreferences.prepare(this);
 		}
-		JSDate.setFactory(AndroidDate.androidDateFactory(this));
-		displayMetrics = getResources().getDisplayMetrics();
-		AppPreferences.prepare(this);
 
 		log("onCreate savedInstanceState=" + nameOf(savedInstanceState));
 		super.onCreate(savedInstanceState);
@@ -106,7 +108,7 @@ public abstract class MyActivity extends Activity {
 		return mFragmentOrganizer;
 	}
 
-	private void prepareSystemOut() {
+	private static void prepareSystemOut() {
 		AndroidSystemOutFilter.install();
 
 		// Print message about app starting. Print a bunch of newlines
@@ -125,7 +127,6 @@ public abstract class MyActivity extends Activity {
 			pr("\n");
 		pr("--------------- Start of App ----- " + strTime
 				+ " -------------\n\n\n");
-
 	}
 
 	/**
@@ -139,8 +140,8 @@ public abstract class MyActivity extends Activity {
 	 * @param key
 	 * @param resourceId
 	 */
-	public void addResource(String key, int resourceId) {
-		resourceMap.put(key, resourceId);
+	public static void addResource(String key, int resourceId) {
+		sResourceMap.put(key, resourceId);
 	}
 
 	/**
@@ -152,14 +153,14 @@ public abstract class MyActivity extends Activity {
 	 *             if no mapping exists
 	 */
 	public int getResource(String key) {
-		Integer id = resourceMap.get(key);
+		Integer id = sResourceMap.get(key);
 		if (id == null)
 			throw new IllegalArgumentException(
 					"no resource id mapping found for " + key);
 		return id.intValue();
 	}
 
-	private void addResourceMappings() {
+	private static void addResourceMappings() {
 		addResource("photo", android.R.drawable.ic_menu_gallery);
 		addResource("camera", android.R.drawable.ic_menu_camera);
 		addResource("search", android.R.drawable.ic_menu_search);
@@ -172,12 +173,15 @@ public abstract class MyActivity extends Activity {
 	 * @return
 	 */
 	public int truePixels(float densityPixels) {
-		return (int) (densityPixels * displayMetrics.density);
+		return (int) (densityPixels * sDisplayMetrics.density);
 	}
 
 	private Map<String, FragmentReference> mReferenceMap = new HashMap();
 	private boolean mLogging;
 	private FragmentOrganizer mFragmentOrganizer;
-	private Map<String, Integer> resourceMap = new HashMap();
-	private static DisplayMetrics displayMetrics;
+
+	// Static fields, to outlive a particular activity instance
+	private static boolean sClassInitialized;
+	private static Map<String, Integer> sResourceMap = new HashMap();
+	private static DisplayMetrics sDisplayMetrics;
 }

@@ -45,10 +45,6 @@ public class RBuddyActivity extends MyActivity implements //
 			setLogging(true);
 	}
 
-	public static Intent getStartIntent(Context context) {
-		return startIntentFor(context, RBuddyActivity.class);
-	}
-
 	private static boolean DEBUG_ORIENTATION = true;
 
 	private static int sOrientation = -1;
@@ -84,12 +80,6 @@ public class RBuddyActivity extends MyActivity implements //
 		if (savedInstanceState == null) {
 			FragmentOrganizer f = getFragmentOrganizer();
 			f.focusOn(mStart, false);
-
-			if (false) { // Do this once startup completes
-				f.focusOn(mReceiptList, false);
-				if (f.supportDualFragments())
-					f.focusOn(mReceiptEditor, true);
-			}
 		} else {
 			restorePreviousSavedState(savedInstanceState);
 		}
@@ -390,7 +380,7 @@ public class RBuddyActivity extends MyActivity implements //
 			setGoogleApiClient(apiClient);
 			if (db)
 				pr("constructing UserData");
-			mUserData = new UserData(this, mGoogleApiClient);
+			mUserData = new UserData(this, sGoogleApiClient);
 			if (db)
 				pr("calling open() with null callback");
 			mUserData.open(new Runnable() {
@@ -411,22 +401,24 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private void setUserData(IReceiptFile receiptFile, TagSetFile tagSetFile,
 			IPhotoStore photoStore) {
-		this.mReceiptFile = receiptFile;
-		this.mTagSetFile = tagSetFile;
-		this.mPhotoStore = photoStore;
+		sReceiptFile = receiptFile;
+		sTagSetFile = tagSetFile;
+		sPhotoStore = photoStore;
 	}
 
 	private void processUserDataReady() {
-		if (!userFilesPrepared) {
+		if (!sUserFilesPrepared) {
 			if (usingGoogleAPI()) {
 				setUserData(mUserData.getReceiptFile(),
 						mUserData.getTagSetFile(), mUserData.getPhotoStore());
+				// TODO: what's the point of having UserData class?
+				mUserData = null;
 			} else {
 				SimpleReceiptFile s = new SimpleReceiptFile(this);
 				IPhotoStore ps = new SimplePhotoStore(this);
 				setUserData(s, s.readTagSetFile(), ps);
 			}
-			userFilesPrepared = true;
+			sUserFilesPrepared = true;
 		}
 
 		{
@@ -439,38 +431,38 @@ public class RBuddyActivity extends MyActivity implements //
 
 	void setGoogleApiClient(GoogleApiClient c) {
 		ASSERT(usingGoogleAPI());
-		ASSERT(mGoogleApiClient == null);
-		mGoogleApiClient = c;
+		ASSERT(sGoogleApiClient == null);
+		sGoogleApiClient = c;
 	}
 
 	public boolean usingGoogleAPI() {
-		if (mUsingGoogleAPIFlag == null) {
+		if (sUsingGoogleAPIFlag == null) {
 			if (testing())
-				mUsingGoogleAPIFlag = false;
+				sUsingGoogleAPIFlag = false;
 			else {
-				mUsingGoogleAPIFlag = AppPreferences.getBoolean(
+				sUsingGoogleAPIFlag = AppPreferences.getBoolean(
 						PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
 			}
 		}
-		return mUsingGoogleAPIFlag.booleanValue();
+		return sUsingGoogleAPIFlag.booleanValue();
 	}
 
 	@Override
 	public IReceiptFile receiptFile() {
-		ASSERT(mReceiptFile != null);
-		return mReceiptFile;
+		ASSERT(sReceiptFile != null);
+		return sReceiptFile;
 	}
 
 	@Override
 	public TagSetFile tagSetFile() {
-		ASSERT(mTagSetFile != null);
-		return mTagSetFile;
+		ASSERT(sTagSetFile != null);
+		return sTagSetFile;
 	}
 
 	@Override
 	public IPhotoStore photoStore() {
-		ASSERT(mPhotoStore != null);
-		return mPhotoStore;
+		ASSERT(sPhotoStore != null);
+		return sPhotoStore;
 	}
 
 	@Override
@@ -487,13 +479,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private Receipt mReceipt;
 	private int[] mSearchResults;
-	private boolean userFilesPrepared;
 	private UserData mUserData;
-	private GoogleApiClient mGoogleApiClient;
-	private Boolean mUsingGoogleAPIFlag;
-	private IPhotoStore mPhotoStore;
-	private IReceiptFile mReceiptFile;
-	private TagSetFile mTagSetFile;
 
 	// Fragments
 	private FragmentReference<StartFragment> mStart = buildFragment(StartFragment.class);
@@ -504,4 +490,12 @@ public class RBuddyActivity extends MyActivity implements //
 
 	// Set of registered listeners
 	private Set<IRBuddyActivityListener> listeners = new HashSet();
+
+	// Static fields, to survive longer than a particular activity instance
+	private static boolean sUserFilesPrepared;
+	private static GoogleApiClient sGoogleApiClient;
+	private static Boolean sUsingGoogleAPIFlag;
+	private static IPhotoStore sPhotoStore;
+	private static IReceiptFile sReceiptFile;
+	private static TagSetFile sTagSetFile;
 }
