@@ -19,7 +19,6 @@ import com.google.android.gms.drive.DriveFolder.DriveFolderResult;
 import com.google.android.gms.common.api.Status;
 
 import static com.google.android.gms.drive.Drive.DriveApi;
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -46,15 +45,10 @@ public class UserData {
 	// keys for the stored preferences
 	private static final String PREFERENCE_KEY_PREFIX = "DriveId_";
 
-	/**
-	 * Constructor
-	 * 
-	 * @param app
-	 */
-	public UserData(Context context, RBuddyApp app) {
-		this.mContext = context;
+	public UserData(IRBuddyActivity activity) {
 		assertUIThread();
-		this.mApiClient = app.getGoogleApiClient();
+		this.mActivity = activity;
+		this.mApiClient = activity.getGoogleApiClient();
 
 		HandlerThread ht = new HandlerThread("BgndHandler");
 		ht.start();
@@ -339,7 +333,7 @@ public class UserData {
 		LocateResult r = locateFolder(PREFERENCE_KEY_PREFIX
 				+ FILENAME_PHOTOS_FOLDER, mUserDataFolder,
 				FILENAME_PHOTOS_FOLDER);
-		this.mPhotoStore = new DrivePhotoStore(mContext, this, r.folder);
+		this.mPhotoStore = new DrivePhotoStore(mActivity, this, r.folder);
 	}
 
 	/**
@@ -544,7 +538,6 @@ public class UserData {
 		return mPhotoStore;
 	}
 
-	private Context mContext;
 	private GoogleApiClient mApiClient;
 	private Handler mUiThreadHandler;
 	private Handler mBackgroundHandler;
@@ -553,4 +546,5 @@ public class UserData {
 	private DriveFile mTagSetDriveFile;
 	private TagSetFile mTagSetFile;
 	private IPhotoStore mPhotoStore;
+	private IRBuddyActivity mActivity;
 }

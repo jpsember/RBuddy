@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.js.android.App;
 import com.js.android.AppPreferences;
 import com.js.android.FragmentOrganizer;
@@ -34,6 +35,7 @@ public class RBuddyActivity extends MyActivity implements //
 
 	private static final String PERSIST_KEY_ACTIVE_RECEIPT_ID = "activeReceiptId";
 	private static final String PERSIST_KEY_SEARCH_RESULTS = "searchResults";
+	private static final String PREFERENCE_KEY_USE_GOOGLE_DRIVE_API = "use_google_drive_api";
 
 	public RBuddyActivity() {
 		if (db)
@@ -173,7 +175,7 @@ public class RBuddyActivity extends MyActivity implements //
 			return true;
 		case R.id.action_testonly_toggle_google_drive:
 			AppPreferences
-					.toggle(RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API);
+.toggle(PREFERENCE_KEY_USE_GOOGLE_DRIVE_API);
 			showGoogleDriveState();
 			return true;
 		case R.id.action_testonly_toggle_small_device:
@@ -197,10 +199,10 @@ public class RBuddyActivity extends MyActivity implements //
 	private void showGoogleDriveState() {
 		toast(this,
 				"Google Drive is "
-						+ (app.useGoogleAPI() ? "active" : "inactive")
+						+ (useGoogleAPI() ? "active" : "inactive")
 						+ ", and will be "
 						+ (AppPreferences.getBoolean(
-								RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
+								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
 								true) ? "active" : "inactive")
 						+ " when app restarts.");
 	}
@@ -229,7 +231,7 @@ public class RBuddyActivity extends MyActivity implements //
 						menu,
 						R.id.action_testonly_toggle_google_drive,
 						(AppPreferences.getBoolean(
-								RBuddyApp.PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
+								PREFERENCE_KEY_USE_GOOGLE_DRIVE_API,
 								true) ? "Disable" : "Enable")
 								+ " Google Drive");
 				setMenuLabel(
@@ -385,14 +387,15 @@ public class RBuddyActivity extends MyActivity implements //
 		startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
 	}
 
+	@Override
 	public void connectedToServer() {
 		if (db)
 			pr(hey() + "processGoogleAPIConnected");
 
-		if (app.useGoogleAPI()) {
+		if (useGoogleAPI()) {
 			if (db)
 				pr("constructing UserData");
-			mUserData = new UserData(this, app);
+			mUserData = new UserData(this);
 			if (db)
 				pr("calling open() with null callback");
 			mUserData.open(new Runnable() {
@@ -406,9 +409,14 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
+	@Override
+	public Context getContext() {
+		return this;
+	}
+
 	private void processUserDataReady() {
 		if (!userFilesPrepared) {
-			if (app.useGoogleAPI()) {
+			if (useGoogleAPI()) {
 				app.setUserData(mUserData.getReceiptFile(),
 						mUserData.getTagSetFile(), mUserData.getPhotoStore());
 			} else {
@@ -427,11 +435,36 @@ public class RBuddyActivity extends MyActivity implements //
 		}
 	}
 
+	public GoogleApiClient getGoogleApiClient() {
+		ASSERT(useGoogleAPI());
+		return mGoogleApiClient;
+	}
+
+	public void setGoogleApiClient(GoogleApiClient c) {
+		ASSERT(useGoogleAPI());
+		ASSERT(mGoogleApiClient == null);
+		mGoogleApiClient = c;
+	}
+
+	public boolean useGoogleAPI() {
+		if (mUseGoogleAPIFlag == null) {
+			if (testing())
+				mUseGoogleAPIFlag = false;
+			else {
+				mUseGoogleAPIFlag = AppPreferences.getBoolean(
+						PREFERENCE_KEY_USE_GOOGLE_DRIVE_API, true);
+			}
+		}
+		return mUseGoogleAPIFlag.booleanValue();
+	}
+
 	private RBuddyApp app;
 	private Receipt mReceipt;
 	private int[] mSearchResults;
 	private boolean userFilesPrepared;
 	private UserData mUserData;
+	private GoogleApiClient mGoogleApiClient;
+	private Boolean mUseGoogleAPIFlag;
 
 	// Fragments
 	private FragmentReference<StartFragment> mStart;

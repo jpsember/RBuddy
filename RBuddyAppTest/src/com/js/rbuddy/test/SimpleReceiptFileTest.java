@@ -19,7 +19,9 @@ public class SimpleReceiptFileTest extends AndroidTestCase {
 
 	private SimpleReceiptFile constructFile() {
 		if (rf == null) {
-			rf = new SimpleReceiptFile(this.getContext(), BASENAME, BASENAME);
+			// Disabled; see Issue #79
+			// rf = new SimpleReceiptFile(this.getContext(), BASENAME,
+			// BASENAME);
 		}
 		return rf;
 	}
@@ -31,7 +33,7 @@ public class SimpleReceiptFileTest extends AndroidTestCase {
 		}
 	}
 
-	public void testContructsEmptyFileIfDoesntExist() {
+	public void __testContructsEmptyFileIfDoesntExist() {
 		constructFile();
 		assertFalse(rf.iterator().hasNext());
 		File f = rf.getFile();
@@ -48,7 +50,7 @@ public class SimpleReceiptFileTest extends AndroidTestCase {
 		}
 	}
 
-	public void testSavesReceipts() {
+	public void __testSavesReceipts() {
 		generate(80, 4);
 		close();
 
@@ -58,7 +60,7 @@ public class SimpleReceiptFileTest extends AndroidTestCase {
 		}
 	}
 
-	public void testDeletesReceipts() {
+	public void __testDeletesReceipts() {
 		generate(80, 50);
 
 		for (int id = 80; id < 80 + 50; id += 3) {
@@ -74,24 +76,24 @@ public class SimpleReceiptFileTest extends AndroidTestCase {
 		close();
 	}
 
-	public void testUpdatesTags() {
+	public void __testUpdatesTags() {
 		constructFile();
 		TagSetFile tf = rf.readTagSetFile();
 		generate(80, 50);
-		
+
 		Set<String> tags = new HashSet<String>(tf.tags());
-		
+
 		close();
 
 		constructFile();
 		tf = rf.readTagSetFile();
-		for (Iterator<String> iter = tags.iterator(); iter.hasNext(); ) {
+		for (Iterator<String> iter = tags.iterator(); iter.hasNext();) {
 			assertTrue(tf.tags().contains(iter.next()));
 		}
 		// assertTrue(false); // This should cause a test failure
 	}
-	
-//  ham // This should cause a compile error ('ant debug' stage)
+
+	// ham // This should cause a compile error ('ant debug' stage)
 
 	@Override
 	protected void setUp() throws Exception {

@@ -29,7 +29,6 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		prepareActivity();
 		constructViews();
 		restoreStateFrom(savedInstanceState);
 		return mView;
@@ -42,12 +41,16 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 	}
 
 	private void connectToGoogleDrive() {
-		if (!mApp.useGoogleAPI()) {
+		IRBuddyActivity activity = getRBuddyActivity();
+		if (!activity.useGoogleAPI()) {
 			getRBuddyActivity().connectedToServer();
 		} else {
 			if (db)
 				pr(" attempting to connect to Google Drive API...");
-			GoogleApiClient c = mApp.getGoogleApiClient();
+			// TODO: Maybe construct our own client, then only store it in
+			// activity if successful... this will eliminate an interface method
+			// or two
+			GoogleApiClient c = activity.getGoogleApiClient();
 			if (c == null) {
 				if (db)
 					pr(" building client");
@@ -55,12 +58,12 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 						.addApi(Drive.API).addScope(Drive.SCOPE_FILE)
 						.addConnectionCallbacks(this)
 						.addOnConnectionFailedListener(this).build();
-				mApp.setGoogleApiClient(c);
+				activity.setGoogleApiClient(c);
 			}
 			if (!(c.isConnected() || c.isConnecting())) {
 				if (db)
 					pr(" connecting to client");
-				mApp.getGoogleApiClient().connect();
+				activity.getGoogleApiClient().connect();
 			}
 			if (c.isConnected()) {
 				if (db)
@@ -120,13 +123,9 @@ public class StartFragment extends MyFragment implements ConnectionCallbacks,
 		mView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 		mView.setOrientation(LinearLayout.VERTICAL);
-		FormWidget.setDebugBgnd(mView, mApp.useGoogleAPI() ? "blue" : "green");
-	}
-
-	private void prepareActivity() {
-		mApp = RBuddyApp.sharedInstance();
+		FormWidget.setDebugBgnd(mView,
+				getRBuddyActivity().useGoogleAPI() ? "blue" : "green");
 	}
 
 	private LinearLayout mView;
-	private RBuddyApp mApp;
 }

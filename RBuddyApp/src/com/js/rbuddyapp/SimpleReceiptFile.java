@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import android.content.Context;
-
 import com.js.basic.Files;
 import com.js.json.*;
 import com.js.rbuddy.IReceiptFile;
@@ -21,14 +19,14 @@ public class SimpleReceiptFile implements IReceiptFile {
 
 	public static final boolean SHOW_FILE_ACTIVITY = TagSetFile.SHOW_FILE_ACTIVITY;
 
-	public SimpleReceiptFile(Context context) {
-		this(context, null, null);
+	public SimpleReceiptFile(IRBuddyActivity activity) {
+		this(activity, null, null);
 	}
 
-	public SimpleReceiptFile(Context context, String receiptsBaseName,
+	public SimpleReceiptFile(IRBuddyActivity activity, String receiptsBaseName,
 			String tagsBaseName) {
-		ASSERT(!RBuddyApp.sharedInstance().useGoogleAPI());
-		this.mContext = context;
+		ASSERT(!activity.useGoogleAPI());
+		this.mActivity = activity;
 		if (receiptsBaseName == null)
 			receiptsBaseName = "receipts_json_v" + Receipt.VERSION + ".txt";
 		this.mReceiptsBaseName = receiptsBaseName;
@@ -78,7 +76,8 @@ public class SimpleReceiptFile implements IReceiptFile {
 	}
 
 	public File fileForBaseName(String baseName) {
-		return new File(mContext.getExternalFilesDir(null), baseName);
+		return new File(mActivity.getContext().getExternalFilesDir(null),
+				baseName);
 	}
 
 	private Receipt getReceiptFromMap(int identifier, boolean expectedToExist) {
@@ -242,5 +241,5 @@ public class SimpleReceiptFile implements IReceiptFile {
 	private boolean mChanges;
 	private Map mMap;
 	private int mHighestId;
-	private Context mContext;
+	private IRBuddyActivity mActivity;
 }

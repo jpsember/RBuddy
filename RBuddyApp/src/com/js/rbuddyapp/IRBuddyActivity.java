@@ -1,7 +1,9 @@
 package com.js.rbuddyapp;
 
+import android.content.Context;
 import android.content.Intent;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.ReceiptFilter;
 
@@ -73,4 +75,18 @@ public interface IRBuddyActivity {
 	 * been achieved
 	 */
 	void connectedToServer();
+
+	/**
+	 * Determine if we're to use the Google Drive API (for test purposes, we can
+	 * disable this and use local storage only)
+	 * 
+	 * @return true if so
+	 */
+	boolean useGoogleAPI();
+
+	GoogleApiClient getGoogleApiClient();
+
+	void setGoogleApiClient(GoogleApiClient c);
+
+	Context getContext();
 }

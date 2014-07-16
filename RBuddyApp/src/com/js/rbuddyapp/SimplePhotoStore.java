@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -29,8 +28,8 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	private static final boolean TRACE_LISTENERS = false;
 
-	public SimplePhotoStore(Context context) {
-		this.mContext = context;
+	public SimplePhotoStore(IRBuddyActivity activity) {
+		this.mActivity = activity;
 		for (Variant v : Variant.values()) {
 			mListenerMaps.put(v, new HashMap());
 		}
@@ -45,7 +44,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 		mCacheMap = new HashMap();
 
-		if (!RBuddyApp.sharedInstance().useGoogleAPI()) {
+		if (!mActivity.useGoogleAPI()) {
 			// Use reduced cache capacities for test purposes
 			mCacheMap.put(Variant.THUMBNAIL, new PhotoCache(200000, 5));
 			mCacheMap.put(Variant.FULLSIZE, new PhotoCache(5000000, 5));
@@ -103,7 +102,8 @@ public class SimplePhotoStore implements IPhotoStore {
 						Bitmap scaledBitmap = BitmapUtil.scaleBitmap(
 								bd.getBitmap(), THUMBNAIL_HEIGHT, false);
 						final BitmapDrawable dThumb = new BitmapDrawable(
-								mContext.getResources(), scaledBitmap);
+								mActivity.getContext().getResources(),
+								scaledBitmap);
 						if (db)
 							pr(" scaled to size "
 									+ dThumb.getBitmap().getByteCount());
@@ -119,7 +119,8 @@ public class SimplePhotoStore implements IPhotoStore {
 				return true;
 			}
 		}
-		toast(mContext, "readPhoto " + receiptId + " (variant " + variant
+		toast(mActivity.getContext(), "readPhoto " + receiptId + " (variant "
+				+ variant
 				+ ") wasn't in cache: " + cacheFor(variant));
 		return false;
 	}
@@ -329,7 +330,8 @@ public class SimplePhotoStore implements IPhotoStore {
 	}
 
 	private File getFileForPhotoId(String photoId) {
-		return new File(mContext.getExternalFilesDir(null), "photo_" + photoId
+		return new File(mActivity.getContext().getExternalFilesDir(null),
+				"photo_" + photoId
 				+ BitmapUtil.JPEG_EXTENSION);
 	}
 
@@ -354,7 +356,7 @@ public class SimplePhotoStore implements IPhotoStore {
 
 	protected BitmapDrawable convertJPEGToDrawable(byte[] jpeg) {
 		Bitmap bmp = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
-		return new BitmapDrawable(mContext.getResources(), bmp);
+		return new BitmapDrawable(mActivity.getContext().getResources(), bmp);
 	}
 
   // Maps of photo listeners, keyed by variant
@@ -367,5 +369,5 @@ public class SimplePhotoStore implements IPhotoStore {
 	protected Handler mBackgroundHandler;
 
 	private Map<Variant, PhotoCache> mCacheMap;
-	private Context mContext;
+	private IRBuddyActivity mActivity;
 }
