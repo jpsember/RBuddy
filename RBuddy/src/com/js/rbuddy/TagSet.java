@@ -170,9 +170,11 @@ public class TagSet implements IJSONEncoder {
 		return true;
 	}
 
-	//
-	// basic set operations test for tagsets
-	//
+	/**
+	 * 
+	 * @param ts
+	 * @return true if tagset contains subset ts
+	 */
 	public boolean contains(TagSet ts) {
 
 		Iterator<String> iter = ts.iterator();
