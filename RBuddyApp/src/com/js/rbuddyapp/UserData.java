@@ -50,8 +50,8 @@ public class UserData extends DataStore {
 		return mPhotoStore;
 	}
 
-	public DriveFile getTagSetDriveFile() {
-		return mTagSetDriveFile;
+	public String getTagSetFileId() {
+		return mTagSetDriveFile.getDriveId().encodeToString();
 	}
 
 	private void findUserDataFolder() {

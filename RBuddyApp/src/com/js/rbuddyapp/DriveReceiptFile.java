@@ -5,13 +5,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.google.android.gms.drive.DriveFile;
-
+import com.js.android.FileArguments;
 import com.js.json.JSONEncoder;
 import com.js.json.JSONParser;
 import com.js.rbuddy.IReceiptFile;
 import com.js.rbuddy.Receipt;
 import com.js.rbuddy.TagSetFile;
-import com.js.android.FileArguments;
 
 public class DriveReceiptFile implements IReceiptFile {
 
@@ -78,7 +77,7 @@ public class DriveReceiptFile implements IReceiptFile {
 		if (tf.isChanged()) {
 			String json = JSONEncoder.toJSON(tf);
 			FileArguments args = new FileArguments();
-			args.setFileId(mUserData.getTagSetDriveFile());
+			args.setFileId(mUserData.getTagSetFileId());
 			mUserData.writeTextFile(args, json);
 			tf.setChanged(false);
 		}
