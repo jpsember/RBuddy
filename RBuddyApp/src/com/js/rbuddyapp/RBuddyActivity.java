@@ -377,10 +377,7 @@ public class RBuddyActivity extends MyActivity implements //
 			setGoogleApiClient(apiClient);
 			if (db)
 				pr("constructing UserData");
-			mUserData = new UserData(this, sGoogleApiClient);
-			if (db)
-				pr("calling open() with null callback");
-			mUserData.open(new Runnable() {
+			mUserData = new UserData(this, sGoogleApiClient, new Runnable() {
 				@Override
 				public void run() {
 					processUserDataReady();

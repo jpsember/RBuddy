@@ -33,9 +33,23 @@ public class UserData extends DataStore {
 	// keys for the stored preferences
 	private static final String PREFERENCE_KEY_PREFIX = "DriveId_";
 
-	public UserData(Context context, GoogleApiClient client) {
+	/**
+	 * Constructor. Prepare user data for use. Looks for user's data in his
+	 * Google Drive, executes callback when done
+	 * 
+	 * @param callback
+	 * @throws RuntimeException
+	 *             if unable to create user data folder
+	 */
+	public UserData(Context context, GoogleApiClient client,
+			final Runnable callback) {
 		super(client);
 		this.mContext = context;
+		this.mBackgroundHandler.post(new Runnable() {
+			public void run() {
+				open_bgndThread(callback);
+			}
+		});
 	}
 
 	public IReceiptFile getReceiptFile() {
@@ -87,22 +101,6 @@ public class UserData extends DataStore {
 		this.mTagSetDriveFile = r.file;
 		String contents = blockingReadTextFile(r.file);
 		this.mTagSetFile = TagSetFile.parse(new JSONParser(contents));
-	}
-
-	/**
-	 * Prepare user data for use. Looks for user's data in his Google Drive,
-	 * executes callback when done
-	 * 
-	 * @param callback
-	 * @throws RuntimeException
-	 *             if unable to create user data folder
-	 */
-	public void open(final Runnable callback) {
-		this.mBackgroundHandler.post(new Runnable() {
-			public void run() {
-				open_bgndThread(callback);
-			}
-		});
 	}
 
 	/**
