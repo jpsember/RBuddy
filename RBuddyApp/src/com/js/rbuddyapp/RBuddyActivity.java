@@ -75,14 +75,6 @@ public class RBuddyActivity extends MyActivity implements //
 		// TODO: Is this still required?
 		RBuddyApp.sharedInstance(RBuddyApp.class, this);
 
-		// We must delay building fragments until the app instance has been
-		// prepared above
-		mStart = buildFragment(StartFragment.class);
-		mReceiptList = buildFragment(ReceiptListFragment.class);
-		mReceiptEditor = buildFragment(ReceiptEditor.class);
-		mSearch = buildFragment(Search.class);
-		mPhoto = buildFragment(Photo.class);
-
 		if (DEBUG_ORIENTATION)
 			initOrientation();
 
@@ -505,11 +497,11 @@ public class RBuddyActivity extends MyActivity implements //
 	private TagSetFile mTagSetFile;
 
 	// Fragments
-	private FragmentReference<StartFragment> mStart;
-	private FragmentReference<ReceiptListFragment> mReceiptList;
-	private FragmentReference mReceiptEditor;
-	private FragmentReference mSearch;
-	private FragmentReference<Photo> mPhoto;
+	private FragmentReference<StartFragment> mStart = buildFragment(StartFragment.class);
+	private FragmentReference<ReceiptListFragment> mReceiptList = buildFragment(ReceiptListFragment.class);
+	private FragmentReference mReceiptEditor = buildFragment(ReceiptEditor.class);
+	private FragmentReference mSearch = buildFragment(Search.class);
+	private FragmentReference<Photo> mPhoto = buildFragment(Photo.class);
 
 	// Set of registered listeners
 	private Set<IRBuddyActivityListener> listeners = new HashSet();
